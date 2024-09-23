@@ -1,5 +1,7 @@
 # Wafrah | وَفــرة
 <p align="center">
+  <img src="https://github.com/user-attachments/assets/d7ce942b-b357-49cc-ae93-83a2178df4a8" alt="GP Logo">
+
 </p>
 
 # About Wafrah
