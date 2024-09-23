@@ -2,8 +2,8 @@
 <p align="center">
 </p>
 
-
 # About Wafrah
+Wafrah is a centralized personal finance management application, a comprehensive solution targeting raising user financial awareness and improving the users' financial well-being using Open Banking and AI services. This solution is offered through a mobile application that will make the user experience seamless, accessible, and more intuitive to the beneficiary. Through this application, we can offer our users a plethora of features that directly deal with their financial needs now and in the future.
 
 # Technology
 
