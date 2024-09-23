@@ -7,4 +7,4 @@
 | Sarah Alhindi  | [@SarahAlhindi](https://github.com/SarahAlhindi) |
 | Wassayef Alkherb   | [@Wissayifmk](https://github.com/Wissayifmk) |
 
-<p>Supervised by:Dr.Manal Albahlal</p>
+<p>Supervised by: Dr.Manal Albahlal</p>
