@@ -7,8 +7,19 @@
 Wafrah is a centralized personal finance management application, a comprehensive solution targeting raising user financial awareness and improving the users' financial well-being using Open Banking and AI services. This solution is offered through a mobile application that will make the user experience seamless, accessible, and more intuitive to the beneficiary. Through this application, we can offer our users a plethora of features that directly deal with their financial needs now and in the future.
 
 # Technology
+![My Skills](https://skillicons.dev/icons?i=dart,flutter,gcp,firebase,flask,py)
 
 # Launching Instructions
+- Open 2024-25_GP_Wafrah repository on GitHub.
+- Click on the code button.
+- Download .zip file.
+- Unzip the file.
+- Open Android Studio or Visual Studio Code.
+- Click on File > Open > Location of the saved unzipped file then click on Ok.
+- Add a .env file in the assets folder and include the API keys for both Google and stability.ai, or contact the developer.
+- Turn on an Android Emulator or connect an android mobile to your computer using USB.
+- Run Wafrah application.
+
 
 # Repository Link
 (https://github.com/mriamft/2024-25_GP_Wafrah)
