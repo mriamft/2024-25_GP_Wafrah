@@ -1,0 +1,56 @@
+
+plugins {
+    id "com.android.application"
+    id "kotlin-android" // This ensures that Kotlin features are available
+    id "dev.flutter.flutter-gradle-plugin"
+}
+apply plugin: 'kotlin-android'
+android {
+    namespace = "com.example.wafrahtest"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId = "com.example.wafrah"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // Add Firebase SDK dependencies here as needed
+    implementation platform('com.google.firebase:firebase-bom:31.2.0') // Firebase BoM (Bill of Materials)
+    implementation 'com.google.firebase:firebase-analytics' // Example: Firebase Analytics
+    dependencies {
+    // Import the BoM for the Firebase platform
+
+    // Add the dependency for the Firebase Authentication library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-auth")
+}
+}
+
+// Add the Google services plugin after the dependencies block
+apply plugin: 'com.google.gms.google-services'
