@@ -13,6 +13,7 @@ void main() async {
   await Firebase.initializeApp();
 //helllllllllllllllllooooooooooooooooooooo
 // ihihihi
+// sosososososo
   // Initialize WebView for Android without checking if it's null
   WebView.platform = SurfaceAndroidWebView();
 
