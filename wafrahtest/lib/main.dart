@@ -14,6 +14,7 @@ void main() async {
 //helllllllllllllllllooooooooooooooooooooo
 // ihihihi
 // sosososososo
+// bndor200000000
   // Initialize WebView for Android without checking if it's null
   WebView.platform = SurfaceAndroidWebView();
 
@@ -46,7 +47,8 @@ Future<String> getApiAccessToken() async {
 // Fetch user accounts from Lean API
 Future<List<dynamic>> fetchAccounts(String entityId, String token) async {
   final response = await http.get(
-    Uri.parse('https://sandbox.sa.leantech.me/data/v2/accounts?entity_id=$entityId'),
+    Uri.parse(
+        'https://sandbox.sa.leantech.me/data/v2/accounts?entity_id=$entityId'),
     headers: {
       'Authorization': 'Bearer $token',
     },
@@ -110,7 +112,8 @@ class _HomePageState extends State<HomePage> {
           // If the user document does not exist, create it
           await FirebaseFirestore.instance.collection('users').doc(userId).set({
             'balance': 0, // Initialize balance (you can adjust this as needed)
-            'created_at': FieldValue.serverTimestamp(), // Optional: store creation timestamp
+            'created_at': FieldValue
+                .serverTimestamp(), // Optional: store creation timestamp
           });
           print("New user document created with ID: $userId");
         } else {
@@ -160,8 +163,10 @@ class _HomePageState extends State<HomePage> {
               Column(
                 children: accounts.map<Widget>((account) {
                   return ListTile(
-                    title: Text(account['account_name'] ?? 'Account'), // Adjust based on the account structure
-                    subtitle: Text('Account ID: ${account['account_id'] ?? 'N/A'}'), // Adjust based on the account structure
+                    title: Text(account['account_name'] ??
+                        'Account'), // Adjust based on the account structure
+                    subtitle: Text(
+                        'Account ID: ${account['account_id'] ?? 'N/A'}'), // Adjust based on the account structure
                   );
                 }).toList(),
               ),
@@ -194,7 +199,7 @@ class LeanConnect extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Connect Bank')),
       body: WebView(
-        initialUrl: Uri.dataFromString(''' 
+        initialUrl: Uri.dataFromString('''
           <html>
           <body>
             <script src="https://cdn.leantech.me/link/v2"></script>
