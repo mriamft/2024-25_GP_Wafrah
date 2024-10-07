@@ -12,6 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 //helllllllllllllllllooooooooooooooooooooo
+// ihihihi
   // Initialize WebView for Android without checking if it's null
   WebView.platform = SurfaceAndroidWebView();
 
