@@ -65,7 +65,7 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Column(
             children: [
               SizedBox(height: 80),
-              Image.asset('assets/logo.png', width: 90, height: 82),
+              Image.asset('assets/images/logo.png', width: 90, height: 82),
               SizedBox(height: 40),
               // First Name Input
               TextField(

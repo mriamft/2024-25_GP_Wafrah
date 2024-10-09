@@ -107,7 +107,7 @@ class _OTPPageState extends State<OTPPage> {
           child: Column(
             children: [
               SizedBox(height: 80),
-              Image.asset('assets/logo.png', width: 129, height: 116),
+              Image.asset('assets/images/logo.png', width: 129, height: 116),
               SizedBox(height: 40),
               Text(
                 'كلمة المرور لمرة واحدة',
