@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'secondpage.dart'; // Import the second page
+import 'signup.dart'; // Import the second page
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // for Firebase Authentication
 import 'package:cloud_firestore/cloud_firestore.dart'; // for Firestore
@@ -11,10 +11,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-//helllllllllllllllllooooooooooooooooooooo
-// ihihihi
-// sosososososo
-// bndor200000000
+
   // Initialize WebView for Android without checking if it's null
   WebView.platform = SurfaceAndroidWebView();
 
@@ -67,8 +64,18 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomePage(),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,  // Disable debug banner
+      title: 'Flutter App',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
+      // Define initial route
+      initialRoute: '/home',
+      routes: {
+        '/home': (context) => const HomePage(),  // HomePage route
+        '/signup': (context) => SignUpPage(),    // SignUpPage route
+      },
     );
   }
 }
@@ -112,8 +119,7 @@ class _HomePageState extends State<HomePage> {
           // If the user document does not exist, create it
           await FirebaseFirestore.instance.collection('users').doc(userId).set({
             'balance': 0, // Initialize balance (you can adjust this as needed)
-            'created_at': FieldValue
-                .serverTimestamp(), // Optional: store creation timestamp
+            'created_at': FieldValue.serverTimestamp(), // Optional: store creation timestamp
           });
           print("New user document created with ID: $userId");
         } else {
@@ -163,61 +169,21 @@ class _HomePageState extends State<HomePage> {
               Column(
                 children: accounts.map<Widget>((account) {
                   return ListTile(
-                    title: Text(account['account_name'] ??
-                        'Account'), // Adjust based on the account structure
-                    subtitle: Text(
-                        'Account ID: ${account['account_id'] ?? 'N/A'}'), // Adjust based on the account structure
+                    title: Text(account['account_name'] ?? 'Account'), // Adjust based on the account structure
+                    subtitle: Text('Account ID: ${account['account_id'] ?? 'N/A'}'), // Adjust based on the account structure
                   );
                 }).toList(),
               ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navigate to the second page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const secondpage()),
-                );
+                // Navigate to the signup page
+                Navigator.pushNamed(context, '/signup');
               },
-              child: const Text('Go to Second Page'),
+              child: const Text('Go to Sign Up Page'),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class LeanConnect extends StatelessWidget {
-  final String customerId;
-  final String token;
-
-  LeanConnect({required this.customerId, required this.token});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Connect Bank')),
-      body: WebView(
-        initialUrl: Uri.dataFromString('''
-          <html>
-          <body>
-            <script src="https://cdn.leantech.me/link/v2"></script>
-            <script>
-              Lean.connect({
-                app_token: '$token',
-                permissions: ["identity","accounts","balance","transactions"],
-                customer_id: '$customerId',
-                sandbox: true,
-                fail_redirect_url: 'https://docs.leantech.me/v2.0-KSA/page/failed-connection',
-                success_redirect_url: 'https://docs.leantech.me/v2.0-KSA/page/successful-connection',
-                account_type: 'personal',
-              });
-            </script>
-          </body>
-          </html>
-        ''').toString(),
-        javascriptMode: JavascriptMode.unrestricted,
       ),
     );
   }

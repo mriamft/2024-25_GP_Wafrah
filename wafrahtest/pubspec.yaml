@@ -15,6 +15,7 @@ dependencies:
   http: ^0.13.3
   webview_flutter: ^3.0.4
   cloud_firestore: ^4.11.0
+  pin_code_fields: ^8.0.1 # For the OTP input fields
 
 dev_dependencies:
   flutter_test:
@@ -24,6 +25,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-
-  
-
+  # Add your assets here
+  assets:
+    - assets/logo.png
