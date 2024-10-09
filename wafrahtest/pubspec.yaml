@@ -27,4 +27,12 @@ flutter:
 
   # Add your assets here
   assets:
-    - assets/logo.png
+    - assets/images/logo.png
+    - assets/images/splash_image.png
+  fonts:
+    - family: GE-SS-Two-Bold
+      fonts:
+        - asset: assets/fonts/GE-SS-Two-Bold.otf
+    - family: GE-SS-Two-Light
+      fonts:
+        - asset: assets/fonts/GE_SS_Two_Light.otf
