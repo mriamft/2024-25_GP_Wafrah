@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'signup.dart'; // Import the second page
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // for Firebase Authentication
@@ -65,7 +66,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,  // Disable debug banner
+      debugShowCheckedModeBanner: false, // Disable debug banner
       title: 'Flutter App',
       theme: ThemeData(
         primarySwatch: Colors.green,
@@ -73,8 +74,8 @@ class MainApp extends StatelessWidget {
       // Define initial route
       initialRoute: '/home',
       routes: {
-        '/home': (context) => const HomePage(),  // HomePage route
-        '/signup': (context) => SignUpPage(),    // SignUpPage route
+        '/home': (context) => const HomePage(), // HomePage route
+        '/signup': (context) => SignUpPage(), // SignUpPage route
       },
     );
   }
@@ -119,7 +120,8 @@ class _HomePageState extends State<HomePage> {
           // If the user document does not exist, create it
           await FirebaseFirestore.instance.collection('users').doc(userId).set({
             'balance': 0, // Initialize balance (you can adjust this as needed)
-            'created_at': FieldValue.serverTimestamp(), // Optional: store creation timestamp
+            'created_at': FieldValue
+                .serverTimestamp(), // Optional: store creation timestamp
           });
           print("New user document created with ID: $userId");
         } else {
@@ -169,8 +171,10 @@ class _HomePageState extends State<HomePage> {
               Column(
                 children: accounts.map<Widget>((account) {
                   return ListTile(
-                    title: Text(account['account_name'] ?? 'Account'), // Adjust based on the account structure
-                    subtitle: Text('Account ID: ${account['account_id'] ?? 'N/A'}'), // Adjust based on the account structure
+                    title: Text(account['account_name'] ??
+                        'Account'), // Adjust based on the account structure
+                    subtitle: Text(
+                        'Account ID: ${account['account_id'] ?? 'N/A'}'), // Adjust based on the account structure
                   );
                 }).toList(),
               ),
