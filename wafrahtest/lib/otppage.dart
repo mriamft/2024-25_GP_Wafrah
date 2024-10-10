@@ -111,7 +111,11 @@ class _OTPPageState extends State<OTPPage> {
               SizedBox(height: 40),
               Text(
                 'كلمة المرور لمرة واحدة',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // Text color set to white
+                ),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 10),
@@ -119,7 +123,10 @@ class _OTPPageState extends State<OTPPage> {
               Text(
                 'يرجى كتابة رمز التحقق المرسل إلى رقم الهاتف ${widget.phoneNumber}',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white, // Text color set to white
+                ),
               ),
               SizedBox(height: 20),
               // OTP input fields
@@ -185,6 +192,7 @@ class _OTPPageState extends State<OTPPage> {
           border: InputBorder.none,
           counterText: '',
         ),
+        style: TextStyle(color: Colors.white), // Set the input text color to white
         onChanged: (value) {
           if (value.length == 1) {
             FocusScope.of(context).nextFocus(); // Move focus to the next field
