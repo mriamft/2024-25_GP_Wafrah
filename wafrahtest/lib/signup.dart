@@ -32,15 +32,16 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('موافق'),  // Customize the button text (OK in Arabic)
+              child: Text('موافق'),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Color(0xFF3D3D3D), // Button background color (#3D3D3D)
+                foregroundColor: Colors.white, 
+                backgroundColor: Color(0xFF3D3D3D),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100), // Set button radius to 100px
+                  borderRadius: BorderRadius.circular(100),
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).pop();  // Close the dialog
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -65,7 +66,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     // Check if passwords match
     if (password != confirmPassword) {
-      showAlertDialog('  رمز المرور', 'رمز المرور المدخل غير متطابق.');
+      showAlertDialog('عدم تطابق كلمة المرور', 'كلمات المرور التي أدخلتها غير متطابقة.');
       return;
     }
 
@@ -79,13 +80,12 @@ class _SignUpPageState extends State<SignUpPage> {
         print('Verification failed: ${e.message}');
       },
       codeSent: (String verificationId, int? resendToken) {
-        // Navigate to OTPPage when the code is sent
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => OTPPage(
               verificationId: verificationId,
-              phoneNumber: phoneNumberController.text, // Pass phone number to OTPPage
+              phoneNumber: phoneNumberController.text,
             ),
           ),
         );
@@ -100,95 +100,85 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF2A996F), Color(0xFF09462F)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
+            colors: [Color(0xFF2A996F), Color(0xFF09462F)],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              SizedBox(height: 80),
-              Image.asset('assets/images/logo.png', width: 90, height: 82),
-              SizedBox(height: 40),
-              // First Name Input
-              TextField(
-                controller: firstNameController,
-                decoration: InputDecoration(
-                  labelText: 'الاسم الأول',
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
+        child: Stack(
+          children: [
+            // Back Arrow Icon
+            Positioned(
+              top: 60,
+              right: 15,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 28,
                 ),
-                style: TextStyle(color: Colors.white), // Ensure white text in input field
-                textAlign: TextAlign.right,
               ),
-              SizedBox(height: 10),
-              // Last Name Input
-              TextField(
-                controller: lastNameController,
-                decoration: InputDecoration(
-                  labelText: 'الاسم الأخير',
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                ),
-                style: TextStyle(color: Colors.white), // Ensure white text in input field
-                textAlign: TextAlign.right,
+            ),
+
+            // Logo Image
+            Positioned(
+              left: 140,
+              top: 130,
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 90,
+                height: 82,
               ),
-              SizedBox(height: 10),
-              // Phone Number Input
-              TextField(
-                controller: phoneNumberController,
-                decoration: InputDecoration(
-                  labelText: 'رقم الجوال',
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                ),
-                style: TextStyle(color: Colors.white), // Ensure white text in input field
-                keyboardType: TextInputType.phone,
-                textAlign: TextAlign.right,
-              ),
-              SizedBox(height: 10),
-              // Password Input
-              TextField(
-                controller: passwordController,
-                decoration: InputDecoration(
-                  labelText: 'رمز المرور',
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                ),
-                style: TextStyle(color: Colors.white), // Ensure white text in input field
-                obscureText: true,
-                textAlign: TextAlign.right,
-              ),
-              SizedBox(height: 10),
-              // Confirm Password Input
-              TextField(
-                controller: confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'تأكيد رمز المرور',
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                ),
-                style: TextStyle(color: Colors.white), // Ensure white text in input field
-                obscureText: true,
-                textAlign: TextAlign.right,
-              ),
-              SizedBox(height: 20),
-              // Password Requirements
-              Container(
-                width: 199,
-                height: 86,
+            ),
+
+            // First Name Input
+            _buildInputField(
+              top: 235,
+              hintText: 'الاسم الأول',
+              controller: firstNameController,
+            ),
+
+            // Last Name Input
+            _buildInputField(
+              top: 300,
+              hintText: 'الاسم الأخير',
+              controller: lastNameController,
+            ),
+
+            // Phone Number Input
+            _buildInputField(
+              top: 365,
+              hintText: 'رقم الجوال',
+              controller: phoneNumberController,
+              keyboardType: TextInputType.phone,
+            ),
+
+            // Password Input
+            _buildInputField(
+              top: 430,
+              hintText: 'رمز المرور',
+              controller: passwordController,
+              obscureText: true,
+            ),
+
+            // Confirm Password Input
+            _buildInputField(
+              top: 495,
+              hintText: 'تأكيد رمز المرور',
+              controller: confirmPasswordController,
+              obscureText: true,
+            ),
+
+            // Password Requirements Text
+            Positioned(
+              left: 24,
+              right: 10,
+              top: 570, // Positioned below the inputs
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'الرجاء اختيار رمز مرور يحقق الشروط التالية:\n'
                   'أن يتكون من 8 خانات على الأقل.\n'
@@ -196,43 +186,143 @@ class _SignUpPageState extends State<SignUpPage> {
                   'أن يحتوي على حرف صغير.\n'
                   'أن يحتوي على حرف كبير.\n'
                   'أن يحتوي على رمز خاص.',
+                  textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: 'GE SS Two',
-                    fontWeight: FontWeight.w300,
                     fontSize: 9,
-                    height: 1.21, // Line height adjusted
+                    fontWeight: FontWeight.w300,
                     color: Colors.white,
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-              SizedBox(height: 20),
-              // Sign Up Button
-              ElevatedButton(
-                onPressed: signUp,
-                child: Text('تسجيل الدخول'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black, 
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100),
+                    height: 1.21,
                   ),
                 ),
               ),
-              SizedBox(height: 5), // Reduced the space to 5px
-              // Navigate to Login
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/login');
-                },
-                child: Text('لديك حساب؟ سجل الدخول'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
+            ),
+
+            // Sign Up Button
+            Positioned(
+              left: (MediaQuery.of(context).size.width - 308) / 2,
+              top: 715,
+              child: GestureDetector(
+                onTap: signUp,
+                child: Container(
+                  width: 308,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.5),
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      'تسجيل الدخول',
+                      style: TextStyle(
+                        color: Color(0xFF3D3D3D),
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+
+            // Sign Up Text
+            Positioned(
+              bottom: 30,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                SignUpPage()), // Navigate to sign-up page
+                      );
+                    },
+                    child: Text(
+                      'سجل الآن',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 14,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    'ليس لديك حساب؟',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  // Reusable Input Field Widget
+  Widget _buildInputField({
+    required double top,
+    required String hintText,
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+  }) {
+    return Positioned(
+      left: 24,
+      right: 24,
+      top: top,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            obscureText: obscureText,
+            textAlign: TextAlign.right,
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: TextStyle(
+                fontFamily: 'GE-SS-Two-Light',
+                fontSize: 14,
+                color: Colors.white,
+              ),
+              border: InputBorder.none,
+            ),
+            style: TextStyle(color: Colors.white),
+            cursorColor: Colors.white,
+          ),
+          SizedBox(height: 5),
+          Container(
+            width: 313,
+            height: 2.95,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF60B092), Colors.white],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

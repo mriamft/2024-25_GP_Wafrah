@@ -102,74 +102,111 @@ class _OTPPageState extends State<OTPPage> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              SizedBox(height: 80),
-              Image.asset('assets/images/logo.png', width: 129, height: 116),
-              SizedBox(height: 40),
-              Text(
-                'كلمة المرور لمرة واحدة',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white, // Text color set to white
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 10),
-              // Text with user's phone number dynamically added
-              Text(
-                'يرجى كتابة رمز التحقق المرسل إلى رقم الهاتف ${widget.phoneNumber}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white, // Text color set to white
+        child: Stack(
+          children: [
+            // Back Arrow Icon
+            Positioned(
+              top: 60,
+              right: 15,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 28,
                 ),
               ),
-              SizedBox(height: 20),
-              // OTP input fields
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            ),
+            // Splash Image
+            Positioned(
+              left: 140,
+              top: 130, // Positioned the same as in sign-up page
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 90,
+                height: 82,
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center, // Center alignment
                 children: [
-                  _otpField(),
-                  _otpField(),
-                  _otpField(),
-                  _otpField(),
-                  _otpField(),
-                  _otpField(),
+                  SizedBox(height: 230), // Adjusted to move the text under the splash image
+                  // First Text (Styled as per the image you provided)
+                  Text(
+                    'كلمة المرور لمرة واحدة',
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'GE SS Two',
+                      color: Colors.white,
+                      height: 1.21,
+                    ),
+                    textAlign: TextAlign.center, // Center the text
+                  ),
+                  SizedBox(height: 10),
+                  // Second Text with phone number (Styled as per the image)
+                  Text(
+                    'يرجى كتابة رمز التحقق كلمة المرور لمرة واحدة المرسلة إلى رقم الهاتف ${widget.phoneNumber}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w300,
+                      fontFamily: 'GE SS Two',
+                      color: Colors.white,
+                      height: 1.24,
+                    ),
+                    textAlign: TextAlign.center, // Center the text
+                  ),
+                  SizedBox(height: 20),
+                  // OTP input fields
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _otpField(),
+                      _otpField(),
+                      _otpField(),
+                      _otpField(),
+                      _otpField(),
+                      _otpField(),
+                    ],
+                  ),
+                  SizedBox(height: 40),
+                  // Updated Button (Styled same as sign-up page)
+                  ElevatedButton(
+                    onPressed: verifyOTP,
+                    child: Text('التحقق من الرمز'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black, 
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      elevation: 5,
+                      minimumSize: Size(308, 52), // Ensure the button is the same size
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // Resend OTP text
+                  GestureDetector(
+                    onTap: canResend ? resendOTP : null, // Only allow resend after 3 minutes
+                    child: Text(
+                      canResend ? 'إعادة إرسال رمز التحقق؟' : 'إعادة الإرسال بعد ${resendTimeLeft} ثانية',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: canResend ? Colors.white : Colors.grey, // Disable link while waiting
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
                 ],
               ),
-              SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: verifyOTP,
-                child: Text('التحقق من الرمز'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black, 
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  elevation: 5,
-                ),
-              ),
-              SizedBox(height: 20),
-              // Resend OTP text
-              GestureDetector(
-                onTap: canResend ? resendOTP : null, // Only allow resend after 3 minutes
-                child: Text(
-                  canResend ? 'إعادة إرسال رمز التحقق؟' : 'إعادة الإرسال بعد ${resendTimeLeft} ثانية',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: canResend ? Colors.white : Colors.grey, // Disable link while waiting
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
