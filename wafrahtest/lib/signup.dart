@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'otppage.dart';  // Import your OTPPage file
+import 'dart:async';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -15,39 +16,22 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController confirmPasswordController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool showErrorNotification = false; // To control the visibility of the notification
+  String errorMessage = ''; // To display dynamic error messages
 
-  // Method to show an alert dialog with customizable text and right-aligned content
-  void showAlertDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Directionality(
-            textDirection: TextDirection.rtl, // Align the title to the right
-            child: Text(title),
-          ),
-          content: Directionality(
-            textDirection: TextDirection.rtl, // Align the message to the right
-            child: Text(message),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('موافق'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white, 
-                backgroundColor: Color(0xFF3D3D3D),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  // Method to show a notification box at the top of the screen
+  void showNotification(String message) {
+    setState(() {
+      errorMessage = message;
+      showErrorNotification = true;
+    });
+
+    // Automatically hide the notification after 10 seconds
+    Timer(Duration(seconds: 10), () {
+      setState(() {
+        showErrorNotification = false;
+      });
+    });
   }
 
   // Method to handle phone number verification
@@ -60,17 +44,17 @@ class _SignUpPageState extends State<SignUpPage> {
 
     // Check if any field is empty
     if (firstName.isEmpty || lastName.isEmpty || phoneNumber.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      showAlertDialog('معلومات مفقودة', 'الرجاء ملء جميع الحقول المطلوبة.');
+      showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
       return;
     }
 
     // Check if passwords match
     if (password != confirmPassword) {
-      showAlertDialog('عدم تطابق كلمة المرور', 'كلمات المرور التي أدخلتها غير متطابقة.');
+      showNotification('حدث خطأ ما\nرمز المرور غير متطابق');
       return;
     }
 
-    // Proceed with phone number verification
+    // Proceed with phone number verification logic
     await _auth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
       verificationCompleted: (PhoneAuthCredential credential) async {
@@ -97,183 +81,226 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF2A996F), Color(0xFF09462F)],
-          ),
-        ),
-        child: Stack(
-          children: [
-            // Back Arrow Icon
-            Positioned(
-              top: 60,
-              right: 15,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 28,
-                ),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF2A996F), Color(0xFF09462F)],
               ),
             ),
-
-            // Logo Image
-            Positioned(
-              left: 140,
-              top: 130,
-              child: Image.asset(
-                'assets/images/logo.png',
-                width: 90,
-                height: 82,
-              ),
-            ),
-
-            // First Name Input
-            _buildInputField(
-              top: 235,
-              hintText: 'الاسم الأول',
-              controller: firstNameController,
-            ),
-
-            // Last Name Input
-            _buildInputField(
-              top: 300,
-              hintText: 'الاسم الأخير',
-              controller: lastNameController,
-            ),
-
-            // Phone Number Input
-            _buildInputField(
-              top: 365,
-              hintText: 'رقم الجوال',
-              controller: phoneNumberController,
-              keyboardType: TextInputType.phone,
-            ),
-
-            // Password Input
-            _buildInputField(
-              top: 430,
-              hintText: 'رمز المرور',
-              controller: passwordController,
-              obscureText: true,
-            ),
-
-            // Confirm Password Input
-            _buildInputField(
-              top: 495,
-              hintText: 'تأكيد رمز المرور',
-              controller: confirmPasswordController,
-              obscureText: true,
-            ),
-
-            // Password Requirements Text
-            Positioned(
-              left: 24,
-              right: 10,
-              top: 570, // Positioned below the inputs
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'الرجاء اختيار رمز مرور يحقق الشروط التالية:\n'
-                  'أن يتكون من 8 خانات على الأقل.\n'
-                  'أن يحتوي على رقم.\n'
-                  'أن يحتوي على حرف صغير.\n'
-                  'أن يحتوي على حرف كبير.\n'
-                  'أن يحتوي على رمز خاص.',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontFamily: 'GE SS Two',
-                    fontSize: 9,
-                    fontWeight: FontWeight.w300,
-                    color: Colors.white,
-                    height: 1.21,
+            child: Stack(
+              children: [
+                // Back Arrow Icon
+                Positioned(
+                  top: 60,
+                  right: 15,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                 ),
-              ),
-            ),
 
-            // Sign Up Button
-            Positioned(
-              left: (MediaQuery.of(context).size.width - 308) / 2,
-              top: 715,
-              child: GestureDetector(
-                onTap: signUp,
-                child: Container(
-                  width: 308,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
+                // Logo Image
+                Positioned(
+                  left: 140,
+                  top: 130,
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 90,
+                    height: 82,
+                  ),
+                ),
+
+                // First Name Input
+                _buildInputField(
+                  top: 235,
+                  hintText: 'الاسم الأول',
+                  controller: firstNameController,
+                ),
+
+                // Last Name Input
+                _buildInputField(
+                  top: 300,
+                  hintText: 'الاسم الأخير',
+                  controller: lastNameController,
+                ),
+
+                // Phone Number Input
+                _buildInputField(
+                  top: 365,
+                  hintText: 'رقم الجوال',
+                  controller: phoneNumberController,
+                  keyboardType: TextInputType.phone,
+                ),
+
+                // Password Input
+                _buildInputField(
+                  top: 430,
+                  hintText: 'رمز المرور',
+                  controller: passwordController,
+                  obscureText: true,
+                ),
+
+                // Confirm Password Input
+                _buildInputField(
+                  top: 495,
+                  hintText: 'تأكيد رمز المرور',
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                ),
+
+                // Password Requirements Text
+                Positioned(
+                  left: 24,
+                  right: 10,
+                  top: 570, // Positioned below the inputs
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      'الرجاء اختيار رمز مرور يحقق الشروط التالية:\n'
+                      'أن يتكون من 8 خانات على الأقل.\n'
+                      'أن يحتوي على رقم.\n'
+                      'أن يحتوي على حرف صغير.\n'
+                      'أن يحتوي على حرف كبير.\n'
+                      'أن يحتوي على رمز خاص.',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontFamily: 'GE SS Two',
+                        fontSize: 9,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.white,
+                        height: 1.21,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Sign Up Button
+                Positioned(
+                  left: (MediaQuery.of(context).size.width - 308) / 2,
+                  top: 715,
+                  child: GestureDetector(
+                    onTap: signUp,
+                    child: Container(
+                      width: 308,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          'تسجيل الدخول',
+                          style: TextStyle(
+                            color: Color(0xFF3D3D3D),
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Sign Up Text
+                Positioned(
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    SignUpPage()), // Navigate to sign-up page
+                          );
+                        },
+                        child: Text(
+                          'سجل الآن',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'ليس لديك حساب؟',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
-                  child: Center(
-                    child: Text(
-                      'تسجيل الدخول',
-                      style: TextStyle(
-                        color: Color(0xFF3D3D3D),
-                        fontFamily: 'GE-SS-Two-Light',
-                        fontSize: 18,
+                ),
+              ],
+            ),
+          ),
+
+          // Error Notification Box
+          if (showErrorNotification)
+            Positioned(
+              top: 23, // Adjust the position as needed
+              left: 20,
+              child: Container(
+                width: 353,
+                height: 57,
+                decoration: BoxDecoration(
+                  color: Color(0xFFC62C2C), // Red background
+                  borderRadius: BorderRadius.all(Radius.circular(10)), // Apply rounded corners
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15.0),
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
                       ),
                     ),
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 15.0),
+                      child: Text(
+                        errorMessage,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-
-            // Sign Up Text
-            Positioned(
-              bottom: 30,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                SignUpPage()), // Navigate to sign-up page
-                      );
-                    },
-                    child: Text(
-                      'سجل الآن',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'GE-SS-Two-Light',
-                        fontSize: 14,
-                        decoration: TextDecoration.underline,
-                        decorationColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    'ليس لديك حساب؟',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontFamily: 'GE-SS-Two-Light',
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
