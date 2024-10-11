@@ -6,7 +6,7 @@ class OTPPage extends StatefulWidget {
   final String verificationId;
   final String phoneNumber;
 
-  OTPPage({required this.verificationId, required this.phoneNumber});
+  const OTPPage({super.key, required this.verificationId, required this.phoneNumber});
 
   @override
   _OTPPageState createState() => _OTPPageState();
@@ -26,7 +26,7 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   void startResendOTPCountdown() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (resendTimeLeft > 0) {
           resendTimeLeft--;
@@ -95,7 +95,7 @@ class _OTPPageState extends State<OTPPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF2A996F), Color(0xFF09462F)],
             begin: Alignment.topCenter,
@@ -112,7 +112,7 @@ class _OTPPageState extends State<OTPPage> {
                 onTap: () {
                   Navigator.pop(context);
                 },
-                child: Icon(
+                child: const Icon(
                   Icons.arrow_forward_ios,
                   color: Colors.white,
                   size: 28,
@@ -135,9 +135,9 @@ class _OTPPageState extends State<OTPPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center, // Center alignment
                 children: [
-                  SizedBox(height: 230), // Adjusted to move the text under the splash image
+                  const SizedBox(height: 230), // Adjusted to move the text under the splash image
                   // First Text (Styled as per the image you provided)
-                  Text(
+                  const Text(
                     'كلمة المرور لمرة واحدة',
                     style: TextStyle(
                       fontSize: 25,
@@ -148,11 +148,11 @@ class _OTPPageState extends State<OTPPage> {
                     ),
                     textAlign: TextAlign.center, // Center the text
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   // Second Text with phone number (Styled as per the image)
                   Text(
                     'يرجى كتابة رمز التحقق كلمة المرور لمرة واحدة المرسلة إلى رقم الهاتف ${widget.phoneNumber}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
                       fontFamily: 'GE SS Two',
@@ -161,7 +161,7 @@ class _OTPPageState extends State<OTPPage> {
                     ),
                     textAlign: TextAlign.center, // Center the text
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   // OTP input fields
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -174,11 +174,10 @@ class _OTPPageState extends State<OTPPage> {
                       _otpField(),
                     ],
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   // Updated Button (Styled same as sign-up page)
                   ElevatedButton(
                     onPressed: verifyOTP,
-                    child: Text('التحقق من الرمز'),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.black, 
                       backgroundColor: Colors.white,
@@ -186,15 +185,16 @@ class _OTPPageState extends State<OTPPage> {
                         borderRadius: BorderRadius.circular(100),
                       ),
                       elevation: 5,
-                      minimumSize: Size(308, 52), // Ensure the button is the same size
+                      minimumSize: const Size(308, 52), // Ensure the button is the same size
                     ),
+                    child: Text('التحقق من الرمز'),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   // Resend OTP text
                   GestureDetector(
                     onTap: canResend ? resendOTP : null, // Only allow resend after 3 minutes
                     child: Text(
-                      canResend ? 'إعادة إرسال رمز التحقق؟' : 'إعادة الإرسال بعد ${resendTimeLeft} ثانية',
+                      canResend ? 'إعادة إرسال رمز التحقق؟' : 'إعادة الإرسال بعد $resendTimeLeft ثانية',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -225,11 +225,11 @@ class _OTPPageState extends State<OTPPage> {
         textAlign: TextAlign.center,
         maxLength: 1,
         keyboardType: TextInputType.number,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           border: InputBorder.none,
           counterText: '',
         ),
-        style: TextStyle(color: Colors.white), // Set the input text color to white
+        style: const TextStyle(color: Colors.white), // Set the input text color to white
         onChanged: (value) {
           if (value.length == 1) {
             FocusScope.of(context).nextFocus(); // Move focus to the next field

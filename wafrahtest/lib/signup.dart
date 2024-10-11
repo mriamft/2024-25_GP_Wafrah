@@ -4,6 +4,8 @@ import 'otppage.dart';  // Import your OTPPage file
 import 'dart:async';
 
 class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
+
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -27,7 +29,7 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     // Automatically hide the notification after 10 seconds
-    Timer(Duration(seconds: 10), () {
+    Timer(const Duration(seconds: 10), () {
       setState(() {
         showErrorNotification = false;
       });
@@ -84,7 +86,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -101,7 +103,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     onTap: () {
                       Navigator.pop(context);
                     },
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_forward_ios,
                       color: Colors.white,
                       size: 28,
@@ -164,8 +166,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   right: 10,
                   top: 570, // Positioned below the inputs
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Text(
                       'الرجاء اختيار رمز مرور يحقق الشروط التالية:\n'
                       'أن يتكون من 8 خانات على الأقل.\n'
                       'أن يحتوي على رقم.\n'
@@ -200,11 +202,11 @@ class _SignUpPageState extends State<SignUpPage> {
                           BoxShadow(
                             color: Colors.black.withOpacity(0.5),
                             blurRadius: 10,
-                            offset: Offset(0, 5),
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'تسجيل الدخول',
                           style: TextStyle(
@@ -235,7 +237,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     SignUpPage()), // Navigate to sign-up page
                           );
                         },
-                        child: Text(
+                        child: const Text(
                           'سجل الآن',
                           style: TextStyle(
                             color: Colors.white,
@@ -246,7 +248,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         'ليس لديك حساب؟',
                         style: TextStyle(
@@ -270,15 +272,15 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Container(
                 width: 353,
                 height: 57,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFFC62C2C), // Red background
                   borderRadius: BorderRadius.all(Radius.circular(10)), // Apply rounded corners
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 15.0),
                       child: Icon(
                         Icons.error_outline,
                         color: Colors.white,
@@ -288,7 +290,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       padding: const EdgeInsets.only(right: 15.0),
                       child: Text(
                         errorMessage,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontFamily: 'GE-SS-Two-Light',
                           fontSize: 14,
@@ -327,21 +329,21 @@ class _SignUpPageState extends State<SignUpPage> {
             textAlign: TextAlign.right,
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: TextStyle(
+              hintStyle: const TextStyle(
                 fontFamily: 'GE-SS-Two-Light',
                 fontSize: 14,
                 color: Colors.white,
               ),
               border: InputBorder.none,
             ),
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
             cursorColor: Colors.white,
           ),
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
           Container(
             width: 313,
             height: 2.95,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFF60B092), Colors.white],
                 begin: Alignment.centerLeft,
