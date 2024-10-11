@@ -182,7 +182,7 @@ class _OTPPageState extends State<OTPPage> {
                       foregroundColor: Colors.black, 
                       backgroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(100),
+                      borderRadius: BorderRadius.circular(100),
                       ),
                       elevation: 5,
                       minimumSize: const Size(308, 52), // Ensure the button is the same size
