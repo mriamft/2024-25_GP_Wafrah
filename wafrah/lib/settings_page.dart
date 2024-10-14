@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'saving_plan_page.dart';
 import 'transactions_page.dart';
@@ -58,46 +60,46 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       _profileColor = Colors.grey[400]!; // Darker color on press
     });
-    Navigator.of(context).push(createRoute(ProfilePage())).then(() {
+    Navigator.of(context).push(_createRoute(ProfilePage())).then(() {
       setState(() {
         _profileColor = Color(0xFFD9D9D9); // Reset color after navigating back
       });
-    });
+    } as FutureOr Function(dynamic value));
   }
 
   void _onResetPasswordTap() {
     setState(() {
       _resetPasswordColor = Colors.grey[400]!; // Darker color on press
     });
-    Navigator.of(context).push(createRoute(ResetPasswordPage())).then(() {
+    Navigator.of(context).push(_createRoute(ResetPasswordPage())).then(() {
       setState(() {
         _resetPasswordColor =
             Color(0xFFD9D9D9); // Reset color after navigating back
       });
-    });
+    } as FutureOr Function(Object? value));
   }
 
   void _onNotificationTap() {
     setState(() {
       _notificationColor = Colors.grey[400]!; // Darker color on press
     });
-    Navigator.of(context).push(createRoute(NotificationPage())).then(() {
+    Navigator.of(context).push(_createRoute(NotificationPage())).then(() {
       setState(() {
         _notificationColor =
             Color(0xFFD9D9D9); // Reset color after navigating back
       });
-    });
+    } as FutureOr Function(dynamic value));
   }
 
   void _onSupportTap() {
     setState(() {
       _supportColor = Colors.grey[400]!; // Darker color on press
     });
-    Navigator.of(context).push(createRoute(SupportPage())).then(() {
+    Navigator.of(context).push(_createRoute(SupportPage())).then(() {
       setState(() {
         _supportColor = Color(0xFFD9D9D9); // Reset color after navigating back
       });
-    });
+    } as FutureOr Function(dynamic value));
   }
 
   @override
