@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 class OTPPage extends StatefulWidget {
-  final String verificationId;
   final String phoneNumber;
   final String firstName;  // Added
   final String lastName;   // Added
   final String password;   // Added
 
   OTPPage({
-    required this.verificationId,
     required this.phoneNumber,
     required this.firstName,  // Added
     required this.lastName,   // Added
@@ -21,25 +19,17 @@ class OTPPage extends StatefulWidget {
 }
 
 class _OTPPageState extends State<OTPPage> {
-  /*
   final TextEditingController otpController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool canResend = false;
   late Timer _timer;
   int resendTimeLeft = 180; // 3 minutes in seconds
-*/
+
   @override
   void initState() {
     super.initState();
-    //startResendOTPCountdown(); // Start countdown on page load
+    startResendOTPCountdown(); // Start countdown on page load
   }
-  
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
-  }
-/*
+
   void startResendOTPCountdown() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
@@ -53,28 +43,14 @@ class _OTPPageState extends State<OTPPage> {
     });
   }
 
-  // Method to verify OTP
-  void verifyOTP() async {
+  // Method to verify OTP without Firebase authentication
+  void verifyOTP() {
     String otp = otpController.text.trim();
 
     if (otp.isNotEmpty) {
-      try {
-        // Verify the OTP using the verificationId and OTP entered
-        PhoneAuthCredential credential = PhoneAuthProvider.credential(
-          verificationId: widget.verificationId,
-          smsCode: otp,
-        );
-
-        // Sign in the user using the credential
-        await _auth.signInWithCredential(credential);
-
-        // Navigate to the home page after successful OTP verification
-        Navigator.pushReplacementNamed(context, '/home');
-      } catch (e) {
-        // Handle OTP verification failure
-        print('Error verifying OTP: $e');
-        _showErrorSnackBar('Failed to verify OTP. Please try again.');
-      }
+      // Add your custom OTP verification logic here
+      // Navigate to the home page after successful OTP verification
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       _showErrorSnackBar('Please enter the OTP.');
     }
@@ -89,32 +65,16 @@ class _OTPPageState extends State<OTPPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  // Method to resend OTP if 3 minutes have passed
-  void resendOTP() async {
+  // Method to resend OTP if 3 minutes have passed (without Firebase)
+  void resendOTP() {
     if (canResend) {
-      try {
-        await _auth.verifyPhoneNumber(
-          phoneNumber: widget.phoneNumber,
-          verificationCompleted: (PhoneAuthCredential credential) async {
-            await _auth.signInWithCredential(credential);
-          },
-          verificationFailed: (FirebaseAuthException e) {
-            print('Verification failed: ${e.message}');
-            _showErrorSnackBar('Failed to resend OTP. Please try again later.');
-          },
-          codeSent: (String verificationId, int? resendToken) {
-            print('OTP resent');
-            setState(() {
-              resendTimeLeft = 180; // Reset the countdown to 3 minutes
-              canResend = false;
-            });
-            startResendOTPCountdown(); // Restart the countdown
-          },
-          codeAutoRetrievalTimeout: (String verificationId) {},
-        );
-      } catch (e) {
-        _showErrorSnackBar('An error occurred while resending the OTP.');
-      }
+      // Add your custom resend OTP logic here
+      print('OTP resent');
+      setState(() {
+        resendTimeLeft = 180; // Reset the countdown to 3 minutes
+        canResend = false;
+      });
+      startResendOTPCountdown(); // Restart the countdown
     }
   }
 
@@ -274,5 +234,5 @@ class _OTPPageState extends State<OTPPage> {
         },
       ),
     );
-  }*/
+  }
 }

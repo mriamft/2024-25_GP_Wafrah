@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart'; // Import the home_page.dart file
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'dart:async';
 
 void main() {
   runApp(MyApp());
@@ -24,6 +28,76 @@ class _LoginPageState extends State<LoginPage> {
   Color _arrowColor = Colors.white; // Default color for the arrow
   Color _buttonColor = Colors.white; // Default color for the button
   Color _signupColor = Colors.white; // Default color for the signup text
+  final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  bool showErrorNotification = false;
+  String errorMessage = '';
+
+  // Show notification method
+  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
+    setState(() {
+      errorMessage = message;
+      showErrorNotification = true;
+    });
+
+    Timer(Duration(seconds: 10), () {
+      setState(() {
+        showErrorNotification = false;
+      });
+    });
+  }
+
+  // Method to hash the password
+  String hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    return sha256.convert(bytes).toString();
+  }
+
+  // Method to check login credentials
+  Future<void> login() async {
+    String phoneNumber = phoneNumberController.text.trim();
+    String password = passwordController.text;
+
+    if (phoneNumber.isEmpty || password.isEmpty) {
+      showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
+      return;
+    }
+
+    // Hash the entered password
+    String hashedPassword = hashPassword(password);
+
+    // Send request to the backend to check if the credentials are correct
+    final url = Uri.parse('http://localhost:3000/login');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'phoneNumber': phoneNumber,
+        'password': hashedPassword,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final body = json.decode(response.body);
+
+      // If login successful
+      if (body['success']) {
+        showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ),
+        );
+      } else {
+        // If login failed (incorrect phone number or password)
+        showNotification('رقم الجوال او رمز المرور غير صحيحين');
+      }
+    } else {
+      showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,17 +146,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
 
-            // Logo Image
-            Positioned(
-              left: 140,
-              top: 161,
-              child: Image.asset(
-                'assets/images/logo.png',
-                width: 90,
-                height: 82,
-              ),
-            ),
-
             // Phone Number Input Field with Gradient Bar
             Positioned(
               left: 24,
@@ -92,6 +155,7 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   TextField(
+                    controller: phoneNumberController,
                     textAlign: TextAlign.right,
                     decoration: InputDecoration(
                       hintText: 'رقم الجوال',
@@ -131,6 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   TextField(
+                    controller: passwordController,
                     obscureText: true, // Hide password
                     textAlign: TextAlign.right,
                     decoration: InputDecoration(
@@ -167,14 +232,7 @@ class _LoginPageState extends State<LoginPage> {
               left: (MediaQuery.of(context).size.width - 308) / 2,
               top: 650,
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            HomePage()), // Navigate to home page
-                  );
-                },
+                onTap: login,
                 onTapDown: (_) {
                   setState(() {
                     _buttonColor = Color(0xFFB0B0B0); // Darker color on press
@@ -227,7 +285,6 @@ class _LoginPageState extends State<LoginPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // "سجل الآن" text
                   GestureDetector(
                     onTapDown: (_) {
                       setState(() {
@@ -266,7 +323,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(width: 4),
-                  // "ليس لديك حساب؟" text
                   Text(
                     'ليس لديك حساب؟',
                     style: TextStyle(
@@ -278,6 +334,45 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
+
+            // Error Notification Box
+            if (showErrorNotification)
+              Positioned(
+                top: 23,
+                left: 20,
+                child: Container(
+                  width: 353,
+                  height: 57,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFC62C2C), // Red background
+                    borderRadius: BorderRadius.all(Radius.circular(10)), // Apply rounded corners
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 15.0),
+                        child: Icon(
+                          Icons.error_outline,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: Text(
+                          errorMessage,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:wafrah/OTP_page.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'package:wafrah/login_page.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -14,17 +18,16 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
-  bool showErrorNotification = false; // To control the visibility of the notification
-  String errorMessage = ''; // To display dynamic error messages
+  bool showErrorNotification = false;
+  String errorMessage = '';
 
-  // Method to show a notification box at the top of the screen
-  void showNotification(String message) {
+  // Show notification method
+  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
       showErrorNotification = true;
     });
 
-    // Automatically hide the notification after 10 seconds
     Timer(Duration(seconds: 10), () {
       setState(() {
         showErrorNotification = false;
@@ -32,7 +35,38 @@ class _SignUpPageState extends State<SignUpPage> {
     });
   }
 
-  // Method to handle sign-up logic (without Firebase authentication)
+  // Method to validate password complexity
+  bool validatePassword(String password) {
+    final RegExp passwordRegExp = RegExp(
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$',
+    );
+    return passwordRegExp.hasMatch(password);
+  }
+
+  // Check if the phone number exists in the database
+  Future<bool> phoneNumberExists(String phoneNumber) async {
+    final url = Uri.parse('http://localhost:3000/checkPhoneNumber');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({'phoneNumber': phoneNumber}),
+    );
+    if (response.statusCode == 200) {
+      final body = json.decode(response.body);
+      return body['exists'];
+    } else {
+      showNotification('حدث خطأ ما\nفشل في التحقق من رقم الجوال');
+      return false;
+    }
+  }
+
+  // Method to hash the password
+  String hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    return sha256.convert(bytes).toString();
+  }
+
+  // Method to handle sign-up logic
   void signUp() async {
     String firstName = firstNameController.text.trim();
     String lastName = lastNameController.text.trim();
@@ -40,30 +74,47 @@ class _SignUpPageState extends State<SignUpPage> {
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
 
-    // Check if any field is empty
     if (firstName.isEmpty || lastName.isEmpty || phoneNumber.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
       return;
     }
 
-    // Check if passwords match
+    if (await phoneNumberExists(phoneNumber)) {
+      showNotification('حدث خطأ ما\nرقم الجوال موجود مسبقاً');
+      return;
+    }
+
     if (password != confirmPassword) {
       showNotification('حدث خطأ ما\nرمز المرور غير متطابق');
       return;
     }
 
-    // Proceed with your custom sign-up logic (without Firebase authentication)
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OTPPage(
-          phoneNumber: phoneNumberController.text,
-          firstName: firstNameController.text,
-          lastName: lastNameController.text,
-          password: passwordController.text, verificationId: '',
-        ),
-      ),
+    if (!validatePassword(password)) {
+      showNotification(
+          'حدث خطأ ما\nرمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص');
+      return;
+    }
+
+    // If everything is valid, hash the password and store the data
+    String hashedPassword = hashPassword(password);
+
+    // Send data to backend
+    final url = Uri.parse('http://localhost:3000/adduser');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'userName': '$firstName $lastName',  // Store full name
+        'phoneNumber': phoneNumber,
+        'password': hashedPassword
+      }),
     );
+
+    if (response.statusCode == 200) {
+      showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
+    } else {
+      showNotification('حدث خطأ ما\nفشل في عملية التسجيل');
+    }
   }
 
   @override
@@ -81,7 +132,6 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             child: Stack(
               children: [
-                // Back Arrow Icon
                 Positioned(
                   top: 60,
                   right: 15,
@@ -97,7 +147,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
 
-                // Logo Image
                 Positioned(
                   left: 140,
                   top: 130,
@@ -108,21 +157,18 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
 
-                // First Name Input
                 _buildInputField(
                   top: 235,
                   hintText: 'الاسم الأول',
                   controller: firstNameController,
                 ),
 
-                // Last Name Input
                 _buildInputField(
                   top: 300,
                   hintText: 'الاسم الأخير',
                   controller: lastNameController,
                 ),
 
-                // Phone Number Input
                 _buildInputField(
                   top: 365,
                   hintText: 'رقم الجوال',
@@ -130,7 +176,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   keyboardType: TextInputType.phone,
                 ),
 
-                // Password Input
                 _buildInputField(
                   top: 430,
                   hintText: 'رمز المرور',
@@ -138,7 +183,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   obscureText: true,
                 ),
 
-                // Confirm Password Input
                 _buildInputField(
                   top: 495,
                   hintText: 'تأكيد رمز المرور',
@@ -146,11 +190,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   obscureText: true,
                 ),
 
-                // Password Requirements Text
                 Positioned(
                   left: 24,
                   right: 10,
-                  top: 570, // Positioned below the inputs
+                  top: 570,
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
@@ -172,7 +215,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
 
-                // Sign Up Button
                 Positioned(
                   left: (MediaQuery.of(context).size.width - 308) / 2,
                   top: 715,
@@ -206,7 +248,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
 
-                // Sign Up Text
                 Positioned(
                   bottom: 30,
                   left: 0,
@@ -220,11 +261,11 @@ class _SignUpPageState extends State<SignUpPage> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    SignUpPage()), // Navigate to sign-up page
+                                    LoginPage()), // Navigate to sign-up page
                           );
                         },
                         child: Text(
-                          'سجل الآن',
+                          'سجل الدخول',
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'GE-SS-Two-Light',
@@ -236,7 +277,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       SizedBox(width: 4),
                       Text(
-                        'ليس لديك حساب؟',
+                        'لديك حساب؟',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.7),
                           fontFamily: 'GE-SS-Two-Light',
@@ -250,17 +291,16 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           ),
 
-          // Error Notification Box
           if (showErrorNotification)
             Positioned(
-              top: 23, // Adjust the position as needed
+              top: 23,
               left: 20,
               child: Container(
                 width: 353,
                 height: 57,
                 decoration: BoxDecoration(
                   color: Color(0xFFC62C2C), // Red background
-                  borderRadius: BorderRadius.all(Radius.circular(10)), // Apply rounded corners
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -293,7 +333,6 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  // Reusable Input Field Widget
   Widget _buildInputField({
     required double top,
     required String hintText,

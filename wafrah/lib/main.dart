@@ -62,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          Positioned(
+          /*Positioned(
             left: size.width * -0.60,
             top: -375,
             child: Transform.rotate(
@@ -74,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 fit: BoxFit.cover,
               ),
             ),
-          ),
+          ),*/
           Positioned(
             top: size.height * 0.4,
             left: 20,

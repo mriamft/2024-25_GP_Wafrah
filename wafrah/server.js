@@ -40,5 +40,41 @@ app.get('/users', (req, res) => {
   });
 });
 
+// Check if a phone number exists
+app.post('/checkPhoneNumber', (req, res) => {
+    const { phoneNumber } = req.body;
+    const sql = 'SELECT * FROM user WHERE phoneNumber = ?';
+    db.query(sql, [phoneNumber], (err, result) => {
+      if (err) throw err;
+      if (result.length > 0) {
+        res.json({ exists: true });
+      } else {
+        res.json({ exists: false });
+      }
+    });
+  });  
+
+  // Handle the login request
+app.post('/login', (req, res) => {
+  const { phoneNumber, password } = req.body;
+
+  // Check if phone number exists and if the password matches
+  const sql = 'SELECT * FROM user WHERE phoneNumber = ?';
+  db.query(sql, [phoneNumber], (err, result) => {
+    if (err) throw err;
+    if (result.length > 0) {
+      // Compare the hashed password
+      if (result[0].password === password) {
+        res.json({ success: true });
+      } else {
+        res.json({ success: false });
+      }
+    } else {
+      res.json({ success: false });
+    }
+  });
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
