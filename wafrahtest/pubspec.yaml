@@ -1,0 +1,38 @@
+name: wafrahtest
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.15.0
+  firebase_auth: ^4.8.1   # For Firebase Authentication
+  cloud_functions: ^4.7.6  # For Firebase Cloud Functions
+  http: ^0.13.3
+  webview_flutter: ^3.0.4
+  cloud_firestore: ^4.11.0
+  pin_code_fields: ^8.0.1 # For the OTP input fields
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Add your assets here
+  assets:
+    - assets/images/logo.png
+    - assets/images/splash_image.png
+  fonts:
+    - family: GE-SS-Two-Bold
+      fonts:
+        - asset: assets/fonts/GE-SS-Two-Bold.otf
+    - family: GE-SS-Two-Light
+      fonts:
+        - asset: assets/fonts/GE_SS_Two_Light.otf
