@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firebase_database_url" translatable="false">https://wafrahgp-default-rtdb.firebaseio.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">146334320451</string>
+    <string name="google_api_key" translatable="false">AIzaSyCSJp3-lIDbnC7d_YRsjO3KDJs9LzCvQ08</string>
+    <string name="google_app_id" translatable="false">1:146334320451:android:94cca739597c66687e51f6</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCSJp3-lIDbnC7d_YRsjO3KDJs9LzCvQ08</string>
+    <string name="google_storage_bucket" translatable="false">wafrahgp.appspot.com</string>
+    <string name="project_id" translatable="false">wafrahgp</string>
+</resources>
