@@ -88,3 +88,18 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+assets:
+    - assets/images/splash_image.png   # Add your splash image here
+    - assets/images/logo.png           # Add your logo image here if used
+    - assets/images/green_square.png
+    - assets/images/Alrajhi.png
+
+fonts:
+    - family: GE-SS-Two-Bold           # Add your bold font
+      fonts:
+        - asset: assets/fonts/GE-SS-Two-Bold.otf
+
+    - family: GE-SS-Two-Light          # Add your light font
+      fonts:
+        - asset: assets/fonts/GE_SS_Two_Light.otf
