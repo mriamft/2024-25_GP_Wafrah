@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'saving_plan_page.dart';
 import 'transactions_page.dart';
@@ -35,23 +33,13 @@ class _SettingsPageState extends State<SettingsPage> {
   Color _notificationColor = Color(0xFFD9D9D9);
   Color _supportColor = Color(0xFFD9D9D9);
 
-  // Custom page transition for left to right
-  Route _createRoute(Widget page) {
+  // Custom page transition for no transition effect
+  Route _createNoTransitionRoute(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionDuration: Duration(seconds: 0), // No transition
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(-1.0, 0.0); // Start from left
-        const end = Offset.zero; // End at the current position
-        const curve = Curves.easeInOut;
-
-        final tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-        final offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
+        return child; // No animation
       },
     );
   }
@@ -60,46 +48,54 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       _profileColor = Colors.grey[400]!; // Darker color on press
     });
-    Navigator.of(context).push(_createRoute(ProfilePage())).then(() {
+    Navigator.of(context)
+        .push(_createNoTransitionRoute(ProfilePage()))
+        .then((_) {
       setState(() {
         _profileColor = Color(0xFFD9D9D9); // Reset color after navigating back
       });
-    } as FutureOr Function(dynamic value));
+    });
   }
 
   void _onResetPasswordTap() {
     setState(() {
       _resetPasswordColor = Colors.grey[400]!; // Darker color on press
     });
-    Navigator.of(context).push(_createRoute(ResetPasswordPage())).then(() {
+    Navigator.of(context)
+        .push(_createNoTransitionRoute(ResetPasswordPage()))
+        .then((_) {
       setState(() {
         _resetPasswordColor =
             Color(0xFFD9D9D9); // Reset color after navigating back
       });
-    } as FutureOr Function(Object? value));
+    });
   }
 
   void _onNotificationTap() {
     setState(() {
       _notificationColor = Colors.grey[400]!; // Darker color on press
     });
-    Navigator.of(context).push(_createRoute(NotificationPage())).then(() {
+    Navigator.of(context)
+        .push(_createNoTransitionRoute(NotificationPage()))
+        .then((_) {
       setState(() {
         _notificationColor =
             Color(0xFFD9D9D9); // Reset color after navigating back
       });
-    } as FutureOr Function(dynamic value));
+    });
   }
 
   void _onSupportTap() {
     setState(() {
       _supportColor = Colors.grey[400]!; // Darker color on press
     });
-    Navigator.of(context).push(_createRoute(SupportPage())).then(() {
+    Navigator.of(context)
+        .push(_createNoTransitionRoute(SupportPage()))
+        .then((_) {
       setState(() {
         _supportColor = Color(0xFFD9D9D9); // Reset color after navigating back
       });
-    } as FutureOr Function(dynamic value));
+    });
   }
 
   @override
@@ -160,29 +156,28 @@ class _SettingsPageState extends State<SettingsPage> {
                       onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsPage()),
+                      _createNoTransitionRoute(SettingsPage()),
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
                       onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => TransactionsPage()),
+                      _createNoTransitionRoute(TransactionsPage()),
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
                       isSelected: false, onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      _createNoTransitionRoute(HomePage()),
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
                       onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SavingPlanPage()),
+                      _createNoTransitionRoute(SavingPlanPage()),
                     );
                   }),
                 ],
@@ -537,7 +532,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       // Navigate to Banks Page without transition
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => BanksPage()),
+                        _createNoTransitionRoute(BanksPage()),
                       );
                     },
                   ),

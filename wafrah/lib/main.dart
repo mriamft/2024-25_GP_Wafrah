@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'signup_page.dart'; // Ensure you have this import
+// Ensure you have this import
 import 'login_page.dart'; // Import the LoginPage
+import 'package:wafrah/signup_page.dart' as signup;
 
 void main() {
   runApp(MyApp());
@@ -62,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          /*Positioned(
+          Positioned(
             left: size.width * -0.60,
             top: -375,
             child: Transform.rotate(
@@ -74,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 fit: BoxFit.cover,
               ),
             ),
-          ),*/
+          ),
           Positioned(
             top: size.height * 0.4,
             left: 20,
@@ -162,7 +163,8 @@ class _SplashScreenState extends State<SplashScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SignUpPage(),
+                            builder: (context) =>
+                                signup.SignUpPage(), // Use alias
                           ),
                         );
                       }
@@ -269,18 +271,6 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// SignUpPage implementation
-class SignUpPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text('Sign Up Page'),
       ),
     );
   }

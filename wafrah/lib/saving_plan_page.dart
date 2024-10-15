@@ -81,7 +81,15 @@ class SavingPlanPage extends StatelessWidget {
                     // Navigate to Settings Page without transition
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsPage()),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            SettingsPage(),
+                        transitionDuration: Duration(seconds: 0),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return child; // No animation
+                        },
+                      ),
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
@@ -89,8 +97,15 @@ class SavingPlanPage extends StatelessWidget {
                     // Navigate to Transactions Page without transition
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => TransactionsPage()),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            TransactionsPage(),
+                        transitionDuration: Duration(seconds: 0),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return child; // No animation
+                        },
+                      ),
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
@@ -98,7 +113,15 @@ class SavingPlanPage extends StatelessWidget {
                     // Navigate to Home Page without transition
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            HomePage(),
+                        transitionDuration: Duration(seconds: 0),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return child; // No animation
+                        },
+                      ),
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -163,7 +186,16 @@ class SavingPlanPage extends StatelessWidget {
                       // Navigate to Banks Page without transition
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => BanksPage()),
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  BanksPage(),
+                          transitionDuration: Duration(seconds: 0),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            return child; // No animation
+                          },
+                        ),
                       );
                     },
                   ),

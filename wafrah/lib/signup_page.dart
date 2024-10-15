@@ -16,13 +16,19 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   bool showErrorNotification = false;
   String errorMessage = '';
 
+  bool _isArrowPressed = false;
+  bool _isLoginButtonPressed = false;
+  bool _isLoginTextPressed = false;
+
   // Show notification method
-  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
+  void showNotification(String message,
+      {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
       showErrorNotification = true;
@@ -38,7 +44,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Method to validate password complexity
   bool validatePassword(String password) {
     final RegExp passwordRegExp = RegExp(
-      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$',
+      r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[!@#\$&*~]).{8,}$',
     );
     return passwordRegExp.hasMatch(password);
   }
@@ -74,7 +80,11 @@ class _SignUpPageState extends State<SignUpPage> {
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
 
-    if (firstName.isEmpty || lastName.isEmpty || phoneNumber.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (firstName.isEmpty ||
+        lastName.isEmpty ||
+        phoneNumber.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
       return;
     }
@@ -104,7 +114,7 @@ class _SignUpPageState extends State<SignUpPage> {
       url,
       headers: {"Content-Type": "application/json"},
       body: json.encode({
-        'userName': '$firstName $lastName',  // Store full name
+        'userName': '$firstName $lastName', // Store full name
         'phoneNumber': phoneNumber,
         'password': hashedPassword
       }),
@@ -132,21 +142,24 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             child: Stack(
               children: [
+                // Darker Arrow Icon when pressed
                 Positioned(
                   top: 60,
                   right: 15,
                   child: GestureDetector(
-                    onTap: () {
+                    onTapDown: (_) => setState(() => _isArrowPressed = true),
+                    onTapUp: (_) {
+                      setState(() => _isArrowPressed = false);
                       Navigator.pop(context);
                     },
+                    onTapCancel: () => setState(() => _isArrowPressed = false),
                     child: Icon(
                       Icons.arrow_forward_ios,
-                      color: Colors.white,
+                      color: _isArrowPressed ? Colors.grey : Colors.white,
                       size: 28,
                     ),
                   ),
                 ),
-
                 Positioned(
                   left: 140,
                   top: 130,
@@ -156,40 +169,34 @@ class _SignUpPageState extends State<SignUpPage> {
                     height: 82,
                   ),
                 ),
-
                 _buildInputField(
                   top: 235,
                   hintText: 'الاسم الأول',
                   controller: firstNameController,
                 ),
-
                 _buildInputField(
                   top: 300,
                   hintText: 'الاسم الأخير',
                   controller: lastNameController,
                 ),
-
                 _buildInputField(
                   top: 365,
-                  hintText: 'رقم الجوال',
+                  hintText: '(+966555555555) رقم الجوال',
                   controller: phoneNumberController,
                   keyboardType: TextInputType.phone,
                 ),
-
                 _buildInputField(
                   top: 430,
                   hintText: 'رمز المرور',
                   controller: passwordController,
                   obscureText: true,
                 ),
-
                 _buildInputField(
                   top: 495,
                   hintText: 'تأكيد رمز المرور',
                   controller: confirmPasswordController,
                   obscureText: true,
                 ),
-
                 Positioned(
                   left: 24,
                   right: 10,
@@ -214,17 +221,26 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                 ),
-
+                // Darker "تسجيل الدخول" button when pressed
                 Positioned(
                   left: (MediaQuery.of(context).size.width - 308) / 2,
-                  top: 715,
+                  top: 662,
                   child: GestureDetector(
-                    onTap: signUp,
+                    onTapDown: (_) =>
+                        setState(() => _isLoginButtonPressed = true),
+                    onTapUp: (_) {
+                      setState(() => _isLoginButtonPressed = false);
+                      signUp();
+                    },
+                    onTapCancel: () =>
+                        setState(() => _isLoginButtonPressed = false),
                     child: Container(
                       width: 308,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: _isLoginButtonPressed
+                            ? Colors.grey[300]
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
@@ -247,7 +263,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                 ),
-
                 Positioned(
                   bottom: 30,
                   left: 0,
@@ -255,19 +270,26 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Darker "سجل الدخول" text when pressed
                       GestureDetector(
-                        onTap: () {
+                        onTapDown: (_) =>
+                            setState(() => _isLoginTextPressed = true),
+                        onTapUp: (_) {
+                          setState(() => _isLoginTextPressed = false);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    LoginPage()), // Navigate to sign-up page
+                                builder: (context) => LoginPage()),
                           );
                         },
+                        onTapCancel: () =>
+                            setState(() => _isLoginTextPressed = false),
                         child: Text(
                           'سجل الدخول',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: _isLoginTextPressed
+                                ? Colors.grey
+                                : Colors.white,
                             fontFamily: 'GE-SS-Two-Light',
                             fontSize: 14,
                             decoration: TextDecoration.underline,
@@ -290,11 +312,10 @@ class _SignUpPageState extends State<SignUpPage> {
               ],
             ),
           ),
-
           if (showErrorNotification)
             Positioned(
               top: 23,
-              left: 20,
+              left: 4,
               child: Container(
                 width: 353,
                 height: 57,

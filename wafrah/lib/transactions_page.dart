@@ -243,27 +243,54 @@ class TransactionsPage extends StatelessWidget {
                 children: [
                   buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
                       onTap: () {
-                    Navigator.push(
+                    // Navigate to Settings Page without transition
+                    Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsPage()),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            SettingsPage(),
+                        transitionDuration: Duration(seconds: 0),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return child; // No animation
+                        },
+                      ),
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
                       onTap: () {
-                    // Removed navigation logic here
+                    // Do nothing for the current page
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
                       isSelected: false, onTap: () {
-                    Navigator.push(
+                    // Navigate to Home Page without transition
+                    Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            HomePage(),
+                        transitionDuration: Duration(seconds: 0),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return child; // No animation
+                        },
+                      ),
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
                       onTap: () {
-                    Navigator.push(
+                    // Navigate to Saving Plan Page without transition
+                    Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => SavingPlanPage()),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            SavingPlanPage(),
+                        transitionDuration: Duration(seconds: 0),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return child; // No animation
+                        },
+                      ),
                     );
                   }),
                 ],
@@ -322,7 +349,16 @@ class TransactionsPage extends StatelessWidget {
                       // Navigate to Banks Page without transition
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => BanksPage()),
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  BanksPage(),
+                          transitionDuration: Duration(seconds: 0),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            return child; // No animation
+                          },
+                        ),
                       );
                     },
                   ),

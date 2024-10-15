@@ -30,6 +30,8 @@ class _HomePageState extends State<HomePage>
   int currentPage = 0; // Track the current dashboard
   PageController _pageController = PageController(); // Controller for PageView
 
+  bool _isCirclePressed = false; // Track if the circle button is pressed
+
   @override
   void initState() {
     super.initState();
@@ -202,7 +204,16 @@ class _HomePageState extends State<HomePage>
                       onTap: () {
                     // Navigate to Settings Page with no transition
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => SettingsPage()),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            SettingsPage(),
+                        transitionDuration:
+                            Duration(seconds: 0), // Disable transition
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return child; // No animation
+                        },
+                      ),
                       (route) => false,
                     );
                   }), // Outlined settings icon
@@ -210,8 +221,16 @@ class _HomePageState extends State<HomePage>
                       onTap: () {
                     // Navigate to Transactions Page with no transition
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                          builder: (context) => TransactionsPage()),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            TransactionsPage(),
+                        transitionDuration:
+                            Duration(seconds: 0), // Disable transition
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return child; // No animation
+                        },
+                      ),
                       (route) => false,
                     );
                   }), // Transaction icon
@@ -223,7 +242,16 @@ class _HomePageState extends State<HomePage>
                       onTap: () {
                     // Navigate to Saving Plan Page with no transition
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => SavingPlanPage()),
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            SavingPlanPage(),
+                        transitionDuration:
+                            Duration(seconds: 0), // Disable transition
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return child; // No animation
+                        },
+                      ),
                       (route) => false,
                     );
                   }), // Plan icon
@@ -238,12 +266,35 @@ class _HomePageState extends State<HomePage>
             left: 0,
             right: 0,
             child: GestureDetector(
-              onTap: () {
+              onTapDown: (_) {
+                setState(() {
+                  _isCirclePressed = true; // Set the state to pressed
+                });
+              },
+              onTapUp: (_) {
+                setState(() {
+                  _isCirclePressed = false; // Reset the state after press
+                });
                 // Navigate to Banks Page with no transition
                 Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => BanksPage()),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        BanksPage(),
+                    transitionDuration:
+                        Duration(seconds: 0), // Disable transition
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return child; // No animation
+                    },
+                  ),
                   (route) => false,
                 );
+              },
+              onTapCancel: () {
+                setState(() {
+                  _isCirclePressed =
+                      false; // Reset the state if tap is canceled
+                });
               },
               child: Stack(
                 alignment: Alignment.center,
@@ -257,13 +308,18 @@ class _HomePageState extends State<HomePage>
                       shape: BoxShape.circle,
                     ),
                   ),
-                  // Gradient green circle
+                  // Gradient green circle that changes when pressed
                   Container(
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
+                        colors: _isCirclePressed
+                            ? [
+                                Color(0xFF1A7A5E),
+                                Color(0xFF6FC3A0)
+                              ] // Darker when pressed
+                            : [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
