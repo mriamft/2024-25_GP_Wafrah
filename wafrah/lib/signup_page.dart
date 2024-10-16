@@ -16,8 +16,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   bool showErrorNotification = false;
   String errorMessage = '';
@@ -27,8 +26,7 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoginTextPressed = false;
 
   // Show notification method
-  void showNotification(String message,
-      {Color color = const Color(0xFFC62C2C)}) {
+  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
       showErrorNotification = true;
@@ -44,14 +42,14 @@ class _SignUpPageState extends State<SignUpPage> {
   // Method to validate password complexity
   bool validatePassword(String password) {
     final RegExp passwordRegExp = RegExp(
-      r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[!@#\$&*~]).{8,}$',
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$',
     );
     return passwordRegExp.hasMatch(password);
   }
 
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
-    final url = Uri.parse('http://localhost:3000/checkPhoneNumber');
+    final url = Uri.parse('https://55e1-82-167-111-148.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -80,11 +78,7 @@ class _SignUpPageState extends State<SignUpPage> {
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
 
-    if (firstName.isEmpty ||
-        lastName.isEmpty ||
-        phoneNumber.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
+    if (firstName.isEmpty || lastName.isEmpty || phoneNumber.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
       return;
     }
@@ -109,7 +103,7 @@ class _SignUpPageState extends State<SignUpPage> {
     String hashedPassword = hashPassword(password);
 
     // Send data to backend
-    final url = Uri.parse('http://localhost:3000/adduser');
+    final url = Uri.parse('https://55e1-82-167-111-148.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -226,14 +220,12 @@ class _SignUpPageState extends State<SignUpPage> {
                   left: (MediaQuery.of(context).size.width - 308) / 2,
                   top: 662,
                   child: GestureDetector(
-                    onTapDown: (_) =>
-                        setState(() => _isLoginButtonPressed = true),
+                    onTapDown: (_) => setState(() => _isLoginButtonPressed = true),
                     onTapUp: (_) {
                       setState(() => _isLoginButtonPressed = false);
                       signUp();
                     },
-                    onTapCancel: () =>
-                        setState(() => _isLoginButtonPressed = false),
+                    onTapCancel: () => setState(() => _isLoginButtonPressed = false),
                     child: Container(
                       width: 308,
                       height: 52,
@@ -272,8 +264,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     children: [
                       // Darker "سجل الدخول" text when pressed
                       GestureDetector(
-                        onTapDown: (_) =>
-                            setState(() => _isLoginTextPressed = true),
+                        onTapDown: (_) => setState(() => _isLoginTextPressed = true),
                         onTapUp: (_) {
                           setState(() => _isLoginTextPressed = false);
                           Navigator.push(
@@ -282,8 +273,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 builder: (context) => LoginPage()),
                           );
                         },
-                        onTapCancel: () =>
-                            setState(() => _isLoginTextPressed = false),
+                        onTapCancel: () => setState(() => _isLoginTextPressed = false),
                         child: Text(
                           'سجل الدخول',
                           style: TextStyle(

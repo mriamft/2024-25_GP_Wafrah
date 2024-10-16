@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import for input formatters
+import 'package:flutter/services.dart';
 import 'dart:async';
 import 'home_page.dart'; // Import the home_page.dart file
 import 'package:wafrah/signup_page.dart' as signup;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -34,9 +36,8 @@ class _LoginPageState extends State<LoginPage> {
   Color _buttonColor = Colors.white; // Default color for the button
   Color _signupColor = Colors.white; // Default color for the signup text
 
-  // Show notification method (from sign-up page)
-  void showNotification(String message,
-      {Color color = const Color(0xFFC62C2C)}) {
+  // Show notification method
+  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
       showErrorNotification = true;
@@ -49,8 +50,8 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  // Handle login logic
-  void handleLogin() {
+  // Handle login logic with API call
+  Future<void> handleLogin() async {
     String phoneNumber = phoneNumberController.text.trim();
     String password = passwordController.text.trim();
 
@@ -59,12 +60,37 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Proceed with login logic (e.g., API call)
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => HomePage()), // Navigate to home page
-    );
+    try {
+      // Send request to the server to validate login
+      final url = Uri.parse('https://55e1-82-167-111-148.ngrok-free.app/login');
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({'phoneNumber': phoneNumber, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+
+        if (responseBody['success']) {
+          // Login successful
+          showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
+
+          // Navigate to the home page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
+          );
+        } else {
+          // Invalid phone number or password
+          showNotification('رقم الجوال أو رمز المرور غير صحيحين');
+        }
+      } else {
+        showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
+      }
+    } catch (error) {
+      showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
+    }
   }
 
   @override
@@ -139,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                         keyboardType: TextInputType.phone,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
-                            RegExp(r'[0-9+\-() ]'), // Allow numbers and symbols
+                            RegExp(r'[0-9+\-() ]'),
                           ),
                         ],
                         decoration: InputDecoration(
@@ -154,7 +180,6 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(color: Colors.white),
                         cursorColor: Colors.white,
                       ),
-                      // Custom Gradient Line
                       SizedBox(height: 5),
                       Container(
                         width: 313,
@@ -195,7 +220,6 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(color: Colors.white),
                         cursorColor: Colors.white,
                       ),
-                      // Custom Gradient Line
                       SizedBox(height: 5),
                       Container(
                         width: 313,
@@ -217,7 +241,7 @@ class _LoginPageState extends State<LoginPage> {
                   left: (MediaQuery.of(context).size.width - 308) / 2,
                   top: 650,
                   child: GestureDetector(
-                    onTap: handleLogin, // Handle login with validation
+                    onTap: handleLogin,
                     onTapDown: (_) {
                       setState(() {
                         _buttonColor = Color(0xFFB0B0B0);
@@ -269,7 +293,6 @@ class _LoginPageState extends State<LoginPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // "سجل الآن" text
                       GestureDetector(
                         onTapDown: (_) {
                           setState(() {
@@ -290,8 +313,8 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => signup
-                                    .SignUpPage()), // Navigate to sign-up page
+                                builder: (context) =>
+                                    signup.SignUpPage()), // Navigate to sign-up page
                           );
                         },
                         child: Text(
@@ -306,7 +329,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       SizedBox(width: 4),
-                      // "ليس لديك حساب؟" text
                       Text(
                         'ليس لديك حساب؟',
                         style: TextStyle(
@@ -322,7 +344,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // Error Notification (Similar to sign-up page)
+          // Error Notification
           if (showErrorNotification)
             Positioned(
               top: 23,
