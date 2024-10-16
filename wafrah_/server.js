@@ -5,22 +5,26 @@ const app = express();
 
 const saltRounds = 10; // Used for bcrypt hashing
 
-// Database connection to AWS RDS MySQL
-const db = mysql.createConnection({
-  host: 'wafrahdb.cf6kyks0q11n.eu-north-1.rds.amazonaws.com', // Replace with your AWS RDS endpoint
-  user: 'admin', // Your master username
-  password: 'Wafrah_GP_1', // Your master password for the RDS instance
-  database: 'Wafrah', // The name of the database
+// Database connection pool to AWS RDS MySQL
+const pool = mysql.createPool({
+  host: 'wafrahdb.cf6kyks0q11n.eu-north-1.rds.amazonaws.com', // AWS RDS endpoint
+  user: 'admin', // Master username
+  password: 'Wafrah_GP_1', // Master password for RDS instance
+  database: 'Wafrah', // Database name
   port: 3306, // MySQL default port
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-// Connect to the database
-db.connect((err) => {
+// Test connection to the database pool
+pool.getConnection((err, connection) => {
   if (err) {
     console.error('MySQL connection failed: ' + err.stack);
     return;
   }
-  console.log('Connected to AWS RDS MySQL as id ' + db.threadId);
+  console.log('Connected to AWS RDS MySQL');
+  connection.release(); // release the connection back to the pool
 });
 
 // Middleware to parse JSON
@@ -36,7 +40,7 @@ app.post('/adduser', async (req, res) => {
 
     // SQL query to insert new user
     let sql = 'INSERT INTO user (userName, phoneNumber, password) VALUES (?, ?, ?)';
-    db.query(sql, [userName, phoneNumber, hashedPassword], (err, result) => {
+    pool.query(sql, [userName, phoneNumber, hashedPassword], (err, result) => {
       if (err) throw err;
       res.send('User added successfully');
     });
@@ -46,37 +50,23 @@ app.post('/adduser', async (req, res) => {
   }
 });
 
-// Route to get all users (just for testing or admin use)
-app.get('/users', (req, res) => {
-  let sql = 'SELECT * FROM user';
-  db.query(sql, (err, results) => {
-    if (err) throw err;
-    res.json(results);
-  });
-});
-
-// Check if a phone number exists
-app.post('/checkPhoneNumber', (req, res) => {
-  const { phoneNumber } = req.body;
-  const sql = 'SELECT * FROM user WHERE phoneNumber = ?';
-  db.query(sql, [phoneNumber], (err, result) => {
-    if (err) throw err;
-    if (result.length > 0) {
-      res.json({ exists: true });
-    } else {
-      res.json({ exists: false });
-    }
-  });
-});
-
-// Handle the login request with hashed password comparison
+// Route to handle user login with hashed password comparison
 app.post('/login', (req, res) => {
   const { phoneNumber, password } = req.body;
 
+  if (!phoneNumber || !password) {
+    res.status(400).json({ success: false, message: 'Missing phone number or password' });
+    return;
+  }
+
   // Check if phone number exists and if the password matches
-  const sql = 'SELECT * FROM user WHERE phoneNumber = ?';
-  db.query(sql, [phoneNumber], async (err, result) => {
-    if (err) throw err;
+  const sql = 'SELECT userID, firstName, password FROM user WHERE phoneNumber = ?'; // Select userID and firstName as well
+  pool.query(sql, [phoneNumber], async (err, result) => {
+    if (err) {
+      console.error('Error during login: ', err);
+      res.status(500).send('Server error');
+      return;
+    }
 
     if (result.length > 0) {
       const user = result[0];
@@ -85,12 +75,18 @@ app.post('/login', (req, res) => {
       const match = await bcrypt.compare(password, user.password);
 
       if (match) {
-        res.json({ success: true });
+        // Return the userID and firstName upon successful login
+        res.json({
+          success: true,
+          message: 'Login successful',
+          userID: user.userID,        // Sending userID
+          firstName: user.firstName   // Sending firstName
+        });
       } else {
         res.json({ success: false, message: 'Incorrect phone number or password' });
       }
     } else {
-      res.json({ success: false, message: 'Incorrect phone number or password' });
+      res.json({ success: false, message: 'Phone number not found' });
     }
   });
 });
