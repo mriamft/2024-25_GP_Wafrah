@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:firebase_core/firebase_core.dart';
+// Ensure you have this import
 import 'login_page.dart'; // Import the LoginPage
 import 'package:wafrah/signup_page.dart' as signup;
 
-void main() async{
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+void main() {
   runApp(MyApp());
 }
 

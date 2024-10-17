@@ -3,7 +3,8 @@ import 'package:wafrah/OTP_page.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'otp_service.dart'; // Import the OTP service
+import 'package:crypto/crypto.dart';
+import 'package:wafrah/login_page.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -11,8 +12,6 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final OTPService _otpService = OTPService(); // Initialize OTP service
-
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
@@ -50,8 +49,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
-    final url = Uri.parse('https://3f89-82-167-111-148.ngrok-free.app/checkPhoneNumber');
-
+    final url = Uri.parse('https://55e1-82-167-111-148.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -66,8 +64,14 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  // Method to handle sign-up logic and send OTP
-  void handleSignUp() async {
+  // Method to hash the password
+  String hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    return sha256.convert(bytes).toString();
+  }
+
+  // Method to handle sign-up logic
+  void signUp() async {
     String firstName = firstNameController.text.trim();
     String lastName = lastNameController.text.trim();
     String phoneNumber = phoneNumberController.text.trim();
@@ -95,21 +99,26 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    // If everything is valid, send OTP to user's phone
-    await _otpService.sendOTP(phoneNumber);
+    // If everything is valid, hash the password and store the data
+    String hashedPassword = hashPassword(password);
 
-    // Navigate to the OTP page
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OTPPage(
-          phoneNumber: phoneNumber,
-          firstName: firstName,
-          lastName: lastName,
-          password: password,
-        ),
-      ),
+    // Send data to backend
+    final url = Uri.parse('https://55e1-82-167-111-148.ngrok-free.app/adduser');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'userName': '$firstName $lastName', // Store full name
+        'phoneNumber': phoneNumber,
+        'password': hashedPassword
+      }),
     );
+
+    if (response.statusCode == 200) {
+      showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
+    } else {
+      showNotification('حدث خطأ ما\nفشل في عملية التسجيل');
+    }
   }
 
   @override
@@ -127,9 +136,86 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             child: Stack(
               children: [
-                // Other widgets and styling here...
-
-                // "تسجيل الدخول" button logic
+                // Darker Arrow Icon when pressed
+                Positioned(
+                  top: 60,
+                  right: 15,
+                  child: GestureDetector(
+                    onTapDown: (_) => setState(() => _isArrowPressed = true),
+                    onTapUp: (_) {
+                      setState(() => _isArrowPressed = false);
+                      Navigator.pop(context);
+                    },
+                    onTapCancel: () => setState(() => _isArrowPressed = false),
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      color: _isArrowPressed ? Colors.grey : Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 140,
+                  top: 130,
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 90,
+                    height: 82,
+                  ),
+                ),
+                _buildInputField(
+                  top: 235,
+                  hintText: 'الاسم الأول',
+                  controller: firstNameController,
+                ),
+                _buildInputField(
+                  top: 300,
+                  hintText: 'الاسم الأخير',
+                  controller: lastNameController,
+                ),
+                _buildInputField(
+                  top: 365,
+                  hintText: '(+966555555555) رقم الجوال',
+                  controller: phoneNumberController,
+                  keyboardType: TextInputType.phone,
+                ),
+                _buildInputField(
+                  top: 430,
+                  hintText: 'رمز المرور',
+                  controller: passwordController,
+                  obscureText: true,
+                ),
+                _buildInputField(
+                  top: 495,
+                  hintText: 'تأكيد رمز المرور',
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                ),
+                Positioned(
+                  left: 24,
+                  right: 10,
+                  top: 570,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      'الرجاء اختيار رمز مرور يحقق الشروط التالية:\n'
+                      'أن يتكون من 8 خانات على الأقل.\n'
+                      'أن يحتوي على رقم.\n'
+                      'أن يحتوي على حرف صغير.\n'
+                      'أن يحتوي على حرف كبير.\n'
+                      'أن يحتوي على رمز خاص.',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 9,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.white,
+                        height: 1.21,
+                      ),
+                    ),
+                  ),
+                ),
+                // Darker "تسجيل الدخول" button when pressed
                 Positioned(
                   left: (MediaQuery.of(context).size.width - 308) / 2,
                   top: 662,
@@ -137,14 +223,16 @@ class _SignUpPageState extends State<SignUpPage> {
                     onTapDown: (_) => setState(() => _isLoginButtonPressed = true),
                     onTapUp: (_) {
                       setState(() => _isLoginButtonPressed = false);
-                      handleSignUp();
+                      signUp();
                     },
                     onTapCancel: () => setState(() => _isLoginButtonPressed = false),
                     child: Container(
                       width: 308,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: _isLoginButtonPressed ? Colors.grey[300] : Colors.white,
+                        color: _isLoginButtonPressed
+                            ? Colors.grey[300]
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
@@ -167,7 +255,50 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                 ),
-                // Other widgets...
+                Positioned(
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Darker "سجل الدخول" text when pressed
+                      GestureDetector(
+                        onTapDown: (_) => setState(() => _isLoginTextPressed = true),
+                        onTapUp: (_) {
+                          setState(() => _isLoginTextPressed = false);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()),
+                          );
+                        },
+                        onTapCancel: () => setState(() => _isLoginTextPressed = false),
+                        child: Text(
+                          'سجل الدخول',
+                          style: TextStyle(
+                            color: _isLoginTextPressed
+                                ? Colors.grey
+                                : Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'لديك حساب؟',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -179,7 +310,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 width: 353,
                 height: 57,
                 decoration: BoxDecoration(
-                  color: Color(0xFFC62C2C),
+                  color: Color(0xFFC62C2C), // Red background
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Row(
@@ -208,6 +339,54 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required double top,
+    required String hintText,
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+  }) {
+    return Positioned(
+      left: 24,
+      right: 24,
+      top: top,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            obscureText: obscureText,
+            textAlign: TextAlign.right,
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: TextStyle(
+                fontFamily: 'GE-SS-Two-Light',
+                fontSize: 14,
+                color: Colors.white,
+              ),
+              border: InputBorder.none,
+            ),
+            style: TextStyle(color: Colors.white),
+            cursorColor: Colors.white,
+          ),
+          SizedBox(height: 5),
+          Container(
+            width: 313,
+            height: 2.95,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF60B092), Colors.white],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class OTPPage extends StatefulWidget {
   final String phoneNumber;
-  final String firstName;
-  final String lastName;
-  final String password;
+  final String firstName; // Added
+  final String lastName; // Added
+  final String password; // Added
 
   OTPPage({
     required this.phoneNumber,
-    required this.firstName,
-    required this.lastName,
-    required this.password,
+    required this.firstName, // Added
+    required this.lastName, // Added
+    required this.password, // Added
   });
 
   @override
@@ -45,48 +43,16 @@ class _OTPPageState extends State<OTPPage> {
     });
   }
 
-  // Method to verify OTP and add user to the database
-  Future<void> verifyOTP() async {
+  // Method to verify OTP without Firebase authentication
+  void verifyOTP() {
     String otp = otpController.text.trim();
 
     if (otp.isNotEmpty) {
-      // Simulate OTP verification (you can add actual verification logic here)
-      if (otp == '123456') { // Just a dummy verification
-        await addUserToDatabase(
-          widget.firstName,
-          widget.lastName,
-          widget.phoneNumber,
-          widget.password,
-        );
-        // Navigate to the home page after successful OTP verification
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        _showErrorSnackBar('OTP is incorrect.');
-      }
+      // Add your custom OTP verification logic here
+      // Navigate to the home page after successful OTP verification
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       _showErrorSnackBar('Please enter the OTP.');
-    }
-  }
-
-  // Method to add user to database
-  Future<void> addUserToDatabase(String firstName, String lastName, String phoneNumber, String password) async {
-    final url = Uri.parse('https://3f89-82-167-111-148.ngrok-free.app/adduser');
-
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        'firstName': firstName,
-        'lastName': lastName,
-        'phoneNumber': phoneNumber,
-        'password': password
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      print('User added successfully');
-    } else {
-      _showErrorSnackBar('Failed to add user to the database.');
     }
   }
 
@@ -99,9 +65,10 @@ class _OTPPageState extends State<OTPPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  // Method to resend OTP if 3 minutes have passed
+  // Method to resend OTP if 3 minutes have passed (without Firebase)
   void resendOTP() {
     if (canResend) {
+      // Add your custom resend OTP logic here
       print('OTP resent');
       setState(() {
         resendTimeLeft = 180; // Reset the countdown to 3 minutes

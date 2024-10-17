@@ -4,12 +4,21 @@ import 'transactions_page.dart';
 import 'home_page.dart';
 import 'banks_page.dart';
 
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: SavingPlanPage(),
+    );
+  }
+}
+
 class SavingPlanPage extends StatelessWidget {
-  final String firstName;
-  final String userID;
-
-  SavingPlanPage({required this.firstName, required this.userID});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +40,7 @@ class SavingPlanPage extends StatelessWidget {
 
           // Main content area
           Positioned(
-            top: 380, 
+            top: 380, // Adjusted to position below the green square
             left: 19,
             right: 19,
             child: Center(
@@ -69,52 +78,55 @@ class SavingPlanPage extends StatelessWidget {
                 children: [
                   buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
                       onTap: () {
+                    // Navigate to Settings Page without transition
                     Navigator.pushReplacement(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            SettingsPage(firstName: firstName, userID: userID),
+                            SettingsPage(),
                         transitionDuration: Duration(seconds: 0),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          return child;
+                          return child; // No animation
                         },
                       ),
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
                       onTap: () {
+                    // Navigate to Transactions Page without transition
                     Navigator.pushReplacement(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            TransactionsPage(firstName: firstName, userID: userID),
+                            TransactionsPage(),
                         transitionDuration: Duration(seconds: 0),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          return child;
+                          return child; // No animation
                         },
                       ),
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
-                      onTap: () {
+                      isSelected: false, onTap: () {
+                    // Navigate to Home Page without transition
                     Navigator.pushReplacement(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            HomePage(firstName: firstName, userID: userID),
+                            HomePage(),
                         transitionDuration: Duration(seconds: 0),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          return child;
+                          return child; // No animation
                         },
                       ),
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
                       onTap: () {
-                    // Do nothing for the current page
+                    // Do nothing for saving plan page as we are already here
                   }),
                 ],
               ),
@@ -129,20 +141,21 @@ class SavingPlanPage extends StatelessWidget {
               width: 6,
               height: 6,
               decoration: BoxDecoration(
-                color: Color(0xFF2C8C68),
+                color: Color(0xFF2C8C68), // Point color
                 shape: BoxShape.circle,
               ),
             ),
           ),
 
-          // Circular Button above the Navigation Bar
+          // Circular Button above the Navigation Bar (F9F9F9 circle + gradient green circle)
           Positioned(
-            bottom: 44,
+            bottom: 44, // Adjusted position
             left: 0,
             right: 0,
             child: Stack(
               alignment: Alignment.center,
               children: [
+                // #F9F9F9 circle without shadow
                 Container(
                   width: 92,
                   height: 90,
@@ -151,6 +164,7 @@ class SavingPlanPage extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
+                // Gradient green circle
                 Container(
                   width: 80,
                   height: 80,
@@ -169,16 +183,17 @@ class SavingPlanPage extends StatelessWidget {
                       size: 40,
                     ),
                     onPressed: () {
+                      // Navigate to Banks Page without transition
                       Navigator.pushReplacement(
                         context,
                         PageRouteBuilder(
                           pageBuilder:
                               (context, animation, secondaryAnimation) =>
-                                  BanksPage(firstName: firstName, userID: userID),
+                                  BanksPage(),
                           transitionDuration: Duration(seconds: 0),
                           transitionsBuilder:
                               (context, animation, secondaryAnimation, child) {
-                            return child;
+                            return child; // No animation
                           },
                         ),
                       );
@@ -195,7 +210,7 @@ class SavingPlanPage extends StatelessWidget {
 
   // Bottom Navigation Item
   Widget buildBottomNavItem(IconData icon, String label, int index,
-      {required VoidCallback onTap}) {
+      {bool isSelected = false, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(

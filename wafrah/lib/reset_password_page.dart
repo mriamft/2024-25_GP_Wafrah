@@ -1,27 +1,22 @@
 import 'package:flutter/material.dart';
 
 class ResetPasswordPage extends StatefulWidget {
-  final String firstName;
-  final String userID;
-
-  ResetPasswordPage({required this.firstName, required this.userID});
-
   @override
   _ResetPasswordPageState createState() => _ResetPasswordPageState();
 }
 
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
-  Color _arrowColor = Color(0xFF3D3D3D);
+  Color _arrowColor = Color(0xFF3D3D3D); // Default arrow color
 
   void _onArrowTap() {
     setState(() {
-      _arrowColor = Colors.grey;
+      _arrowColor = Colors.grey; // Change color on press
     });
     Future.delayed(Duration(milliseconds: 100), () {
       setState(() {
-        _arrowColor = Color(0xFF3D3D3D);
+        _arrowColor = Color(0xFF3D3D3D); // Reset color after a short delay
       });
-      Navigator.pop(context);
+      Navigator.pop(context); // Navigate back to settings page
     });
   }
 
@@ -36,10 +31,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             top: 60,
             right: 15,
             child: GestureDetector(
-              onTap: _onArrowTap,
+              onTap: _onArrowTap, // Change this to the new method
               child: Icon(
                 Icons.arrow_forward_ios,
-                color: _arrowColor,
+                color: _arrowColor, // Use the dynamic color
                 size: 28,
               ),
             ),
@@ -55,7 +50,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 color: Color(0xFF3D3D3D),
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'GE-SS-Two-Bold',
+                fontFamily:
+                    'GE-SS-Two-Bold', // Use the same font as the project
               ),
             ),
           ),
@@ -72,15 +68,16 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: TextField(
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.right, // Align text to the right
                 style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
+                  fontFamily:
+                      'GE-SS-Two-Light', // Use the same font as the project
                 ),
                 decoration: InputDecoration(
                   hintText: 'رمز المرور الحالي',
                   hintStyle: TextStyle(
                     color: Color(0xFF888888),
-                    fontFamily: 'GE-SS-Two-Light',
+                    fontFamily: 'GE-SS-Two-Light', // Same font for hint
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 10),
@@ -101,15 +98,16 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: TextField(
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.right, // Align text to the right
                 style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
+                  fontFamily:
+                      'GE-SS-Two-Light', // Use the same font as the project
                 ),
                 decoration: InputDecoration(
                   hintText: 'رمز المرور الجديد',
                   hintStyle: TextStyle(
                     color: Color(0xFF888888),
-                    fontFamily: 'GE-SS-Two-Light',
+                    fontFamily: 'GE-SS-Two-Light', // Same font for hint
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 10),
@@ -130,15 +128,16 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: TextField(
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.right, // Align text to the right
                 style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
+                  fontFamily:
+                      'GE-SS-Two-Light', // Use the same font as the project
                 ),
                 decoration: InputDecoration(
                   hintText: 'تأكيد رمز المرور الجديد',
                   hintStyle: TextStyle(
                     color: Color(0xFF888888),
-                    fontFamily: 'GE-SS-Two-Light',
+                    fontFamily: 'GE-SS-Two-Light', // Same font for hint
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 10),
@@ -150,9 +149,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           // Instructions Text
           Positioned(
             top: 330,
-            left: 100,
+            left: 100, // Adjust this position as needed
             child: Container(
-              width: 345,
+              width: 345, // Width for the instructions text
               child: Column(
                 children: [
                   Text(
@@ -160,9 +159,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     style: TextStyle(
                       color: Color(0xFF838383),
                       fontSize: 9,
-                      fontFamily: 'GE-SS-Two-Light',
+                      fontFamily:
+                          'GE-SS-Two-Light', // Use the same font as the project
                     ),
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.right, // Align text to the right
                   ),
                   SizedBox(height: 5),
                   Text(
@@ -174,9 +174,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     style: TextStyle(
                       color: Color(0xFF838383),
                       fontSize: 9,
-                      fontFamily: 'GE-SS-Two-Light',
+                      fontFamily:
+                          'GE-SS-Two-Light', // Use the same font as the project
                     ),
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.right, // Align text to the right
                   ),
                 ],
               ),
@@ -185,20 +186,20 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
           // Submit Button
           Positioned(
-            bottom: 40,
+            bottom: 40, // Adjust position as needed
             left: (MediaQuery.of(context).size.width - 220) / 2,
             child: SizedBox(
               width: 220,
               height: 38,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF3D3D3D),
-                  foregroundColor: Colors.white,
+                  backgroundColor: Color(0xFF3D3D3D), // Background color
+                  foregroundColor: Colors.white, // Text color
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100),
+                    borderRadius: BorderRadius.circular(100), // Rounded corners
                   ),
-                  shadowColor: Colors.black,
-                  elevation: 5,
+                  shadowColor: Colors.black, // Shadow color
+                  elevation: 5, // Shadow elevation
                 ),
                 onPressed: () {
                   // Add your reset logic here
@@ -207,7 +208,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   'تعديل',
                   style: TextStyle(
                     fontSize: 20,
-                    fontFamily: 'GE-SS-Two-Light',
+                    fontFamily:
+                        'GE-SS-Two-Light', // Use the same font as the project
                   ),
                 ),
               ),

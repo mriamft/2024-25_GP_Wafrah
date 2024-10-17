@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:wafrah/signup_page.dart';
 import 'dart:async';
-import 'home_page.dart';
+import 'home_page.dart'; // Import the home_page.dart file
+import 'package:wafrah/signup_page.dart' as signup;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: LoginPage(),
+    );
+  }
+}
 
 class LoginPage extends StatefulWidget {
   @override
@@ -48,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // Send request to the server to validate login
-      final url = Uri.parse('https://3f89-82-167-111-148.ngrok-free.app/login');
+      final url = Uri.parse('https://55e1-82-167-111-148.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -57,21 +71,15 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
-        print('Response body: $responseBody');  // Debugging the response
 
         if (responseBody['success']) {
           // Login successful
           showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
 
-          // Navigate to the home page with the firstName and userID
+          // Navigate to the home page
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => HomePage(
-                firstName: responseBody['firstName'],
-                userID: responseBody['userID'], // Pass the userID
-              ),
-            ),
+            MaterialPageRoute(builder: (context) => HomePage()),
           );
         } else {
           // Invalid phone number or password
@@ -81,7 +89,6 @@ class _LoginPageState extends State<LoginPage> {
         showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
       }
     } catch (error) {
-      print('Login error: $error');  // Debugging the error
       showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
     }
   }
@@ -307,7 +314,7 @@ class _LoginPageState extends State<LoginPage> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    SignUpPage()), // Navigate to sign-up page
+                                    signup.SignUpPage()), // Navigate to sign-up page
                           );
                         },
                         child: Text(

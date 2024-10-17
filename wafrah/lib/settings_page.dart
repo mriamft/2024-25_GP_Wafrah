@@ -8,12 +8,21 @@ import 'notification_page.dart';
 import 'support_page.dart';
 import 'banks_page.dart';
 
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: SettingsPage(),
+    );
+  }
+}
+
 class SettingsPage extends StatefulWidget {
-  final String firstName;
-  final String userID;
-
-  SettingsPage({required this.firstName, required this.userID});
-
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
@@ -40,7 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _profileColor = Colors.grey[400]!; // Darker color on press
     });
     Navigator.of(context)
-        .push(_createNoTransitionRoute(ProfilePage(firstName: widget.firstName, userID: widget.userID)))
+        .push(_createNoTransitionRoute(ProfilePage()))
         .then((_) {
       setState(() {
         _profileColor = Color(0xFFD9D9D9); // Reset color after navigating back
@@ -53,10 +62,11 @@ class _SettingsPageState extends State<SettingsPage> {
       _resetPasswordColor = Colors.grey[400]!; // Darker color on press
     });
     Navigator.of(context)
-        .push(_createNoTransitionRoute(ResetPasswordPage(firstName: widget.firstName, userID: widget.userID)))
+        .push(_createNoTransitionRoute(ResetPasswordPage()))
         .then((_) {
       setState(() {
-        _resetPasswordColor = Color(0xFFD9D9D9); // Reset color after navigating back
+        _resetPasswordColor =
+            Color(0xFFD9D9D9); // Reset color after navigating back
       });
     });
   }
@@ -66,10 +76,11 @@ class _SettingsPageState extends State<SettingsPage> {
       _notificationColor = Colors.grey[400]!; // Darker color on press
     });
     Navigator.of(context)
-        .push(_createNoTransitionRoute(NotificationPage(firstName: widget.firstName, userID: widget.userID)))
+        .push(_createNoTransitionRoute(NotificationPage()))
         .then((_) {
       setState(() {
-        _notificationColor = Color(0xFFD9D9D9); // Reset color after navigating back
+        _notificationColor =
+            Color(0xFFD9D9D9); // Reset color after navigating back
       });
     });
   }
@@ -79,7 +90,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _supportColor = Colors.grey[400]!; // Darker color on press
     });
     Navigator.of(context)
-        .push(_createNoTransitionRoute(SupportPage(firstName: widget.firstName, userID: widget.userID)))
+        .push(_createNoTransitionRoute(SupportPage()))
         .then((_) {
       setState(() {
         _supportColor = Color(0xFFD9D9D9); // Reset color after navigating back
@@ -115,7 +126,75 @@ class _SettingsPageState extends State<SettingsPage> {
               style: TextStyle(
                 color: Color(0xFF3D3D3D),
                 fontSize: 13,
-                fontFamily: 'GE-SS-Two-Light',
+                fontFamily:
+                    'GE-SS-Two-Light', // Use the same font as the project
+              ),
+            ),
+          ),
+
+          // Bottom Navigation Bar
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 77,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
+                      onTap: () {
+                    Navigator.push(
+                      context,
+                      _createNoTransitionRoute(SettingsPage()),
+                    );
+                  }),
+                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
+                      onTap: () {
+                    Navigator.push(
+                      context,
+                      _createNoTransitionRoute(TransactionsPage()),
+                    );
+                  }),
+                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
+                      isSelected: false, onTap: () {
+                    Navigator.push(
+                      context,
+                      _createNoTransitionRoute(HomePage()),
+                    );
+                  }),
+                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
+                      onTap: () {
+                    Navigator.push(
+                      context,
+                      _createNoTransitionRoute(SavingPlanPage()),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+
+          // Point under "إعدادات"
+          Positioned(
+            right: 320,
+            top: 762,
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: Color(0xFF2C8C68), // Point color
+                shape: BoxShape.circle,
               ),
             ),
           ),
@@ -140,10 +219,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
                     SizedBox(width: 10),
                     Expanded(
+                      // Use Expanded to fill remaining space
                       child: Align(
-                        alignment: Alignment.centerRight,
+                        // Align text
+                        alignment: Alignment.centerRight * 0.9,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.end, // Right align texts
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -152,7 +234,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                 color: Color(0xFF3D3D3D),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                fontFamily: 'GE-SS-Two-Bold',
+                                fontFamily:
+                                    'GE-SS-Two-Bold', // Use the same font as the project
                               ),
                             ),
                             Text(
@@ -160,7 +243,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               style: TextStyle(
                                 color: Color(0xFF686868),
                                 fontSize: 9,
-                                fontFamily: 'GE-SS-Two-Light',
+                                fontFamily:
+                                    'GE-SS-Two-Light', // Use the same font as the project
                               ),
                             ),
                           ],
@@ -193,10 +277,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
                     SizedBox(width: 10),
                     Expanded(
+                      // Use Expanded to fill remaining space
                       child: Align(
-                        alignment: Alignment.centerRight,
+                        // Align text
+                        alignment: Alignment.centerRight * 0.9,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.end, // Right align texts
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -205,7 +292,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                 color: Color(0xFF3D3D3D),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                fontFamily: 'GE-SS-Two-Bold',
+                                fontFamily:
+                                    'GE-SS-Two-Bold', // Use the same font as the project
                               ),
                             ),
                             Text(
@@ -213,7 +301,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               style: TextStyle(
                                 color: Color(0xFF686868),
                                 fontSize: 9,
-                                fontFamily: 'GE-SS-Two-Light',
+                                fontFamily:
+                                    'GE-SS-Two-Light', // Use the same font as the project
                               ),
                             ),
                           ],
@@ -246,10 +335,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
                     SizedBox(width: 10),
                     Expanded(
+                      // Use Expanded to fill remaining space
                       child: Align(
-                        alignment: Alignment.centerRight,
+                        // Align text
+                        alignment: Alignment.centerRight * 0.9,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.end, // Right align texts
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -258,7 +350,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                 color: Color(0xFF3D3D3D),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                fontFamily: 'GE-SS-Two-Bold',
+                                fontFamily:
+                                    'GE-SS-Two-Bold', // Use the same font as the project
                               ),
                             ),
                             Text(
@@ -266,7 +359,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               style: TextStyle(
                                 color: Color(0xFF686868),
                                 fontSize: 9,
-                                fontFamily: 'GE-SS-Two-Light',
+                                fontFamily:
+                                    'GE-SS-Two-Light', // Use the same font as the project
                               ),
                             ),
                           ],
@@ -299,10 +393,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
                     SizedBox(width: 10),
                     Expanded(
+                      // Use Expanded to fill remaining space
                       child: Align(
-                        alignment: Alignment.centerRight,
+                        // Align text
+                        alignment: Alignment.centerRight * 0.9,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.end, // Right align texts
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -311,7 +408,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                 color: Color(0xFF3D3D3D),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                fontFamily: 'GE-SS-Two-Bold',
+                                fontFamily:
+                                    'GE-SS-Two-Bold', // Use the same font as the project
                               ),
                             ),
                             Text(
@@ -319,7 +417,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               style: TextStyle(
                                 color: Color(0xFF686868),
                                 fontSize: 9,
-                                fontFamily: 'GE-SS-Two-Light',
+                                fontFamily:
+                                    'GE-SS-Two-Light', // Use the same font as the project
                               ),
                             ),
                           ],
@@ -356,7 +455,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   'تسجيل الخروج',
                   style: TextStyle(
                     fontSize: 15,
-                    fontFamily: 'GE-SS-Two-Light',
+                    fontFamily:
+                        'GE-SS-Two-Light', // Use the same font as the project
                   ),
                 ),
               ),
@@ -385,110 +485,59 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       color: Color(0xFFDD2C35),
                       fontSize: 15,
-                      fontFamily: 'GE-SS-Two-Light',
+                      fontFamily:
+                          'GE-SS-Two-Light', // Use the same font as the project
                     ),
                   ),
                 ),
               ),
             ),
           ),
-
-          // Bottom Navigation Bar
+          // Circular Button above the Navigation Bar (F9F9F9 circle + gradient green circle)
           Positioned(
-            bottom: 0,
+            bottom: 44, // Adjusted position
             left: 0,
             right: 0,
-            child: Container(
-              height: 77,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: Offset(0, -5),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // #F9F9F9 circle without shadow
+                Container(
+                  width: 92,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF9F9F9),
+                    shape: BoxShape.circle,
                   ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
-                      onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            SettingsPage(firstName: widget.firstName, userID: widget.userID),
-                        transitionDuration: Duration(seconds: 0),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return child;
-                        },
-                      ),
-                    );
-                  }),
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
-                      onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            TransactionsPage(firstName: widget.firstName, userID: widget.userID),
-                        transitionDuration: Duration(seconds: 0),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return child;
-                        },
-                      ),
-                    );
-                  }),
-                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
-                      onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            HomePage(firstName: widget.firstName, userID: widget.userID),
-                        transitionDuration: Duration(seconds: 0),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return child;
-                        },
-                      ),
-                    );
-                  }),
-                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
-                      onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            SavingPlanPage(firstName: widget.firstName, userID: widget.userID),
-                        transitionDuration: Duration(seconds: 0),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return child;
-                        },
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          ),
-
-          // Point under "إعدادات"
-          Positioned(
-            right: 320,
-            top: 762,
-            child: Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: Color(0xFF2C8C68),
-                shape: BoxShape.circle,
-              ),
+                ),
+                // Gradient green circle
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.account_balance,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                    onPressed: () {
+                      // Navigate to Banks Page without transition
+                      Navigator.pushReplacement(
+                        context,
+                        _createNoTransitionRoute(BanksPage()),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -498,7 +547,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // Bottom Navigation Item
   Widget buildBottomNavItem(IconData icon, String label, int index,
-      {required VoidCallback onTap}) {
+      {bool isSelected = false, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(

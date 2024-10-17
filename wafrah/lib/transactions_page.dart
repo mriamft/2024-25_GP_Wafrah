@@ -5,15 +5,10 @@ import 'saving_plan_page.dart';
 import 'home_page.dart';
 
 class TransactionsPage extends StatelessWidget {
-  final String firstName;
-  final String userID;
-
-  TransactionsPage({required this.firstName, required this.userID});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9),
+      backgroundColor: Color(0xFFF9F9F9), // Background color
       body: Stack(
         children: [
           // Green square image
@@ -39,7 +34,7 @@ class TransactionsPage extends StatelessWidget {
                 color: Color(0xFF3D3D3D),
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'GE-SS-Two-Bold',
+                fontFamily: 'GE-SS-Two-Bold', // Ensure same font as the project
               ),
             ),
           ),
@@ -53,7 +48,8 @@ class TransactionsPage extends StatelessWidget {
               style: TextStyle(
                 color: Color(0xFF3D3D3D),
                 fontSize: 13,
-                fontFamily: 'GE-SS-Two-Light',
+                fontFamily:
+                    'GE-SS-Two-Light', // Ensure same font as the project
               ),
             ),
           ),
@@ -77,17 +73,19 @@ class TransactionsPage extends StatelessWidget {
                     style: TextStyle(
                       color: Color(0xFF5F5F5F),
                       fontSize: 13,
-                      fontFamily: 'GE-SS-Two-Light',
+                      fontFamily:
+                          'GE-SS-Two-Light', // Ensure same font as the project
                     ),
                   ),
-                  SizedBox(width: 3),
+                  SizedBox(width: 3), // Spacing
                   Text(
                     '25,000',
                     style: TextStyle(
                       color: Color(0xFF2C8C68),
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'GE-SS-Two-Bold',
+                      fontFamily:
+                          'GE-SS-Two-Bold', // Ensure same font as the project
                     ),
                   ),
                   Spacer(),
@@ -101,7 +99,8 @@ class TransactionsPage extends StatelessWidget {
                           color: Color(0xFF3D3D3D),
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'GE-SS-Two-Bold',
+                          fontFamily:
+                              'GE-SS-Two-Bold', // Ensure same font as the project
                         ),
                       ),
                       Text(
@@ -109,12 +108,13 @@ class TransactionsPage extends StatelessWidget {
                         style: TextStyle(
                           color: Color(0xFF5F5F5F),
                           fontSize: 13,
-                          fontFamily: 'GE-SS-Two-Light',
+                          fontFamily:
+                              'GE-SS-Two-Light', // Ensure same font as the project
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(width: 40),
+                  SizedBox(width: 40), // Spacing
                 ],
               ),
             ),
@@ -139,17 +139,19 @@ class TransactionsPage extends StatelessWidget {
                     style: TextStyle(
                       color: Color(0xFF5F5F5F),
                       fontSize: 13,
-                      fontFamily: 'GE-SS-Two-Light',
+                      fontFamily:
+                          'GE-SS-Two-Light', // Ensure same font as the project
                     ),
                   ),
-                  SizedBox(width: 3),
+                  SizedBox(width: 3), // Spacing
                   Text(
                     '31',
                     style: TextStyle(
                       color: Color(0xFF3D3D3D),
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'GE-SS-Two-Bold',
+                      fontFamily:
+                          'GE-SS-Two-Bold', // Ensure same font as the project
                     ),
                   ),
                   Spacer(),
@@ -163,7 +165,8 @@ class TransactionsPage extends StatelessWidget {
                           color: Color(0xFF3D3D3D),
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'GE-SS-Two-Bold',
+                          fontFamily:
+                              'GE-SS-Two-Bold', // Ensure same font as the project
                         ),
                       ),
                       Text(
@@ -171,13 +174,49 @@ class TransactionsPage extends StatelessWidget {
                         style: TextStyle(
                           color: Color(0xFF5F5F5F),
                           fontSize: 13,
-                          fontFamily: 'GE-SS-Two-Light',
+                          fontFamily:
+                              'GE-SS-Two-Light', // Ensure same font as the project
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(width: 40),
+                  SizedBox(width: 40), // Spacing
                 ],
+              ),
+            ),
+          ),
+          // First Alrajhi Image
+          Positioned(
+            left: 315,
+            top: 265,
+            child: Image.asset(
+              'assets/images/Alrajhi.png', // Ensure this is the correct image path
+              width: 30,
+              height: 30,
+            ),
+          ),
+
+          // Second Alrajhi Image
+          Positioned(
+            left: 315,
+            top: 326,
+            child: Image.asset(
+              'assets/images/Alrajhi.png', // Ensure this is the correct image path
+              width: 30,
+              height: 30,
+            ),
+          ),
+
+          // Point under "سجل المعاملات"
+          Positioned(
+            right: 109, // Position x
+            top: 700, // Position y
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: Color(0xFF2C8C68), // Point color
+                shape: BoxShape.circle,
               ),
             ),
           ),
@@ -204,52 +243,127 @@ class TransactionsPage extends StatelessWidget {
                 children: [
                   buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
                       onTap: () {
+                    // Navigate to Settings Page without transition
                     Navigator.pushReplacement(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            SettingsPage(firstName: firstName, userID: userID),
+                            SettingsPage(),
                         transitionDuration: Duration(seconds: 0),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          return child;
+                          return child; // No animation
                         },
                       ),
                     );
                   }),
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1, onTap: () {}),
-                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
+                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
                       onTap: () {
+                    // Do nothing for the current page
+                  }),
+                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
+                      isSelected: false, onTap: () {
+                    // Navigate to Home Page without transition
                     Navigator.pushReplacement(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            HomePage(firstName: firstName, userID: userID),
+                            HomePage(),
                         transitionDuration: Duration(seconds: 0),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          return child;
+                          return child; // No animation
                         },
                       ),
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
                       onTap: () {
+                    // Navigate to Saving Plan Page without transition
                     Navigator.pushReplacement(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            SavingPlanPage(firstName: firstName, userID: userID),
+                            SavingPlanPage(),
                         transitionDuration: Duration(seconds: 0),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          return child;
+                          return child; // No animation
                         },
                       ),
                     );
                   }),
                 ],
               ),
+            ),
+          ),
+          Positioned(
+            right: 226, // Position x
+            top: 762, // Position y
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: Color(0xFF2C8C68), // Point color
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // Circular Button above the Navigation Bar (F9F9F9 circle + gradient green circle)
+          Positioned(
+            bottom: 44, // Adjusted position
+            left: 0,
+            right: 0,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // #F9F9F9 circle without shadow
+                Container(
+                  width: 92,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF9F9F9),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                // Gradient green circle
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.account_balance,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                    onPressed: () {
+                      // Navigate to Banks Page without transition
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  BanksPage(),
+                          transitionDuration: Duration(seconds: 0),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            return child; // No animation
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -259,7 +373,7 @@ class TransactionsPage extends StatelessWidget {
 
   // Bottom Navigation Item
   Widget buildBottomNavItem(IconData icon, String label, int index,
-      {required VoidCallback onTap}) {
+      {bool isSelected = false, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
