@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 class NotificationPage extends StatefulWidget {
+  final String userName;
+  final String phoneNumber;
+  
+  NotificationPage({ required this.userName, required this.phoneNumber});
+
   @override
   _NotificationPageState createState() => _NotificationPageState();
 }

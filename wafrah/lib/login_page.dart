@@ -1,24 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'home_page.dart'; // Import the home_page.dart file
+import 'home_page.dart'; // Redirect to home page after successful login
 import 'package:wafrah/signup_page.dart' as signup;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: LoginPage(),
-    );
-  }
-}
 
 class LoginPage extends StatefulWidget {
   @override
@@ -62,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // Send request to the server to validate login
-      final url = Uri.parse('https://55e1-82-167-111-148.ngrok-free.app/login');
+      final url = Uri.parse('https://534b-82-167-111-148.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -73,13 +59,14 @@ class _LoginPageState extends State<LoginPage> {
         final responseBody = json.decode(response.body);
 
         if (responseBody['success']) {
-          // Login successful
+          String fullName = responseBody['userName']; // Assuming the response contains user's full name
+
           showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
 
-          // Navigate to the home page
+          // Redirect to home page after successful login
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => HomePage()),
+            MaterialPageRoute(builder: (context) => HomePage(userName: fullName, phoneNumber :phoneNumber)),
           );
         } else {
           // Invalid phone number or password
@@ -132,6 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                         _arrowColor = Colors.white;
                       });
                     },
+
                     child: Icon(
                       Icons.arrow_forward_ios,
                       color: _arrowColor,

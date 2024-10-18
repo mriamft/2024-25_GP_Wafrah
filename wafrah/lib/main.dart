@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-// Ensure you have this import
-import 'login_page.dart'; // Import the LoginPage
+import 'login_page.dart';
 import 'package:wafrah/signup_page.dart' as signup;
 
 void main() {
@@ -33,28 +32,6 @@ class _SplashScreenState extends State<SplashScreen> {
   Color loginTextColor = Color(0xFF2C8C68);
   bool isCirclePressed = false;
   bool isLoginPressed = false;
-
-  void _onCirclePressed() {
-    setState(() {
-      isCirclePressed = true;
-    });
-    Future.delayed(Duration(milliseconds: 100), () {
-      setState(() {
-        isCirclePressed = false;
-      });
-    });
-  }
-
-  void _onLoginPressed() {
-    setState(() {
-      isLoginPressed = true;
-    });
-    Future.delayed(Duration(milliseconds: 100), () {
-      setState(() {
-        isLoginPressed = false;
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,13 +141,10 @@ class _SplashScreenState extends State<SplashScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                signup.SignUpPage(), // Use alias
+                                signup.SignUpPage(), 
                           ),
                         );
                       }
-                    },
-                    onTapDown: (_) {
-                      _onCirclePressed();
                     },
                     child: Container(
                       width: circleSize,
@@ -202,30 +176,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ),
                 ),
-                Positioned(
-                  left: 26,
-                  top: 17,
-                  child: Opacity(
-                    opacity: (0.7 - _dragValue).clamp(0.0, 1.0),
-                    child: Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 17,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 34,
-                  top: 17,
-                  child: Opacity(
-                    opacity: (0.5 - _dragValue).clamp(0.0, 1.0),
-                    child: Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 17,
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -238,12 +188,10 @@ class _SplashScreenState extends State<SplashScreen> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    _onLoginPressed();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            LoginPage(), // Navigate to LoginPage
+                        builder: (context) => LoginPage(),
                       ),
                     );
                   },
@@ -251,9 +199,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     'سجل الدخول',
                     style: TextStyle(
                       fontSize: 13,
-                      color: isLoginPressed
-                          ? Colors.black.withOpacity(0.5)
-                          : loginTextColor,
+                      color: loginTextColor,
                       fontFamily: 'GE-SS-Two-Light',
                     ),
                   ),

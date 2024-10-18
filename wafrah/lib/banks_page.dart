@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 class BanksPage extends StatelessWidget {
+  final String userName; // Pass userName from previous pages
+  final String phoneNumber;
+  
+  BanksPage({required this.userName, required this.phoneNumber});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -9,8 +14,8 @@ class BanksPage extends StatelessWidget {
       ),
       body: Center(
         child: Text(
-          'البنوك الصفحة',
-          style: TextStyle(fontSize: 24),
+          'مرحبًا $userName, هذه صفحة البنوك', // Displaying the username
+          style: TextStyle(fontSize: 24, fontFamily: 'GE-SS-Two-Bold'),
         ),
       ),
     );

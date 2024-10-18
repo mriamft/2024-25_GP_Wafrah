@@ -4,21 +4,12 @@ import 'transactions_page.dart';
 import 'home_page.dart';
 import 'banks_page.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: SavingPlanPage(),
-    );
-  }
-}
-
 class SavingPlanPage extends StatelessWidget {
+  final String userName;
+  final String phoneNumber;
+
+  SavingPlanPage({ required this.userName, required this.phoneNumber});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +31,7 @@ class SavingPlanPage extends StatelessWidget {
 
           // Main content area
           Positioned(
-            top: 380, // Adjusted to position below the green square
+            top: 380,
             left: 19,
             right: 19,
             child: Center(
@@ -76,86 +67,40 @@ class SavingPlanPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
-                      onTap: () {
-                    // Navigate to Settings Page without transition
+                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0, onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            SettingsPage(),
-                        transitionDuration: Duration(seconds: 0),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return child; // No animation
-                        },
-                      ),
+                      MaterialPageRoute(builder: (context) => SettingsPage(userName: userName, phoneNumber: phoneNumber)),
                     );
                   }),
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
-                      onTap: () {
-                    // Navigate to Transactions Page without transition
+                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1, onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            TransactionsPage(),
-                        transitionDuration: Duration(seconds: 0),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return child; // No animation
-                        },
-                      ),
+                      MaterialPageRoute(builder: (context) => TransactionsPage(userName: userName, phoneNumber: phoneNumber)),
                     );
                   }),
-                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
-                      isSelected: false, onTap: () {
-                    // Navigate to Home Page without transition
+                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2, onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            HomePage(),
-                        transitionDuration: Duration(seconds: 0),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return child; // No animation
-                        },
-                      ),
+                      MaterialPageRoute(builder: (context) => HomePage(userName: userName, phoneNumber: phoneNumber)),
                     );
                   }),
-                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
-                      onTap: () {
-                    // Do nothing for saving plan page as we are already here
+                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3, onTap: () {
+                    // Already on Saving Plan page
                   }),
                 ],
               ),
             ),
           ),
 
-          // Point under "خطة الإدخار"
+          // Circular Button for Banks Page
           Positioned(
-            left: 310,
-            top: 762,
-            child: Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: Color(0xFF2C8C68), // Point color
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-
-          // Circular Button above the Navigation Bar (F9F9F9 circle + gradient green circle)
-          Positioned(
-            bottom: 44, // Adjusted position
+            bottom: 44,
             left: 0,
             right: 0,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // #F9F9F9 circle without shadow
                 Container(
                   width: 92,
                   height: 90,
@@ -164,7 +109,6 @@ class SavingPlanPage extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                // Gradient green circle
                 Container(
                   width: 80,
                   height: 80,
@@ -183,19 +127,9 @@ class SavingPlanPage extends StatelessWidget {
                       size: 40,
                     ),
                     onPressed: () {
-                      // Navigate to Banks Page without transition
                       Navigator.pushReplacement(
                         context,
-                        PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) =>
-                                  BanksPage(),
-                          transitionDuration: Duration(seconds: 0),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            return child; // No animation
-                          },
-                        ),
+                        MaterialPageRoute(builder: (context) => BanksPage(userName: userName, phoneNumber: phoneNumber)),
                       );
                     },
                   ),
@@ -208,9 +142,7 @@ class SavingPlanPage extends StatelessWidget {
     );
   }
 
-  // Bottom Navigation Item
-  Widget buildBottomNavItem(IconData icon, String label, int index,
-      {bool isSelected = false, required VoidCallback onTap}) {
+  Widget buildBottomNavItem(IconData icon, String label, int index, {required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(

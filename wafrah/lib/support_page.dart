@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 class SupportPage extends StatefulWidget {
+final String phoneNumber;
+  final String userName;
+
+  SupportPage({required this.userName, required this.phoneNumber});
+
   @override
   _SupportPageState createState() => _SupportPageState();
 }

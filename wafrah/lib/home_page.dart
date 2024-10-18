@@ -4,21 +4,11 @@ import 'transactions_page.dart';
 import 'saving_plan_page.dart';
 import 'banks_page.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomePage(),
-    );
-  }
-}
-
 class HomePage extends StatefulWidget {
+  final String userName; // Dynamic user name passed from SignUp or Login
+  final String phoneNumber;
+  HomePage({required this.userName, required this.phoneNumber});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -82,7 +72,7 @@ class _HomePageState extends State<HomePage>
                     fit: BoxFit.contain, // Keep original aspect ratio
                   ),
                 ),
-                // "أهلًا عبير!" Greeting Text (Sticky to the right side of the image)
+                // "أهلًا {userName}!" Greeting Text (Sticky to the right side of the image)
                 Positioned(
                   top: 25,
                   right: 20, // Stick to the right side of the image
@@ -106,11 +96,11 @@ class _HomePageState extends State<HomePage>
                           ),
                         ),
                         TextSpan(
-                          text: 'عبير',
+                          text: widget.userName, // Use dynamic user name here
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 40,
-                            fontFamily: 'GE-SS-Two-Bold', // Bold "عبير"
+                            fontFamily: 'GE-SS-Two-Bold', // Bold user name
                           ),
                         ),
                       ],
@@ -200,55 +190,48 @@ class _HomePageState extends State<HomePage>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
-                      onTap: () {
-                    // Navigate to Settings Page with no transition
+                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0, onTap: () {
+                    // Navigate to Settings Page and pass userName
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            SettingsPage(),
-                        transitionDuration:
-                            Duration(seconds: 0), // Disable transition
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
+                            SettingsPage(userName: widget.userName,phoneNumber: widget.phoneNumber), // Pass userName
+                        transitionDuration: Duration(seconds: 0), // Disable transition
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
                           return child; // No animation
                         },
                       ),
                       (route) => false,
                     );
                   }), // Outlined settings icon
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
-                      onTap: () {
-                    // Navigate to Transactions Page with no transition
+
+                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1, onTap: () {
+                    // Navigate to Transactions Page and pass userName
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            TransactionsPage(),
-                        transitionDuration:
-                            Duration(seconds: 0), // Disable transition
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
+                            TransactionsPage(userName: widget.userName, phoneNumber: widget.phoneNumber), // Pass userName
+                        transitionDuration: Duration(seconds: 0), // Disable transition
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
                           return child; // No animation
                         },
                       ),
                       (route) => false,
                     );
                   }), // Transaction icon
-                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
-                      isSelected: true, onTap: () {
+
+                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2, isSelected: true, onTap: () {
                     // Do nothing for home page
                   }), // Outlined home icon
-                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
-                      onTap: () {
-                    // Navigate to Saving Plan Page with no transition
+
+                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3, onTap: () {
+                    // Navigate to Saving Plan Page and pass userName
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            SavingPlanPage(),
-                        transitionDuration:
-                            Duration(seconds: 0), // Disable transition
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
+                            SavingPlanPage(userName: widget.userName, phoneNumber: widget.phoneNumber), // Pass userName
+                        transitionDuration: Duration(seconds: 0), // Disable transition
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
                           return child; // No animation
                         },
                       ),
@@ -275,15 +258,14 @@ class _HomePageState extends State<HomePage>
                 setState(() {
                   _isCirclePressed = false; // Reset the state after press
                 });
-                // Navigate to Banks Page with no transition
+                // Navigate to Banks Page and pass userName
                 Navigator.of(context).pushAndRemoveUntil(
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        BanksPage(),
+                        BanksPage(userName: widget.userName, phoneNumber: widget.phoneNumber,), // Pass userName
                     transitionDuration:
                         Duration(seconds: 0), // Disable transition
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
                       return child; // No animation
                     },
                   ),
@@ -292,8 +274,7 @@ class _HomePageState extends State<HomePage>
               },
               onTapCancel: () {
                 setState(() {
-                  _isCirclePressed =
-                      false; // Reset the state if tap is canceled
+                  _isCirclePressed = false; // Reset the state if tap is canceled
                 });
               },
               child: Stack(
@@ -315,10 +296,7 @@ class _HomePageState extends State<HomePage>
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: _isCirclePressed
-                            ? [
-                                Color(0xFF1A7A5E),
-                                Color(0xFF6FC3A0)
-                              ] // Darker when pressed
+                            ? [Color(0xFF1A7A5E), Color(0xFF6FC3A0)] // Darker when pressed
                             : [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -421,8 +399,7 @@ class _HomePageState extends State<HomePage>
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
-              padding:
-                  const EdgeInsets.only(right: 1), // Moved more to the right
+              padding: const EdgeInsets.only(right: 1), // Moved more to the right
               child: Text(
                 'تدفقك المالي لهذا الشهر',
                 style: TextStyle(
@@ -448,8 +425,7 @@ class _HomePageState extends State<HomePage>
                   left: 25,
                   top: -20,
                   child: Icon(
-                      Icons
-                          .keyboard_arrow_down_rounded, // Thinner and rounded "^" arrow
+                      Icons.keyboard_arrow_down_rounded, // Thinner and rounded "^" arrow
                       color: Color(0xFFC62C2C),
                       size: 90),
                 ),
@@ -457,8 +433,7 @@ class _HomePageState extends State<HomePage>
                   right: 30,
                   top: -20,
                   child: Icon(
-                      Icons
-                          .keyboard_arrow_up_rounded, // Thinner and rounded "^" arrow
+                      Icons.keyboard_arrow_up_rounded, // Thinner and rounded "^" arrow
                       color: Color(0xFF2C8C68),
                       size: 90),
                 ),
