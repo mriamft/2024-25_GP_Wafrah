@@ -100,9 +100,6 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    // If everything is valid, hash the password and store the data
-    String hashedPassword = hashPassword(password);
-
     // Send data to backend
     final url = Uri.parse('https://534b-82-167-111-148.ngrok-free.app/adduser');
     final response = await http.post(
@@ -111,7 +108,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: json.encode({
         'userName': '$firstName $lastName', // Store full name
         'phoneNumber': phoneNumber,
-        'password': hashedPassword
+        'password': password
       }),
     );
 
