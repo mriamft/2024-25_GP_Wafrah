@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:wafrah/login_page.dart';
-import 'package:wafrah/home_page.dart'; // Import HomePage for navigation
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -55,7 +54,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url = Uri.parse(
-        'https://534b-82-167-111-148.ngrok-free.app/checkPhoneNumber');
+        'https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -80,7 +79,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
     final url = Uri.parse(
-        'https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
+        'https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); //backend URL
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -97,6 +96,8 @@ class _SignUpPageState extends State<SignUpPage> {
             firstName: firstName,
             lastName: lastName,
             password: password,
+            isSignUp: true, // This indicates a new user sign-up
+
           ),
         ),
       );
@@ -141,31 +142,8 @@ class _SignUpPageState extends State<SignUpPage> {
     // If valid, send OTP before adding the user
     sendOTP(phoneNumber, firstName, lastName, password);
 
-    // // Send data to backend
-    // final url = Uri.parse('https://534b-82-167-111-148.ngrok-free.app/adduser');
-    // final response = await http.post(
-    //   url,
-    //   headers: {"Content-Type": "application/json"},
-    //   body: json.encode({
-    //     'userName': '$firstName $lastName', // Store full name
-    //     'phoneNumber': phoneNumber,
-    //     'password': password
-    //   }),
-    // );
 
-    // if (response.statusCode == 200) {
-    //   showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
 
-    //   // Redirect to HomePage after successful sign-up
-    //   Navigator.pushReplacement(
-    //     context,
-    //     MaterialPageRoute(
-    //       builder: (context) => HomePage(userName: '$firstName $lastName', phoneNumber:phoneNumber), // Pass full name
-    //     ),
-    //   );
-    // } else {
-    //   showNotification('حدث خطأ ما\nفشل في عملية التسجيل');
-    // }
   }
 
   @override

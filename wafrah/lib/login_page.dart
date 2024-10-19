@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'home_page.dart'; // Redirect to home page after successful login
+import 'package:wafrah/OTP_page.dart';
 import 'package:wafrah/signup_page.dart' as signup;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -9,6 +9,7 @@ import 'dart:convert';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
+  
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -40,51 +41,139 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // Handle login logic with API call
-  Future<void> handleLogin() async {
-    String phoneNumber = phoneNumberController.text.trim();
-    String password = passwordController.text.trim();
+// Handle login logic with API call
+// Method to handle login and send OTP
+Future<void> handleLogin() async {
+  String phoneNumber = phoneNumberController.text.trim();
+  String password = passwordController.text.trim();
 
-    if (phoneNumber.isEmpty || password.isEmpty) {
-      showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
-      return;
-    }
+  if (phoneNumber.isEmpty || password.isEmpty) {
+    showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
+    return;
+  }
 
-    try {
-      // Send request to the server to validate login
-      final url = Uri.parse('https://534b-82-167-111-148.ngrok-free.app/login');
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({'phoneNumber': phoneNumber, 'password': password}),
-      );
+  try {
+    // Send request to the server to validate login
+    final url = Uri.parse('https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/login');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({'phoneNumber': phoneNumber, 'password': password}),
+    );
 
-      if (response.statusCode == 200) {
-        final responseBody = json.decode(response.body);
+    if (response.statusCode == 200) {
+      final responseBody = json.decode(response.body);
 
-        if (responseBody['success']) {
-          String fullName = responseBody[
-              'userName']; // Assuming the response contains user's full name
+      if (responseBody['success']) {
+        String userName = responseBody['userName'];  // Fetch full name from server
 
-          showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
+        showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
 
-          // Redirect to home page after successful login
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    HomePage(userName: fullName, phoneNumber: phoneNumber)),
-          );
-        } else {
-          // Invalid phone number or password
-          showNotification('رقم الجوال أو رمز المرور غير صحيحين');
-        }
+        // Send OTP for final verification after login
+        sendOTP(phoneNumber, password, userName);  // Pass the user's full name to OTP page
+
       } else {
-        showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
+        // Invalid phone number or password
+        showNotification('رقم الجوال أو رمز المرور غير صحيحين');
       }
-    } catch (error) {
+    } else {
       showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
     }
+  } catch (error) {
+    showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
   }
+}
+
+// Method to send OTP to the user and navigate to OTPPage
+Future<void> sendOTP(String phoneNumber, String password, String fullName) async {
+  final url = Uri.parse('https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp');
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({'phoneNumber': phoneNumber}),
+  );
+
+  if (response.statusCode == 200) {
+    // Navigate to OTP page after OTP is sent
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OTPPage(
+          phoneNumber: phoneNumber,
+          firstName: fullName.split(' ')[0], // Pass first name
+          lastName: fullName.split(' ').length > 1 ? fullName.split(' ')[1] : '', // Handle cases where the name might be just one part
+          password: password,
+          isSignUp: false,  // Indicate that this is a login process
+        ),
+      ),
+    );
+  } else {
+    showNotification('Failed to send OTP');
+  }
+}
+
+
+// Send OTP and pass user details to OTPPage
+// Future<void> sendOTP(String phoneNumber, String firstName, String lastName, String password) async {
+//   final url = Uri.parse('https://your-backend-url/send-otp');
+//   final response = await http.post(
+//     url,
+//     headers: {"Content-Type": "application/json"},
+//     body: json.encode({'phoneNumber': phoneNumber}),
+//   );
+
+//   if (response.statusCode == 200) {
+//     // Navigate to OTP page and pass user's data
+//     Navigator.push(
+//       context,
+//       MaterialPageRoute(
+//         builder: (context) => OTPPage(
+//           phoneNumber: phoneNumber,
+//           firstName: firstName,
+//           lastName: lastName,
+//           password: password,
+//           isSignUp: false, // Login case
+//         ),
+//       ),
+//     );
+//   } else {
+//     showNotification('Failed to send OTP');
+//   }
+// }
+
+
+    // Method to send OTP to the user
+// Method to send OTP to the user
+// Future<void> sendOTP(String phoneNumber, String password) async {
+//   final url = Uri.parse(
+//       'https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); //backend URL
+//   final response = await http.post(
+//     url,
+//     headers: {"Content-Type": "application/json"},
+//     body: json.encode({'phoneNumber': phoneNumber}),
+//   );
+
+//   if (response.statusCode == 200) {
+//     // Navigate to OTP page after OTP is sent
+//     Navigator.push(
+//       context,
+//       MaterialPageRoute(
+//         builder: (context) => OTPPage(
+//           phoneNumber: phoneNumber,
+//           firstName: '', // Since this is the login, first and last names are not necessary
+//           lastName: '',
+//           password: password, // Pass the password to the OTP page for final authentication
+//           isSignUp: false, // This indicates an existing user login
+
+//         ),
+//       ),
+//     );
+//   } else {
+//     showNotification('Failed to send OTP');
+//   }
+// }
+
+
 
   @override
   Widget build(BuildContext context) {

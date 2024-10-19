@@ -9,14 +9,18 @@ class OTPPage extends StatefulWidget {
   final String firstName;
   final String lastName;
   final String password;
+  final bool isSignUp;
 
-  const OTPPage({
-    super.key,
-    required this.phoneNumber,
-    required this.firstName,
-    required this.lastName,
-    required this.password,
-  });
+const OTPPage({
+  super.key,
+  required this.phoneNumber,
+  required this.firstName,
+  required this.lastName,
+  required this.password,
+  required this.isSignUp, 
+});
+
+
 
   @override
   _OTPPageState createState() => _OTPPageState();
@@ -65,60 +69,118 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   // Method to verify OTP with the backend (using Twilio)
-  Future<void> verifyOTP() async {
-    String otp = getOTP();
-    if (otp.isEmpty || otp.length != 6) {
-      _showErrorSnackBar('Please enter the 6-digit OTP.');
-      return;
-    }
-
-    final url = Uri.parse(
-        'https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/verify-otp'); // Replace with your backend URL
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        'phoneNumber': widget.phoneNumber,
-        'otp': otp,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      addUserToDatabase(); // OTP verified, proceed to add user
-    } else {
-      _showErrorSnackBar('Invalid OTP. Please try again.');
-    }
+// Method to verify OTP with the backend
+// Method to verify OTP with the backend
+// Method to verify OTP with the backend (using Twilio)
+Future<void> verifyOTP() async {
+  String otp = getOTP();
+  if (otp.isEmpty || otp.length != 6) {
+    _showErrorSnackBar('Please enter the 6-digit OTP.');
+    return;
   }
 
-  // Add user to the database after OTP is verified
-  Future<void> addUserToDatabase() async {
-    final url = Uri.parse(
-        'https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/adduser'); // Replace with your backend URL
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        'userName': '${widget.firstName} ${widget.lastName}',
-        'phoneNumber': widget.phoneNumber,
-        'password': widget.password, // Ensure this is hashed in the backend
-      }),
-    );
+  final url = Uri.parse('https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/verify-otp');
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({
+      'phoneNumber': widget.phoneNumber,
+      'otp': otp,
+    }),
+  );
 
-    if (response.statusCode == 200) {
-      // Navigate to HomePage after the user is added successfully
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(
-            userName: widget.firstName,
-            phoneNumber: widget.phoneNumber,
-          ),
+  if (response.statusCode == 200) {
+    // Display success message and navigate to home page with user info
+    _showSuccessSnackBar('تم تسجيل الدخول بنجاح');
+    if (widget.isSignUp){
+      addUserToDatabase();
+    }
+        Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(
+          userName: '${widget.firstName} ${widget.lastName}',
+          phoneNumber: widget.phoneNumber,
         ),
-      );
-    } else {
-      _showErrorSnackBar('Failed to add user. Please try again.');
-    }
+      ),
+    );
+  } else {
+    _showErrorSnackBar('Invalid OTP. Please try again.');
   }
+}
+
+// Success Snackbar
+void _showSuccessSnackBar(String message) {
+  final snackBar = SnackBar(
+    content: Text(message),
+    backgroundColor: Colors.green, // Success color
+  );
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+
+
+// Add user to the database only if it's a sign-up process
+Future<void> addUserToDatabase() async {
+  final url = Uri.parse(
+      'https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/adduser'); // Replace with your backend URL
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({
+      'userName': '${widget.firstName} ${widget.lastName}',
+      'phoneNumber': widget.phoneNumber,
+      'password': widget.password, // Ensure this is hashed in the backend
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    // Navigate to HomePage after the user is added successfully
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => HomePage(
+    //       userName: widget.firstName,
+    _showErrorSnackBar("مبروك");
+    //       phoneNumber: widget.phoneNumber,
+    //     ),
+    //   ),
+    // );
+  } else {
+    _showErrorSnackBar('Failed to add user. Please try again.');
+  }
+}
+
+
+  // // Add user to the database after OTP is verified
+  // Future<void> addUserToDatabase() async {
+  //   final url = Uri.parse(
+  //       'https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/adduser'); // Replace with your backend URL
+  //   final response = await http.post(
+  //     url,
+  //     headers: {"Content-Type": "application/json"},
+  //     body: json.encode({
+  //       'userName': '${widget.firstName} ${widget.lastName}',
+  //       'phoneNumber': widget.phoneNumber,
+  //       'password': widget.password, // Ensure this is hashed in the backend
+  //     }),
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     // Navigate to HomePage after the user is added successfully
+  //     Navigator.pushReplacement(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => HomePage(
+  //           userName: widget.firstName,
+  //           phoneNumber: widget.phoneNumber,
+  //         ),
+  //       ),
+  //     );
+  //   } else {
+  //     _showErrorSnackBar('Failed to add user. Please try again.');
+  //   }
+  // }
 
   // Snackbar to show error messages
   void _showErrorSnackBar(String message) {
@@ -274,7 +336,7 @@ class _OTPPageState extends State<OTPPage> {
   Future<void> resendOTP() async {
     if (canResend) {
       final url = Uri.parse(
-          'https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
+          'https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

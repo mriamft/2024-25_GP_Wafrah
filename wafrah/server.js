@@ -129,7 +129,7 @@ app.post('/login', (req, res) => {
 
       if (match) {
         // Passwords match, return success with user details
-        res.json({ success: true, userID: user.userID, userName: user.userName });
+        res.json({ success: true, userName: user.userName });
       } else {
         // Passwords do not match
         res.json({ success: false, message: 'Incorrect phone number or password' });
