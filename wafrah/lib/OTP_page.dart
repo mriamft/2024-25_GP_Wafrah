@@ -1,28 +1,39 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:wafrah/home_page.dart';
 
 class OTPPage extends StatefulWidget {
   final String phoneNumber;
-  final String firstName; // Added
-  final String lastName; // Added
-  final String password; // Added
+  final String firstName;
+  final String lastName;
+  final String password;
 
   OTPPage({
     required this.phoneNumber,
-    required this.firstName, // Added
-    required this.lastName, // Added
-    required this.password, // Added
+    required this.firstName,
+    required this.lastName,
+    required this.password,
   });
 
   @override
   _OTPPageState createState() => _OTPPageState();
 }
 
+
 class _OTPPageState extends State<OTPPage> {
-  final TextEditingController otpController = TextEditingController();
+  // Use six different controllers for each OTP field
+  final TextEditingController otpController1 = TextEditingController();
+  final TextEditingController otpController2 = TextEditingController();
+  final TextEditingController otpController3 = TextEditingController();
+  final TextEditingController otpController4 = TextEditingController();
+  final TextEditingController otpController5 = TextEditingController();
+  final TextEditingController otpController6 = TextEditingController();
+
   bool canResend = false;
   late Timer _timer;
-  int resendTimeLeft = 180; // 3 minutes in seconds
+  int resendTimeLeft = 120; // 2 minutes in seconds
 
   @override
   void initState() {
@@ -43,17 +54,69 @@ class _OTPPageState extends State<OTPPage> {
     });
   }
 
-  // Method to verify OTP without Firebase authentication
-  void verifyOTP() {
-    String otp = otpController.text.trim();
+  // Combine the values of all OTP fields
+  String getOTP() {
+    return otpController1.text +
+        otpController2.text +
+        otpController3.text +
+        otpController4.text +
+        otpController5.text +
+        otpController6.text;
+  }
 
-    if (otp.isNotEmpty) {
-      // Add your custom OTP verification logic here
-      // Navigate to the home page after successful OTP verification
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      _showErrorSnackBar('Please enter the OTP.');
+  // Method to verify OTP with the backend (using Twilio)
+  Future<void> verifyOTP() async {
+    String otp = getOTP();
+    if (otp.isEmpty || otp.length != 6) {
+      _showErrorSnackBar('Please enter the 6-digit OTP.');
+      return;
     }
+
+    final url = Uri.parse('https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/verify-otp'); // Replace with your backend URL
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'phoneNumber': widget.phoneNumber,
+        'otp': otp,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      addUserToDatabase(); // OTP verified, proceed to add user
+    } else {
+      _showErrorSnackBar('Invalid OTP. Please try again.');
+    }
+  }
+
+  // Add user to the database after OTP is verified
+  Future<void> addUserToDatabase() async {
+    final url = Uri.parse('https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/adduser'); // Replace with your backend URL
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'userName': '${widget.firstName} ${widget.lastName}',
+        'phoneNumber': widget.phoneNumber,
+        'password': widget.password, // Ensure this is hashed in the backend
+      }),
+    );
+
+  if (response.statusCode == 200) {
+    // Navigate to HomePage after the user is added successfully
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(
+          userName: widget.firstName,
+          phoneNumber: widget.phoneNumber,
+
+        ),
+      ),
+    );
+  } else {
+    _showErrorSnackBar('Failed to add user. Please try again.');
+  }
   }
 
   // Snackbar to show error messages
@@ -65,18 +128,7 @@ class _OTPPageState extends State<OTPPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  // Method to resend OTP if 3 minutes have passed (without Firebase)
-  void resendOTP() {
-    if (canResend) {
-      // Add your custom resend OTP logic here
-      print('OTP resent');
-      setState(() {
-        resendTimeLeft = 180; // Reset the countdown to 3 minutes
-        canResend = false;
-      });
-      startResendOTPCountdown(); // Restart the countdown
-    }
-  }
+  // Resend OTP logic remains the same
 
   @override
   void dispose() {
@@ -162,12 +214,12 @@ class _OTPPageState extends State<OTPPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _otpField(),
-                      _otpField(),
-                      _otpField(),
-                      _otpField(),
-                      _otpField(),
-                      _otpField(),
+                      _otpField(otpController1),
+                      _otpField(otpController2),
+                      _otpField(otpController3),
+                      _otpField(otpController4),
+                      _otpField(otpController5),
+                      _otpField(otpController6),
                     ],
                   ),
                   SizedBox(height: 40),
@@ -216,15 +268,40 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   // OTP Field Widget for the OTP input
-  Widget _otpField() {
+  // OTP Field Widget for the OTP input
+// Method to resend OTP if 3 minutes have passed
+Future<void> resendOTP() async {
+  if (canResend) {
+    final url = Uri.parse('https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({'phoneNumber': widget.phoneNumber}),
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        resendTimeLeft = 180; // Reset the countdown to 3 minutes
+        canResend = false;
+      });
+      startResendOTPCountdown(); // Restart the countdown
+    } else {
+      _showErrorSnackBar('Failed to resend OTP. Please try again.');
+    }
+  }
+}
+
+
+  Widget _otpField(TextEditingController controller) {
     return Container(
-      width: 40, // Adjusted width to fit 6 fields
+      width: 40,
       height: 40,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.white),
         borderRadius: BorderRadius.circular(8),
       ),
       child: TextField(
+        controller: controller,
         textAlign: TextAlign.center,
         maxLength: 1,
         keyboardType: TextInputType.number,
@@ -232,15 +309,10 @@ class _OTPPageState extends State<OTPPage> {
           border: InputBorder.none,
           counterText: '',
         ),
-        style:
-            TextStyle(color: Colors.white), // Set the input text color to white
+        style: TextStyle(color: Colors.white),
         onChanged: (value) {
           if (value.length == 1) {
             FocusScope.of(context).nextFocus(); // Move focus to the next field
-          }
-          // Auto-submit OTP once 6 digits are entered
-          if (otpController.text.length == 6) {
-            verifyOTP();
           }
         },
       ),
