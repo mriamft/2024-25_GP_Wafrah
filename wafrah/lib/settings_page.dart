@@ -12,8 +12,8 @@ class SettingsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
 
-  const SettingsPage({super.key,  required this.userName, required this.phoneNumber});
-
+  const SettingsPage(
+      {super.key, required this.userName, required this.phoneNumber});
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -41,10 +41,12 @@ class _SettingsPageState extends State<SettingsPage> {
       _profileColor = Colors.grey[400]!; // Darker color on press
     });
     Navigator.of(context)
-        .push(_createNoTransitionRoute(ProfilePage(userName: widget.userName ,phoneNumber: widget.userName)))
+        .push(_createNoTransitionRoute(ProfilePage(
+            userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
-        _profileColor = const Color(0xFFD9D9D9); // Reset color after navigating back
+        _profileColor =
+            const Color(0xFFD9D9D9); // Reset color after navigating back
       });
     });
   }
@@ -54,7 +56,9 @@ class _SettingsPageState extends State<SettingsPage> {
       _resetPasswordColor = Colors.grey[400]!; // Darker color on press
     });
     Navigator.of(context)
-        .push(_createNoTransitionRoute(ResetPasswordPage(userName: widget.userName ,phoneNumber: widget.userName))) // Pass user phone number
+        .push(_createNoTransitionRoute(ResetPasswordPage(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber))) // Pass user phone number
         .then((_) {
       setState(() {
         _resetPasswordColor =
@@ -68,7 +72,8 @@ class _SettingsPageState extends State<SettingsPage> {
       _notificationColor = Colors.grey[400]!; // Darker color on press
     });
     Navigator.of(context)
-        .push(_createNoTransitionRoute(NotificationPage(userName: widget.userName ,phoneNumber: widget.userName)))
+        .push(_createNoTransitionRoute(NotificationPage(
+            userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
         _notificationColor =
@@ -82,10 +87,12 @@ class _SettingsPageState extends State<SettingsPage> {
       _supportColor = Colors.grey[400]!; // Darker color on press
     });
     Navigator.of(context)
-        .push(_createNoTransitionRoute(SupportPage(userName: widget.userName , phoneNumber: widget.userName)))
+        .push(_createNoTransitionRoute(SupportPage(
+            userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
-        _supportColor = const Color(0xFFD9D9D9); // Reset color after navigating back
+        _supportColor =
+            const Color(0xFFD9D9D9); // Reset color after navigating back
       });
     });
   }
@@ -108,7 +115,8 @@ class _SettingsPageState extends State<SettingsPage> {
               Navigator.of(context).pushNamed('/'); // Navigate to main.dart
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('تم تسجيل الخروج بنجاح'), // Successfully logged out
+                  content:
+                      Text('تم تسجيل الخروج بنجاح'), // Successfully logged out
                   duration: Duration(seconds: 2),
                 ),
               );
@@ -177,28 +185,36 @@ class _SettingsPageState extends State<SettingsPage> {
                       onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      _createNoTransitionRoute(SettingsPage(userName: widget.userName ,phoneNumber: widget.userName)), // Pass userName
+                      _createNoTransitionRoute(SettingsPage(
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber)), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
                       onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      _createNoTransitionRoute(TransactionsPage(userName: widget.userName, phoneNumber: widget.phoneNumber)), // Pass userName
+                      _createNoTransitionRoute(TransactionsPage(
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber)), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
                       isSelected: false, onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      _createNoTransitionRoute(HomePage(userName: widget.userName ,phoneNumber: widget.userName)), // Pass userName
+                      _createNoTransitionRoute(HomePage(
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber)), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
                       onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      _createNoTransitionRoute(SavingPlanPage(userName: widget.userName ,phoneNumber: widget.userName)), // Pass userName
+                      _createNoTransitionRoute(SavingPlanPage(
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber)), // Pass userName
                     );
                   }),
                 ],
@@ -474,7 +490,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   'تسجيل الخروج',
                   style: TextStyle(
                     fontSize: 15,
-                    fontFamily: 'GE-SS-Two-Light', // Use the same font as the project
+                    fontFamily:
+                        'GE-SS-Two-Light', // Use the same font as the project
                   ),
                 ),
               ),
@@ -503,7 +520,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       color: Color(0xFFDD2C35),
                       fontSize: 15,
-                      fontFamily: 'GE-SS-Two-Light', // Use the same font as the project
+                      fontFamily:
+                          'GE-SS-Two-Light', // Use the same font as the project
                     ),
                   ),
                 ),
@@ -550,7 +568,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       // Navigate to Banks Page without transition and pass userName
                       Navigator.pushReplacement(
                         context,
-                        _createNoTransitionRoute(BanksPage(userName: widget.userName, phoneNumber: widget.phoneNumber)), // Pass userName
+                        _createNoTransitionRoute(BanksPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber)), // Pass userName
                       );
                     },
                   ),

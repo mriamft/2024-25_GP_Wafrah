@@ -303,7 +303,7 @@ class BanksPage extends StatelessWidget {
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             SettingsPage(
-                                userName: userName, phoneNumber: userName),
+                                userName: userName, phoneNumber: phoneNumber),
                         transitionDuration: Duration.zero,
                         reverseTransitionDuration: Duration.zero,
                       ),
@@ -315,7 +315,7 @@ class BanksPage extends StatelessWidget {
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             TransactionsPage(
-                                userName: userName, phoneNumber: userName),
+                                userName: userName, phoneNumber: phoneNumber),
                         transitionDuration: Duration.zero,
                         reverseTransitionDuration: Duration.zero,
                       ),
@@ -326,7 +326,8 @@ class BanksPage extends StatelessWidget {
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            HomePage(userName: userName, phoneNumber: userName),
+                            HomePage(
+                                userName: userName, phoneNumber: phoneNumber),
                         transitionDuration: Duration.zero,
                         reverseTransitionDuration: Duration.zero,
                       ),
@@ -338,7 +339,7 @@ class BanksPage extends StatelessWidget {
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             SavingPlanPage(
-                                userName: userName, phoneNumber: userName),
+                                userName: userName, phoneNumber: phoneNumber),
                         transitionDuration: Duration.zero,
                         reverseTransitionDuration: Duration.zero,
                       ),
