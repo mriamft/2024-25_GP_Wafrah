@@ -71,6 +71,33 @@ class _SignUpPageState extends State<SignUpPage> {
     return sha256.convert(bytes).toString();
   }
 
+  // Method to send OTP to the user
+Future<void> sendOTP(String phoneNumber, String firstName, String lastName, String password) async {
+  final url = Uri.parse('https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({'phoneNumber': phoneNumber}),
+  );
+
+  if (response.statusCode == 200) {
+    // Navigate to OTP page after OTP is sent
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OTPPage(
+          phoneNumber: phoneNumber,
+          firstName: firstName,
+          lastName: lastName,
+          password: password,
+        ),
+      ),
+    );
+  } else {
+    showNotification('Failed to send OTP');
+  }
+}
+
   // Method to handle sign-up logic
   void signUp() async {
     String firstName = firstNameController.text.trim();
@@ -100,31 +127,34 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    // Send data to backend
-    final url = Uri.parse('https://534b-82-167-111-148.ngrok-free.app/adduser');
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        'userName': '$firstName $lastName', // Store full name
-        'phoneNumber': phoneNumber,
-        'password': password
-      }),
-    );
+      // If valid, send OTP before adding the user
+  sendOTP(phoneNumber, firstName, lastName, password);
 
-    if (response.statusCode == 200) {
-      showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
+    // // Send data to backend
+    // final url = Uri.parse('https://534b-82-167-111-148.ngrok-free.app/adduser');
+    // final response = await http.post(
+    //   url,
+    //   headers: {"Content-Type": "application/json"},
+    //   body: json.encode({
+    //     'userName': '$firstName $lastName', // Store full name
+    //     'phoneNumber': phoneNumber,
+    //     'password': password
+    //   }),
+    // );
 
-      // Redirect to HomePage after successful sign-up
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(userName: '$firstName $lastName', phoneNumber:phoneNumber), // Pass full name
-        ),
-      );
-    } else {
-      showNotification('حدث خطأ ما\nفشل في عملية التسجيل');
-    }
+    // if (response.statusCode == 200) {
+    //   showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
+
+    //   // Redirect to HomePage after successful sign-up
+    //   Navigator.pushReplacement(
+    //     context,
+    //     MaterialPageRoute(
+    //       builder: (context) => HomePage(userName: '$firstName $lastName', phoneNumber:phoneNumber), // Pass full name
+    //     ),
+    //   );
+    // } else {
+    //   showNotification('حدث خطأ ما\nفشل في عملية التسجيل');
+    // }
   }
 
   @override
