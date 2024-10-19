@@ -1,9 +1,18 @@
 const express = require('express');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
+const twilio = require('twilio'); // Twilio SDK
 const app = express();
+require('dotenv').config();
+
 
 const saltRounds = 10; // Used for bcrypt hashing
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+
+const client = twilio(accountSid, authToken);
 
 // Database connection to AWS RDS MySQL
 const db = mysql.createConnection({
@@ -24,6 +33,43 @@ db.connect((err) => {
 });
 
 app.use(express.json());
+
+// Route to send OTP
+app.post('/send-otp', async (req, res) => {
+  const { phoneNumber } = req.body;
+
+  try {
+    await client.verify.services(verifyServiceSid)
+      .verifications
+      .create({ to: phoneNumber, channel: 'sms' });
+    res.status(200).send('OTP sent successfully');
+  } catch (error) {
+    console.error('Error sending OTP: ', error);
+    res.status(500).send('Failed to send OTP');
+  }
+});
+
+// Route to verify OTP
+app.post('/verify-otp', async (req, res) => {
+  const { phoneNumber, otp } = req.body;
+
+  try {
+    const verificationCheck = await client.verify.services(verifyServiceSid)
+      .verificationChecks
+      .create({ to: phoneNumber, code: otp });
+
+    if (verificationCheck.status === 'approved') {
+      res.status(200).send('OTP verified');
+    } else {
+      res.status(400).send('Invalid OTP');
+    }
+  } catch (error) {
+    console.error('Error verifying OTP: ', error);
+    res.status(500).send('Failed to verify OTP');
+  }
+});
+
+
 
 // Add a new user with bcrypt hashed password
 app.post('/adduser', async (req, res) => {
