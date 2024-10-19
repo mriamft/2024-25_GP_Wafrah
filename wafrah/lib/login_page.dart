@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -23,13 +25,14 @@ class _LoginPageState extends State<LoginPage> {
   Color _signupColor = Colors.white; // Default color for the signup text
 
   // Show notification method
-  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
+  void showNotification(String message,
+      {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
       showErrorNotification = true;
     });
 
-    Timer(Duration(seconds: 10), () {
+    Timer(const Duration(seconds: 10), () {
       setState(() {
         showErrorNotification = false;
       });
@@ -59,14 +62,17 @@ class _LoginPageState extends State<LoginPage> {
         final responseBody = json.decode(response.body);
 
         if (responseBody['success']) {
-          String fullName = responseBody['userName']; // Assuming the response contains user's full name
+          String fullName = responseBody[
+              'userName']; // Assuming the response contains user's full name
 
           showNotification('تم تسجيل الدخول بنجاح', color: Colors.grey);
 
           // Redirect to home page after successful login
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => HomePage(userName: fullName, phoneNumber :phoneNumber)),
+            MaterialPageRoute(
+                builder: (context) =>
+                    HomePage(userName: fullName, phoneNumber: phoneNumber)),
           );
         } else {
           // Invalid phone number or password
@@ -87,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -119,7 +125,6 @@ class _LoginPageState extends State<LoginPage> {
                         _arrowColor = Colors.white;
                       });
                     },
-
                     child: Icon(
                       Icons.arrow_forward_ios,
                       color: _arrowColor,
@@ -156,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                             RegExp(r'[0-9+\-() ]'),
                           ),
                         ],
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: '(+966555555555) رقم الجوال',
                           hintStyle: TextStyle(
                             fontFamily: 'GE-SS-Two-Light',
@@ -165,14 +170,14 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           border: InputBorder.none,
                         ),
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                         cursorColor: Colors.white,
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Container(
                         width: 313,
                         height: 2.95,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [Color(0xFF60B092), Colors.white],
                             begin: Alignment.centerLeft,
@@ -196,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                         controller: passwordController,
                         obscureText: true,
                         textAlign: TextAlign.right,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: 'رمز المرور',
                           hintStyle: TextStyle(
                             fontFamily: 'GE-SS-Two-Light',
@@ -205,14 +210,14 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           border: InputBorder.none,
                         ),
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                         cursorColor: Colors.white,
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Container(
                         width: 313,
                         height: 2.95,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [Color(0xFF60B092), Colors.white],
                             begin: Alignment.centerLeft,
@@ -232,7 +237,7 @@ class _LoginPageState extends State<LoginPage> {
                     onTap: handleLogin,
                     onTapDown: (_) {
                       setState(() {
-                        _buttonColor = Color(0xFFB0B0B0);
+                        _buttonColor = const Color(0xFFB0B0B0);
                       });
                     },
                     onTapUp: (_) {
@@ -255,11 +260,11 @@ class _LoginPageState extends State<LoginPage> {
                           BoxShadow(
                             color: Colors.black.withOpacity(0.5),
                             blurRadius: 10,
-                            offset: Offset(0, 5),
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'تسجيل',
                           style: TextStyle(
@@ -284,7 +289,7 @@ class _LoginPageState extends State<LoginPage> {
                       GestureDetector(
                         onTapDown: (_) {
                           setState(() {
-                            _signupColor = Color(0xFFB0B0B0);
+                            _signupColor = const Color(0xFFB0B0B0);
                           });
                         },
                         onTapUp: (_) {
@@ -301,8 +306,8 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    signup.SignUpPage()), // Navigate to sign-up page
+                                builder: (context) => signup
+                                    .SignUpPage()), // Navigate to sign-up page
                           );
                         },
                         child: Text(
@@ -316,7 +321,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         'ليس لديك حساب؟',
                         style: TextStyle(
@@ -340,15 +345,15 @@ class _LoginPageState extends State<LoginPage> {
               child: Container(
                 width: 353,
                 height: 57,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFFC62C2C),
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 15.0),
                       child: Icon(
                         Icons.error_outline,
                         color: Colors.white,
@@ -358,7 +363,7 @@ class _LoginPageState extends State<LoginPage> {
                       padding: const EdgeInsets.only(right: 15.0),
                       child: Text(
                         errorMessage,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontFamily: 'GE-SS-Two-Light',
                           fontSize: 14,

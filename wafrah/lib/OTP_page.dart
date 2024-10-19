@@ -10,7 +10,8 @@ class OTPPage extends StatefulWidget {
   final String lastName;
   final String password;
 
-  OTPPage({
+  const OTPPage({
+    super.key,
     required this.phoneNumber,
     required this.firstName,
     required this.lastName,
@@ -20,7 +21,6 @@ class OTPPage extends StatefulWidget {
   @override
   _OTPPageState createState() => _OTPPageState();
 }
-
 
 class _OTPPageState extends State<OTPPage> {
   // Use six different controllers for each OTP field
@@ -42,7 +42,7 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   void startResendOTPCountdown() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (resendTimeLeft > 0) {
           resendTimeLeft--;
@@ -72,7 +72,8 @@ class _OTPPageState extends State<OTPPage> {
       return;
     }
 
-    final url = Uri.parse('https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/verify-otp'); // Replace with your backend URL
+    final url = Uri.parse(
+        'https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/verify-otp'); // Replace with your backend URL
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -91,7 +92,8 @@ class _OTPPageState extends State<OTPPage> {
 
   // Add user to the database after OTP is verified
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/adduser'); // Replace with your backend URL
+    final url = Uri.parse(
+        'https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/adduser'); // Replace with your backend URL
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -102,21 +104,20 @@ class _OTPPageState extends State<OTPPage> {
       }),
     );
 
-  if (response.statusCode == 200) {
-    // Navigate to HomePage after the user is added successfully
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HomePage(
-          userName: widget.firstName,
-          phoneNumber: widget.phoneNumber,
-
+    if (response.statusCode == 200) {
+      // Navigate to HomePage after the user is added successfully
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            userName: widget.firstName,
+            phoneNumber: widget.phoneNumber,
+          ),
         ),
-      ),
-    );
-  } else {
-    _showErrorSnackBar('Failed to add user. Please try again.');
-  }
+      );
+    } else {
+      _showErrorSnackBar('Failed to add user. Please try again.');
+    }
   }
 
   // Snackbar to show error messages
@@ -140,7 +141,7 @@ class _OTPPageState extends State<OTPPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF2A996F), Color(0xFF09462F)],
             begin: Alignment.topCenter,
@@ -157,7 +158,7 @@ class _OTPPageState extends State<OTPPage> {
                 onTap: () {
                   Navigator.pop(context);
                 },
-                child: Icon(
+                child: const Icon(
                   Icons.arrow_forward_ios,
                   color: Colors.white,
                   size: 28,
@@ -181,11 +182,11 @@ class _OTPPageState extends State<OTPPage> {
                 crossAxisAlignment:
                     CrossAxisAlignment.center, // Center alignment
                 children: [
-                  SizedBox(
+                  const SizedBox(
                       height:
                           230), // Adjusted to move the text under the splash image
                   // First Text (Styled as per the image you provided)
-                  Text(
+                  const Text(
                     'كلمة المرور لمرة واحدة',
                     style: TextStyle(
                       fontSize: 25,
@@ -196,11 +197,11 @@ class _OTPPageState extends State<OTPPage> {
                     ),
                     textAlign: TextAlign.center, // Center the text
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   // Second Text with phone number (Styled as per the image)
                   Text(
                     'يرجى كتابة رمز التحقق كلمة المرور لمرة واحدة المرسلة إلى رقم الهاتف ${widget.phoneNumber}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
                       fontFamily: 'GE SS Two',
@@ -209,7 +210,7 @@ class _OTPPageState extends State<OTPPage> {
                     ),
                     textAlign: TextAlign.center, // Center the text
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   // OTP input fields
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -222,11 +223,10 @@ class _OTPPageState extends State<OTPPage> {
                       _otpField(otpController6),
                     ],
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   // Updated Button (Styled same as sign-up page)
                   ElevatedButton(
                     onPressed: verifyOTP,
-                    child: Text('التحقق من الرمز'),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.black,
                       backgroundColor: Colors.white,
@@ -234,11 +234,12 @@ class _OTPPageState extends State<OTPPage> {
                         borderRadius: BorderRadius.circular(100),
                       ),
                       elevation: 5,
-                      minimumSize:
-                          Size(308, 52), // Ensure the button is the same size
+                      minimumSize: const Size(
+                          308, 52), // Ensure the button is the same size
                     ),
+                    child: Text('التحقق من الرمز'),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   // Resend OTP text
                   GestureDetector(
                     onTap: canResend
@@ -247,7 +248,7 @@ class _OTPPageState extends State<OTPPage> {
                     child: Text(
                       canResend
                           ? 'إعادة إرسال رمز التحقق؟'
-                          : 'إعادة الإرسال بعد ${resendTimeLeft} ثانية',
+                          : 'إعادة الإرسال بعد $resendTimeLeft ثانية',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -270,27 +271,27 @@ class _OTPPageState extends State<OTPPage> {
   // OTP Field Widget for the OTP input
   // OTP Field Widget for the OTP input
 // Method to resend OTP if 3 minutes have passed
-Future<void> resendOTP() async {
-  if (canResend) {
-    final url = Uri.parse('https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({'phoneNumber': widget.phoneNumber}),
-    );
+  Future<void> resendOTP() async {
+    if (canResend) {
+      final url = Uri.parse(
+          'https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({'phoneNumber': widget.phoneNumber}),
+      );
 
-    if (response.statusCode == 200) {
-      setState(() {
-        resendTimeLeft = 180; // Reset the countdown to 3 minutes
-        canResend = false;
-      });
-      startResendOTPCountdown(); // Restart the countdown
-    } else {
-      _showErrorSnackBar('Failed to resend OTP. Please try again.');
+      if (response.statusCode == 200) {
+        setState(() {
+          resendTimeLeft = 180; // Reset the countdown to 3 minutes
+          canResend = false;
+        });
+        startResendOTPCountdown(); // Restart the countdown
+      } else {
+        _showErrorSnackBar('Failed to resend OTP. Please try again.');
+      }
     }
   }
-}
-
 
   Widget _otpField(TextEditingController controller) {
     return Container(
@@ -305,11 +306,11 @@ Future<void> resendOTP() async {
         textAlign: TextAlign.center,
         maxLength: 1,
         keyboardType: TextInputType.number,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           border: InputBorder.none,
           counterText: '',
         ),
-        style: TextStyle(color: Colors.white),
+        style: const TextStyle(color: Colors.white),
         onChanged: (value) {
           if (value.length == 1) {
             FocusScope.of(context).nextFocus(); // Move focus to the next field

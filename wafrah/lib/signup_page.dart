@@ -8,6 +8,8 @@ import 'package:wafrah/login_page.dart';
 import 'package:wafrah/home_page.dart'; // Import HomePage for navigation
 
 class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
+
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -17,7 +19,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   bool showErrorNotification = false;
   String errorMessage = '';
@@ -27,13 +30,14 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoginTextPressed = false;
 
   // Show notification method
-  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
+  void showNotification(String message,
+      {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
       showErrorNotification = true;
     });
 
-    Timer(Duration(seconds: 10), () {
+    Timer(const Duration(seconds: 10), () {
       setState(() {
         showErrorNotification = false;
       });
@@ -50,7 +54,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
-    final url = Uri.parse('https://534b-82-167-111-148.ngrok-free.app/checkPhoneNumber');
+    final url = Uri.parse(
+        'https://534b-82-167-111-148.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -72,31 +77,33 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   // Method to send OTP to the user
-Future<void> sendOTP(String phoneNumber, String firstName, String lastName, String password) async {
-  final url = Uri.parse('https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
-  final response = await http.post(
-    url,
-    headers: {"Content-Type": "application/json"},
-    body: json.encode({'phoneNumber': phoneNumber}),
-  );
-
-  if (response.statusCode == 200) {
-    // Navigate to OTP page after OTP is sent
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OTPPage(
-          phoneNumber: phoneNumber,
-          firstName: firstName,
-          lastName: lastName,
-          password: password,
-        ),
-      ),
+  Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
+      String password) async {
+    final url = Uri.parse(
+        'https://c63a-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({'phoneNumber': phoneNumber}),
     );
-  } else {
-    showNotification('Failed to send OTP');
+
+    if (response.statusCode == 200) {
+      // Navigate to OTP page after OTP is sent
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OTPPage(
+            phoneNumber: phoneNumber,
+            firstName: firstName,
+            lastName: lastName,
+            password: password,
+          ),
+        ),
+      );
+    } else {
+      showNotification('Failed to send OTP');
+    }
   }
-}
 
   // Method to handle sign-up logic
   void signUp() async {
@@ -106,7 +113,11 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
 
-    if (firstName.isEmpty || lastName.isEmpty || phoneNumber.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (firstName.isEmpty ||
+        lastName.isEmpty ||
+        phoneNumber.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
       return;
     }
@@ -127,8 +138,8 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
       return;
     }
 
-      // If valid, send OTP before adding the user
-  sendOTP(phoneNumber, firstName, lastName, password);
+    // If valid, send OTP before adding the user
+    sendOTP(phoneNumber, firstName, lastName, password);
 
     // // Send data to backend
     // final url = Uri.parse('https://534b-82-167-111-148.ngrok-free.app/adduser');
@@ -163,7 +174,7 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -231,8 +242,8 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
                   right: 10,
                   top: 570,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Text(
                       'الرجاء اختيار رمز مرور يحقق الشروط التالية:\n'
                       'أن يتكون من 8 خانات على الأقل.\n'
                       'أن يحتوي على رقم.\n'
@@ -254,12 +265,14 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
                   left: (MediaQuery.of(context).size.width - 308) / 2,
                   top: 662,
                   child: GestureDetector(
-                    onTapDown: (_) => setState(() => _isLoginButtonPressed = true),
+                    onTapDown: (_) =>
+                        setState(() => _isLoginButtonPressed = true),
                     onTapUp: (_) {
                       setState(() => _isLoginButtonPressed = false);
                       signUp();
                     },
-                    onTapCancel: () => setState(() => _isLoginButtonPressed = false),
+                    onTapCancel: () =>
+                        setState(() => _isLoginButtonPressed = false),
                     child: Container(
                       width: 308,
                       height: 52,
@@ -272,11 +285,11 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
                           BoxShadow(
                             color: Colors.black.withOpacity(0.5),
                             blurRadius: 10,
-                            offset: Offset(0, 5),
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'تسجيل الدخول',
                           style: TextStyle(
@@ -297,7 +310,8 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       GestureDetector(
-                        onTapDown: (_) => setState(() => _isLoginTextPressed = true),
+                        onTapDown: (_) =>
+                            setState(() => _isLoginTextPressed = true),
                         onTapUp: (_) {
                           setState(() => _isLoginTextPressed = false);
                           Navigator.push(
@@ -306,7 +320,8 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
                                 builder: (context) => LoginPage()),
                           );
                         },
-                        onTapCancel: () => setState(() => _isLoginTextPressed = false),
+                        onTapCancel: () =>
+                            setState(() => _isLoginTextPressed = false),
                         child: Text(
                           'سجل الدخول',
                           style: TextStyle(
@@ -320,7 +335,7 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
                           ),
                         ),
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         'لديك حساب؟',
                         style: TextStyle(
@@ -342,15 +357,15 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
               child: Container(
                 width: 353,
                 height: 57,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFFC62C2C), // Red background
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 15.0),
                       child: Icon(
                         Icons.error_outline,
                         color: Colors.white,
@@ -360,7 +375,7 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
                       padding: const EdgeInsets.only(right: 15.0),
                       child: Text(
                         errorMessage,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontFamily: 'GE-SS-Two-Light',
                           fontSize: 14,
@@ -398,21 +413,21 @@ Future<void> sendOTP(String phoneNumber, String firstName, String lastName, Stri
             textAlign: TextAlign.right,
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: TextStyle(
+              hintStyle: const TextStyle(
                 fontFamily: 'GE-SS-Two-Light',
                 fontSize: 14,
                 color: Colors.white,
               ),
               border: InputBorder.none,
             ),
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
             cursorColor: Colors.white,
           ),
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
           Container(
             width: 313,
             height: 2.95,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFF60B092), Colors.white],
                 begin: Alignment.centerLeft,

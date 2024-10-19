@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 
 class SupportPage extends StatefulWidget {
-final String phoneNumber;
+  final String phoneNumber;
   final String userName;
 
-  SupportPage({required this.userName, required this.phoneNumber});
+  const SupportPage(
+      {super.key, required this.userName, required this.phoneNumber});
 
   @override
   _SupportPageState createState() => _SupportPageState();
 }
 
 class _SupportPageState extends State<SupportPage> {
-  Color _arrowColor = Color(0xFF3D3D3D); // Default arrow color
+  Color _arrowColor = const Color(0xFF3D3D3D); // Default arrow color
 
   void _onArrowTap() {
     setState(() {
       _arrowColor = Colors.grey; // Change color on press
     });
-    Future.delayed(Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
-        _arrowColor = Color(0xFF3D3D3D); // Reset color after a short delay
+        _arrowColor =
+            const Color(0xFF3D3D3D); // Reset color after a short delay
       });
       Navigator.pop(context); // Navigate back to settings page
     });
@@ -28,7 +30,7 @@ class _SupportPageState extends State<SupportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9), // Set background color
+      backgroundColor: const Color(0xFFF9F9F9), // Set background color
       body: Stack(
         children: [
           // Back Arrow
@@ -46,7 +48,7 @@ class _SupportPageState extends State<SupportPage> {
           ),
 
           // Title
-          Positioned(
+          const Positioned(
             top: 58,
             left: 142,
             child: Text(

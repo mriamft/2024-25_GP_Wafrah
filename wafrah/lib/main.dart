@@ -8,6 +8,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,6 +20,8 @@ class MyApp extends StatelessWidget {
 }
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -28,8 +32,8 @@ class _SplashScreenState extends State<SplashScreen> {
   final double circleSize = 40.0;
   final double startPositionOffset = 10.0;
 
-  Color circleColor = Color(0xFFD9D9D9);
-  Color loginTextColor = Color(0xFF2C8C68);
+  Color circleColor = const Color(0xFFD9D9D9);
+  Color loginTextColor = const Color(0xFF2C8C68);
   bool isCirclePressed = false;
   bool isLoginPressed = false;
 
@@ -57,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
             top: size.height * 0.4,
             left: 20,
             right: 20,
-            child: Column(
+            child: const Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
@@ -98,20 +102,20 @@ class _SplashScreenState extends State<SplashScreen> {
                   width: buttonWidth,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: Color(0xFF2C8C68),
+                    color: const Color(0xFF2C8C68),
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.5),
                         blurRadius: 10,
-                        offset: Offset(0, 5),
+                        offset: const Offset(0, 5),
                       ),
                     ],
                   ),
                   child: Center(
                     child: Opacity(
                       opacity: (1 - _dragValue).clamp(0.0, 1.0),
-                      child: Text(
+                      child: const Text(
                         'ابدأ',
                         style: TextStyle(
                           fontSize: 20,
@@ -140,8 +144,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                signup.SignUpPage(), 
+                            builder: (context) => signup.SignUpPage(),
                           ),
                         );
                       }
@@ -153,8 +156,8 @@ class _SplashScreenState extends State<SplashScreen> {
                         color: isCirclePressed ? Colors.grey : circleColor,
                         shape: BoxShape.circle,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 4.0),
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 4.0),
                         child: Icon(
                           Icons.arrow_back_ios,
                           color: Color(0xFF2C8C68),
@@ -169,7 +172,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   top: 17,
                   child: Opacity(
                     opacity: (1 - _dragValue).clamp(0.0, 1.0),
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_back_ios,
                       color: Colors.white,
                       size: 17,
@@ -204,7 +207,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   'لديك حساب؟',
                   style: TextStyle(

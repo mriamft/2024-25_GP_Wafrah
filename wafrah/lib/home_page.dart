@@ -7,7 +7,8 @@ import 'banks_page.dart';
 class HomePage extends StatefulWidget {
   final String userName; // Dynamic user name passed from SignUp or Login
   final String phoneNumber;
-  HomePage({required this.userName, required this.phoneNumber});
+  const HomePage(
+      {super.key, required this.userName, required this.phoneNumber});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -18,7 +19,8 @@ class _HomePageState extends State<HomePage>
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   int currentPage = 0; // Track the current dashboard
-  PageController _pageController = PageController(); // Controller for PageView
+  final PageController _pageController =
+      PageController(); // Controller for PageView
 
   bool _isCirclePressed = false; // Track if the circle button is pressed
 
@@ -28,13 +30,14 @@ class _HomePageState extends State<HomePage>
 
     // Initialize the animation controller
     _controller = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
       vsync: this,
     );
 
     // Define the animation for the green square image (from top to its final position y = -100)
     _offsetAnimation =
-        Tween<Offset>(begin: Offset(0, -1), end: Offset(0, 0)).animate(
+        Tween<Offset>(begin: const Offset(0, -1), end: const Offset(0, 0))
+            .animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
@@ -52,7 +55,7 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9),
+      backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
           // Green square animation
@@ -79,7 +82,7 @@ class _HomePageState extends State<HomePage>
                   child: RichText(
                     text: TextSpan(
                       children: [
-                        TextSpan(
+                        const TextSpan(
                           text: '!',
                           style: TextStyle(
                             color: Colors.white,
@@ -87,7 +90,7 @@ class _HomePageState extends State<HomePage>
                             fontFamily: 'GE-SS-Two-Light',
                           ),
                         ),
-                        TextSpan(
+                        const TextSpan(
                           text: 'أهلًا ',
                           style: TextStyle(
                             color: Colors.white,
@@ -97,7 +100,7 @@ class _HomePageState extends State<HomePage>
                         ),
                         TextSpan(
                           text: widget.userName, // Use dynamic user name here
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 40,
                             fontFamily: 'GE-SS-Two-Bold', // Bold user name
@@ -125,7 +128,7 @@ class _HomePageState extends State<HomePage>
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
                     blurRadius: 5,
-                    offset: Offset(0, 5),
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
@@ -149,7 +152,8 @@ class _HomePageState extends State<HomePage>
             top: 100,
             right: 30,
             child: IconButton(
-              icon: Icon(Icons.visibility_outlined, color: Color(0xFF9E9E9E)),
+              icon: const Icon(Icons.visibility_outlined,
+                  color: Color(0xFF9E9E9E)),
               iconSize: 31,
               onPressed: () {},
             ),
@@ -164,7 +168,7 @@ class _HomePageState extends State<HomePage>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 buildDot(0),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 buildDot(1),
               ],
             ),
@@ -183,21 +187,28 @@ class _HomePageState extends State<HomePage>
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2), // Shadow color
                     blurRadius: 10, // Shadow blur
-                    offset: Offset(0, -5), // Shadow position (above the bar)
+                    offset:
+                        const Offset(0, -5), // Shadow position (above the bar)
                   ),
                 ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0, onTap: () {
+                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
+                      onTap: () {
                     // Navigate to Settings Page and pass userName
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            SettingsPage(userName: widget.userName,phoneNumber: widget.phoneNumber), // Pass userName
-                        transitionDuration: Duration(seconds: 0), // Disable transition
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                            SettingsPage(
+                                userName: widget.userName,
+                                phoneNumber:
+                                    widget.phoneNumber), // Pass userName
+                        transitionDuration:
+                            const Duration(seconds: 0), // Disable transition
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return child; // No animation
                         },
                       ),
@@ -205,14 +216,20 @@ class _HomePageState extends State<HomePage>
                     );
                   }), // Outlined settings icon
 
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1, onTap: () {
+                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
+                      onTap: () {
                     // Navigate to Transactions Page and pass userName
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            TransactionsPage(userName: widget.userName, phoneNumber: widget.phoneNumber), // Pass userName
-                        transitionDuration: Duration(seconds: 0), // Disable transition
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                            TransactionsPage(
+                                userName: widget.userName,
+                                phoneNumber:
+                                    widget.phoneNumber), // Pass userName
+                        transitionDuration:
+                            const Duration(seconds: 0), // Disable transition
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return child; // No animation
                         },
                       ),
@@ -220,18 +237,25 @@ class _HomePageState extends State<HomePage>
                     );
                   }), // Transaction icon
 
-                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2, isSelected: true, onTap: () {
+                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
+                      isSelected: true, onTap: () {
                     // Do nothing for home page
                   }), // Outlined home icon
 
-                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3, onTap: () {
+                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
+                      onTap: () {
                     // Navigate to Saving Plan Page and pass userName
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            SavingPlanPage(userName: widget.userName, phoneNumber: widget.phoneNumber), // Pass userName
-                        transitionDuration: Duration(seconds: 0), // Disable transition
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                            SavingPlanPage(
+                                userName: widget.userName,
+                                phoneNumber:
+                                    widget.phoneNumber), // Pass userName
+                        transitionDuration:
+                            const Duration(seconds: 0), // Disable transition
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return child; // No animation
                         },
                       ),
@@ -262,10 +286,14 @@ class _HomePageState extends State<HomePage>
                 Navigator.of(context).pushAndRemoveUntil(
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        BanksPage(userName: widget.userName, phoneNumber: widget.phoneNumber,), // Pass userName
+                        BanksPage(
+                      userName: widget.userName,
+                      phoneNumber: widget.phoneNumber,
+                    ), // Pass userName
                     transitionDuration:
-                        Duration(seconds: 0), // Disable transition
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        const Duration(seconds: 0), // Disable transition
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
                       return child; // No animation
                     },
                   ),
@@ -274,7 +302,8 @@ class _HomePageState extends State<HomePage>
               },
               onTapCancel: () {
                 setState(() {
-                  _isCirclePressed = false; // Reset the state if tap is canceled
+                  _isCirclePressed =
+                      false; // Reset the state if tap is canceled
                 });
               },
               child: Stack(
@@ -284,7 +313,7 @@ class _HomePageState extends State<HomePage>
                   Container(
                     width: 92,
                     height: 90,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Color(0xFFF9F9F9),
                       shape: BoxShape.circle,
                     ),
@@ -296,14 +325,20 @@ class _HomePageState extends State<HomePage>
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: _isCirclePressed
-                            ? [Color(0xFF1A7A5E), Color(0xFF6FC3A0)] // Darker when pressed
-                            : [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
+                            ? [
+                                const Color(0xFF1A7A5E),
+                                const Color(0xFF6FC3A0)
+                              ] // Darker when pressed
+                            : [
+                                const Color(0xFF2C8C68),
+                                const Color(0xFF8FD9BD)
+                              ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.account_balance,
                       color: Colors.white,
                       size: 40,
@@ -324,7 +359,7 @@ class _HomePageState extends State<HomePage>
       width: 10, // Smaller width
       height: 10, // Smaller height
       decoration: BoxDecoration(
-        color: currentPage == pageIndex ? Color(0xFF2C8C68) : Colors.grey,
+        color: currentPage == pageIndex ? const Color(0xFF2C8C68) : Colors.grey,
         shape: BoxShape.circle,
       ),
     );
@@ -340,12 +375,12 @@ class _HomePageState extends State<HomePage>
         children: [
           Icon(
             icon,
-            color: Color(0xFF2C8C68), // Changed to #2C8C68
+            color: const Color(0xFF2C8C68), // Changed to #2C8C68
             size: 30, // Increased size for icons
           ),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFF2C8C68), // Changed to #2C8C68
               fontSize: 12, // Adjusted font size
               fontFamily: 'GE-SS-Two-Light', // Same font as the interface
@@ -357,7 +392,7 @@ class _HomePageState extends State<HomePage>
               child: Container(
                 width: 6,
                 height: 6,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFF2C8C68), // Current page indicator color
                   shape: BoxShape.circle,
                 ),
@@ -375,8 +410,8 @@ class _HomePageState extends State<HomePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 90), // Adjust height based on design
-          Text(
+          const SizedBox(height: 90), // Adjust height based on design
+          const Text(
             'مجموع أموالك',
             style: TextStyle(
               color: Colors.black,
@@ -384,8 +419,8 @@ class _HomePageState extends State<HomePage>
               fontFamily: 'GE-SS-Two-Light',
             ),
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 10),
+          const Text(
             'هذه الخاصية لم تتوفر\nحتى الآن', // Divided into two lines
             textAlign: TextAlign.center, // Centered text
             style: TextStyle(
@@ -394,12 +429,12 @@ class _HomePageState extends State<HomePage>
               fontFamily: 'GE-SS-Two-Bold',
             ),
           ),
-          SizedBox(height: 60),
+          const SizedBox(height: 60),
           // "تدفقك المالي لهذا الشهر" shifted more to the right
-          Align(
+          const Align(
             alignment: Alignment.centerRight,
             child: Padding(
-              padding: const EdgeInsets.only(right: 1), // Moved more to the right
+              padding: EdgeInsets.only(right: 1), // Moved more to the right
               child: Text(
                 'تدفقك المالي لهذا الشهر',
                 style: TextStyle(
@@ -410,22 +445,23 @@ class _HomePageState extends State<HomePage>
               ),
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           // #F6F6F6 rectangle with corner radius of 8
           Container(
             width: 327,
             height: 166,
             decoration: BoxDecoration(
-              color: Color(0xFFF6F6F6),
+              color: const Color(0xFFF6F6F6),
               borderRadius: BorderRadius.circular(8), // Rounded corners
             ),
-            child: Stack(
+            child: const Stack(
               children: [
                 Positioned(
                   left: 25,
                   top: -20,
                   child: Icon(
-                      Icons.keyboard_arrow_down_rounded, // Thinner and rounded "^" arrow
+                      Icons
+                          .keyboard_arrow_down_rounded, // Thinner and rounded "^" arrow
                       color: Color(0xFFC62C2C),
                       size: 90),
                 ),
@@ -433,7 +469,8 @@ class _HomePageState extends State<HomePage>
                   right: 30,
                   top: -20,
                   child: Icon(
-                      Icons.keyboard_arrow_up_rounded, // Thinner and rounded "^" arrow
+                      Icons
+                          .keyboard_arrow_up_rounded, // Thinner and rounded "^" arrow
                       color: Color(0xFF2C8C68),
                       size: 90),
                 ),
@@ -482,8 +519,8 @@ class _HomePageState extends State<HomePage>
 
   // Second Dashboard Layout
   Widget buildSecondDashboard() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

@@ -4,22 +4,24 @@ class ProfilePage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
 
-  ProfilePage({ required this.userName, required this.phoneNumber});
+  const ProfilePage(
+      {super.key, required this.userName, required this.phoneNumber});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Color _arrowColor = Color(0xFF3D3D3D); // Default arrow color
+  Color _arrowColor = const Color(0xFF3D3D3D); // Default arrow color
 
   void _onArrowTap() {
     setState(() {
       _arrowColor = Colors.grey; // Change color on press
     });
-    Future.delayed(Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
-        _arrowColor = Color(0xFF3D3D3D); // Reset color after a short delay
+        _arrowColor =
+            const Color(0xFF3D3D3D); // Reset color after a short delay
       });
       Navigator.pop(context); // Navigate back to settings page
     });
@@ -28,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9), // Set background color
+      backgroundColor: const Color(0xFFF9F9F9), // Set background color
       body: Stack(
         children: [
           // Back Arrow
@@ -46,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
 
           // Title
-          Positioned(
+          const Positioned(
             top: 58,
             left: 145,
             child: Text(

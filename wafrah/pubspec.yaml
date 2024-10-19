@@ -135,6 +135,7 @@ flutter:
     - assets/images/logo.png
     - assets/images/green_square.png
     - assets/images/Alrajhi.png
+    - assets/images/SAMA_logo.png
 
   # Fonts section
   fonts:

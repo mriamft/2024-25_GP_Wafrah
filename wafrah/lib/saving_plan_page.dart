@@ -8,12 +8,13 @@ class SavingPlanPage extends StatelessWidget {
   final String userName;
   final String phoneNumber;
 
-  SavingPlanPage({ required this.userName, required this.phoneNumber});
+  const SavingPlanPage(
+      {super.key, required this.userName, required this.phoneNumber});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9),
+      backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
           // Green square image
@@ -30,7 +31,7 @@ class SavingPlanPage extends StatelessWidget {
           ),
 
           // Main content area
-          Positioned(
+          const Positioned(
             top: 380,
             left: 19,
             right: 19,
@@ -60,32 +61,42 @@ class SavingPlanPage extends StatelessWidget {
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
                     blurRadius: 10,
-                    offset: Offset(0, -5),
+                    offset: const Offset(0, -5),
                   ),
                 ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0, onTap: () {
+                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
+                      onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsPage(userName: userName, phoneNumber: phoneNumber)),
+                      MaterialPageRoute(
+                          builder: (context) => SettingsPage(
+                              userName: userName, phoneNumber: phoneNumber)),
                     );
                   }),
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1, onTap: () {
+                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
+                      onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => TransactionsPage(userName: userName, phoneNumber: phoneNumber)),
+                      MaterialPageRoute(
+                          builder: (context) => TransactionsPage(
+                              userName: userName, phoneNumber: phoneNumber)),
                     );
                   }),
-                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2, onTap: () {
+                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
+                      onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage(userName: userName, phoneNumber: phoneNumber)),
+                      MaterialPageRoute(
+                          builder: (context) => HomePage(
+                              userName: userName, phoneNumber: phoneNumber)),
                     );
                   }),
-                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3, onTap: () {
+                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
+                      onTap: () {
                     // Already on Saving Plan page
                   }),
                 ],
@@ -104,7 +115,7 @@ class SavingPlanPage extends StatelessWidget {
                 Container(
                   width: 92,
                   height: 90,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Color(0xFFF9F9F9),
                     shape: BoxShape.circle,
                   ),
@@ -112,7 +123,7 @@ class SavingPlanPage extends StatelessWidget {
                 Container(
                   width: 80,
                   height: 80,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
                       begin: Alignment.topCenter,
@@ -121,7 +132,7 @@ class SavingPlanPage extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.account_balance,
                       color: Colors.white,
                       size: 40,
@@ -129,7 +140,9 @@ class SavingPlanPage extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => BanksPage(userName: userName, phoneNumber: phoneNumber)),
+                        MaterialPageRoute(
+                            builder: (context) => BanksPage(
+                                userName: userName, phoneNumber: phoneNumber)),
                       );
                     },
                   ),
@@ -142,7 +155,8 @@ class SavingPlanPage extends StatelessWidget {
     );
   }
 
-  Widget buildBottomNavItem(IconData icon, String label, int index, {required VoidCallback onTap}) {
+  Widget buildBottomNavItem(IconData icon, String label, int index,
+      {required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -150,12 +164,12 @@ class SavingPlanPage extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: Color(0xFF2C8C68),
+            color: const Color(0xFF2C8C68),
             size: 30,
           ),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFF2C8C68),
               fontSize: 12,
               fontFamily: 'GE-SS-Two-Light',

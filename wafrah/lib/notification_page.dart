@@ -3,23 +3,25 @@ import 'package:flutter/material.dart';
 class NotificationPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
-  
-  NotificationPage({ required this.userName, required this.phoneNumber});
+
+  const NotificationPage(
+      {super.key, required this.userName, required this.phoneNumber});
 
   @override
   _NotificationPageState createState() => _NotificationPageState();
 }
 
 class _NotificationPageState extends State<NotificationPage> {
-  Color _arrowColor = Color(0xFF3D3D3D); // Default arrow color
+  Color _arrowColor = const Color(0xFF3D3D3D); // Default arrow color
 
   void _onArrowTap() {
     setState(() {
       _arrowColor = Colors.grey; // Change color on press
     });
-    Future.delayed(Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
-        _arrowColor = Color(0xFF3D3D3D); // Reset color after a short delay
+        _arrowColor =
+            const Color(0xFF3D3D3D); // Reset color after a short delay
       });
       Navigator.pop(context); // Navigate back to settings page
     });
@@ -28,7 +30,7 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9), // Set background color
+      backgroundColor: const Color(0xFFF9F9F9), // Set background color
       body: Stack(
         children: [
           // Back Arrow
@@ -46,7 +48,7 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
 
           // Title
-          Positioned(
+          const Positioned(
             top: 58,
             left: 170,
             child: Text(
