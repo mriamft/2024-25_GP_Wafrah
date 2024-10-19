@@ -17,7 +17,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  String? _confirmationMessage;
+  bool _showErrorNotification = false;
+  String _errorMessage = '';
 
   void _onArrowTap() {
     setState(() {
@@ -31,21 +32,46 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     });
   }
 
+  // Method to validate password complexity
+  bool validatePassword(String password) {
+    final RegExp passwordRegExp = RegExp(
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$',
+    );
+    return passwordRegExp.hasMatch(password);
+  }
+
   Future<void> _resetPassword() async {
     final String currentPassword = _currentPasswordController.text;
     final String newPassword = _newPasswordController.text;
     final String confirmPassword = _confirmPasswordController.text;
 
+    if (newPassword.isEmpty || confirmPassword.isEmpty) {
+      setState(() {
+        _errorMessage = "يجب ملء جميع الحقول";
+        _showErrorNotification = true;
+      });
+      return;
+    }
+
+    if (!validatePassword(newPassword)) {
+      setState(() {
+        _errorMessage = 'رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص';
+        _showErrorNotification = true;
+      });
+      return;
+    }
+
     if (newPassword != confirmPassword) {
       setState(() {
-        _confirmationMessage = "كلمات المرور الجديدة غير متطابقة"; // Passwords do not match
+        _errorMessage = "كلمات المرور الجديدة غير متطابقة";
+        _showErrorNotification = true;
       });
       return;
     }
 
     try {
       final response = await http.post(
-        Uri.parse('https://534b-82-167-111-148.ngrok-free.app/reset-password'), // Change to your API endpoint
+        Uri.parse('https://edda-82-167-111-148.ngrok-free.app/reset-password'), // Change to your API endpoint
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -58,16 +84,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
       if (response.statusCode == 200) {
         setState(() {
-          _confirmationMessage = "تم تعديل كلمة المرور بنجاح"; // Password updated successfully
+          _errorMessage = "تم تعديل كلمة المرور بنجاح";
+          _showErrorNotification = true;
         });
       } else {
         setState(() {
-          _confirmationMessage = "فشل تعديل كلمة المرور"; // Failed to update password
+          _errorMessage = "فشل تعديل كلمة المرور";
+          _showErrorNotification = true;
         });
       }
     } catch (error) {
       setState(() {
-        _confirmationMessage = "خطأ في الاتصال بالخادم"; // Server connection error
+        _errorMessage = "خطأ في الاتصال بالخادم";
+        _showErrorNotification = true;
       });
     }
   }
@@ -124,6 +153,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 style: TextStyle(
                   fontFamily: 'GE-SS-Two-Light',
                 ),
+                obscureText: true, // Obscure text for password input
                 decoration: InputDecoration(
                   hintText: 'رمز المرور الحالي',
                   hintStyle: TextStyle(
@@ -151,6 +181,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               child: TextField(
                 controller: _newPasswordController,
                 textAlign: TextAlign.right,
+                obscureText: true, // Obscure text for password input
                 style: TextStyle(
                   fontFamily: 'GE-SS-Two-Light',
                 ),
@@ -181,6 +212,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               child: TextField(
                 controller: _confirmPasswordController,
                 textAlign: TextAlign.right,
+                obscureText: true, // Obscure text for password input
                 style: TextStyle(
                   fontFamily: 'GE-SS-Two-Light',
                 ),
@@ -264,15 +296,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             ),
           ),
 
-          // Confirmation Message
-          if (_confirmationMessage != null)
+          // Error/Confirmation Message
+          if (_showErrorNotification)
             Positioned(
               bottom: 100,
               left: (MediaQuery.of(context).size.width - 300) / 2,
               child: Text(
-                _confirmationMessage!,
+                _errorMessage,
                 style: TextStyle(
-                  color: Colors.green, // Change to your preferred color
+                  color: Colors.red, // Display error message in red
                   fontSize: 14,
                 ),
               ),
