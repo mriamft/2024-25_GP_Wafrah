@@ -5,13 +5,49 @@ import 'saving_plan_page.dart';
 import 'home_page.dart';
 
 class TransactionsPage extends StatelessWidget {
-  final String userName; // Pass userName from previous pages
+  final String userName;
   final String phoneNumber;
-  const TransactionsPage(
-      {super.key, required this.userName, required this.phoneNumber});
+  final List<Map<String, dynamic>> accounts; // Optional accounts
+
+  const TransactionsPage({
+    super.key,
+    required this.userName,
+    required this.phoneNumber,
+    this.accounts = const [], // Default to an empty list if no accounts are provided
+  });
+
+  // Function to extract and sort all transactions from connected accounts
+  List<Map<String, dynamic>> getAllTransactions() {
+    List<Map<String, dynamic>> allTransactions = [];
+
+    for (var account in accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        allTransactions.add(transaction);
+      }
+    }
+
+    // Sort transactions by date (most recent to oldest)
+    allTransactions.sort((a, b) {
+      String dateA = a['TransactionDateTime'] ?? '';
+      String dateB = b['TransactionDateTime'] ?? '';
+
+      DateTime dateTimeA = DateTime.tryParse(dateA) ?? DateTime.now();
+      DateTime dateTimeB = DateTime.tryParse(dateB) ?? DateTime.now();
+
+      // Sort in descending order, most recent first
+      return dateTimeB.compareTo(dateTimeA);
+    });
+
+    return allTransactions;
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Get all transactions sorted by date
+    List<Map<String, dynamic>> allTransactions = getAllTransactions();
+    
+
     return Scaffold(
       backgroundColor: Color(0xFFF9F9F9), // Background color
       body: Stack(
@@ -34,7 +70,7 @@ class TransactionsPage extends StatelessWidget {
             top: 185,
             right: 12,
             child: Text(
-              'العمليات منذ السبت 4 ابريل 2024',
+              'سجل المعاملات',
               style: TextStyle(
                 color: Color(0xFF3D3D3D),
                 fontSize: 16,
@@ -44,168 +80,30 @@ class TransactionsPage extends StatelessWidget {
             ),
           ),
 
-          // Date Text
+          // Transactions List or No Transactions Message
           Positioned(
-            top: 234,
-            right: 12,
-            child: Text(
-              'الجمعة 18 اكتوبر 2024',
-              style: TextStyle(
-                color: Color(0xFF3D3D3D),
-                fontSize: 13,
-                fontFamily:
-                    'GE-SS-Two-Light', // Ensure same font as the project
-              ),
-            ),
-          ),
-
-          // First Transaction Bar
-          Positioned(
-            top: 255,
+            top: 240,
+            left: 10,
             right: 10,
-            child: Container(
-              width: 338,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Color(0xFFD9D9D9),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  SizedBox(width: 4),
-                  Text(
-                    'ر.س',
-                    style: TextStyle(
-                      color: Color(0xFF5F5F5F),
-                      fontSize: 13,
-                      fontFamily:
-                          'GE-SS-Two-Light', // Ensure same font as the project
-                    ),
-                  ),
-                  SizedBox(width: 3), // Spacing
-                  Text(
-                    '25,000',
-                    style: TextStyle(
-                      color: Color(0xFF2C8C68),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily:
-                          'GE-SS-Two-Bold', // Ensure same font as the project
-                    ),
-                  ),
-                  Spacer(),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'الشركة السعودية للكهرباء',
-                        style: TextStyle(
-                          color: Color(0xFF3D3D3D),
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          fontFamily:
-                              'GE-SS-Two-Bold', // Ensure same font as the project
-                        ),
+            bottom: 90, // Added bottom padding to make space for the navigation bar
+            child: allTransactions.isEmpty
+                ? Center(
+                    child: Text(
+                      'لا يوجد لديك معاملات',
+                      style: TextStyle(
+                        color: Color(0xFF3D3D3D),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'GE-SS-Two-Bold',
                       ),
-                    ],
-                  ),
-                  SizedBox(width: 40), // Spacing
-                ],
-              ),
-            ),
-          ),
-
-          // Second Transaction Bar
-          Positioned(
-            top: 316,
-            right: 10,
-            child: Container(
-              width: 338,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Color(0xFFD9D9D9),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  SizedBox(width: 4),
-                  Text(
-                    'ر.س',
-                    style: TextStyle(
-                      color: Color(0xFF5F5F5F),
-                      fontSize: 13,
-                      fontFamily:
-                          'GE-SS-Two-Light', // Ensure same font as the project
                     ),
+                  )
+                : ListView.builder(  // Use ListView.builder for better scrolling with large datasets
+                    itemCount: allTransactions.length,
+                    itemBuilder: (context, index) {
+                      return _buildTransactionCard(allTransactions[index]);
+                    },
                   ),
-                  SizedBox(width: 3), // Spacing
-                  Text(
-                    '31',
-                    style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily:
-                          'GE-SS-Two-Bold', // Ensure same font as the project
-                    ),
-                  ),
-                  Spacer(),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'ماكدونالدز',
-                        style: TextStyle(
-                          color: Color(0xFF3D3D3D),
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          fontFamily:
-                              'GE-SS-Two-Bold', // Ensure same font as the project
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(width: 40), // Spacing
-                ],
-              ),
-            ),
-          ),
-          // First SAAMA Image
-          Positioned(
-            left: 315,
-            top: 265,
-            child: Image.asset(
-              'assets/images/SAMA_logo.png', // Ensure this is the correct image path
-              width: 30,
-              height: 30,
-            ),
-          ),
-
-          // Second SAMA Image
-          Positioned(
-            left: 315,
-            top: 326,
-            child: Image.asset(
-              'assets/images/SAMA_logo.png', // Ensure this is the correct image path
-              width: 30,
-              height: 30,
-            ),
-          ),
-
-          // Point under "سجل المعاملات"
-          Positioned(
-            right: 109, // Position x
-            top: 700, // Position y
-            child: Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: Color(0xFF2C8C68), // Point color
-                shape: BoxShape.circle,
-              ),
-            ),
           ),
 
           // Bottom Navigation Bar
@@ -234,7 +132,10 @@ class TransactionsPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SettingsPage(
-                              userName: userName, phoneNumber: phoneNumber)),
+                              userName: userName, 
+                              phoneNumber: phoneNumber,
+                              accounts: accounts,  // Pass accounts
+                          )),
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
@@ -247,7 +148,10 @@ class TransactionsPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => HomePage(
-                              userName: userName, phoneNumber: phoneNumber)),
+                              userName: userName, 
+                              phoneNumber: phoneNumber,
+                              accounts: accounts,  // Pass accounts
+                          )),
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -256,7 +160,10 @@ class TransactionsPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SavingPlanPage(
-                              userName: userName, phoneNumber: phoneNumber)),
+                              userName: userName, 
+                              phoneNumber: phoneNumber,
+                              accounts: accounts,  // Pass accounts
+                          )),
                     );
                   }),
                 ],
@@ -301,14 +208,126 @@ class TransactionsPage extends StatelessWidget {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => BanksPage(
-                                userName: userName, phoneNumber: phoneNumber)),
+                          builder: (context) => BanksPage(
+                            userName: userName,
+                            phoneNumber: phoneNumber,
+                            accounts: accounts,  // Pass the accounts data here
+                          ),
+                        ),
                       );
                     },
                   ),
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionCard(Map<String, dynamic> transaction) {
+    // Extract the necessary data
+    String dateTime = transaction['TransactionDateTime'] ?? '';
+    String date = dateTime.split('T').first; // Only get the date part
+
+    String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف'; // Remove KSAOB.
+
+    // Transaction amount
+    String amount = transaction['Amount']?['Amount'] ?? '0.00';
+
+    // Translate transaction subtype to Arabic
+    Map<String, String> transactionTypeTranslations = {
+      'MoneyTransfer': 'تحويل مالي',
+      'WithdrawalReversal': 'سحب عكسي',
+      'Withdrawal': 'سحب مبلغ',
+      'Deposit': 'إيداع',
+      'NotApplicable': 'غير محدد',
+      'Purchase': 'شراء بضاعة',
+      'Refund': 'إعادة مبلغ',
+      'DepositReversal': 'إيداع عكسي',
+      'Reversal': 'عملية عكسية',
+    };
+    String translatedSubtype = transactionTypeTranslations[subtype] ?? subtype;
+
+    // Determine the color based on the translated subtype
+    Color amountColor;
+    if (translatedSubtype == 'تحويل مالي' ||
+        translatedSubtype == 'سحب مبلغ' ||
+        translatedSubtype == 'شراء بضاعة' ||
+        translatedSubtype == 'إيداع عكسي') {
+      amountColor = Colors.red; // Red color for these transaction types
+    } else if (translatedSubtype == 'إيداع' ||
+        translatedSubtype == 'سحب عكسي' ||
+        translatedSubtype == 'إعادة مبلغ') {
+      amountColor = Colors.green; // Green color for these transaction types
+    } else if (translatedSubtype == 'عملية عكسية' ||
+        translatedSubtype == 'غير محدد') {
+      amountColor = Colors.black; // Black color for these transaction types
+    } else {
+      amountColor = Color(0xFF3D3D3D); // Default color (same as used for other texts)
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: Color(0xFFD9D9D9),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'التاريخ: $date',
+                  style: TextStyle(
+                    color: Color(0xFF3D3D3D),
+                    fontSize: 14,
+                    fontFamily: 'GE-SS-Two-Bold',
+                  ),
+                ),
+                Text(
+                  'نوع العملية: $translatedSubtype', // Translated transaction subtype
+                  style: TextStyle(
+                    color: Color(0xFF3D3D3D),
+                    fontSize: 14,
+                    fontFamily: 'GE-SS-Two-Light',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 10),
+          Column(
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'ر.س',
+                    style: TextStyle(
+                      color: amountColor, // Dynamically set the color
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'GE-SS-Two-Bold',
+                    ),
+                  ),
+                  SizedBox(width: 4), // Add a small space between "ر.س" and the amount
+                  Text(
+                    amount,
+                    style: TextStyle(
+                      color: amountColor, // Dynamically set the color
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'GE-SS-Two-Bold',
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

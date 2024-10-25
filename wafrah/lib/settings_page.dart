@@ -11,9 +11,14 @@ import 'banks_page.dart';
 class SettingsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
+  final List<Map<String, dynamic>> accounts; // Add accounts list
 
-  const SettingsPage(
-      {super.key, required this.userName, required this.phoneNumber});
+  const SettingsPage({
+    super.key,
+    required this.userName,
+    required this.phoneNumber,
+    this.accounts = const [], // Default to an empty list if not passed
+  });
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -187,7 +192,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(SettingsPage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber)), // Pass userName
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts)), // Pass accounts
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
@@ -196,7 +202,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(TransactionsPage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber)), // Pass userName
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts)), // Pass accounts
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
@@ -205,7 +212,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(HomePage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber)), // Pass userName
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts)), // Pass accounts
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -214,7 +222,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(SavingPlanPage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber)), // Pass userName
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts)), // Pass accounts
                     );
                   }),
                 ],
@@ -565,12 +574,13 @@ class _SettingsPageState extends State<SettingsPage> {
                       size: 40,
                     ),
                     onPressed: () {
-                      // Navigate to Banks Page without transition and pass userName
+                      // Navigate to Banks Page without transition and pass accounts
                       Navigator.pushReplacement(
                         context,
                         _createNoTransitionRoute(BanksPage(
                             userName: widget.userName,
-                            phoneNumber: widget.phoneNumber)), // Pass userName
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts)), // Pass accounts
                       );
                     },
                   ),

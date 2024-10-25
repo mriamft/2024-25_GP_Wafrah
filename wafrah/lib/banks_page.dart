@@ -8,9 +8,127 @@ import 'saving_plan_page.dart'; // Import the saving plan page
 class BanksPage extends StatelessWidget {
   final String userName; // Pass userName from previous pages
   final String phoneNumber;
+  final List<Map<String, dynamic>> accounts; // Optional account details from AccLinkPage
 
-  const BanksPage(
-      {super.key, required this.userName, required this.phoneNumber});
+  const BanksPage({
+    super.key,
+    required this.userName,
+    required this.phoneNumber,
+    this.accounts = const [], // Default to an empty list if not passed
+  });
+
+  // Method to build account card
+  Widget _buildAccountCard(Map<String, dynamic> account) {
+    Map<String, String> accountTypeTranslations = {
+      'CurrentAccount': 'الحساب الجاري',
+      'SavingsAccount': 'حساب التوفير',
+      'CheckingAccount': 'حساب الشيكات',
+      'CreditAccount': 'حساب الائتمان',
+      // Add more translations as needed
+    };
+
+    String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
+    String translatedAccountSubType = accountTypeTranslations[accountSubType] ?? accountSubType;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      width: 340,
+      height: 50,
+      decoration: BoxDecoration(
+        color: Color(0xFFD9D9D9),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end, // Align to the right
+        children: [
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end, // Align text and currency to the right
+              children: [
+                Text(
+                  'ر.س', // Place the currency on the left
+                  style: TextStyle(
+                    color: Color(0xFF5F5F5F), // Use a lighter grey for the currency symbol
+                    fontSize: 16, // Smaller font size for the currency
+                    fontFamily: 'GE-SS-Two-Light', // Ensure the same font as the project
+                  ),
+                ),
+                SizedBox(width: 5), // Add some space between currency and balance
+                Text(
+                  account['Balance'] ?? '0', // This can later be dynamic if needed
+                  style: TextStyle(
+                    color: Color(0xFF313131),
+                    fontSize: 20, // Smaller font size for the balance
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'GE-SS-Two-Bold', // Ensure the same font as the project
+                  ),
+                  textAlign: TextAlign.right, // Align the text to the right
+                  overflow: TextOverflow.ellipsis, // Handle long text
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 10), // Adjust spacing between elements
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 20), // Adjust padding for layout
+                child: Text(
+                  translatedAccountSubType, // Use the translated account subtype
+                  style: TextStyle(
+                    color: Color(0xFF3D3D3D),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'GE-SS-Two-Bold', // Ensure the same font as the project
+                  ),
+                  overflow: TextOverflow.ellipsis, // Handle overflow in case of long text
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 20), // Adjust padding for layout
+                child: Row(
+                  mainAxisSize: MainAxisSize.min, // Make row shrink to content
+                  children: [
+                    Text(
+                      account['IBAN'] ?? 'رقم الايبان', // Dynamically display the IBAN
+                      style: TextStyle(
+                        color: Color(0xFF5F5F5F),
+                        fontSize: 13,
+                        fontFamily: 'GE-SS-Two-Light', // Ensure the same font as the project
+                      ),
+                      overflow: TextOverflow.ellipsis, // Handle overflow for long IBANs
+                    ),
+                    SizedBox(width: 5), // Add space between IBAN and label
+                    Text(
+                      'رقم الآيبان', // Label for IBAN
+                      style: TextStyle(
+                        color: Color(0xFF3D3D3D),
+                        fontSize: 13,
+                        fontFamily: 'GE-SS-Two-Bold', // Same font as the project
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(width: 10), // Space between text and logo
+          // SAMA Logo
+          Padding(
+            padding: const EdgeInsets.only(right: 10), // Adjust padding for layout
+            child: Image.asset(
+              'assets/images/SAMA_logo.png', // Path to SAMA logo
+              width: 30, // Set logo width
+              height: 30, // Set logo height
+              fit: BoxFit.contain, // Fit the logo within the box
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,253 +149,111 @@ class BanksPage extends StatelessWidget {
             ),
           ),
 
-          // Title
+          // Title and + Button
           Positioned(
             top: 202,
-            left: 210,
-            child: Text(
-              'الحسابات البنكية',
-              style: TextStyle(
-                color: Color(0xFF3D3D3D),
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'GE-SS-Two-Bold', // Ensure same font as the project
+            left: 12, // Left aligned the + button
+            right: 12,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Aligned elements
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.add_circle,
+                    color: Color(0xFF3D3D3D), // Dark grey color
+                    size: 30,
+                  ),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AccLinkPage(
+                          userName: userName,
+                          phoneNumber: phoneNumber,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                Text(
+                  'الحسابات البنكية',
+                  style: TextStyle(
+                    color: Color(0xFF3D3D3D),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'GE-SS-Two-Bold', // Ensure same font as the project
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Changing and Unlinking Accounts Button
+          Positioned(
+            top: 240,
+            left: 12, // Aligned to the left under the plus button
+            child: Align(
+              alignment: Alignment.centerLeft, // Align the button to the left
+              child: OutlinedButton(
+                onPressed: () {
+                  // Navigate to AccLinkPage when button is clicked
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AccLinkPage(
+                        userName: userName,
+                        phoneNumber: phoneNumber,
+                      ),
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  side: BorderSide(color: Color(0xFF3D3D3D)),
+                ),
+                child: Text(
+                  'تغيير وإزالة ربط الحسابات',
+                  style: TextStyle(
+                    color: Color(0xFF3D3D3D),
+                    fontSize: 14,
+                    fontFamily: 'GE-SS-Two-Light', // Ensure same font as the project
+                  ),
+                ),
               ),
             ),
           ),
 
-          // Plus Icon for adding bank account
+          // Dynamically display accounts or a message if no accounts
           Positioned(
-            top: 200,
-            left: 26,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AccLinkPage()), // Navigate to account link page
-                );
-              },
-              child: Icon(
-                Icons.add,
-                color: Color(0xFF313131),
-                size: 30,
-              ),
-            ),
-          ),
-
-          // Bar for the first bank account
-          Positioned(
-            top: 258,
+            top: 300,
             left: 12,
-            child: Container(
-              width: 340,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Color(0xFFD9D9D9),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end, // Align to the right
-                children: [
-                  Container(
-                    width: 65,
-                    height: 17,
-                    decoration: BoxDecoration(
-                      color: Color(0xFFD9D9D9),
-                      border: Border.all(color: Color(0xFFDD2C35), width: 1),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'إزالة الربط',
-                        style: TextStyle(
-                          color: Color(0xFF313131),
-                          fontSize: 8,
-                          fontFamily:
-                              'GE-SS-Two-Light', // Ensure same font as the project
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 46), // Space between elements
-                  Text(
-                    'ر.س',
-                    style: TextStyle(
-                      color: Color(0xFF5F5F5F),
-                      fontSize: 13,
-                      fontFamily:
-                          'GE-SS-Two-Light', // Ensure same font as the project
-                    ),
-                  ),
-                  SizedBox(width: 3), // Adjusted space
-                  Text(
-                    '60,000',
-                    style: TextStyle(
-                      color: Color(0xFF313131),
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      fontFamily:
-                          'GE-SS-Two-Bold', // Ensure same font as the project
-                    ),
-                  ),
-                  SizedBox(width: 40), // Space between elements
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(right: 40), // Right padding
-                        child: Text(
-                          'بزنس',
-                          style: TextStyle(
-                            color: Color(0xFF3D3D3D),
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            fontFamily:
-                                'GE-SS-Two-Bold', // Ensure same font as the project
+            right: 12,
+            child: SingleChildScrollView(
+              child: Column(
+                children: accounts.isNotEmpty
+                    ? accounts.map((account) {
+                        return _buildAccountCard(account);
+                      }).toList() // Convert the Iterable to List<Widget>
+                    : [
+                        Center(
+                          child: Text(
+                            'لم تقم بإضافة حساباتك البنكية',
+                            style: TextStyle(
+                              color: Color(0xFF3D3D3D),
+                              fontSize: 16,
+                              fontFamily: 'GE-SS-Two-Light', // Ensure same font as the project
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(right: 40), // Right padding
-                        child: Text(
-                          'رقم الايبان',
-                          style: TextStyle(
-                            color: Color(0xFF5F5F5F),
-                            fontSize: 13,
-                            fontFamily:
-                                'GE-SS-Two-Light', // Ensure same font as the project
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
               ),
             ),
           ),
 
-          // Bar for the second bank account
-          Positioned(
-            top: 331,
-            left: 12,
-            child: Container(
-              width: 340,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Color(0xFFD9D9D9),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end, // Align to the right
-                children: [
-                  Container(
-                    width: 65,
-                    height: 17,
-                    decoration: BoxDecoration(
-                      color: Color(0xFFD9D9D9),
-                      border: Border.all(color: Color(0xFFDD2C35), width: 1),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'إزالة الربط',
-                        style: TextStyle(
-                          color: Color(0xFF313131),
-                          fontSize: 8,
-                          fontFamily:
-                              'GE-SS-Two-Light', // Ensure same font as the project
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 42), // Space between elements
-                  Text(
-                    'ر.س',
-                    style: TextStyle(
-                      color: Color(0xFF5F5F5F),
-                      fontSize: 13,
-                      fontFamily:
-                          'GE-SS-Two-Light', // Ensure same font as the project
-                    ),
-                  ),
-                  SizedBox(width: 3), // Adjusted space
-                  Text(
-                    '30,000',
-                    style: TextStyle(
-                      color: Color(0xFF313131),
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      fontFamily:
-                          'GE-SS-Two-Bold', // Ensure same font as the project
-                    ),
-                  ),
-                  SizedBox(width: 40), // Space between elements
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(right: 40), // Right padding
-                        child: Text(
-                          'فورين',
-                          style: TextStyle(
-                            color: Color(0xFF3D3D3D),
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            fontFamily:
-                                'GE-SS-Two-Bold', // Ensure same font as the project
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(right: 40), // Right padding
-                        child: Text(
-                          'رقم الايبان',
-                          style: TextStyle(
-                            color: Color(0xFF5F5F5F),
-                            fontSize: 13,
-                            fontFamily:
-                                'GE-SS-Two-Light', // Ensure same font as the project
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // First SAAMA Image
-          Positioned(
-            left: 317,
-            top: 269,
-            child: Image.asset(
-              'assets/images/SAMA_logo.png', // Ensure this is the correct image path
-              width: 30,
-              height: 30,
-            ),
-          ),
-
-          // Second SAMA Image
-          Positioned(
-            left: 317,
-            top: 341,
-            child: Image.asset(
-              'assets/images/SAMA_logo.png', // Ensure this is the correct image path
-              width: 30,
-              height: 30,
-            ),
-          ),
-
-          // Bottom Navigation Bar
+          // Bottom Navigation Bar and other UI elements...
           Positioned(
             bottom: 0,
             left: 0,
@@ -300,110 +276,52 @@ class BanksPage extends StatelessWidget {
                   buildBottomNavItem(Icons.settings_outlined, "إعدادات", () {
                     Navigator.pushReplacement(
                       context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            SettingsPage(
-                                userName: userName, phoneNumber: phoneNumber),
-                        transitionDuration: Duration.zero,
-                        reverseTransitionDuration: Duration.zero,
+                      MaterialPageRoute(
+                        builder: (context) => SettingsPage(
+                          userName: userName,
+                          phoneNumber: phoneNumber,
+                          accounts: accounts, // Ensure accounts are passed here
+                        ),
                       ),
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", () {
                     Navigator.pushReplacement(
                       context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            TransactionsPage(
-                                userName: userName, phoneNumber: phoneNumber),
-                        transitionDuration: Duration.zero,
-                        reverseTransitionDuration: Duration.zero,
+                      MaterialPageRoute(
+                        builder: (context) => TransactionsPage(
+                          userName: userName,
+                          phoneNumber: phoneNumber,
+                          accounts: accounts, // Ensure accounts are passed here
+                        ),
                       ),
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", () {
                     Navigator.pushReplacement(
                       context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            HomePage(
-                                userName: userName, phoneNumber: phoneNumber),
-                        transitionDuration: Duration.zero,
-                        reverseTransitionDuration: Duration.zero,
+                      MaterialPageRoute(
+                        builder: (context) => HomePage(
+                          userName: userName,
+                          phoneNumber: phoneNumber,
+                          accounts: accounts, // Ensure accounts are passed here
+                        ),
                       ),
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", () {
                     Navigator.pushReplacement(
                       context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            SavingPlanPage(
-                                userName: userName, phoneNumber: phoneNumber),
-                        transitionDuration: Duration.zero,
-                        reverseTransitionDuration: Duration.zero,
+                      MaterialPageRoute(
+                        builder: (context) => SavingPlanPage(
+                          userName: userName,
+                          phoneNumber: phoneNumber,
+                          accounts: accounts, // Ensure accounts are passed here
+                        ),
                       ),
                     );
                   }),
                 ],
-              ),
-            ),
-          ),
-
-          // Circular Button above the Navigation Bar
-          Positioned(
-            bottom: 44,
-            left: 0,
-            right: 0,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // #F9F9F9 circle without shadow
-                Container(
-                  width: 92,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF9F9F9),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                // Gradient green circle
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.account_balance,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                    onPressed: () {
-                      // No navigation needed here since we are already on BanksPage
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Point under the gradient circle
-          Positioned(
-            left: 180,
-            top: 740,
-            child: Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: Color(0xFF2C8C68),
-                shape: BoxShape.circle,
               ),
             ),
           ),

@@ -7,21 +7,24 @@ import 'banks_page.dart';
 class HomePage extends StatefulWidget {
   final String userName; // Dynamic user name passed from SignUp or Login
   final String phoneNumber;
-  const HomePage(
-      {super.key, required this.userName, required this.phoneNumber});
+  final List<Map<String, dynamic>> accounts; // Add accounts parameter
+
+  const HomePage({
+    super.key,
+    required this.userName,
+    required this.phoneNumber,
+    this.accounts = const [], // Default to empty list if not passed
+  });
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   int currentPage = 0; // Track the current dashboard
-  final PageController _pageController =
-      PageController(); // Controller for PageView
-
+  final PageController _pageController = PageController(); // Controller for PageView
   bool _isCirclePressed = false; // Track if the circle button is pressed
 
   @override
@@ -187,24 +190,24 @@ class _HomePageState extends State<HomePage>
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2), // Shadow color
                     blurRadius: 10, // Shadow blur
-                    offset:
-                        const Offset(0, -5), // Shadow position (above the bar)
+                    offset: const Offset(0, -5), // Shadow position (above the bar)
                   ),
                 ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
+                  
                   buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
                       onTap: () {
-                    // Navigate to Settings Page and pass userName
+                    // Navigate to Settings Page and pass userName and accounts
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             SettingsPage(
                                 userName: widget.userName,
-                                phoneNumber:
-                                    widget.phoneNumber), // Pass userName
+                                phoneNumber: widget.phoneNumber,
+                                accounts: widget.accounts), // Pass userName and accounts
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -218,14 +221,14 @@ class _HomePageState extends State<HomePage>
 
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
                       onTap: () {
-                    // Navigate to Transactions Page and pass userName
+                    // Navigate to Transactions Page and pass userName and accounts
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             TransactionsPage(
                                 userName: widget.userName,
-                                phoneNumber:
-                                    widget.phoneNumber), // Pass userName
+                                phoneNumber: widget.phoneNumber,
+                                accounts: widget.accounts), // Pass userName and accounts
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -244,14 +247,14 @@ class _HomePageState extends State<HomePage>
 
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
                       onTap: () {
-                    // Navigate to Saving Plan Page and pass userName
+                    // Navigate to Saving Plan Page and pass userName and accounts
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             SavingPlanPage(
                                 userName: widget.userName,
-                                phoneNumber:
-                                    widget.phoneNumber), // Pass userName
+                                phoneNumber: widget.phoneNumber,
+                                accounts: widget.accounts), // Pass userName and accounts
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -282,18 +285,17 @@ class _HomePageState extends State<HomePage>
                 setState(() {
                   _isCirclePressed = false; // Reset the state after press
                 });
-                // Navigate to Banks Page and pass userName
+                // Navigate to Banks Page and pass userName and accounts
                 Navigator.of(context).pushAndRemoveUntil(
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
                         BanksPage(
                       userName: widget.userName,
                       phoneNumber: widget.phoneNumber,
+                      accounts: widget.accounts, // Pass accounts
                     ), // Pass userName
-                    transitionDuration:
-                        const Duration(seconds: 0), // Disable transition
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
+                    transitionDuration: const Duration(seconds: 0), // Disable transition
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
                       return child; // No animation
                     },
                   ),
@@ -302,8 +304,7 @@ class _HomePageState extends State<HomePage>
               },
               onTapCancel: () {
                 setState(() {
-                  _isCirclePressed =
-                      false; // Reset the state if tap is canceled
+                  _isCirclePressed = false; // Reset the state if tap is canceled
                 });
               },
               child: Stack(
@@ -325,14 +326,8 @@ class _HomePageState extends State<HomePage>
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: _isCirclePressed
-                            ? [
-                                const Color(0xFF1A7A5E),
-                                const Color(0xFF6FC3A0)
-                              ] // Darker when pressed
-                            : [
-                                const Color(0xFF2C8C68),
-                                const Color(0xFF8FD9BD)
-                              ],
+                            ? [const Color(0xFF1A7A5E), const Color(0xFF6FC3A0)]
+                            : [const Color(0xFF2C8C68), const Color(0xFF8FD9BD)],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
@@ -460,8 +455,7 @@ class _HomePageState extends State<HomePage>
                   left: 25,
                   top: -20,
                   child: Icon(
-                      Icons
-                          .keyboard_arrow_down_rounded, // Thinner and rounded "^" arrow
+                      Icons.keyboard_arrow_down_rounded, // Thinner and rounded "^" arrow
                       color: Color(0xFFC62C2C),
                       size: 90),
                 ),
@@ -469,8 +463,7 @@ class _HomePageState extends State<HomePage>
                   right: 30,
                   top: -20,
                   child: Icon(
-                      Icons
-                          .keyboard_arrow_up_rounded, // Thinner and rounded "^" arrow
+                      Icons.keyboard_arrow_up_rounded, // Thinner and rounded "^" arrow
                       color: Color(0xFF2C8C68),
                       size: 90),
                 ),

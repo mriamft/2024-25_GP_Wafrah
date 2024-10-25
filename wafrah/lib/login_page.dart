@@ -54,7 +54,7 @@ Future<void> handleLogin() async {
 
   try {
     // Send request to the server to validate login
-    final url = Uri.parse('https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/login');
+    final url = Uri.parse('https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/login');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -86,7 +86,7 @@ Future<void> handleLogin() async {
 
 // Method to send OTP to the user and navigate to OTPPage
 Future<void> sendOTP(String phoneNumber, String password, String fullName) async {
-  final url = Uri.parse('https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp');
+  final url = Uri.parse('https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/send-otp');
   final response = await http.post(
     url,
     headers: {"Content-Type": "application/json"},

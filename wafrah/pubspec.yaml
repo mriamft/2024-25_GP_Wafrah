@@ -120,6 +120,13 @@ dependencies:
   cupertino_icons: ^1.0.8
   crypto: ^3.0.5
   http: ^1.2.2
+  twilio_flutter: ^0.9.0
+  uuid: ^3.0.4
+  url_launcher: ^6.0.20
+  android_intent_plus: ^5.2.0
+  webview_flutter: ^4.0.0
+  uni_links: ^0.5.1
+  flutter_dotenv: ^5.0.2
 
 dev_dependencies:
   flutter_test:
@@ -136,6 +143,10 @@ flutter:
     - assets/images/green_square.png
     - assets/images/Alrajhi.png
     - assets/images/SAMA_logo.png
+    - assets/certs/transport-cert-Wafrah-SoftwareStatement.pem
+    - assets/certs/transport-key-Wafrah-SoftwareStatement.key
+    - assets/certs/signin-key-Wafrah-SoftwareStatement.key
+    
 
   # Fonts section
   fonts:

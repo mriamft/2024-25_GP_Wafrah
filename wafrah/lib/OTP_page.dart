@@ -79,7 +79,7 @@ Future<void> verifyOTP() async {
     return;
   }
 
-  final url = Uri.parse('https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/verify-otp');
+  final url = Uri.parse('https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/verify-otp');
   final response = await http.post(
     url,
     headers: {"Content-Type": "application/json"},
@@ -123,7 +123,7 @@ void _showSuccessSnackBar(String message) {
 // Add user to the database only if it's a sign-up process
 Future<void> addUserToDatabase() async {
   final url = Uri.parse(
-      'https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/adduser'); // Replace with your backend URL
+      'https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/adduser'); // Replace with your backend URL
   final response = await http.post(
     url,
     headers: {"Content-Type": "application/json"},
@@ -336,7 +336,7 @@ Future<void> addUserToDatabase() async {
   Future<void> resendOTP() async {
     if (canResend) {
       final url = Uri.parse(
-          'https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/send-otp'); // Replace with your backend URL
+          'https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/send-otp'); // Replace with your backend URL
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

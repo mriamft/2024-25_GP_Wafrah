@@ -77,7 +77,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     try {
       final response = await http.post(
         Uri.parse(
-            'https://edda-82-167-111-148.ngrok-free.app/reset-password'), // Change to your API endpoint
+            'https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/reset-password'), // Change to your API endpoint
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

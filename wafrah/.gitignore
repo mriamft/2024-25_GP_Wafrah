@@ -10,6 +10,8 @@
 .svn/
 migrate_working_dir/
 .env
+assets/certs/
+lib/config.dart
 
 
 # IntelliJ related

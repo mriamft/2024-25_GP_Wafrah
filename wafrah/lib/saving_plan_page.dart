@@ -7,9 +7,14 @@ import 'banks_page.dart';
 class SavingPlanPage extends StatelessWidget {
   final String userName;
   final String phoneNumber;
+  final List<Map<String, dynamic>> accounts; // Add accounts parameter
 
-  const SavingPlanPage(
-      {super.key, required this.userName, required this.phoneNumber});
+  const SavingPlanPage({
+    super.key,
+    required this.userName,
+    required this.phoneNumber,
+    this.accounts = const [], // Default to an empty list if not passed
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +79,9 @@ class SavingPlanPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SettingsPage(
-                              userName: userName, phoneNumber: phoneNumber)),
+                              userName: userName,
+                              phoneNumber: phoneNumber,
+                              accounts: accounts)), // Pass accounts here
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
@@ -83,7 +90,9 @@ class SavingPlanPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => TransactionsPage(
-                              userName: userName, phoneNumber: phoneNumber)),
+                              userName: userName,
+                              phoneNumber: phoneNumber,
+                              accounts: accounts)), // Pass accounts here
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
@@ -92,7 +101,9 @@ class SavingPlanPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => HomePage(
-                              userName: userName, phoneNumber: phoneNumber)),
+                              userName: userName,
+                              phoneNumber: phoneNumber,
+                              accounts: accounts)), // Pass accounts here
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -142,7 +153,9 @@ class SavingPlanPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) => BanksPage(
-                                userName: userName, phoneNumber: phoneNumber)),
+                                userName: userName,
+                                phoneNumber: phoneNumber,
+                                accounts: accounts)), // Pass accounts here
                       );
                     },
                   ),

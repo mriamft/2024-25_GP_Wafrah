@@ -1,23 +1,226 @@
 import 'package:flutter/material.dart';
+import 'api_service.dart'; // Ensure the ApiService is imported
+import 'package:url_launcher/url_launcher.dart'; // Import for URL launching
+import 'package:uni_links/uni_links.dart';
+import 'dart:async';
+import 'banks_page.dart'; // Import the BanksPage file
 
 class AccLinkPage extends StatefulWidget {
+  final String userName; // Accept userName from previous page
+  final String phoneNumber; // Accept phoneNumber from previous page
+  
+  const AccLinkPage({required this.userName, required this.phoneNumber}); // Constructor
+
   @override
   _AccLinkPageState createState() => _AccLinkPageState();
 }
 
 class _AccLinkPageState extends State<AccLinkPage> {
   Color _arrowColor = Color(0xFF3D3D3D); // Default arrow color
+  final ApiService _apiService = ApiService();  // Initialize ApiService
+  String _accessToken = '';
+  String _authorizationCode = '';
+  String _finalAccessToken = '';
+  List<Map<String, dynamic>> _accounts = []; // List to store retrieved accounts
+  StreamSubscription? _sub; // For uni_links
 
-  void _onArrowTap() {
-    setState(() {
-      _arrowColor = Colors.grey; // Change color on press
+  @override
+  void initState() {
+    super.initState();
+    _initUniLinks(); // Initialize uni_links listener for deep links
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  // UniLinks Initialization
+  Future<void> _initUniLinks() async {
+    _sub = linkStream.listen((String? link) {
+      if (link != null) {
+        Uri uri = Uri.parse(link);
+        String? code = uri.queryParameters['code']; // Extract the authorization code
+        if (code != null) {
+          setState(() {
+            _authorizationCode = code;
+          });
+          _exchangeAuthorizationCode(); // Step 7: Proceed to exchange the authorization code
+        }
+      }
+    }, onError: (err) {
+      _showErrorDialog('Error handling deep link: $err');
     });
-    Future.delayed(Duration(milliseconds: 100), () {
+  }
+
+  // Main function to handle all steps in order (1 to 9)
+  void _startApiProcess() async {
+    try {
+      // Step 1: Get Well-Known Endpoint
+      await _apiService.getWellKnownEndpoint();
+
+      // Step 2: Get Access Token
+      String accessToken = await _apiService.getAccessToken();
       setState(() {
-        _arrowColor = Color(0xFF3D3D3D); // Reset color after a short delay
+        _accessToken = accessToken;
       });
-      Navigator.pop(context); // Navigate back to settings page
-    });
+
+      // Step 3: Create Account Access Consent
+      await _apiService.createConsent(_accessToken);
+
+      // Step 4: Create JWT for PAR
+      String jwt = await _apiService.createJwt();
+
+      // Step 5: POST to PAR
+      String requestUri = await _apiService.postToPAR(jwt);
+
+      // Step 6: Compute Authorization Code URL and Launch Browser
+      String authorizationUrl = await _apiService.computeAuthorizationCodeUrl();
+      await launch(authorizationUrl, forceSafariVC: false, forceWebView: false);
+
+    } catch (e) {
+      _showErrorDialog('Error during API process: $e');
+    }
+  }
+
+  // Step 7: Exchange Authorization Code for Access Token
+  void _exchangeAuthorizationCode() async {
+    try {
+      if (_authorizationCode.isEmpty) {
+        _showErrorDialog('Error: Authorization code is required.');
+        return;
+      }
+
+      String token = await _apiService.exchangeCodeForAccessToken(_authorizationCode);
+      setState(() {
+        _finalAccessToken = token;
+      });
+
+      // Step: Get Account Details (Before fetching transactions)
+      await _getAccountDetails(); // Fetch account details and store them
+
+      // Step 8: Get Accounts
+      await _apiService.getAllAccountTransactions(_finalAccessToken);
+
+      // Step 9: Get Transactions for All Accounts
+      await _apiService.getAllAccountTransactions(_finalAccessToken);
+
+      // Show success dialog
+      _showSuccessDialog('Connection successful! Your bank account has been linked.');
+
+    } catch (e) {
+      _showErrorDialog('Error exchanging authorization code: $e');
+    }
+  }
+
+  Future<void> _getAccountDetails() async {
+  try {
+    final List<dynamic> accounts = await _apiService.getAccountDetails(_finalAccessToken);
+    
+    List<Map<String, dynamic>> accountsWithBalances = [];
+
+    for (var account in accounts) {
+      String accountId = account['AccountId'];
+      String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
+      String iban = account['AccountIdentifiers'][0]['Identification'];
+
+      // Fetch balance for the current account
+      Map<String, dynamic> balanceData = await _apiService.getAccountBalance(_finalAccessToken, accountId);
+      String balance = balanceData['Amount'];  // Extract just the amount without currency
+
+      // Fetch transactions for this account
+Map<String, dynamic> transactionData = await _apiService.getAccountTransactions(_finalAccessToken, accountId);
+List<dynamic> transactions = transactionData['Data']['Transaction']; // Extract the list of transactions
+
+
+      // Debugging output to verify transactions for each account
+      print('Account ID: $accountId, Transactions: ${transactions.length}');
+
+      // Add account details along with the balance and transactions to the list
+      accountsWithBalances.add({
+        'IBAN': iban,
+        'AccountSubType': accountSubType,
+        'Balance': balance, // Only the balance without currency
+        'transactions': transactions, // Add transactions to the account
+      });
+    }
+
+    if (mounted) {
+      setState(() {
+        _accounts = accountsWithBalances;
+      });
+
+      _redirectToBanksPage(); // Redirect after fetching details
+    }
+  } catch (e) {
+    if (mounted) {
+      _showErrorDialog('Error fetching account details or balance: $e');
+    }
+  }
+}
+
+
+
+  // Step 10: Redirect to BanksPage with accounts
+  void _redirectToBanksPage() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BanksPage(
+          userName: widget.userName,
+          phoneNumber: widget.phoneNumber,
+          accounts: _accounts, // Pass the retrieved accounts to BanksPage
+        ),
+      ),
+    );
+  }
+
+ // Dialog for success message
+  void _showSuccessDialog(String successMessage) {
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text(successMessage),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                _redirectToBanksPage(); // Redirect after success
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Dialog for error message
+  void _showErrorDialog(String errorMessage) {
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -31,7 +234,17 @@ class _AccLinkPageState extends State<AccLinkPage> {
             top: 60,
             right: 15,
             child: GestureDetector(
-              onTap: _onArrowTap, // Change this to the new method
+              onTap: () {
+                setState(() {
+                  _arrowColor = Colors.grey; // Change color on press
+                });
+                Future.delayed(Duration(milliseconds: 100), () {
+                  setState(() {
+                    _arrowColor = Color(0xFF3D3D3D); // Reset color after a short delay
+                  });
+                  Navigator.pop(context); // Navigate back to settings page
+                });
+              },
               child: Icon(
                 Icons.arrow_forward_ios,
                 color: _arrowColor, // Use the dynamic color
@@ -50,8 +263,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
                 color: Color(0xFF3D3D3D),
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                fontFamily:
-                    'GE-SS-Two-Bold', // Use the same font as the project
+                fontFamily: 'GE-SS-Two-Bold', // Use the same font as the project
               ),
             ),
           ),
@@ -116,8 +328,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
               ),
               child: Center(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.only(left: 35.0), // Add left padding
+                  padding: const EdgeInsets.only(left: 35.0), // Add left padding
                   child: Text(
                     'ساما (البنك السعودي المركزي)',
                     style: TextStyle(
@@ -149,22 +360,19 @@ class _AccLinkPageState extends State<AccLinkPage> {
                   shadowColor: Colors.black, // Shadow color
                   elevation: 5, // Shadow elevation
                 ),
-                onPressed: () {
-                  // Add your reset logic here
-                },
+                onPressed: _startApiProcess, // Trigger full API process when button is pressed
                 child: Text(
                   'الاستمرار في اجراءات الربط',
                   style: TextStyle(
                     fontSize: 18,
-                    fontFamily:
-                        'GE-SS-Two-Light', // Use the same font as the project
+                    fontFamily: 'GE-SS-Two-Light', // Use the same font as the project
                   ),
                 ),
               ),
             ),
           ),
 
-          // First SAAMA Image
+          // First SAMA Image
           Positioned(
             left: 315,
             top: 290.5,
