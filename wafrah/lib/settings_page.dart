@@ -11,30 +11,24 @@ import 'banks_page.dart';
 class SettingsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
-  final List<Map<String, dynamic>> accounts; // Add accounts list
 
-  const SettingsPage({
-    super.key,
-    required this.userName,
-    required this.phoneNumber,
-    this.accounts = const [], // Default to an empty list if not passed
-  });
+  SettingsPage({required this.userName, required this.phoneNumber});
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  Color _profileColor = const Color(0xFFD9D9D9);
-  Color _resetPasswordColor = const Color(0xFFD9D9D9);
-  Color _notificationColor = const Color(0xFFD9D9D9);
-  Color _supportColor = const Color(0xFFD9D9D9);
+  Color _profileColor = Color(0xFFD9D9D9);
+  Color _resetPasswordColor = Color(0xFFD9D9D9);
+  Color _notificationColor = Color(0xFFD9D9D9);
+  Color _supportColor = Color(0xFFD9D9D9);
 
   // Custom page transition for no transition effect
   Route _createNoTransitionRoute(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionDuration: const Duration(seconds: 0), // No transition
+      transitionDuration: Duration(seconds: 0), // No transition
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return child; // No animation
       },
@@ -47,11 +41,10 @@ class _SettingsPageState extends State<SettingsPage> {
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(ProfilePage(
-            userName: widget.userName, phoneNumber: widget.phoneNumber)))
+            userName: widget.userName, phoneNumber: widget.userName)))
         .then((_) {
       setState(() {
-        _profileColor =
-            const Color(0xFFD9D9D9); // Reset color after navigating back
+        _profileColor = Color(0xFFD9D9D9); // Reset color after navigating back
       });
     });
   }
@@ -63,11 +56,11 @@ class _SettingsPageState extends State<SettingsPage> {
     Navigator.of(context)
         .push(_createNoTransitionRoute(ResetPasswordPage(
             userName: widget.userName,
-            phoneNumber: widget.phoneNumber))) // Pass user phone number
+            phoneNumber: widget.userName))) // Pass user phone number
         .then((_) {
       setState(() {
         _resetPasswordColor =
-            const Color(0xFFD9D9D9); // Reset color after navigating back
+            Color(0xFFD9D9D9); // Reset color after navigating back
       });
     });
   }
@@ -78,11 +71,11 @@ class _SettingsPageState extends State<SettingsPage> {
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(NotificationPage(
-            userName: widget.userName, phoneNumber: widget.phoneNumber)))
+            userName: widget.userName, phoneNumber: widget.userName)))
         .then((_) {
       setState(() {
         _notificationColor =
-            const Color(0xFFD9D9D9); // Reset color after navigating back
+            Color(0xFFD9D9D9); // Reset color after navigating back
       });
     });
   }
@@ -93,11 +86,10 @@ class _SettingsPageState extends State<SettingsPage> {
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(SupportPage(
-            userName: widget.userName, phoneNumber: widget.phoneNumber)))
+            userName: widget.userName, phoneNumber: widget.userName)))
         .then((_) {
       setState(() {
-        _supportColor =
-            const Color(0xFFD9D9D9); // Reset color after navigating back
+        _supportColor = Color(0xFFD9D9D9); // Reset color after navigating back
       });
     });
   }
@@ -106,27 +98,34 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تأكيد تسجيل الخروج'),
-        content: const Text('هل أنت متأكد أنك تريد تسجيل الخروج؟'),
+        title: Text('تأكيد تسجيل الخروج'),
+        content: Text('هل أنت متأكد أنك تريد تسجيل الخروج؟'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Close the dialog
             },
-            child: const Text('إلغاء'),
+            child: Text('إلغاء'),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pushNamed('/'); // Navigate to main.dart
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content:
-                      Text('تم تسجيل الخروج بنجاح'), // Successfully logged out
+                SnackBar(
+                  content: Text(
+                    'لقد تم تسجيل خروجك بنجاح',
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                  backgroundColor: Colors.grey, // Grey color for success
                   duration: Duration(seconds: 2),
                 ),
               );
             },
-            child: const Text('تسجيل الخروج'),
+            child: Text('تسجيل الخروج'),
           ),
         ],
       ),
@@ -136,7 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor: Color(0xFFF9F9F9),
       body: Stack(
         children: [
           // Green square image
@@ -153,7 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
 
           // Settings Title
-          const Positioned(
+          Positioned(
             top: 200,
             right: 19,
             child: Text(
@@ -179,7 +178,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
                     blurRadius: 10,
-                    offset: const Offset(0, -5),
+                    offset: Offset(0, -5),
                   ),
                 ],
               ),
@@ -192,8 +191,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(SettingsPage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts)), // Pass accounts
+                          phoneNumber: widget.userName)), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
@@ -202,8 +200,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(TransactionsPage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts)), // Pass accounts
+                          phoneNumber: widget.phoneNumber)), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
@@ -212,8 +209,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(HomePage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts)), // Pass accounts
+                          phoneNumber: widget.userName)), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -222,8 +218,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(SavingPlanPage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts)), // Pass accounts
+                          phoneNumber: widget.userName)), // Pass userName
                     );
                   }),
                 ],
@@ -238,7 +233,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Container(
               width: 6,
               height: 6,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Color(0xFF2C8C68), // Point color
                 shape: BoxShape.circle,
               ),
@@ -260,16 +255,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), // Move arrow to the right
-                    const Icon(Icons.arrow_back_ios_new,
+                    SizedBox(width: 10), // Move arrow to the right
+                    Icon(Icons.arrow_back_ios_new,
                         color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Expanded(
                       // Use Expanded to fill remaining space
                       child: Align(
                         // Align text
                         alignment: Alignment.centerRight * 0.9,
-                        child: const Column(
+                        child: Column(
                           crossAxisAlignment:
                               CrossAxisAlignment.end, // Right align texts
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -318,16 +313,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), // Move arrow to the right
-                    const Icon(Icons.arrow_back_ios_new,
+                    SizedBox(width: 10), // Move arrow to the right
+                    Icon(Icons.arrow_back_ios_new,
                         color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Expanded(
                       // Use Expanded to fill remaining space
                       child: Align(
                         // Align text
                         alignment: Alignment.centerRight * 0.9,
-                        child: const Column(
+                        child: Column(
                           crossAxisAlignment:
                               CrossAxisAlignment.end, // Right align texts
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -376,16 +371,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), // Move arrow to the right
-                    const Icon(Icons.arrow_back_ios_new,
+                    SizedBox(width: 10), // Move arrow to the right
+                    Icon(Icons.arrow_back_ios_new,
                         color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Expanded(
                       // Use Expanded to fill remaining space
                       child: Align(
                         // Align text
                         alignment: Alignment.centerRight * 0.9,
-                        child: const Column(
+                        child: Column(
                           crossAxisAlignment:
                               CrossAxisAlignment.end, // Right align texts
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -434,16 +429,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), // Move arrow to the right
-                    const Icon(Icons.arrow_back_ios_new,
+                    SizedBox(width: 10), // Move arrow to the right
+                    Icon(Icons.arrow_back_ios_new,
                         color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Expanded(
                       // Use Expanded to fill remaining space
                       child: Align(
                         // Align text
                         alignment: Alignment.centerRight * 0.9,
-                        child: const Column(
+                        child: Column(
                           crossAxisAlignment:
                               CrossAxisAlignment.end, // Right align texts
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -486,7 +481,7 @@ class _SettingsPageState extends State<SettingsPage> {
               height: 39,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3D3D3D), // Background color
+                  backgroundColor: Color(0xFF3D3D3D), // Background color
                   foregroundColor: Colors.white, // Text color
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(100), // Rounded corners
@@ -495,7 +490,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   elevation: 5, // Shadow elevation
                 ),
                 onPressed: _onLogout, // Call logout method
-                child: const Text(
+                child: Text(
                   'تسجيل الخروج',
                   style: TextStyle(
                     fontSize: 15,
@@ -516,15 +511,15 @@ class _SettingsPageState extends State<SettingsPage> {
               height: 39,
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF9F9F9),
-                  border: Border.all(color: const Color(0xFFDD2C35), width: 1),
+                  color: Color(0xFFF9F9F9),
+                  border: Border.all(color: Color(0xFFDD2C35), width: 1),
                   borderRadius: BorderRadius.circular(100), // Rounded corners
                 ),
                 child: TextButton(
                   onPressed: () {
                     // Add your deletion logic here
                   },
-                  child: const Text(
+                  child: Text(
                     'حذف الحساب',
                     style: TextStyle(
                       color: Color(0xFFDD2C35),
@@ -550,7 +545,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Container(
                   width: 92,
                   height: 90,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Color(0xFFF9F9F9),
                     shape: BoxShape.circle,
                   ),
@@ -559,7 +554,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Container(
                   width: 80,
                   height: 80,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
                       begin: Alignment.topCenter,
@@ -568,19 +563,18 @@ class _SettingsPageState extends State<SettingsPage> {
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.account_balance,
                       color: Colors.white,
                       size: 40,
                     ),
                     onPressed: () {
-                      // Navigate to Banks Page without transition and pass accounts
+                      // Navigate to Banks Page without transition and pass userName
                       Navigator.pushReplacement(
                         context,
                         _createNoTransitionRoute(BanksPage(
                             userName: widget.userName,
-                            phoneNumber: widget.phoneNumber,
-                            accounts: widget.accounts)), // Pass accounts
+                            phoneNumber: widget.phoneNumber)), // Pass userName
                       );
                     },
                   ),
@@ -603,12 +597,12 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           Icon(
             icon,
-            color: const Color(0xFF2C8C68),
+            color: Color(0xFF2C8C68),
             size: 30,
           ),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color(0xFF2C8C68),
               fontSize: 12,
               fontFamily: 'GE-SS-Two-Light',
