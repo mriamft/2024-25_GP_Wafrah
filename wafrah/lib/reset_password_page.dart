@@ -22,6 +22,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       TextEditingController();
   bool _showErrorNotification = false;
   String _errorMessage = '';
+  Color notificationColor =
+      const Color(0xFFC62C2C); // Default notification color
 
   void _onArrowTap() {
     setState(() {
@@ -39,7 +41,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   // Method to validate password complexity
   bool validatePassword(String password) {
     final RegExp passwordRegExp = RegExp(
-      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$',
+      r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[!@#\$&*~]).{8,}$',
     );
     return passwordRegExp.hasMatch(password);
   }
@@ -50,34 +52,25 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final String confirmPassword = _confirmPasswordController.text;
 
     if (newPassword.isEmpty || confirmPassword.isEmpty) {
-      setState(() {
-        _errorMessage = "يجب ملء جميع الحقول";
-        _showErrorNotification = true;
-      });
+      showNotification("يجب ملء جميع الحقول");
       return;
     }
 
     if (!validatePassword(newPassword)) {
-      setState(() {
-        _errorMessage =
-            'رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص';
-        _showErrorNotification = true;
-      });
+      showNotification(
+          'رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص');
       return;
     }
 
     if (newPassword != confirmPassword) {
-      setState(() {
-        _errorMessage = "كلمات المرور الجديدة غير متطابقة";
-        _showErrorNotification = true;
-      });
+      showNotification("كلمات المرور الجديدة غير متطابقة");
       return;
     }
 
     try {
       final response = await http.post(
         Uri.parse(
-            'https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/reset-password'), // Change to your API endpoint
+            'https://8735-78-95-248-162.ngrok-free.app/reset-password'), // Change to your API endpoint
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -89,22 +82,29 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       );
 
       if (response.statusCode == 200) {
-        setState(() {
-          _errorMessage = "تم تعديل كلمة المرور بنجاح";
-          _showErrorNotification = true;
-        });
+        showNotification("تم تعديل كلمة المرور بنجاح", color: Colors.grey);
       } else {
-        setState(() {
-          _errorMessage = "فشل تعديل كلمة المرور";
-          _showErrorNotification = true;
-        });
+        showNotification("فشل تعديل كلمة المرور");
       }
     } catch (error) {
-      setState(() {
-        _errorMessage = "خطأ في الاتصال بالخادم";
-        _showErrorNotification = true;
-      });
+      showNotification("خطأ في الاتصال بالخادم");
     }
+  }
+
+  // Method to show notifications
+  void showNotification(String message,
+      {Color color = const Color(0xFFC62C2C)}) {
+    setState(() {
+      _errorMessage = message;
+      notificationColor = color; // Set dynamic color
+      _showErrorNotification = true;
+    });
+
+    Timer(const Duration(seconds: 5), () {
+      setState(() {
+        _showErrorNotification = false;
+      });
+    });
   }
 
   @override
@@ -159,7 +159,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 style: const TextStyle(
                   fontFamily: 'GE-SS-Two-Light',
                 ),
-                obscureText: true, // Obscure text for password input
+                obscureText: true,
                 decoration: const InputDecoration(
                   hintText: 'رمز المرور الحالي',
                   hintStyle: TextStyle(
@@ -187,7 +187,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               child: TextField(
                 controller: _newPasswordController,
                 textAlign: TextAlign.right,
-                obscureText: true, // Obscure text for password input
+                obscureText: true,
                 style: const TextStyle(
                   fontFamily: 'GE-SS-Two-Light',
                 ),
@@ -218,7 +218,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               child: TextField(
                 controller: _confirmPasswordController,
                 textAlign: TextAlign.right,
-                obscureText: true, // Obscure text for password input
+                obscureText: true,
                 style: const TextStyle(
                   fontFamily: 'GE-SS-Two-Light',
                 ),
@@ -236,12 +236,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           ),
 
           // Instructions Text
-          Positioned(
+          const Positioned(
             top: 330,
             left: 100,
             child: SizedBox(
               width: 345,
-              child: const Column(
+              child: Column(
                 children: [
                   Text(
                     'الرجاء اختيار رمز مرور يحقق الشروط التالية:',
@@ -305,13 +305,38 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           // Error/Confirmation Message
           if (_showErrorNotification)
             Positioned(
-              bottom: 100,
-              left: (MediaQuery.of(context).size.width - 300) / 2,
-              child: Text(
-                _errorMessage,
-                style: const TextStyle(
-                  color: Colors.red, // Display error message in red
-                  fontSize: 14,
+              top: 23,
+              left: 4,
+              child: Container(
+                width: 353,
+                height: 57,
+                decoration: BoxDecoration(
+                  color: notificationColor, // Use dynamic color
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(left: 15.0),
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 15.0),
+                      child: Text(
+                        _errorMessage,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

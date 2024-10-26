@@ -20,11 +20,13 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   int currentPage = 0; // Track the current dashboard
-  final PageController _pageController = PageController(); // Controller for PageView
+  final PageController _pageController =
+      PageController(); // Controller for PageView
   bool _isCirclePressed = false; // Track if the circle button is pressed
 
   @override
@@ -190,14 +192,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2), // Shadow color
                     blurRadius: 10, // Shadow blur
-                    offset: const Offset(0, -5), // Shadow position (above the bar)
+                    offset:
+                        const Offset(0, -5), // Shadow position (above the bar)
                   ),
                 ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  
                   buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
                       onTap: () {
                     // Navigate to Settings Page and pass userName and accounts
@@ -207,7 +209,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             SettingsPage(
                                 userName: widget.userName,
                                 phoneNumber: widget.phoneNumber,
-                                accounts: widget.accounts), // Pass userName and accounts
+                                accounts: widget
+                                    .accounts), // Pass userName and accounts
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -228,7 +231,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             TransactionsPage(
                                 userName: widget.userName,
                                 phoneNumber: widget.phoneNumber,
-                                accounts: widget.accounts), // Pass userName and accounts
+                                accounts: widget
+                                    .accounts), // Pass userName and accounts
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -254,7 +258,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             SavingPlanPage(
                                 userName: widget.userName,
                                 phoneNumber: widget.phoneNumber,
-                                accounts: widget.accounts), // Pass userName and accounts
+                                accounts: widget
+                                    .accounts), // Pass userName and accounts
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -294,8 +299,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       phoneNumber: widget.phoneNumber,
                       accounts: widget.accounts, // Pass accounts
                     ), // Pass userName
-                    transitionDuration: const Duration(seconds: 0), // Disable transition
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    transitionDuration:
+                        const Duration(seconds: 0), // Disable transition
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
                       return child; // No animation
                     },
                   ),
@@ -304,7 +311,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               },
               onTapCancel: () {
                 setState(() {
-                  _isCirclePressed = false; // Reset the state if tap is canceled
+                  _isCirclePressed =
+                      false; // Reset the state if tap is canceled
                 });
               },
               child: Stack(
@@ -327,7 +335,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       gradient: LinearGradient(
                         colors: _isCirclePressed
                             ? [const Color(0xFF1A7A5E), const Color(0xFF6FC3A0)]
-                            : [const Color(0xFF2C8C68), const Color(0xFF8FD9BD)],
+                            : [
+                                const Color(0xFF2C8C68),
+                                const Color(0xFF8FD9BD)
+                              ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
@@ -416,7 +427,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
           const SizedBox(height: 10),
           const Text(
-            'هذه الخاصية لم تتوفر\nحتى الآن', // Divided into two lines
+            'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', // Divided into two lines
             textAlign: TextAlign.center, // Centered text
             style: TextStyle(
               color: Color(0xFF838383),
@@ -455,7 +466,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   left: 25,
                   top: -20,
                   child: Icon(
-                      Icons.keyboard_arrow_down_rounded, // Thinner and rounded "^" arrow
+                      Icons
+                          .keyboard_arrow_down_rounded, // Thinner and rounded "^" arrow
                       color: Color(0xFFC62C2C),
                       size: 90),
                 ),
@@ -463,7 +475,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   right: 30,
                   top: -20,
                   child: Icon(
-                      Icons.keyboard_arrow_up_rounded, // Thinner and rounded "^" arrow
+                      Icons
+                          .keyboard_arrow_up_rounded, // Thinner and rounded "^" arrow
                       color: Color(0xFF2C8C68),
                       size: 90),
                 ),
@@ -493,7 +506,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 Center(
                   child: Text(
-                    'هذه الخاصية لم تتوفر\nحتى الآن', // Divided into two lines
+                    'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', // Divided into two lines
                     textAlign: TextAlign.center, // Centered text
                     style: TextStyle(
                       color: Color(0xFF838383),
@@ -528,7 +541,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
           SizedBox(height: 10),
           Text(
-            'هذه الخاصية لم تتوفر\nحتى الآن', // Divided into two lines
+            'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', // Divided into two lines
             textAlign: TextAlign.center, // Centered text
             style: TextStyle(
               color: Color(0xFF838383),

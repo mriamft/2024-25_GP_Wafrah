@@ -13,7 +13,8 @@ class TransactionsPage extends StatelessWidget {
     super.key,
     required this.userName,
     required this.phoneNumber,
-    this.accounts = const [], // Default to an empty list if no accounts are provided
+    this.accounts =
+        const [], // Default to an empty list if no accounts are provided
   });
 
   // Function to extract and sort all transactions from connected accounts
@@ -46,10 +47,9 @@ class TransactionsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get all transactions sorted by date
     List<Map<String, dynamic>> allTransactions = getAllTransactions();
-    
 
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9), // Background color
+      backgroundColor: const Color(0xFFF9F9F9), // Background color
       body: Stack(
         children: [
           // Green square image
@@ -66,7 +66,7 @@ class TransactionsPage extends StatelessWidget {
           ),
 
           // Title
-          Positioned(
+          const Positioned(
             top: 185,
             right: 12,
             child: Text(
@@ -85,9 +85,10 @@ class TransactionsPage extends StatelessWidget {
             top: 240,
             left: 10,
             right: 10,
-            bottom: 90, // Added bottom padding to make space for the navigation bar
+            bottom:
+                90, // Added bottom padding to make space for the navigation bar
             child: allTransactions.isEmpty
-                ? Center(
+                ? const Center(
                     child: Text(
                       'لا يوجد لديك معاملات',
                       style: TextStyle(
@@ -98,7 +99,8 @@ class TransactionsPage extends StatelessWidget {
                       ),
                     ),
                   )
-                : ListView.builder(  // Use ListView.builder for better scrolling with large datasets
+                : ListView.builder(
+                    // Use ListView.builder for better scrolling with large datasets
                     itemCount: allTransactions.length,
                     itemBuilder: (context, index) {
                       return _buildTransactionCard(allTransactions[index]);
@@ -132,10 +134,10 @@ class TransactionsPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SettingsPage(
-                              userName: userName, 
-                              phoneNumber: phoneNumber,
-                              accounts: accounts,  // Pass accounts
-                          )),
+                                userName: userName,
+                                phoneNumber: phoneNumber,
+                                accounts: accounts, // Pass accounts
+                              )),
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
@@ -148,10 +150,10 @@ class TransactionsPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => HomePage(
-                              userName: userName, 
-                              phoneNumber: phoneNumber,
-                              accounts: accounts,  // Pass accounts
-                          )),
+                                userName: userName,
+                                phoneNumber: phoneNumber,
+                                accounts: accounts, // Pass accounts
+                              )),
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -160,10 +162,10 @@ class TransactionsPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SavingPlanPage(
-                              userName: userName, 
-                              phoneNumber: phoneNumber,
-                              accounts: accounts,  // Pass accounts
-                          )),
+                                userName: userName,
+                                phoneNumber: phoneNumber,
+                                accounts: accounts, // Pass accounts
+                              )),
                     );
                   }),
                 ],
@@ -211,7 +213,7 @@ class TransactionsPage extends StatelessWidget {
                           builder: (context) => BanksPage(
                             userName: userName,
                             phoneNumber: phoneNumber,
-                            accounts: accounts,  // Pass the accounts data here
+                            accounts: accounts, // Pass the accounts data here
                           ),
                         ),
                       );
@@ -231,7 +233,9 @@ class TransactionsPage extends StatelessWidget {
     String dateTime = transaction['TransactionDateTime'] ?? '';
     String date = dateTime.split('T').first; // Only get the date part
 
-    String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف'; // Remove KSAOB.
+    String subtype =
+        transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+            'غير معروف'; // Remove KSAOB.
 
     // Transaction amount
     String amount = transaction['Amount']?['Amount'] ?? '0.00';
@@ -265,14 +269,15 @@ class TransactionsPage extends StatelessWidget {
         translatedSubtype == 'غير محدد') {
       amountColor = Colors.black; // Black color for these transaction types
     } else {
-      amountColor = Color(0xFF3D3D3D); // Default color (same as used for other texts)
+      amountColor = const Color(
+          0xFF3D3D3D); // Default color (same as used for other texts)
     }
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: Color(0xFFD9D9D9),
+        color: const Color(0xFFD9D9D9),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -283,7 +288,7 @@ class TransactionsPage extends StatelessWidget {
               children: [
                 Text(
                   'التاريخ: $date',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Color(0xFF3D3D3D),
                     fontSize: 14,
                     fontFamily: 'GE-SS-Two-Bold',
@@ -291,7 +296,7 @@ class TransactionsPage extends StatelessWidget {
                 ),
                 Text(
                   'نوع العملية: $translatedSubtype', // Translated transaction subtype
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Color(0xFF3D3D3D),
                     fontSize: 14,
                     fontFamily: 'GE-SS-Two-Light',
@@ -300,7 +305,7 @@ class TransactionsPage extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Column(
             children: [
               Row(
@@ -315,7 +320,9 @@ class TransactionsPage extends StatelessWidget {
                       fontFamily: 'GE-SS-Two-Bold',
                     ),
                   ),
-                  SizedBox(width: 4), // Add a small space between "ر.س" and the amount
+                  const SizedBox(
+                      width:
+                          4), // Add a small space between "ر.س" and the amount
                   Text(
                     amount,
                     style: TextStyle(

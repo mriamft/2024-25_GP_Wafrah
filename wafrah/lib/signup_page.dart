@@ -23,6 +23,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool showErrorNotification = false;
   String errorMessage = '';
+  Color notificationColor = const Color(0xFFC62C2C); // Default red color
 
   bool _isArrowPressed = false;
   bool _isLoginButtonPressed = false;
@@ -33,6 +34,7 @@ class _SignUpPageState extends State<SignUpPage> {
       {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
+      notificationColor = color; // Set the dynamic color
       showErrorNotification = true;
     });
 
@@ -46,15 +48,15 @@ class _SignUpPageState extends State<SignUpPage> {
   // Method to validate password complexity
   bool validatePassword(String password) {
     final RegExp passwordRegExp = RegExp(
-      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$',
+      r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[!@#\$&*~]).{8,}$',
     );
     return passwordRegExp.hasMatch(password);
   }
 
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
-    final url = Uri.parse(
-        'https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/checkPhoneNumber');
+    final url =
+        Uri.parse('https://8735-78-95-248-162.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -78,8 +80,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse(
-        'https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/send-otp'); //backend URL
+    final url = Uri.parse('https://8735-78-95-248-162.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -97,12 +98,12 @@ class _SignUpPageState extends State<SignUpPage> {
             lastName: lastName,
             password: password,
             isSignUp: true, // This indicates a new user sign-up
-
+            isForget: false,
           ),
         ),
       );
     } else {
-      showNotification('Failed to send OTP');
+      showNotification('فشل إرسال رمز التحقق، حاول مجددًا بعد قليل');
     }
   }
 
@@ -141,9 +142,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
     // If valid, send OTP before adding the user
     sendOTP(phoneNumber, firstName, lastName, password);
-
-
-
   }
 
   @override
@@ -295,7 +293,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => LoginPage()),
+                                builder: (context) => const LoginPage()),
                           );
                         },
                         onTapCancel: () =>
@@ -335,9 +333,9 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Container(
                 width: 353,
                 height: 57,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFC62C2C), // Red background
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                decoration: BoxDecoration(
+                  color: notificationColor, // Use dynamic color
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

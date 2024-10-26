@@ -9,29 +9,32 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Generate a unique nonce for each request
 String generateNonce() {
-  return Uuid().v4(); // Using UUID to generate a secure nonce
+  return const Uuid().v4(); // Using UUID to generate a secure nonce
 }
 
 // Generate a unique state for each request
 String generateState() {
-  return Uuid().v4(); // Using UUID to generate a secure state
+  return const Uuid().v4(); // Using UUID to generate a secure state
 }
 
 class ApiService {
-  String _consentId = '';  // Store the consent ID (kac) here
-  String _codeVerifier = '';  // Store the PKCE code verifier here
+  String _consentId = ''; // Store the consent ID (kac) here
+  String _codeVerifier = ''; // Store the PKCE code verifier here
 
   // Step 1: Create HttpClient with Certificates
   Future<HttpClient> _createHttpClientWithCert() async {
-    final certPem = await rootBundle.loadString('assets/certs/transport-cert-Wafrah-SoftwareStatement.pem');
-    final privateKey = await rootBundle.loadString('assets/certs/transport-key-Wafrah-SoftwareStatement.key');
+    final certPem = await rootBundle
+        .loadString('assets/certs/transport-cert-Wafrah-SoftwareStatement.pem');
+    final privateKey = await rootBundle
+        .loadString('assets/certs/transport-key-Wafrah-SoftwareStatement.key');
 
     SecurityContext context = SecurityContext.defaultContext;
     context.useCertificateChainBytes(utf8.encode(certPem));
     context.usePrivateKeyBytes(utf8.encode(privateKey));
 
     HttpClient client = HttpClient(context: context);
-    client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
 
     return client;
   }
@@ -43,7 +46,8 @@ class ApiService {
 
     try {
       HttpClientRequest request = await client.getUrl(url);
-      request.headers.set('Authorization', 'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
+      request.headers.set('Authorization',
+          'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
       request.headers.set('Content-Type', 'application/x-www-form-urlencoded');
 
       HttpClientResponse response = await request.close();
@@ -62,13 +66,15 @@ class ApiService {
 
     try {
       HttpClientRequest request = await client.postUrl(url);
-      request.headers.set('Authorization', 'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
+      request.headers.set('Authorization',
+          'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
       request.headers.set('Content-Type', 'application/x-www-form-urlencoded');
       request.write('grant_type=client_credentials&scope=accounts openid');
 
-      HttpClientResponse response = await request.close().timeout(Duration(seconds: 180));
+      HttpClientResponse response =
+          await request.close().timeout(const Duration(seconds: 180));
       String responseBody = await response.transform(utf8.decoder).join();
-      print ('Get Client credintials : $responseBody');
+      print('Get Client credintials : $responseBody');
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(responseBody);
         return jsonResponse['access_token'];
@@ -84,11 +90,13 @@ class ApiService {
   // Step 3: POST Account Access Consents
   Future<void> createConsent(String accessToken) async {
     final client = await _createHttpClientWithCert();
-    var url = Uri.parse('https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/account-access-consents');
+    var url = Uri.parse(
+        'https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/account-access-consents');
 
     try {
       final financialID = dotenv.env['FinancialID'] ?? 'default-financial-id';
-      final interactionID = dotenv.env['InteractionID'] ?? 'default-interaction-id';
+      final interactionID =
+          dotenv.env['InteractionID'] ?? 'default-interaction-id';
 
       HttpClientRequest request = await client.postUrl(url);
       request.headers.set('Authorization', 'Bearer $accessToken');
@@ -125,7 +133,7 @@ class ApiService {
 
       HttpClientResponse response = await request.close();
       String responseBody = await response.transform(utf8.decoder).join();
-       print('Post account access: $responseBody'); 
+      print('Post account access: $responseBody');
 
       if (response.statusCode == 201) {
         var jsonResponse = jsonDecode(responseBody);
@@ -136,26 +144,31 @@ class ApiService {
       }
     } catch (e) {
       print('Error creating consent: $e');
-      throw e;
+      rethrow;
     }
   }
 
   // Step 4: Create JWT for PAR Request
   Future<String> createJwt() async {
     final client = await _createHttpClientWithCert();
-    var url = Uri.parse('https://rs1.lab.openbanking.sa/o3/v1.0/message-signature');
+    var url =
+        Uri.parse('https://rs1.lab.openbanking.sa/o3/v1.0/message-signature');
 
     try {
       HttpClientRequest request = await client.getUrl(url);
       request.headers.set('Content-Type', 'application/json');
 
-      _codeVerifier = Uuid().v4() + Uuid().v4(); // Generate and store code_verifier
+      _codeVerifier =
+          const Uuid().v4() + Uuid().v4(); // Generate and store code_verifier
       var bytes = utf8.encode(_codeVerifier);
       var digest = sha256.convert(bytes); // Hash the bytes using SHA-256
       String codeChallenge = base64Url.encode(digest.bytes).replaceAll('=', '');
 
       // Expiration and Not Before Time
-      double exp = DateTime.now().add(Duration(minutes: 5)).millisecondsSinceEpoch / 1000;
+      double exp = DateTime.now()
+              .add(const Duration(minutes: 5))
+              .millisecondsSinceEpoch /
+          1000;
       double nbf = DateTime.now().millisecondsSinceEpoch / 1000 - 10;
 
       Map<String, dynamic> body = {
@@ -202,7 +215,8 @@ class ApiService {
 
     try {
       HttpClientRequest request = await client.postUrl(url);
-      request.headers.set('Authorization', 'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
+      request.headers.set('Authorization',
+          'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
       request.headers.set('Content-Type', 'application/x-www-form-urlencoded');
       request.write('request=$jwt');
 
@@ -229,15 +243,17 @@ class ApiService {
       String requestUri = await postToPAR(jwt); // Step 5: Get requestUri
 
       if (_consentId.isEmpty) {
-        throw Exception('Invalid ConsentId. Please complete Step 3 successfully.');
+        throw Exception(
+            'Invalid ConsentId. Please complete Step 3 successfully.');
       }
 
-
       final client = await _createHttpClientWithCert();
-      var url = Uri.parse('https://rs1.lab.openbanking.sa/o3/v1.0/par-auth-code-url/$_consentId?response_type=code%20id_token&scope=openid%20accounts&request_uri=$requestUri');
+      var url = Uri.parse(
+          'https://rs1.lab.openbanking.sa/o3/v1.0/par-auth-code-url/$_consentId?response_type=code%20id_token&scope=openid%20accounts&request_uri=$requestUri');
 
       HttpClientRequest request = await client.getUrl(url);
-      request.headers.set('Authorization', 'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
+      request.headers.set('Authorization',
+          'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
 
       HttpClientResponse response = await request.close();
       String responseBody = await response.transform(utf8.decoder).join();
@@ -246,11 +262,12 @@ class ApiService {
       if (response.statusCode == 200) {
         return responseBody; // Return the URL
       } else {
-        throw Exception('Failed to compute Authorization Code URL: $responseBody');
+        throw Exception(
+            'Failed to compute Authorization Code URL: $responseBody');
       }
     } catch (e) {
       print('Error computing authorization code URL: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -261,7 +278,8 @@ class ApiService {
 
     try {
       HttpClientRequest request = await client.postUrl(url);
-      request.headers.set('Authorization', 'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
+      request.headers.set('Authorization',
+          'Basic ${base64Encode(utf8.encode("${Config.clientId}:${Config.clientSecret}"))}');
       request.headers.set('Content-Type', 'application/x-www-form-urlencoded');
       request.write(
           'grant_type=authorization_code&scope=accounts&code=$authorizationCode&redirect_uri=wafrah://auth-callback&code_verifier=$_codeVerifier');
@@ -285,7 +303,8 @@ class ApiService {
   // Step: GET Account Details from SAMA
   Future<List<dynamic>> getAccountDetails(String accessToken) async {
     final client = await _createHttpClientWithCert();
-    var url = Uri.parse('https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts');
+    var url = Uri.parse(
+        'https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts');
 
     try {
       HttpClientRequest request = await client.getUrl(url);
@@ -311,7 +330,8 @@ class ApiService {
   // Step 8: GET All Account Transactions
   Future<void> getAllAccountTransactions(String accessToken) async {
     final client = await _createHttpClientWithCert();
-    var url = Uri.parse('https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts');
+    var url = Uri.parse(
+        'https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts');
 
     try {
       HttpClientRequest request = await client.getUrl(url);
@@ -320,7 +340,6 @@ class ApiService {
 
       HttpClientResponse response = await request.close();
       String responseBody = await response.transform(utf8.decoder).join();
-      
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(responseBody);
@@ -344,56 +363,61 @@ class ApiService {
   }
 
   // Step 9: GET Transactions for a Specific Account
-Future<Map<String, dynamic>> getAccountTransactions(String accessToken, String accountId) async {
-  final client = await _createHttpClientWithCert();
-  var url = Uri.parse('https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts/$accountId/transactions');
+  Future<Map<String, dynamic>> getAccountTransactions(
+      String accessToken, String accountId) async {
+    final client = await _createHttpClientWithCert();
+    var url = Uri.parse(
+        'https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts/$accountId/transactions');
 
-  try {
-    HttpClientRequest request = await client.getUrl(url);
-    request.headers.set('Authorization', 'Bearer $accessToken');
-    request.headers.set('Content-Type', 'application/json');
-    request.headers.set('Accept', 'application/json');
+    try {
+      HttpClientRequest request = await client.getUrl(url);
+      request.headers.set('Authorization', 'Bearer $accessToken');
+      request.headers.set('Content-Type', 'application/json');
+      request.headers.set('Accept', 'application/json');
 
-    HttpClientResponse response = await request.close();
-    String responseBody = await response.transform(utf8.decoder).join();
+      HttpClientResponse response = await request.close();
+      String responseBody = await response.transform(utf8.decoder).join();
 
-    if (response.statusCode == 200) {
-      print('Transactions for Account ID $accountId: $responseBody');
-      var jsonResponse = jsonDecode(responseBody); // Decode JSON response
-      return jsonResponse; // Return the decoded transaction data
-    } else {
-      throw Exception('Failed to fetch transactions for Account ID $accountId: $responseBody');
+      if (response.statusCode == 200) {
+        print('Transactions for Account ID $accountId: $responseBody');
+        var jsonResponse = jsonDecode(responseBody); // Decode JSON response
+        return jsonResponse; // Return the decoded transaction data
+      } else {
+        throw Exception(
+            'Failed to fetch transactions for Account ID $accountId: $responseBody');
+      }
+    } catch (e) {
+      print('Error fetching transactions for Account ID $accountId: $e');
+      rethrow;
     }
-  } catch (e) {
-    print('Error fetching transactions for Account ID $accountId: $e');
-    rethrow;
   }
-}
-  
+
   // Step 10: GET Account Balance for a Specific Account
-Future<Map<String, dynamic>> getAccountBalance(String accessToken, String accountId) async {
-  final client = await _createHttpClientWithCert();
-  var url = Uri.parse('https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts/$accountId/balances');
+  Future<Map<String, dynamic>> getAccountBalance(
+      String accessToken, String accountId) async {
+    final client = await _createHttpClientWithCert();
+    var url = Uri.parse(
+        'https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts/$accountId/balances');
 
-  try {
-    HttpClientRequest request = await client.getUrl(url);
-    request.headers.set('Authorization', 'Bearer $accessToken');
-    request.headers.set('Content-Type', 'application/json');
-    request.headers.set('Accept', 'application/json');
+    try {
+      HttpClientRequest request = await client.getUrl(url);
+      request.headers.set('Authorization', 'Bearer $accessToken');
+      request.headers.set('Content-Type', 'application/json');
+      request.headers.set('Accept', 'application/json');
 
-    HttpClientResponse response = await request.close();
-    String responseBody = await response.transform(utf8.decoder).join();
+      HttpClientResponse response = await request.close();
+      String responseBody = await response.transform(utf8.decoder).join();
 
-    if (response.statusCode == 200) {
-      var jsonResponse = jsonDecode(responseBody);
-      return jsonResponse['Data']['Balance'][0]['Amount']; // Return balance information
-    } else {
-      throw Exception('Failed to fetch account balance: $responseBody');
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(responseBody);
+        return jsonResponse['Data']['Balance'][0]
+            ['Amount']; // Return balance information
+      } else {
+        throw Exception('Failed to fetch account balance: $responseBody');
+      }
+    } catch (e) {
+      print('Error fetching account balance for Account ID $accountId: $e');
+      rethrow;
     }
-  } catch (e) {
-    print('Error fetching account balance for Account ID $accountId: $e');
-    rethrow;
   }
-}
-
 }

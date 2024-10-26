@@ -42,7 +42,7 @@ class SavingPlanPage extends StatelessWidget {
             right: 19,
             child: Center(
               child: Text(
-                'هذه الخاصية لم تتوفر\nحتى الآن',
+                'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(0xFF838383),

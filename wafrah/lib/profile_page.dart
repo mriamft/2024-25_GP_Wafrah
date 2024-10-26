@@ -65,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
           // Centered Text
           const Center(
             child: Text(
-              'هذه الخاصية لم\n تتوفر حتى الآن', // Displayed text in the center
+              'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', // Displayed text in the center
               style: TextStyle(
                 fontFamily: 'GE-SS-Two-Bold',
                 fontSize: 20,

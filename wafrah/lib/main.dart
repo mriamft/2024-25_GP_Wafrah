@@ -4,9 +4,8 @@ import 'login_page.dart';
 import 'package:wafrah/signup_page.dart' as signup;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -14,7 +13,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),
     );
@@ -146,7 +145,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => signup.SignUpPage(),
+                            builder: (context) => const signup.SignUpPage(),
                           ),
                         );
                       }
@@ -196,7 +195,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => LoginPage(),
+                        builder: (context) => const LoginPage(),
                       ),
                     );
                   },

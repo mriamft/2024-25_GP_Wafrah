@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:wafrah/home_page.dart';
+import 'package:wafrah/pass_confirmation_page.dart';
 
 class OTPPage extends StatefulWidget {
   final String phoneNumber;
@@ -10,17 +11,17 @@ class OTPPage extends StatefulWidget {
   final String lastName;
   final String password;
   final bool isSignUp;
+  final bool isForget;
 
-const OTPPage({
-  super.key,
-  required this.phoneNumber,
-  required this.firstName,
-  required this.lastName,
-  required this.password,
-  required this.isSignUp, 
-});
-
-
+  const OTPPage({
+    super.key,
+    required this.phoneNumber,
+    required this.firstName,
+    required this.lastName,
+    required this.password,
+    required this.isSignUp,
+    required this.isForget,
+  });
 
   @override
   _OTPPageState createState() => _OTPPageState();
@@ -34,6 +35,10 @@ class _OTPPageState extends State<OTPPage> {
   final TextEditingController otpController4 = TextEditingController();
   final TextEditingController otpController5 = TextEditingController();
   final TextEditingController otpController6 = TextEditingController();
+
+  bool showErrorNotification = false;
+  String errorMessage = '';
+  Color notificationColor = Colors.red; // Default notification color
 
   bool canResend = false;
   late Timer _timer;
@@ -68,130 +73,123 @@ class _OTPPageState extends State<OTPPage> {
         otpController6.text;
   }
 
-  // Method to verify OTP with the backend (using Twilio)
-// Method to verify OTP with the backend
-// Method to verify OTP with the backend
-// Method to verify OTP with the backend (using Twilio)
-Future<void> verifyOTP() async {
-  String otp = getOTP();
-  if (otp.isEmpty || otp.length != 6) {
-    _showErrorSnackBar('Please enter the 6-digit OTP.');
-    return;
+  // Show notification method
+  void showNotification(String message, {Color color = Colors.red}) {
+    setState(() {
+      errorMessage = message;
+      notificationColor = color; // Set notification color dynamically
+      showErrorNotification = true;
+    });
+
+    Timer(const Duration(seconds: 5), () {
+      setState(() {
+        showErrorNotification = false;
+      });
+    });
   }
 
-  final url = Uri.parse('https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/verify-otp');
-  final response = await http.post(
-    url,
-    headers: {"Content-Type": "application/json"},
-    body: json.encode({
-      'phoneNumber': widget.phoneNumber,
-      'otp': otp,
-    }),
-  );
-
-  if (response.statusCode == 200) {
-    // Display success message and navigate to home page with user info
-    _showSuccessSnackBar('تم تسجيل الدخول بنجاح');
-    if (widget.isSignUp){
-      addUserToDatabase();
+  // Method to verify OTP with the backend
+  Future<void> verifyOTP() async {
+    String otp = getOTP();
+    if (otp.isEmpty || otp.length != 6) {
+      showNotification('يرجى إدخال رمز التحقق المؤلف من 6 أرقام.');
+      return;
     }
+
+    final url = Uri.parse('https://your-backend-url/verify-otp');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'phoneNumber': widget.phoneNumber,
+        'otp': otp,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      showNotification('تم التحقق بنجاح', color: Colors.grey);
+
+      if (widget.isForget) {
+        // Navigate to PassConfirmationPage for password reset
         Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HomePage(
-          userName: '${widget.firstName} ${widget.lastName}',
-          phoneNumber: widget.phoneNumber,
+          context,
+          MaterialPageRoute(
+            builder: (context) => PassConfirmationPage(
+              phoneNumber: widget.phoneNumber,
+            ),
+          ),
+        );
+      } else if (widget.isSignUp) {
+        addUserToDatabase(); // Proceed with sign-up flow
+      } else {
+        // Proceed to Home Page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(
+              userName: '${widget.firstName} ${widget.lastName}',
+              phoneNumber: widget.phoneNumber,
+            ),
+          ),
+        );
+      }
+    } else {
+      showNotification('رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.');
+    }
+  }
+
+  // Add user to the database only if it's a sign-up process
+  Future<void> addUserToDatabase() async {
+    final url = Uri.parse('https://your-backend-url/adduser');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'userName': '${widget.firstName} ${widget.lastName}',
+        'phoneNumber': widget.phoneNumber,
+        'password': widget.password, // Ensure this is hashed in the backend
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      showNotification("تم التسجيل بنجاح", color: Colors.grey);
+      // Navigate to HomePage after the user is added successfully
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            userName: '${widget.firstName} ${widget.lastName}',
+            phoneNumber: widget.phoneNumber,
+          ),
         ),
-      ),
-    );
-  } else {
-    _showErrorSnackBar('Invalid OTP. Please try again.');
-  }
-}
-
-// Success Snackbar
-void _showSuccessSnackBar(String message) {
-  final snackBar = SnackBar(
-    content: Text(message),
-    backgroundColor: Colors.green, // Success color
-  );
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-}
-
-
-
-// Add user to the database only if it's a sign-up process
-Future<void> addUserToDatabase() async {
-  final url = Uri.parse(
-      'https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/adduser'); // Replace with your backend URL
-  final response = await http.post(
-    url,
-    headers: {"Content-Type": "application/json"},
-    body: json.encode({
-      'userName': '${widget.firstName} ${widget.lastName}',
-      'phoneNumber': widget.phoneNumber,
-      'password': widget.password, // Ensure this is hashed in the backend
-    }),
-  );
-
-  if (response.statusCode == 200) {
-    // Navigate to HomePage after the user is added successfully
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => HomePage(
-    //       userName: widget.firstName,
-    _showErrorSnackBar("مبروك");
-    //       phoneNumber: widget.phoneNumber,
-    //     ),
-    //   ),
-    // );
-  } else {
-    _showErrorSnackBar('Failed to add user. Please try again.');
-  }
-}
-
-
-  // // Add user to the database after OTP is verified
-  // Future<void> addUserToDatabase() async {
-  //   final url = Uri.parse(
-  //       'https://369c-2001-16a2-dd76-e900-187a-b232-83ee-9150.ngrok-free.app/adduser'); // Replace with your backend URL
-  //   final response = await http.post(
-  //     url,
-  //     headers: {"Content-Type": "application/json"},
-  //     body: json.encode({
-  //       'userName': '${widget.firstName} ${widget.lastName}',
-  //       'phoneNumber': widget.phoneNumber,
-  //       'password': widget.password, // Ensure this is hashed in the backend
-  //     }),
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     // Navigate to HomePage after the user is added successfully
-  //     Navigator.pushReplacement(
-  //       context,
-  //       MaterialPageRoute(
-  //         builder: (context) => HomePage(
-  //           userName: widget.firstName,
-  //           phoneNumber: widget.phoneNumber,
-  //         ),
-  //       ),
-  //     );
-  //   } else {
-  //     _showErrorSnackBar('Failed to add user. Please try again.');
-  //   }
-  // }
-
-  // Snackbar to show error messages
-  void _showErrorSnackBar(String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      backgroundColor: Colors.red,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      );
+    } else {
+      showNotification('فشل في إضافة المستخدم. يرجى المحاولة مرة أخرى.');
+    }
   }
 
-  // Resend OTP logic remains the same
+  // Method to resend OTP if 3 minutes have passed
+  Future<void> resendOTP() async {
+    if (canResend) {
+      final url = Uri.parse('https://your-backend-url/send-otp');
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({'phoneNumber': widget.phoneNumber}),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          resendTimeLeft = 180; // Reset the countdown to 3 minutes
+          canResend = false;
+        });
+        startResendOTPCountdown(); // Restart the countdown
+      } else {
+        showNotification(
+            'فشل في إعادة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.');
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -237,17 +235,13 @@ Future<void> addUserToDatabase() async {
                 height: 82,
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.center, // Center alignment
                 children: [
-                  const SizedBox(
-                      height:
-                          230), // Adjusted to move the text under the splash image
-                  // First Text (Styled as per the image you provided)
+                  const SizedBox(height: 230),
                   const Text(
                     'كلمة المرور لمرة واحدة',
                     style: TextStyle(
@@ -260,7 +254,6 @@ Future<void> addUserToDatabase() async {
                     textAlign: TextAlign.center, // Center the text
                   ),
                   const SizedBox(height: 10),
-                  // Second Text with phone number (Styled as per the image)
                   Text(
                     'يرجى كتابة رمز التحقق كلمة المرور لمرة واحدة المرسلة إلى رقم الهاتف ${widget.phoneNumber}',
                     style: const TextStyle(
@@ -286,7 +279,7 @@ Future<void> addUserToDatabase() async {
                     ],
                   ),
                   const SizedBox(height: 40),
-                  // Updated Button (Styled same as sign-up page)
+                  // Verify OTP Button
                   ElevatedButton(
                     onPressed: verifyOTP,
                     style: ElevatedButton.styleFrom(
@@ -296,17 +289,14 @@ Future<void> addUserToDatabase() async {
                         borderRadius: BorderRadius.circular(100),
                       ),
                       elevation: 5,
-                      minimumSize: const Size(
-                          308, 52), // Ensure the button is the same size
+                      minimumSize: const Size(308, 52),
                     ),
-                    child: Text('التحقق من الرمز'),
+                    child: const Text('التحقق من الرمز'),
                   ),
                   const SizedBox(height: 20),
                   // Resend OTP text
                   GestureDetector(
-                    onTap: canResend
-                        ? resendOTP
-                        : null, // Only allow resend after 3 minutes
+                    onTap: canResend ? resendOTP : null,
                     child: Text(
                       canResend
                           ? 'إعادة إرسال رمز التحقق؟'
@@ -314,9 +304,7 @@ Future<void> addUserToDatabase() async {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: canResend
-                            ? Colors.white
-                            : Colors.grey, // Disable link while waiting
+                        color: canResend ? Colors.white : Colors.grey,
                       ),
                       textAlign: TextAlign.right,
                     ),
@@ -324,35 +312,49 @@ Future<void> addUserToDatabase() async {
                 ],
               ),
             ),
+
+            // Notification Message
+            if (showErrorNotification)
+              Positioned(
+                top: 23,
+                left: 4,
+                child: Container(
+                  width: 353,
+                  height: 57,
+                  decoration: BoxDecoration(
+                    color: notificationColor, // Use dynamic color
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(left: 15.0),
+                        child: Icon(
+                          Icons.error_outline,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
-  }
-
-  // OTP Field Widget for the OTP input
-  // OTP Field Widget for the OTP input
-// Method to resend OTP if 3 minutes have passed
-  Future<void> resendOTP() async {
-    if (canResend) {
-      final url = Uri.parse(
-          'https://add7-2001-16a2-c9a3-7e00-3c71-7e04-93e8-c5bb.ngrok-free.app/send-otp'); // Replace with your backend URL
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({'phoneNumber': widget.phoneNumber}),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          resendTimeLeft = 180; // Reset the countdown to 3 minutes
-          canResend = false;
-        });
-        startResendOTPCountdown(); // Restart the countdown
-      } else {
-        _showErrorSnackBar('Failed to resend OTP. Please try again.');
-      }
-    }
   }
 
   Widget _otpField(TextEditingController controller) {
@@ -375,7 +377,7 @@ Future<void> addUserToDatabase() async {
         style: const TextStyle(color: Colors.white),
         onChanged: (value) {
           if (value.length == 1) {
-            FocusScope.of(context).nextFocus(); // Move focus to the next field
+            FocusScope.of(context).nextFocus();
           }
         },
       ),
