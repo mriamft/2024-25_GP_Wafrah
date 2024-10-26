@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // Add this import for HTTP requests
 import 'dart:convert'; // Add this for JSON handling
@@ -40,9 +42,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   // Method to validate password complexity
   bool validatePassword(String password) {
-    final RegExp passwordRegExp = RegExp(
-      r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[!@#\$&*~]).{8,}$',
-    );
+    final RegExp passwordRegExp =
+        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
     return passwordRegExp.hasMatch(password);
   }
 

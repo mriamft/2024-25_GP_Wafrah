@@ -47,9 +47,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // Method to validate password complexity
   bool validatePassword(String password) {
-    final RegExp passwordRegExp = RegExp(
-      r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[!@#\$&*~]).{8,}$',
-    );
+    final RegExp passwordRegExp =
+        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
+
     return passwordRegExp.hasMatch(password);
   }
 

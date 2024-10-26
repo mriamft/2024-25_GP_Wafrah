@@ -292,12 +292,12 @@ class _AccLinkPageState extends State<AccLinkPage> {
           ),
 
           // Instruction Text 2
-          Positioned(
+          const Positioned(
             top: 152,
             left: 49,
             child: SizedBox(
               width: 300, // Set width for better wrapping
-              child: const Text(
+              child: Text(
                 'أنت الآن تسمح لنا بقراءة بياناتك المصرفية من حسابك البنكي، نقوم بذلك من خلال معايير الخدمات المصرفية المفتوحة والتي تسمح لنا بالحصول على معلوماتك وعرضها في وفرة دون معرفة بيانات اعتمادك البنكية (مثل كلمة السر لحسابك البنكي)',
                 style: TextStyle(
                   color: Color(0xFF3D3D3D),

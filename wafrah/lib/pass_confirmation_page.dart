@@ -20,7 +20,8 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
 
   bool showErrorNotification = false;
   String errorMessage = '';
-  Color notificationColor = Color(0xFFC62C2C); // Default notification color
+  Color notificationColor =
+      const Color(0xFFC62C2C); // Default notification color
 
   Color _arrowColor = Colors.white; // Default color for the arrow
   Color _buttonColor = Colors.white; // Default color for the button
@@ -68,12 +69,14 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
   }
 
   bool isValidPassword(String password) {
-    final regex = RegExp(r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[!@#\$&*~]).{8,}$');
+    final regex =
+        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
     return regex.hasMatch(password);
   }
 
   Future<void> resetPassword(String phoneNumber, String newPassword) async {
-    final url = Uri.parse('https://your-backend-url/reset-password');
+    final url =
+        Uri.parse('https://8735-78-95-248-162.ngrok-free.app/reset-password');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -205,7 +208,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
             ),
 
             // Title
-            Positioned(
+            const Positioned(
               top: 263,
               left: 75,
               child: Text(

@@ -158,8 +158,8 @@ class ApiService {
       HttpClientRequest request = await client.getUrl(url);
       request.headers.set('Content-Type', 'application/json');
 
-      _codeVerifier =
-          const Uuid().v4() + Uuid().v4(); // Generate and store code_verifier
+      _codeVerifier = const Uuid().v4() +
+          const Uuid().v4(); // Generate and store code_verifier
       var bytes = utf8.encode(_codeVerifier);
       var digest = sha256.convert(bytes); // Hash the bytes using SHA-256
       String codeChallenge = base64Url.encode(digest.bytes).replaceAll('=', '');

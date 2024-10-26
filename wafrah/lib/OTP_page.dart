@@ -96,7 +96,8 @@ class _OTPPageState extends State<OTPPage> {
       return;
     }
 
-    final url = Uri.parse('https://your-backend-url/verify-otp');
+    final url =
+        Uri.parse('https://8735-78-95-248-162.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -140,7 +141,7 @@ class _OTPPageState extends State<OTPPage> {
 
   // Add user to the database only if it's a sign-up process
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://your-backend-url/adduser');
+    final url = Uri.parse('https://8735-78-95-248-162.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -171,7 +172,8 @@ class _OTPPageState extends State<OTPPage> {
   // Method to resend OTP if 3 minutes have passed
   Future<void> resendOTP() async {
     if (canResend) {
-      final url = Uri.parse('https://your-backend-url/send-otp');
+      final url =
+          Uri.parse('https://8735-78-95-248-162.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

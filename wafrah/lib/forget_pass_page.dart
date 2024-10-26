@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ForgetPassPage extends StatefulWidget {
+  const ForgetPassPage({super.key});
+
   @override
   _ForgetPassPageState createState() => _ForgetPassPageState();
 }
@@ -15,7 +17,8 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
 
   bool showErrorNotification = false;
   String errorMessage = '';
-  Color notificationColor = Color(0xFFC62C2C); // Default notification color
+  Color notificationColor =
+      const Color(0xFFC62C2C); // Default notification color
 
   Color _arrowColor = Colors.white; // Default color for the arrow
   Color _buttonColor = Colors.white; // Default color for the button
@@ -47,7 +50,8 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
     String phoneNumber = phoneNumberController.text.trim();
     if (validatePhoneNumber(phoneNumber)) {
       // Call backend to send OTP
-      final url = Uri.parse('https://your-backend-url/send-otp');
+      final url =
+          Uri.parse('https://8735-78-95-248-162.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -133,7 +137,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
             ),
 
             // Title
-            Positioned(
+            const Positioned(
               top: 263,
               left: 75,
               child: Text(
@@ -251,7 +255,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                   height: 57,
                   decoration: BoxDecoration(
                     color: notificationColor, // Use dynamic color
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

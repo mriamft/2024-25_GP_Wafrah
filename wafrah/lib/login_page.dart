@@ -20,7 +20,8 @@ class _LoginPageState extends State<LoginPage> {
 
   bool showErrorNotification = false;
   String errorMessage = '';
-  Color notificationColor = Color(0xFFC62C2C); // Default notification color
+  Color notificationColor =
+      const Color(0xFFC62C2C); // Default notification color
 
   Color _arrowColor = Colors.white; // Default color for the arrow
   Color _buttonColor = Colors.white; // Default color for the button
@@ -54,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // Send request to the server to validate login
-      final url = Uri.parse('https://1c75-94-96-139-92.ngrok-free.app/login');
+      final url = Uri.parse('https://8735-78-95-248-162.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -84,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://1c75-94-96-139-92.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://8735-78-95-248-162.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -376,7 +377,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 );
               },
-              child: Text(
+              child: const Text(
                 'هل نسيت كلمة المرور؟',
                 style: TextStyle(
                   color: Colors.white,
