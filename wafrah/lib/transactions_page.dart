@@ -136,7 +136,6 @@ class TransactionsPage extends StatelessWidget {
                           builder: (context) => SettingsPage(
                                 userName: userName,
                                 phoneNumber: phoneNumber,
-                                accounts: accounts, // Pass accounts
                               )),
                     );
                   }),

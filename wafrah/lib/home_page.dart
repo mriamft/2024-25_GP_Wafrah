@@ -209,8 +209,7 @@ class _HomePageState extends State<HomePage>
                             SettingsPage(
                                 userName: widget.userName,
                                 phoneNumber: widget.phoneNumber,
-                                accounts: widget
-                                    .accounts), // Pass userName and accounts
+                                ), // Pass userName and accounts
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:

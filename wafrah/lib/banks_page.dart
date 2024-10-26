@@ -303,7 +303,6 @@ class BanksPage extends StatelessWidget {
                         builder: (context) => SettingsPage(
                           userName: userName,
                           phoneNumber: phoneNumber,
-                          accounts: accounts, // Ensure accounts are passed here
                         ),
                       ),
                     );

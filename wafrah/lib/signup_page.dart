@@ -56,7 +56,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url =
-        Uri.parse('https://8735-78-95-248-162.ngrok-free.app/checkPhoneNumber');
+        Uri.parse('https://8773-2001-16a2-db10-b500-8034-b3ad-e152-91ce.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -80,7 +80,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse('https://8735-78-95-248-162.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://8773-2001-16a2-db10-b500-8034-b3ad-e152-91ce.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
