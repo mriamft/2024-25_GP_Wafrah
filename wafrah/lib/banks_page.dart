@@ -235,14 +235,16 @@ class BanksPage extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   side: const BorderSide(color: Color(0xFF3D3D3D)),
                 ),
-                child: const Text(
-                  'تغيير وإزالة ربط الحسابات',
-                  style: TextStyle(
-                    color: Color(0xFF3D3D3D),
-                    fontSize: 14,
-                    fontFamily:
-                        'GE-SS-Two-Light', // Ensure same font as the project
-                  ),
+                child: Row(
+                  mainAxisSize:
+                      MainAxisSize.min, // Aligns items within the button
+                  children: const [
+                    Icon(
+                      Icons.edit, // Use edit icon here
+                      color: Color(0xFF3D3D3D), // Color for the icon
+                    ),
+                    SizedBox(width: 5), // Space between icon and text
+                  ],
                 ),
               ),
             ),

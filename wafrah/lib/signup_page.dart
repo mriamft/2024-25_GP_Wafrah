@@ -29,6 +29,13 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoginButtonPressed = false;
   bool _isLoginTextPressed = false;
 
+  // State variables to track password criteria
+  bool isLengthValid = false;
+  bool isNumberValid = false;
+  bool isLowercaseValid = false;
+  bool isUppercaseValid = false;
+  bool isSymbolValid = false;
+
   // Show notification method
   void showNotification(String message,
       {Color color = const Color(0xFFC62C2C)}) {
@@ -49,14 +56,13 @@ class _SignUpPageState extends State<SignUpPage> {
   bool validatePassword(String password) {
     final RegExp passwordRegExp =
         RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
-
     return passwordRegExp.hasMatch(password);
   }
 
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url =
-        Uri.parse('https://8773-2001-16a2-db10-b500-8034-b3ad-e152-91ce.ngrok-free.app/checkPhoneNumber');
+        Uri.parse('https://0813-78-95-248-162.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -80,7 +86,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse('https://8773-2001-16a2-db10-b500-8034-b3ad-e152-91ce.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://0813-78-95-248-162.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -142,6 +148,17 @@ class _SignUpPageState extends State<SignUpPage> {
 
     // If valid, send OTP before adding the user
     sendOTP(phoneNumber, firstName, lastName, password);
+  }
+
+  // Updated method to validate password complexity
+  void validatePasswordInput(String password) {
+    setState(() {
+      isLengthValid = password.length >= 8;
+      isNumberValid = password.contains(RegExp(r'\d'));
+      isLowercaseValid = password.contains(RegExp(r'[a-z]'));
+      isUppercaseValid = password.contains(RegExp(r'[A-Z]'));
+      isSymbolValid = password.contains(RegExp(r'[!@#\$&*~]'));
+    });
   }
 
   @override
@@ -206,6 +223,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   hintText: 'رمز المرور',
                   controller: passwordController,
                   obscureText: true,
+                  onChanged: validatePasswordInput, // Validate on change
                 ),
                 _buildInputField(
                   top: 495,
@@ -217,24 +235,30 @@ class _SignUpPageState extends State<SignUpPage> {
                   left: 24,
                   right: 10,
                   top: 570,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: const Text(
-                      'الرجاء اختيار رمز مرور يحقق الشروط التالية:\n'
-                      'أن يتكون من 8 خانات على الأقل.\n'
-                      'أن يحتوي على رقم.\n'
-                      'أن يحتوي على حرف صغير.\n'
-                      'أن يحتوي على حرف كبير.\n'
-                      'أن يحتوي على رمز خاص.',
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontFamily: 'GE-SS-Two-Light',
-                        fontSize: 9,
-                        fontWeight: FontWeight.w300,
-                        color: Colors.white,
-                        height: 1.21,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text(
+                        'الرجاء اختيار رمز مرور يحقق الشروط التالية:',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold, // Make text bold
+                          color: Colors.white,
+                          height: 1.21,
+                        ),
                       ),
-                    ),
+                      _buildCriteriaText(
+                          'أن يتكون من 8 خانات على الأقل.', isLengthValid),
+                      _buildCriteriaText('أن يحتوي على رقم.', isNumberValid),
+                      _buildCriteriaText(
+                          'أن يحتوي على حرف صغير.', isLowercaseValid),
+                      _buildCriteriaText(
+                          'أن يحتوي على حرف كبير.', isUppercaseValid),
+                      _buildCriteriaText(
+                          'أن يحتوي على رمز خاص.', isSymbolValid),
+                    ],
                   ),
                 ),
                 Positioned(
@@ -374,6 +398,7 @@ class _SignUpPageState extends State<SignUpPage> {
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
     bool obscureText = false,
+    Function(String)? onChanged,
   }) {
     return Positioned(
       left: 24,
@@ -387,6 +412,7 @@ class _SignUpPageState extends State<SignUpPage> {
             keyboardType: keyboardType,
             obscureText: obscureText,
             textAlign: TextAlign.right,
+            onChanged: onChanged, // Validate on change
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: const TextStyle(
@@ -412,6 +438,22 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCriteriaText(String text, bool isValid) {
+    return Text(
+      text,
+      textAlign: TextAlign.right,
+      style: TextStyle(
+        fontFamily: 'GE-SS-Two-Light',
+        fontSize: 9,
+        fontWeight: FontWeight.bold, // Make text bold
+        color: isValid
+            ? Colors.white
+            : const Color(0xFFC62C2C), // Change color based on validity
+        height: 1.21,
       ),
     );
   }

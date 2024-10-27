@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'login_page.dart';
 import 'package:wafrah/signup_page.dart' as signup;
+import 'info_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -144,16 +145,27 @@ class _SplashScreenState extends State<SplashScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const signup.SignUpPage(),
+                            builder: (context) => InfoPage(),
                           ),
                         );
+                        // Delay resetting the drag value to create a smooth transition
+                        Future.delayed(const Duration(milliseconds: 300), () {
+                          setState(() {
+                            _dragValue = 0.0; // Reset to initial position
+                          });
+                        });
+                      } else {
+                        // Reset the position of the circle if the drag did not complete
+                        setState(() {
+                          _dragValue = 0.0; // Reset to initial position
+                        });
                       }
                     },
                     child: Container(
                       width: circleSize,
                       height: circleSize,
                       decoration: BoxDecoration(
-                        color: isCirclePressed ? Colors.grey : circleColor,
+                        color: circleColor,
                         shape: BoxShape.circle,
                       ),
                       child: const Padding(
@@ -172,7 +184,31 @@ class _SplashScreenState extends State<SplashScreen> {
                   top: 17,
                   child: Opacity(
                     opacity: (1 - _dragValue).clamp(0.0, 1.0),
-                    child: const Icon(
+                    child: Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.white,
+                      size: 17,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 26,
+                  top: 17,
+                  child: Opacity(
+                    opacity: (0.7 - _dragValue).clamp(0.0, 1.0),
+                    child: Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.white,
+                      size: 17,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 34,
+                  top: 17,
+                  child: Opacity(
+                    opacity: (0.5 - _dragValue).clamp(0.0, 1.0),
+                    child: Icon(
                       Icons.arrow_back_ios,
                       color: Colors.white,
                       size: 17,

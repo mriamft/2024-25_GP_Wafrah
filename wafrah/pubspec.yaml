@@ -142,6 +142,9 @@ flutter:
     - assets/images/green_square.png
     - assets/images/Alrajhi.png
     - assets/images/SAMA_logo.png
+    - assets/images/first_info.png
+    - assets/images/second_info.png
+    - assets/images/third_info.png
     - assets/certs/transport-cert-Wafrah-SoftwareStatement.pem
     - assets/certs/transport-key-Wafrah-SoftwareStatement.key
     - assets/certs/signin-key-Wafrah-SoftwareStatement.key
