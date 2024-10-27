@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // Add this import for HTTP requests
 import 'dart:convert'; // Add this for JSON handling
+import 'settings_page.dart';
+
 
 class ResetPasswordPage extends StatefulWidget {
   final String userName;
@@ -44,66 +46,140 @@ bool validatePassword(String password) {
 }
 
 
-  Future<void> _resetPassword() async {
-    final String currentPassword = _currentPasswordController.text;
-    final String newPassword = _newPasswordController.text;
-    final String confirmPassword = _confirmPasswordController.text;
 
-    if (newPassword.isEmpty || confirmPassword.isEmpty) {
-      setState(() {
-        _errorMessage = "يجب ملء جميع الحقول";
-        _showErrorNotification = true;
-      });
-      return;
-    }
 
-    if (!validatePassword(newPassword)) {
-      setState(() {
-        _errorMessage = 'رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص';
-        _showErrorNotification = true;
-      });
-      return;
-    }
+Future<void> _resetPassword() async {
+  final String currentPassword = _currentPasswordController.text;
+  final String newPassword = _newPasswordController.text;
+  final String confirmPassword = _confirmPasswordController.text;
 
-    if (newPassword != confirmPassword) {
-      setState(() {
-        _errorMessage = "كلمات المرور الجديدة غير متطابقة";
-        _showErrorNotification = true;
-      });
-      return;
-    }
+  if (newPassword.isEmpty || confirmPassword.isEmpty) {
+    setState(() {
+      _errorMessage = "يجب ملء جميع الحقول";
+      _showErrorNotification = true;
+    });
+    return;
+  }
 
-    try {
-      final response = await http.post(
-        Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/reset-password'), // Change to your API endpoint
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'phoneNumber': widget.phoneNumber,
-          'currentPassword': currentPassword,
-          'newPassword': newPassword,
-        }),
+  if (!validatePassword(newPassword)) {
+    setState(() {
+      _errorMessage = 'رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص';
+      _showErrorNotification = true;
+    });
+    return;
+  }
+
+  if (newPassword != confirmPassword) {
+    setState(() {
+      _errorMessage = "كلمات المرور الجديدة غير متطابقة";
+      _showErrorNotification = true;
+    });
+    return;
+  }
+
+  try {
+    final response = await http.post(
+      Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/reset-password'), 
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'phoneNumber': widget.phoneNumber,
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تم تعديل كلمة المرور بنجاح',
+            style: TextStyle(
+              fontFamily: 'GE-SS-Two-Light',
+              fontSize: 14,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.grey,
+          duration: Duration(seconds: 2),
+        ),
       );
 
-      if (response.statusCode == 200) {
-        setState(() {
-          _errorMessage = "تم تعديل كلمة المرور بنجاح";
-          _showErrorNotification = true;
-        });
-      } else {
-        setState(() {
-          _errorMessage = "فشل تعديل كلمة المرور";
-          _showErrorNotification = true;
-        });
-      }
-    } catch (error) {
+      // Navigate back to the Settings page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SettingsPage(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+          ),
+        ),
+      );
+    } else {
       setState(() {
-        _errorMessage = "خطأ في الاتصال بالخادم";
+        _errorMessage = "فشل تعديل كلمة المرور";
         _showErrorNotification = true;
       });
     }
+  } catch (error) {
+    setState(() {
+      _errorMessage = "خطأ في الاتصال بالخادم";
+      _showErrorNotification = true;
+    });
   }
+}
+
+
+  void _showResetConfirmationDialog() {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(
+        'تأكيد إعادة تعيين كلمة المرور',
+        style: TextStyle(
+          fontFamily: 'GE-SS-Two-Bold', // Bold font for the title
+          color: Color(0xFF3D3D3D),
+        ),
+      ),
+      content: Text(
+        'هل أنت متأكد أنك تريد إعادة تعيين كلمة المرور؟',
+        style: TextStyle(
+          fontFamily: 'GE-SS-Two-Light', // Light font for the body text
+          color: Color(0xFF3D3D3D),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(); // Close the dialog
+          },
+          child: Text(
+            'إلغاء',
+            style: TextStyle(
+              fontFamily: 'GE-SS-Two-Light', // Light font for the button text
+              color: Color(0xFF838383),
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.of(context).pop(); // Close the dialog
+            await _resetPassword(); // Call the reset password function
+          },
+          child: Text(
+            'تأكيد',
+            style: TextStyle(
+              fontFamily: 'GE-SS-Two-Light', // Light font for the button text
+              color: Color(0xFF2C8C68), // Green color for confirmation
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -286,8 +362,8 @@ bool validatePassword(String password) {
                   shadowColor: Colors.black,
                   elevation: 5,
                 ),
-                onPressed: () {
-                  _resetPassword(); // Call the reset password function
+      onPressed: () {
+        _showResetConfirmationDialog(); // Show the confirmation dialog
                 },
                 child: Text(
                   'تعديل',
