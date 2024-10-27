@@ -271,42 +271,68 @@ app.post('/login', (req, res) => {
 
  
 
-// Route to update user's password (for password reset)
+// Route to update user's password (for password reset - "Forgot Password" feature)
+app.post('/forget-password', async (req, res) => {
+  const { phoneNumber, newPassword } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    let sql = 'UPDATE user SET password = ? WHERE phoneNumber = ?';
+    db.query(sql, [hashedPassword, phoneNumber], (err, result) => {
+      if (err) throw err;
+      res.send('Password updated successfully');
+    });
+  } catch (err) {
+    console.error('Error during password reset:', err);
+    res.status(500).send('Server error during password reset');
+  }
+});
 
 app.post('/reset-password', async (req, res) => {
-
-  const { phoneNumber, newPassword } = req.body;
-
- 
+  const { phoneNumber, currentPassword, newPassword } = req.body;
 
   try {
+    console.log(`Reset Password called for phone number: ${phoneNumber}`);
 
-    // Hash the new password before storing it
+    let sql = 'SELECT password FROM user WHERE phoneNumber = ?';
+    db.query(sql, [phoneNumber], async (err, results) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).send('Server error during password reset');
+      }
 
-    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+      if (results.length === 0) {
+        console.log('User not found for phoneNumber:', phoneNumber);
+        return res.status(404).send('User not found');
+      }
 
- 
+      const storedHashedPassword = results[0].password;
+      const passwordMatch = await bcrypt.compare(currentPassword, storedHashedPassword);
+      if (!passwordMatch) {
+        console.log('Current password mismatch for phoneNumber:', phoneNumber);
+        return res.status(400).send('Current password is incorrect');
+      }
 
-    // SQL query to update the user's password based on their phoneNumber
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+      let updateSql = 'UPDATE user SET password = ? WHERE phoneNumber = ?';
+      db.query(updateSql, [hashedPassword, phoneNumber], (err, result) => {
+        if (err) {
+          console.error('Error during password update:', err);
+          return res.status(500).send('Server error during password reset');
+        }
 
-    let sql = 'UPDATE user SET password = ? WHERE phoneNumber = ?';
+        if (result.affectedRows === 0) {
+          console.log('Password update failed for phoneNumber:', phoneNumber);
+          return res.status(400).send('Failed to update password');
+        }
 
-    db.query(sql, [hashedPassword, phoneNumber], (err, result) => {
-
-      if (err) throw err;
-
-      res.send('Password updated successfully');
-
+        console.log('Password updated successfully for phoneNumber:', phoneNumber);
+        res.send('Password updated successfully');
+      });
     });
-
   } catch (err) {
-
     console.error('Error during password reset:', err);
-
     res.status(500).send('Server error during password reset');
-
   }
-
 });
 
 

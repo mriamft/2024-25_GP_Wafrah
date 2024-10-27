@@ -68,15 +68,19 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
     resetPassword(widget.phoneNumber, password); // Use widget.phoneNumber
   }
 
-  bool isValidPassword(String password) {
-    final regex =
-        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
-    return regex.hasMatch(password);
-  }
+bool isValidPassword(String password) {
+  if (password.length < 8) return false;
+  bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
+  bool hasLowercase = password.contains(RegExp(r'[a-z]'));
+  bool hasDigit = password.contains(RegExp(r'\d'));
+  bool hasSpecialChar = password.contains(RegExp(r'[!@#\$&*~]'));
+
+  return hasUppercase && hasLowercase && hasDigit && hasSpecialChar;
+}
 
   Future<void> resetPassword(String phoneNumber, String newPassword) async {
     final url =
-        Uri.parse('https://0813-78-95-248-162.ngrok-free.app/reset-password');
+        Uri.parse('https://6217-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/forget-password');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},

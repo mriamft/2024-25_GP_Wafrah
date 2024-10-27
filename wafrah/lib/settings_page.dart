@@ -41,7 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(ProfilePage(
-            userName: widget.userName, phoneNumber: widget.userName)))
+            userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
         _profileColor = Color(0xFFD9D9D9); // Reset color after navigating back
@@ -56,7 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
     Navigator.of(context)
         .push(_createNoTransitionRoute(ResetPasswordPage(
             userName: widget.userName,
-            phoneNumber: widget.userName))) // Pass user phone number
+            phoneNumber: widget.phoneNumber))) // Pass user phone number
         .then((_) {
       setState(() {
         _resetPasswordColor =
@@ -71,7 +71,7 @@ class _SettingsPageState extends State<SettingsPage> {
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(NotificationPage(
-            userName: widget.userName, phoneNumber: widget.userName)))
+            userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
         _notificationColor =
@@ -86,7 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(SupportPage(
-            userName: widget.userName, phoneNumber: widget.userName)))
+            userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
         _supportColor = Color(0xFFD9D9D9); // Reset color after navigating back
@@ -191,7 +191,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(SettingsPage(
                           userName: widget.userName,
-                          phoneNumber: widget.userName)), // Pass userName
+                          phoneNumber: widget.phoneNumber)), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
@@ -209,7 +209,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(HomePage(
                           userName: widget.userName,
-                          phoneNumber: widget.userName)), // Pass userName
+                          phoneNumber: widget.phoneNumber)), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -218,7 +218,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(SavingPlanPage(
                           userName: widget.userName,
-                          phoneNumber: widget.userName)), // Pass userName
+                          phoneNumber: widget.phoneNumber)), // Pass userName
                     );
                   }),
                 ],
