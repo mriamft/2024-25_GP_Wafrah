@@ -75,7 +75,7 @@ bool validatePassword(String password) {
 
     try {
       final response = await http.post(
-        Uri.parse('https://6217-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/reset-password'), // Change to your API endpoint
+        Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/reset-password'), // Change to your API endpoint
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

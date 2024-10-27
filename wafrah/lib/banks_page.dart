@@ -214,7 +214,7 @@ class BanksPage extends StatelessWidget {
             left: 12, // Aligned to the left under the plus button
             child: Align(
               alignment: Alignment.centerLeft, // Align the button to the left
-              child: OutlinedButton(
+              child: TextButton(
                 onPressed: () {
                   // Navigate to AccLinkPage when button is clicked
                   Navigator.pushReplacement(
@@ -227,23 +227,22 @@ class BanksPage extends StatelessWidget {
                     ),
                   );
                 },
-                style: OutlinedButton.styleFrom(
+                style: TextButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  side: const BorderSide(color: Color(0xFF3D3D3D)),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize:
                       MainAxisSize.min, // Aligns items within the button
-                  children: const [
+                  children: [
                     Icon(
                       Icons.edit, // Use edit icon here
                       color: Color(0xFF3D3D3D), // Color for the icon
                     ),
-                    SizedBox(width: 5), // Space between icon and text
+                    SizedBox(width: 15), // Space between icon and text
                   ],
                 ),
               ),

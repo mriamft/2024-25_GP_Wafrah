@@ -80,7 +80,7 @@ bool isValidPassword(String password) {
 
   Future<void> resetPassword(String phoneNumber, String newPassword) async {
     final url =
-        Uri.parse('https://6217-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/forget-password');
+        Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/forget-password');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},

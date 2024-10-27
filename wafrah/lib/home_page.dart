@@ -104,7 +104,9 @@ class _HomePageState extends State<HomePage>
                           ),
                         ),
                         TextSpan(
-                          text: widget.userName, // Use dynamic user name here
+                          text: widget.userName
+                              .split(' ')
+                              .first, // Extract only the first name
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 40,
@@ -152,18 +154,6 @@ class _HomePageState extends State<HomePage>
             ),
           ),
 
-          // Restored Eye Icon
-          Positioned(
-            top: 100,
-            right: 30,
-            child: IconButton(
-              icon: const Icon(Icons.visibility_outlined,
-                  color: Color(0xFF9E9E9E)),
-              iconSize: 31,
-              onPressed: () {},
-            ),
-          ),
-
           // Circle indicators for dashboard navigation
           Positioned(
             bottom: 150, // Positioned higher
@@ -202,14 +192,13 @@ class _HomePageState extends State<HomePage>
                 children: [
                   buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
                       onTap: () {
-                    // Navigate to Settings Page and pass userName and accounts
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             SettingsPage(
-                                userName: widget.userName,
-                                phoneNumber: widget.phoneNumber,
-                                ), // Pass userName and accounts
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                        ),
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -223,15 +212,14 @@ class _HomePageState extends State<HomePage>
 
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
                       onTap: () {
-                    // Navigate to Transactions Page and pass userName and accounts
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             TransactionsPage(
-                                userName: widget.userName,
-                                phoneNumber: widget.phoneNumber,
-                                accounts: widget
-                                    .accounts), // Pass userName and accounts
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts,
+                        ),
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -244,21 +232,18 @@ class _HomePageState extends State<HomePage>
                   }), // Transaction icon
 
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
-                      isSelected: true, onTap: () {
-                    // Do nothing for home page
-                  }), // Outlined home icon
+                      isSelected: true, onTap: () {}), // Outlined home icon
 
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
                       onTap: () {
-                    // Navigate to Saving Plan Page and pass userName and accounts
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             SavingPlanPage(
-                                userName: widget.userName,
-                                phoneNumber: widget.phoneNumber,
-                                accounts: widget
-                                    .accounts), // Pass userName and accounts
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts,
+                        ),
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -289,7 +274,6 @@ class _HomePageState extends State<HomePage>
                 setState(() {
                   _isCirclePressed = false; // Reset the state after press
                 });
-                // Navigate to Banks Page and pass userName and accounts
                 Navigator.of(context).pushAndRemoveUntil(
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
@@ -297,7 +281,7 @@ class _HomePageState extends State<HomePage>
                       userName: widget.userName,
                       phoneNumber: widget.phoneNumber,
                       accounts: widget.accounts, // Pass accounts
-                    ), // Pass userName
+                    ),
                     transitionDuration:
                         const Duration(seconds: 0), // Disable transition
                     transitionsBuilder:
@@ -317,7 +301,6 @@ class _HomePageState extends State<HomePage>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // #F9F9F9 circle without shadow
                   Container(
                     width: 92,
                     height: 90,
@@ -326,7 +309,6 @@ class _HomePageState extends State<HomePage>
                       shape: BoxShape.circle,
                     ),
                   ),
-                  // Gradient green circle that changes when pressed
                   Container(
                     width: 80,
                     height: 80,
@@ -380,15 +362,15 @@ class _HomePageState extends State<HomePage>
         children: [
           Icon(
             icon,
-            color: const Color(0xFF2C8C68), // Changed to #2C8C68
+            color: const Color(0xFF2C8C68),
             size: 30, // Increased size for icons
           ),
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF2C8C68), // Changed to #2C8C68
-              fontSize: 12, // Adjusted font size
-              fontFamily: 'GE-SS-Two-Light', // Same font as the interface
+              color: Color(0xFF2C8C68),
+              fontSize: 12,
+              fontFamily: 'GE-SS-Two-Light',
             ),
           ),
           if (isSelected)
@@ -398,7 +380,7 @@ class _HomePageState extends State<HomePage>
                 width: 6,
                 height: 6,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF2C8C68), // Current page indicator color
+                  color: Color(0xFF2C8C68),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -410,146 +392,11 @@ class _HomePageState extends State<HomePage>
 
   // First Dashboard Layout
   Widget buildFirstDashboard() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 90), // Adjust height based on design
-          const Text(
-            'مجموع أموالك',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 10,
-              fontFamily: 'GE-SS-Two-Light',
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', // Divided into two lines
-            textAlign: TextAlign.center, // Centered text
-            style: TextStyle(
-              color: Color(0xFF838383),
-              fontSize: 20,
-              fontFamily: 'GE-SS-Two-Bold',
-            ),
-          ),
-          const SizedBox(height: 60),
-          // "تدفقك المالي لهذا الشهر" shifted more to the right
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: 1), // Moved more to the right
-              child: Text(
-                'تدفقك المالي لهذا الشهر',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 10,
-                  fontFamily: 'GE-SS-Two-Light',
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          // #F6F6F6 rectangle with corner radius of 8
-          Container(
-            width: 327,
-            height: 166,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF6F6F6),
-              borderRadius: BorderRadius.circular(8), // Rounded corners
-            ),
-            child: const Stack(
-              children: [
-                Positioned(
-                  left: 25,
-                  top: -20,
-                  child: Icon(
-                      Icons
-                          .keyboard_arrow_down_rounded, // Thinner and rounded "^" arrow
-                      color: Color(0xFFC62C2C),
-                      size: 90),
-                ),
-                Positioned(
-                  right: 30,
-                  top: -20,
-                  child: Icon(
-                      Icons
-                          .keyboard_arrow_up_rounded, // Thinner and rounded "^" arrow
-                      color: Color(0xFF2C8C68),
-                      size: 90),
-                ),
-                Positioned(
-                  right: 63,
-                  bottom: 110,
-                  child: Text(
-                    'الدخل',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 10,
-                      fontFamily: 'GE-SS-Two-Light',
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 55,
-                  bottom: 110,
-                  child: Text(
-                    'الصرف',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 10,
-                      fontFamily: 'GE-SS-Two-Light',
-                    ),
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', // Divided into two lines
-                    textAlign: TextAlign.center, // Centered text
-                    style: TextStyle(
-                      color: Color(0xFF838383),
-                      fontSize: 20,
-                      fontFamily: 'GE-SS-Two-Bold',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return Container(); // Empty container to reflect the deletion
   }
 
   // Second Dashboard Layout
   Widget buildSecondDashboard() {
-    return const Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 90),
-          Text(
-            'تحليل النفقات',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 10,
-              fontFamily: 'GE-SS-Two-Light',
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', // Divided into two lines
-            textAlign: TextAlign.center, // Centered text
-            style: TextStyle(
-              color: Color(0xFF838383),
-              fontSize: 20,
-              fontFamily: 'GE-SS-Two-Bold',
-            ),
-          ),
-        ],
-      ),
-    );
+    return Container(); // Empty container to reflect the deletion
   }
 }

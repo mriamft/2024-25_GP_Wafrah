@@ -28,7 +28,6 @@ class OTPPage extends StatefulWidget {
 }
 
 class _OTPPageState extends State<OTPPage> {
-  // Use six different controllers for each OTP field
   final TextEditingController otpController1 = TextEditingController();
   final TextEditingController otpController2 = TextEditingController();
   final TextEditingController otpController3 = TextEditingController();
@@ -38,7 +37,7 @@ class _OTPPageState extends State<OTPPage> {
 
   bool showErrorNotification = false;
   String errorMessage = '';
-  Color notificationColor = Colors.red; // Default notification color
+  Color notificationColor = Colors.red;
 
   bool canResend = false;
   late Timer _timer;
@@ -47,7 +46,7 @@ class _OTPPageState extends State<OTPPage> {
   @override
   void initState() {
     super.initState();
-    startResendOTPCountdown(); // Start countdown on page load
+    startResendOTPCountdown();
   }
 
   void startResendOTPCountdown() {
@@ -57,13 +56,12 @@ class _OTPPageState extends State<OTPPage> {
           resendTimeLeft--;
         } else {
           canResend = true;
-          _timer.cancel(); // Stop the timer when it reaches 0
+          _timer.cancel();
         }
       });
     });
   }
 
-  // Combine the values of all OTP fields
   String getOTP() {
     return otpController1.text +
         otpController2.text +
@@ -73,11 +71,10 @@ class _OTPPageState extends State<OTPPage> {
         otpController6.text;
   }
 
-  // Show notification method
   void showNotification(String message, {Color color = Colors.red}) {
     setState(() {
       errorMessage = message;
-      notificationColor = color; // Set notification color dynamically
+      notificationColor = color;
       showErrorNotification = true;
     });
 
@@ -88,7 +85,6 @@ class _OTPPageState extends State<OTPPage> {
     });
   }
 
-  // Method to verify OTP with the backend
   Future<void> verifyOTP() async {
     String otp = getOTP();
     if (otp.isEmpty || otp.length != 6) {
@@ -97,7 +93,7 @@ class _OTPPageState extends State<OTPPage> {
     }
 
     final url =
-        Uri.parse('https://6217-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/verify-otp');
+        Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -111,7 +107,6 @@ class _OTPPageState extends State<OTPPage> {
       showNotification('تم التحقق بنجاح', color: Colors.grey);
 
       if (widget.isForget) {
-        // Navigate to PassConfirmationPage for password reset
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -121,9 +116,8 @@ class _OTPPageState extends State<OTPPage> {
           ),
         );
       } else if (widget.isSignUp) {
-        addUserToDatabase(); // Proceed with sign-up flow
+        addUserToDatabase();
       } else {
-        // Proceed to Home Page
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -139,22 +133,20 @@ class _OTPPageState extends State<OTPPage> {
     }
   }
 
-  // Add user to the database only if it's a sign-up process
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://6217-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/adduser');
+    final url = Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         'userName': '${widget.firstName} ${widget.lastName}',
         'phoneNumber': widget.phoneNumber,
-        'password': widget.password, // Ensure this is hashed in the backend
+        'password': widget.password,
       }),
     );
 
     if (response.statusCode == 200) {
       showNotification("تم التسجيل بنجاح", color: Colors.grey);
-      // Navigate to HomePage after the user is added successfully
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -169,11 +161,10 @@ class _OTPPageState extends State<OTPPage> {
     }
   }
 
-  // Method to resend OTP if 3 minutes have passed
   Future<void> resendOTP() async {
     if (canResend) {
       final url =
-          Uri.parse('https://6217-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/send-otp');
+          Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -182,10 +173,10 @@ class _OTPPageState extends State<OTPPage> {
 
       if (response.statusCode == 200) {
         setState(() {
-          resendTimeLeft = 180; // Reset the countdown to 3 minutes
+          resendTimeLeft = 180;
           canResend = false;
         });
-        startResendOTPCountdown(); // Restart the countdown
+        startResendOTPCountdown();
       } else {
         showNotification(
             'فشل في إعادة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.');
@@ -195,8 +186,15 @@ class _OTPPageState extends State<OTPPage> {
 
   @override
   void dispose() {
-    _timer.cancel(); // Cancel the timer when the widget is disposed
+    _timer.cancel();
     super.dispose();
+  }
+
+  String formatPhoneNumber(String phoneNumber) {
+    if (phoneNumber.length > 4) {
+      return '0' + phoneNumber.substring(4);
+    }
+    return phoneNumber; // Return as is if less than 4 digits
   }
 
   @override
@@ -212,7 +210,6 @@ class _OTPPageState extends State<OTPPage> {
         ),
         child: Stack(
           children: [
-            // Back Arrow Icon
             Positioned(
               top: 60,
               right: 15,
@@ -227,10 +224,9 @@ class _OTPPageState extends State<OTPPage> {
                 ),
               ),
             ),
-            // Splash Image
             Positioned(
               left: 140,
-              top: 130, // Positioned the same as in sign-up page
+              top: 130,
               child: Image.asset(
                 'assets/images/logo.png',
                 width: 90,
@@ -240,8 +236,7 @@ class _OTPPageState extends State<OTPPage> {
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.center, // Center alignment
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 230),
                   const Text(
@@ -249,26 +244,25 @@ class _OTPPageState extends State<OTPPage> {
                     style: TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.w700,
-                      fontFamily: 'GE SS Two',
+                      fontFamily: 'GE-SS-Two-Bold',
                       color: Colors.white,
                       height: 1.21,
                     ),
-                    textAlign: TextAlign.center, // Center the text
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'يرجى كتابة رمز التحقق كلمة المرور لمرة واحدة المرسلة إلى رقم الهاتف ${widget.phoneNumber}',
+                    'يرجى كتابة رمز التحقق كلمة المرور لمرة واحدة المرسلة إلى رقم الهاتف ${formatPhoneNumber(widget.phoneNumber)}',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
-                      fontFamily: 'GE SS Two',
+                      fontFamily: 'GE-SS-Two-Light',
                       color: Colors.white,
                       height: 1.24,
                     ),
-                    textAlign: TextAlign.center, // Center the text
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  // OTP input fields
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -281,7 +275,6 @@ class _OTPPageState extends State<OTPPage> {
                     ],
                   ),
                   const SizedBox(height: 40),
-                  // Verify OTP Button
                   ElevatedButton(
                     onPressed: verifyOTP,
                     style: ElevatedButton.styleFrom(
@@ -293,10 +286,14 @@ class _OTPPageState extends State<OTPPage> {
                       elevation: 5,
                       minimumSize: const Size(308, 52),
                     ),
-                    child: const Text('التحقق من الرمز'),
+                    child: const Text(
+                      'التحقق من الرمز',
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
-                  // Resend OTP text
                   GestureDetector(
                     onTap: canResend ? resendOTP : null,
                     child: Text(
@@ -305,6 +302,7 @@ class _OTPPageState extends State<OTPPage> {
                           : 'إعادة الإرسال بعد $resendTimeLeft ثانية',
                       style: TextStyle(
                         fontSize: 13,
+                        fontFamily: 'GE-SS-Two-Light',
                         fontWeight: FontWeight.bold,
                         color: canResend ? Colors.white : Colors.grey,
                       ),
@@ -314,8 +312,6 @@ class _OTPPageState extends State<OTPPage> {
                 ],
               ),
             ),
-
-            // Notification Message
             if (showErrorNotification)
               Positioned(
                 top: 23,
@@ -324,7 +320,7 @@ class _OTPPageState extends State<OTPPage> {
                   width: 353,
                   height: 57,
                   decoration: BoxDecoration(
-                    color: notificationColor, // Use dynamic color
+                    color: notificationColor,
                     borderRadius: const BorderRadius.all(Radius.circular(10)),
                   ),
                   child: Row(

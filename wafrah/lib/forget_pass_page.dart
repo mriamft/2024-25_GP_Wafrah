@@ -45,13 +45,34 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
     return regex.hasMatch(phoneNumber);
   }
 
+
+Future<bool> phoneNumberExists(String phoneNumber) async {
+    final url =
+        Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/checkPhoneNumber');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({'phoneNumber': phoneNumber}),
+    );
+    if (response.statusCode == 200) {
+      final body = json.decode(response.body);
+      return body['exists'];
+    } else {
+      showNotification('حدث خطأ ما\nفشل في التحقق من رقم الجوال');
+      return false;
+    }
+  }
+  
   // Handle next button press
-  void handleNext() async {
-    String phoneNumber = phoneNumberController.text.trim();
-    if (validatePhoneNumber(phoneNumber)) {
+// Handle next button press
+void handleNext() async {
+  String phoneNumber = phoneNumberController.text.trim();
+  if (validatePhoneNumber(phoneNumber)) {
+    // Check if phone number exists in the database
+    bool exists = await phoneNumberExists(phoneNumber);
+    if (exists) {
       // Call backend to send OTP
-      final url =
-          Uri.parse('https://6217-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/send-otp');
+      final url = Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -77,9 +98,13 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
         showNotification('فشل في إرسال رمز التحقق');
       }
     } else {
-      showNotification('حدث خطأ ما\nصيغة رقم الجوال غير صحيحة');
+      // Show error notification if the phone number is not registered
+      showNotification('رقم الجوال غير مسجل في النظام');
     }
+  } else {
+    showNotification('حدث خطأ ما\nصيغة رقم الجوال غير صحيحة');
   }
+}
 
   @override
   Widget build(BuildContext context) {

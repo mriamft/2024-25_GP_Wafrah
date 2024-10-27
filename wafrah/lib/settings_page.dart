@@ -98,14 +98,32 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('تأكيد تسجيل الخروج'),
-        content: Text('هل أنت متأكد أنك تريد تسجيل الخروج؟'),
+        title: Text(
+          'تأكيد تسجيل الخروج',
+          style: TextStyle(
+            fontFamily: 'GE-SS-Two-Bold', // Bold font for the title
+            color: Color(0xFF3D3D3D),
+          ),
+        ),
+        content: Text(
+          'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+          style: TextStyle(
+            fontFamily: 'GE-SS-Two-Light', // Light font for the body text
+            color: Color(0xFF3D3D3D),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Close the dialog
             },
-            child: Text('إلغاء'),
+            child: Text(
+              'إلغاء',
+              style: TextStyle(
+                fontFamily: 'GE-SS-Two-Light', // Light font for the body text
+                color: Color(0xFF838383),
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -125,7 +143,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               );
             },
-            child: Text('تسجيل الخروج'),
+            child: Text(
+              'تسجيل الخروج',
+              style: TextStyle(
+                fontFamily: 'GE-SS-Two-Light', // Light font for the body text
+                color: Colors.red,
+              ),
+            ),
           ),
         ],
       ),
