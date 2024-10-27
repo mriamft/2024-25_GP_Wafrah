@@ -132,7 +132,7 @@ Future<void> _resetPassword() async {
 }
 
 
-  void _showResetConfirmationDialog() {
+void _showResetConfirmationDialog() {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -150,6 +150,7 @@ Future<void> _resetPassword() async {
           color: Color(0xFF3D3D3D),
         ),
       ),
+      actionsAlignment: MainAxisAlignment.center, // Center the buttons horizontally
       actions: [
         TextButton(
           onPressed: () {
@@ -180,6 +181,7 @@ Future<void> _resetPassword() async {
     ),
   );
 }
+
 
   @override
   Widget build(BuildContext context) {
