@@ -29,6 +29,10 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoginButtonPressed = false;
   bool _isLoginTextPressed = false;
 
+  bool _isPasswordVisible = false;
+bool _isConfirmPasswordVisible = false;
+
+
   // State variables to track password criteria
   bool isLengthValid = false;
   bool isNumberValid = false;
@@ -62,7 +66,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url =
-        Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/checkPhoneNumber');
+        Uri.parse('https://cefb-2001-16a2-c9a3-7e00-5ccb-a86f-3ccc-ce6a.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -86,7 +90,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://cefb-2001-16a2-c9a3-7e00-5ccb-a86f-3ccc-ce6a.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -218,19 +222,50 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: phoneNumberController,
                   keyboardType: TextInputType.phone,
                 ),
-                _buildInputField(
-                  top: 430,
-                  hintText: 'رمز المرور',
-                  controller: passwordController,
-                  obscureText: true,
-                  onChanged: validatePasswordInput, // Validate on change
-                ),
-                _buildInputField(
-                  top: 495,
-                  hintText: 'تأكيد رمز المرور',
-                  controller: confirmPasswordController,
-                  obscureText: true,
-                ),
+              _buildInputField(
+  top: 430,
+  hintText: 'رمز المرور',
+  controller: passwordController,
+  obscureText: !_isPasswordVisible, // Toggle visibility based on state
+  prefixIcon: Padding(
+    padding: const EdgeInsets.only(left: 30.0), // Adjust padding to move icon slightly right
+    child: IconButton(
+      icon: Icon(
+        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+        color: Colors.white,
+      ),
+      onPressed: () {
+        setState(() {
+          _isPasswordVisible = !_isPasswordVisible;
+        });
+      },
+    ),
+  ),
+  onChanged: validatePasswordInput, // Validate on change
+),
+
+            _buildInputField(
+  top: 495,
+  hintText: 'تأكيد رمز المرور',
+  controller: confirmPasswordController,
+  obscureText: !_isConfirmPasswordVisible, // Toggle visibility based on state
+  prefixIcon: Padding(
+    padding: const EdgeInsets.only(left: 30.0), // Adjust padding to move icon slightly right
+    child: IconButton(
+      icon: Icon(
+        _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+        color: Colors.white,
+      ),
+      onPressed: () {
+        setState(() {
+          _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+        });
+      },
+    ),
+  ),
+),
+
+
                 Positioned(
                   left: 24,
                   right: 10,
@@ -393,54 +428,57 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Widget _buildInputField({
-    required double top,
-    required String hintText,
-    required TextEditingController controller,
-    TextInputType keyboardType = TextInputType.text,
-    bool obscureText = false,
-    Function(String)? onChanged,
-  }) {
-    return Positioned(
-      left: 24,
-      right: 24,
-      top: top,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          TextField(
-            controller: controller,
-            keyboardType: keyboardType,
-            obscureText: obscureText,
-            textAlign: TextAlign.right,
-            onChanged: onChanged, // Validate on change
-            decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: const TextStyle(
-                fontFamily: 'GE-SS-Two-Light',
-                fontSize: 14,
-                color: Colors.white,
-              ),
-              border: InputBorder.none,
+  required double top,
+  required String hintText,
+  required TextEditingController controller,
+  TextInputType keyboardType = TextInputType.text,
+  bool obscureText = false,
+  Function(String)? onChanged,
+  Widget? prefixIcon, // Update this to prefixIcon
+}) {
+  return Positioned(
+    left: 24,
+    right: 24,
+    top: top,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          obscureText: obscureText,
+          textAlign: TextAlign.right,
+          onChanged: onChanged, // Validate on change
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(
+              fontFamily: 'GE-SS-Two-Light',
+              fontSize: 14,
+              color: Colors.white,
             ),
-            style: const TextStyle(color: Colors.white),
-            cursorColor: Colors.white,
+            border: InputBorder.none,
+            prefixIcon: prefixIcon, // Update this to prefixIcon
           ),
-          const SizedBox(height: 5),
-          Container(
-            width: 313,
-            height: 2.95,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF60B092), Colors.white],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
+          style: const TextStyle(color: Colors.white),
+          cursorColor: Colors.white,
+        ),
+        const SizedBox(height: 5),
+        Container(
+          width: 313,
+          height: 2.95,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF60B092), Colors.white],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildCriteriaText(String text, bool isValid) {
     return Text(

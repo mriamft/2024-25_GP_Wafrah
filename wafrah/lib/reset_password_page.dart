@@ -79,7 +79,7 @@ Future<void> _resetPassword() async {
 
   try {
     final response = await http.post(
-      Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/reset-password'), 
+      Uri.parse('https://cefb-2001-16a2-c9a3-7e00-5ccb-a86f-3ccc-ce6a.ngrok-free.app/reset-password'), 
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

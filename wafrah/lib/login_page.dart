@@ -27,6 +27,9 @@ class _LoginPageState extends State<LoginPage> {
   Color _buttonColor = Colors.white; // Default color for the button
   Color _signupColor = Colors.white; // Default color for the signup text
 
+  bool _isPasswordVisible = false;
+
+
   // Show notification method
   void showNotification(String message,
       {Color color = const Color(0xFFC62C2C)}) {
@@ -55,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // Send request to the server to validate login
-      final url = Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/login');
+      final url = Uri.parse('https://cefb-2001-16a2-c9a3-7e00-5ccb-a86f-3ccc-ce6a.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -85,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://3ebd-2001-16a2-db10-b500-4c3a-d071-238f-8ef2.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://cefb-2001-16a2-c9a3-7e00-5ccb-a86f-3ccc-ce6a.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -215,46 +218,60 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 ),
-
-                // Password Input Field with Gradient Bar
-                Positioned(
-                  left: 24,
-                  right: 24,
-                  top: 380,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      TextField(
-                        controller: passwordController,
-                        obscureText: true,
-                        textAlign: TextAlign.right,
-                        decoration: const InputDecoration(
-                          hintText: 'رمز المرور',
-                          hintStyle: TextStyle(
-                            fontFamily: 'GE-SS-Two-Light',
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                          border: InputBorder.none,
-                        ),
-                        style: const TextStyle(color: Colors.white),
-                        cursorColor: Colors.white,
-                      ),
-                      const SizedBox(height: 5),
-                      Container(
-                        width: 313,
-                        height: 2.95,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF60B092), Colors.white],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+// Password Input Field with Toggle Visibility (Icon Adjusted Slightly)
+Positioned(
+  left: 24,
+  right: 24,
+  top: 380,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      TextField(
+        controller: passwordController,
+        obscureText: !_isPasswordVisible, // Toggle visibility based on state
+        textAlign: TextAlign.right,
+        decoration: InputDecoration(
+          hintText: 'رمز المرور',
+          hintStyle: const TextStyle(
+            fontFamily: 'GE-SS-Two-Light',
+            fontSize: 14,
+            color: Colors.white,
+          ),
+          border: InputBorder.none,
+          prefixIcon: Transform.translate(
+            offset: const Offset(8, -5), // Move right (8) and up (-5)
+            child: IconButton(
+              icon: Icon(
+                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                setState(() {
+                  _isPasswordVisible = !_isPasswordVisible;
+                });
+              },
+            ),
+          ),
+          contentPadding: const EdgeInsets.only(left: 10), // Adjust content padding if needed
+        ),
+        style: const TextStyle(color: Colors.white),
+        cursorColor: Colors.white,
+      ),
+      const SizedBox(height: 5),
+      Container(
+        width: 313,
+        height: 2.95,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF60B092), Colors.white],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+      ),
+    ],
+  ),
+),
 
                 // Login Button
                 Positioned(
