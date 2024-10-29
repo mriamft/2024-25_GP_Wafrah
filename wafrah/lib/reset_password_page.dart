@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,8 +20,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _confirmPasswordController = TextEditingController();
 
   Color _arrowColor = Color(0xFF3D3D3D);
-  bool _showErrorNotification = false;
-  String _errorMessage = '';
+  bool _showNotification = false;
+  String _notificationMessage = '';
+  Color _notificationColor = Colors.red;
 
   bool _isCurrentPasswordVisible = false;
   bool _isPasswordVisible = false;
@@ -33,6 +35,32 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   bool isUppercaseValid = false;
   bool isSymbolValid = false;
 
+  // Show notification method
+  void showNotification(String message, {Color color = Colors.red, bool navigateAfter = false}) {
+    setState(() {
+      _notificationMessage = message;
+      _notificationColor = color;
+      _showNotification = true;
+    });
+
+    Timer(const Duration(seconds: 5), () {
+      setState(() {
+        _showNotification = false;
+      });
+      if (navigateAfter) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SettingsPage(
+              userName: widget.userName,
+              phoneNumber: widget.phoneNumber,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
   // Validate password criteria
   void validatePasswordInput(String password) {
     setState(() {
@@ -44,44 +72,32 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     });
   }
 
-  // Method to validate password complexity
-  bool validatePassword(String password) {
-    return isLengthValid && isNumberValid && isLowercaseValid && isUppercaseValid && isSymbolValid;
+  // Check if passwords meet criteria and match
+  bool validatePasswords() {
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (!isLengthValid || !isNumberValid || !isLowercaseValid || !isUppercaseValid || !isSymbolValid) {
+      showNotification('رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص');
+      return false;
+    }
+
+    if (newPassword != confirmPassword) {
+      showNotification("كلمات المرور الجديدة غير متطابقة");
+      return false;
+    }
+
+    return true;
   }
 
   // Reset password method
   Future<void> _resetPassword() async {
     final String currentPassword = _currentPasswordController.text;
     final String newPassword = _newPasswordController.text;
-    final String confirmPassword = _confirmPasswordController.text;
-
-    if (newPassword.isEmpty || confirmPassword.isEmpty) {
-      setState(() {
-        _errorMessage = "يجب ملء جميع الحقول";
-        _showErrorNotification = true;
-      });
-      return;
-    }
-
-    if (!validatePassword(newPassword)) {
-      setState(() {
-        _errorMessage = 'رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص';
-        _showErrorNotification = true;
-      });
-      return;
-    }
-
-    if (newPassword != confirmPassword) {
-      setState(() {
-        _errorMessage = "كلمات المرور الجديدة غير متطابقة";
-        _showErrorNotification = true;
-      });
-      return;
-    }
 
     try {
       final response = await http.post(
-        Uri.parse('https://514b-212-57-208-72.ngrok-free.app/reset-password'),
+        Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/reset-password'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -93,68 +109,49 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'تم تعديل كلمة المرور بنجاح',
-              style: TextStyle(fontFamily: 'GE-SS-Two-Light', fontSize: 14, color: Colors.white),
-            ),
-            backgroundColor: Colors.grey,
-            duration: Duration(seconds: 2),
-          ),
-        );
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SettingsPage(
-              userName: widget.userName,
-              phoneNumber: widget.phoneNumber,
-            ),
-          ),
+        showNotification(
+          'تم تعديل كلمة المرور بنجاح',
+          color: Colors.grey,
+          navigateAfter: true,
         );
       } else {
-        setState(() {
-          _errorMessage = "فشل تعديل كلمة المرور";
-          _showErrorNotification = true;
-        });
+        showNotification("فشل تعديل كلمة المرور");
       }
     } catch (error) {
-      setState(() {
-        _errorMessage = "خطأ في الاتصال بالخادم";
-        _showErrorNotification = true;
-      });
+      showNotification("خطأ في الاتصال بالخادم");
     }
   }
 
   void _showResetConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'تأكيد إعادة تعيين كلمة المرور',
-          style: TextStyle(fontFamily: 'GE-SS-Two-Bold', color: Color(0xFF3D3D3D)),
-        ),
-        content: Text(
-          'هل أنت متأكد أنك تريد إعادة تعيين كلمة المرور؟',
-          style: TextStyle(fontFamily: 'GE-SS-Two-Light', color: Color(0xFF3D3D3D)),
-        ),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('إلغاء', style: TextStyle(fontFamily: 'GE-SS-Two-Light', color: Color(0xFF838383))),
+    if (validatePasswords()) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+            'تأكيد إعادة تعيين كلمة المرور',
+            style: TextStyle(fontFamily: 'GE-SS-Two-Bold', color: Color(0xFF3D3D3D)),
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _resetPassword();
-            },
-            child: Text('تأكيد', style: TextStyle(fontFamily: 'GE-SS-Two-Light', color: Color(0xFF2C8C68))),
+          content: Text(
+            'هل أنت متأكد أنك تريد إعادة تعيين كلمة المرور؟',
+            style: TextStyle(fontFamily: 'GE-SS-Two-Light', color: Color(0xFF3D3D3D)),
           ),
-        ],
-      ),
-    );
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('إلغاء', style: TextStyle(fontFamily: 'GE-SS-Two-Light', color: Color(0xFF838383))),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _resetPassword();
+              },
+              child: Text('تأكيد', style: TextStyle(fontFamily: 'GE-SS-Two-Light', color: Color(0xFF2C8C68))),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   // Helper function for criteria text
@@ -185,7 +182,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               child: Icon(Icons.arrow_forward_ios, color: _arrowColor, size: 28),
             ),
           ),
-
           Positioned(
             top: 58,
             left: 110,
@@ -194,8 +190,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               style: TextStyle(color: Color(0xFF3D3D3D), fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'GE-SS-Two-Bold'),
             ),
           ),
-
-          // Current Password Input with Eye Icon
           Positioned(
             top: 135,
             left: 24,
@@ -224,8 +218,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               ),
             ),
           ),
-
-          // New Password Input with Eye Icon
           Positioned(
             top: 205,
             left: 24,
@@ -255,8 +247,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               ),
             ),
           ),
-
-          // Confirm New Password Input with Eye Icon
           Positioned(
             top: 275,
             left: 24,
@@ -285,8 +275,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               ),
             ),
           ),
-
-          // Password Criteria Instructions
           Positioned(
             top: 330,
             right: 24,
@@ -301,8 +289,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               ],
             ),
           ),
-
-          // Submit Button
           Positioned(
             bottom: 40,
             left: (MediaQuery.of(context).size.width - 220) / 2,
@@ -321,13 +307,42 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               ),
             ),
           ),
-
-          // Error/Confirmation Message
-          if (_showErrorNotification)
+          if (_showNotification)
             Positioned(
-              bottom: 100,
-              left: (MediaQuery.of(context).size.width - 300) / 2,
-              child: Text(_errorMessage, style: TextStyle(color: Colors.red, fontSize: 14)),
+              top: 23,
+              left: 4,
+              child: Container(
+                width: 353,
+                height: 57,
+                decoration: BoxDecoration(
+                  color: _notificationColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(left: 15.0),
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 15.0),
+                      child: Text(
+                        _notificationMessage,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
         ],
       ),

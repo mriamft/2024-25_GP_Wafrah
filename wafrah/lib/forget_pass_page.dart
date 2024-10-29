@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:wafrah/OTP_page.dart'; // Import the OTP page
+import 'package:wafrah/OTP_page.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -17,15 +17,13 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
 
   bool showErrorNotification = false;
   String errorMessage = '';
-  Color notificationColor =
-      const Color(0xFFC62C2C); // Default notification color
+  Color notificationColor = const Color(0xFFC62C2C); // Default error notification color
 
   Color _arrowColor = Colors.white; // Default color for the arrow
   Color _buttonColor = Colors.white; // Default color for the button
 
   // Show notification method
-  void showNotification(String message,
-      {Color color = const Color(0xFFC62C2C)}) {
+  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
       notificationColor = color; // Set notification color dynamically
@@ -45,10 +43,9 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
     return regex.hasMatch(phoneNumber);
   }
 
-
-Future<bool> phoneNumberExists(String phoneNumber) async {
-    final url =
-        Uri.parse('https://514b-212-57-208-72.ngrok-free.app/checkPhoneNumber');
+  // Check if phone number exists in the database
+  Future<bool> phoneNumberExists(String phoneNumber) async {
+    final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -62,49 +59,50 @@ Future<bool> phoneNumberExists(String phoneNumber) async {
       return false;
     }
   }
-  
-  // Handle next button press
-// Handle next button press
-void handleNext() async {
-  String phoneNumber = phoneNumberController.text.trim();
-  if (validatePhoneNumber(phoneNumber)) {
-    // Check if phone number exists in the database
-    bool exists = await phoneNumberExists(phoneNumber);
-    if (exists) {
-      // Call backend to send OTP
-      final url = Uri.parse('https://514b-212-57-208-72.ngrok-free.app/send-otp');
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({'phoneNumber': phoneNumber}),
-      );
 
-      if (response.statusCode == 200) {
-        // Navigate to the OTP page with isForget set to true
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OTPPage(
-              phoneNumber: phoneNumber,
-              firstName: '', // Not required for password reset
-              lastName: '', // Not required for password reset
-              password: '', // Not required for password reset
-              isSignUp: false,
-              isForget: true, // Indicate password reset flow
-            ),
-          ),
+  // Handle next button press
+  void handleNext() async {
+    String phoneNumber = phoneNumberController.text.trim();
+    if (validatePhoneNumber(phoneNumber)) {
+      bool exists = await phoneNumberExists(phoneNumber);
+      if (exists) {
+        // Send OTP only if the phone number exists
+        final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/send-otp');
+        final response = await http.post(
+          url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode({'phoneNumber': phoneNumber}),
         );
+
+        if (response.statusCode == 200) {
+          // Navigate to OTP page with isForget set to true
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OTPPage(
+                phoneNumber: phoneNumber,
+                firstName: '',
+                lastName: '',
+                password: '',
+                isSignUp: false,
+                isForget: true,
+              ),
+            ),
+          ).then((_) {
+            // Show success notification after returning from OTP page
+            showNotification('تم تحديث كلمة المرور بنجاح', color: const Color(0xFF888888)); // Grey color
+          });
+        } else {
+          showNotification('فشل في إرسال رمز التحقق');
+        }
       } else {
-        showNotification('فشل في إرسال رمز التحقق');
+        // Show notification if the phone number is not registered
+        showNotification('رقم الجوال غير مسجل في النظام');
       }
     } else {
-      // Show error notification if the phone number is not registered
-      showNotification('رقم الجوال غير مسجل في النظام');
+      showNotification('حدث خطأ ما\nصيغة رقم الجوال غير صحيحة');
     }
-  } else {
-    showNotification('حدث خطأ ما\nصيغة رقم الجوال غير صحيحة');
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +169,7 @@ void handleNext() async {
                   color: Colors.white,
                   fontSize: 25,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'GE-SS-Two-Bold', // Same font as the project
+                  fontFamily: 'GE-SS-Two-Bold',
                 ),
               ),
             ),
@@ -189,9 +187,7 @@ void handleNext() async {
                     textAlign: TextAlign.right,
                     keyboardType: TextInputType.phone,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'[0-9+\-() ]'),
-                      ),
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-() ]')),
                     ],
                     decoration: const InputDecoration(
                       hintText: '(+966555555555) رقم الجوال',
@@ -270,7 +266,7 @@ void handleNext() async {
               ),
             ),
 
-            // Error Notification
+            // Notification
             if (showErrorNotification)
               Positioned(
                 top: 23,
@@ -279,7 +275,7 @@ void handleNext() async {
                   width: 353,
                   height: 57,
                   decoration: BoxDecoration(
-                    color: notificationColor, // Use dynamic color
+                    color: notificationColor,
                     borderRadius: const BorderRadius.all(Radius.circular(10)),
                   ),
                   child: Row(

@@ -92,8 +92,7 @@ class _OTPPageState extends State<OTPPage> {
       return;
     }
 
-    final url =
-        Uri.parse('https://514b-212-57-208-72.ngrok-free.app/verify-otp');
+    final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -104,37 +103,39 @@ class _OTPPageState extends State<OTPPage> {
     );
 
     if (response.statusCode == 200) {
-      showNotification('تم التحقق بنجاح', color: const Color.fromARGB(255, 0, 73, 12));
+      showNotification('تم التحقق بنجاح', color: Colors.grey);
 
-      if (widget.isForget) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PassConfirmationPage(
-              phoneNumber: widget.phoneNumber,
+      Timer(const Duration(seconds: 2), () {
+        if (widget.isForget) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PassConfirmationPage(
+                phoneNumber: widget.phoneNumber,
+              ),
             ),
-          ),
-        );
-      } else if (widget.isSignUp) {
-        addUserToDatabase();
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(
-              userName: '${widget.firstName} ${widget.lastName}',
-              phoneNumber: widget.phoneNumber,
+          );
+        } else if (widget.isSignUp) {
+          addUserToDatabase();
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomePage(
+                userName: '${widget.firstName} ${widget.lastName}',
+                phoneNumber: widget.phoneNumber,
+              ),
             ),
-          ),
-        );
-      }
+          );
+        }
+      });
     } else {
       showNotification('رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.');
     }
   }
 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://514b-212-57-208-72.ngrok-free.app/adduser');
+    final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -146,16 +147,19 @@ class _OTPPageState extends State<OTPPage> {
     );
 
     if (response.statusCode == 200) {
-      showNotification("تم التسجيل بنجاح", color: const Color.fromARGB(255, 0, 73, 12));
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(
-            userName: '${widget.firstName} ${widget.lastName}',
-            phoneNumber: widget.phoneNumber,
+      showNotification("تم التسجيل بنجاح", color: Colors.grey);
+
+      Timer(const Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(
+              userName: '${widget.firstName} ${widget.lastName}',
+              phoneNumber: widget.phoneNumber,
+            ),
           ),
-        ),
-      );
+        );
+      });
     } else {
       showNotification('فشل في إضافة المستخدم. يرجى المحاولة مرة أخرى.');
     }
@@ -163,8 +167,7 @@ class _OTPPageState extends State<OTPPage> {
 
   Future<void> resendOTP() async {
     if (canResend) {
-      final url =
-          Uri.parse('https://514b-212-57-208-72.ngrok-free.app/send-otp');
+      final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -178,8 +181,7 @@ class _OTPPageState extends State<OTPPage> {
         });
         startResendOTPCountdown();
       } else {
-        showNotification(
-            'فشل في إعادة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.');
+        showNotification('فشل في إعادة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.');
       }
     }
   }
@@ -194,7 +196,7 @@ class _OTPPageState extends State<OTPPage> {
     if (phoneNumber.length > 4) {
       return '0' + phoneNumber.substring(4);
     }
-    return phoneNumber; // Return as is if less than 4 digits
+    return phoneNumber;
   }
 
   @override

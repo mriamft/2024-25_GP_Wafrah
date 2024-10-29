@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // Send request to the server to validate login
-      final url = Uri.parse('https://514b-212-57-208-72.ngrok-free.app/login');
+      final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -88,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://514b-212-57-208-72.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},

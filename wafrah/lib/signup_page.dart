@@ -66,7 +66,7 @@ bool _isConfirmPasswordVisible = false;
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url =
-        Uri.parse('https://514b-212-57-208-72.ngrok-free.app/checkPhoneNumber');
+        Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -90,7 +90,7 @@ bool _isConfirmPasswordVisible = false;
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse('https://514b-212-57-208-72.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -146,7 +146,7 @@ bool _isConfirmPasswordVisible = false;
 
     if (!validatePassword(password)) {
       showNotification(
-          'حدث خطأ ما\nرمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص');
+          'حدث خطأ ما\nرمز المرور لا يحقق الشروط المذكورة');
       return;
     }
 

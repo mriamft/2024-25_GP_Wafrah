@@ -139,7 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   backgroundColor: Colors.grey, // Grey color for success
-                  duration: Duration(seconds: 2),
+                  duration: Duration(seconds: 5), // Keep notification for 5 seconds
                 ),
               );
             },
