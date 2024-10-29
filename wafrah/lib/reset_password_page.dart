@@ -81,7 +81,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://3731-82-167-74-251.ngrok-free.app/reset-password'),
+        Uri.parse('https://514b-212-57-208-72.ngrok-free.app/reset-password'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -317,7 +317,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   elevation: 5,
                 ),
                 onPressed: _showResetConfirmationDialog,
-                child: Text('تعديل', style: TextStyle(fontSize: 20, fontFamily: 'GE-SS-Two-Light')),
+                child: Text('تعديل', style: TextStyle(color: Colors.white, fontSize: 20, fontFamily: 'GE-SS-Two-Light')),
               ),
             ),
           ),

@@ -8,19 +8,16 @@ import 'banks_page.dart'; // Import the BanksPage file
 class AccLinkPage extends StatefulWidget {
   final String userName; // Accept userName from previous page
   final String phoneNumber; // Accept phoneNumber from previous page
-
-  const AccLinkPage(
-      {super.key,
-      required this.userName,
-      required this.phoneNumber}); // Constructor
+  
+  const AccLinkPage({required this.userName, required this.phoneNumber}); // Constructor
 
   @override
   _AccLinkPageState createState() => _AccLinkPageState();
 }
 
 class _AccLinkPageState extends State<AccLinkPage> {
-  Color _arrowColor = const Color(0xFF3D3D3D); // Default arrow color
-  final ApiService _apiService = ApiService(); // Initialize ApiService
+  Color _arrowColor = Color(0xFF3D3D3D); // Default arrow color
+  final ApiService _apiService = ApiService();  // Initialize ApiService
   String _accessToken = '';
   String _authorizationCode = '';
   String _finalAccessToken = '';
@@ -44,8 +41,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
     _sub = linkStream.listen((String? link) {
       if (link != null) {
         Uri uri = Uri.parse(link);
-        String? code =
-            uri.queryParameters['code']; // Extract the authorization code
+        String? code = uri.queryParameters['code']; // Extract the authorization code
         if (code != null) {
           setState(() {
             _authorizationCode = code;
@@ -82,6 +78,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
       // Step 6: Compute Authorization Code URL and Launch Browser
       String authorizationUrl = await _apiService.computeAuthorizationCodeUrl();
       await launch(authorizationUrl, forceSafariVC: false, forceWebView: false);
+
     } catch (e) {
       _showErrorDialog('Error during API process: $e');
     }
@@ -95,8 +92,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
         return;
       }
 
-      String token =
-          await _apiService.exchangeCodeForAccessToken(_authorizationCode);
+      String token = await _apiService.exchangeCodeForAccessToken(_authorizationCode);
       setState(() {
         _finalAccessToken = token;
       });
@@ -104,15 +100,12 @@ class _AccLinkPageState extends State<AccLinkPage> {
       // Step: Get Account Details (Before fetching transactions)
       await _getAccountDetails(); // Fetch account details and store them
 
-      // Step 8: Get Accounts
-      await _apiService.getAllAccountTransactions(_finalAccessToken);
-
-      // Step 9: Get Transactions for All Accounts
+      // Step 8 & 9: Get Transactions for All Accounts
       await _apiService.getAllAccountTransactions(_finalAccessToken);
 
       // Show success dialog
-      _showSuccessDialog(
-          'Connection successful! Your bank account has been linked.');
+      _showSuccessDialog('Connection successful! Your bank account has been linked.');
+
     } catch (e) {
       _showErrorDialog('Error exchanging authorization code: $e');
     }
@@ -120,9 +113,8 @@ class _AccLinkPageState extends State<AccLinkPage> {
 
   Future<void> _getAccountDetails() async {
     try {
-      final List<dynamic> accounts =
-          await _apiService.getAccountDetails(_finalAccessToken);
-
+      final List<dynamic> accounts = await _apiService.getAccountDetails(_finalAccessToken);
+    
       List<Map<String, dynamic>> accountsWithBalances = [];
 
       for (var account in accounts) {
@@ -131,26 +123,19 @@ class _AccLinkPageState extends State<AccLinkPage> {
         String iban = account['AccountIdentifiers'][0]['Identification'];
 
         // Fetch balance for the current account
-        Map<String, dynamic> balanceData =
-            await _apiService.getAccountBalance(_finalAccessToken, accountId);
-        String balance =
-            balanceData['Amount']; // Extract just the amount without currency
+        Map<String, dynamic> balanceData = await _apiService.getAccountBalance(_finalAccessToken, accountId);
+        String balance = balanceData['Amount'];  // Extract just the amount without currency
 
         // Fetch transactions for this account
-        Map<String, dynamic> transactionData = await _apiService
-            .getAccountTransactions(_finalAccessToken, accountId);
-        List<dynamic> transactions = transactionData['Data']
-            ['Transaction']; // Extract the list of transactions
-
-        // Debugging output to verify transactions for each account
-        print('Account ID: $accountId, Transactions: ${transactions.length}');
+        Map<String, dynamic> transactionData = await _apiService.getAccountTransactions(_finalAccessToken, accountId);
+        List<dynamic> transactions = transactionData['Data']['Transaction']; // Extract the list of transactions
 
         // Add account details along with the balance and transactions to the list
         accountsWithBalances.add({
           'IBAN': iban,
           'AccountSubType': accountSubType,
-          'Balance': balance, // Only the balance without currency
-          'transactions': transactions, // Add transactions to the account
+          'Balance': balance,
+          'transactions': transactions,
         });
       }
 
@@ -158,8 +143,6 @@ class _AccLinkPageState extends State<AccLinkPage> {
         setState(() {
           _accounts = accountsWithBalances;
         });
-
-        _redirectToBanksPage(); // Redirect after fetching details
       }
     } catch (e) {
       if (mounted) {
@@ -190,11 +173,11 @@ class _AccLinkPageState extends State<AccLinkPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Success'),
+          title: Text('Success'),
           content: Text(successMessage),
           actions: [
             TextButton(
-              child: const Text('OK'),
+              child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
                 _redirectToBanksPage(); // Redirect after success
@@ -214,11 +197,11 @@ class _AccLinkPageState extends State<AccLinkPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Error'),
+          title: Text('Error'),
           content: Text(errorMessage),
           actions: [
             TextButton(
-              child: const Text('OK'),
+              child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -232,7 +215,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor: Color(0xFFF9F9F9),
       body: Stack(
         children: [
           // Back Arrow
@@ -244,12 +227,21 @@ class _AccLinkPageState extends State<AccLinkPage> {
                 setState(() {
                   _arrowColor = Colors.grey; // Change color on press
                 });
-                Future.delayed(const Duration(milliseconds: 100), () {
+                Future.delayed(Duration(milliseconds: 100), () {
                   setState(() {
-                    _arrowColor = const Color(
-                        0xFF3D3D3D); // Reset color after a short delay
+                    _arrowColor = Color(0xFF3D3D3D); // Reset color after a short delay
                   });
-                  Navigator.pop(context); // Navigate back to settings page
+                  // Navigate to BanksPage instead of popping the screen
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BanksPage(
+                        userName: widget.userName,
+                        phoneNumber: widget.phoneNumber,
+                        accounts: _accounts, // Pass any necessary account data here
+                      ),
+                    ),
+                  );
                 });
               },
               child: Icon(
@@ -261,7 +253,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
           ),
 
           // Title
-          const Positioned(
+          Positioned(
             top: 58,
             left: 135,
             child: Text(
@@ -270,14 +262,13 @@ class _AccLinkPageState extends State<AccLinkPage> {
                 color: Color(0xFF3D3D3D),
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                fontFamily:
-                    'GE-SS-Two-Bold', // Use the same font as the project
+                fontFamily: 'GE-SS-Two-Bold', // Use the same font as the project
               ),
             ),
           ),
 
           // Instruction Text 1
-          const Positioned(
+          Positioned(
             top: 130,
             left: 28,
             child: Text(
@@ -292,10 +283,10 @@ class _AccLinkPageState extends State<AccLinkPage> {
           ),
 
           // Instruction Text 2
-          const Positioned(
+          Positioned(
             top: 152,
             left: 49,
-            child: SizedBox(
+            child: Container(
               width: 300, // Set width for better wrapping
               child: Text(
                 'أنت الآن تسمح لنا بقراءة بياناتك المصرفية من حسابك البنكي، نقوم بذلك من خلال معايير الخدمات المصرفية المفتوحة والتي تسمح لنا بالحصول على معلوماتك وعرضها في وفرة دون معرفة بيانات اعتمادك البنكية (مثل كلمة السر لحسابك البنكي)',
@@ -310,7 +301,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
           ),
 
           // Instruction Text 3
-          const Positioned(
+          Positioned(
             top: 260,
             left: 60,
             child: Text(
@@ -331,12 +322,12 @@ class _AccLinkPageState extends State<AccLinkPage> {
               width: 330,
               height: 50,
               decoration: BoxDecoration(
-                color: const Color(0xFFD9D9D9),
+                color: Color(0xFFD9D9D9),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
+              child: Center(
                 child: Padding(
-                  padding: EdgeInsets.only(left: 35.0), // Add left padding
+                  padding: const EdgeInsets.only(left: 35.0), // Add left padding
                   child: Text(
                     'ساما (البنك السعودي المركزي)',
                     style: TextStyle(
@@ -360,7 +351,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
               height: 47,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3D3D3D), // Background color
+                  backgroundColor: Color(0xFF3D3D3D), // Background color
                   foregroundColor: Colors.white, // Text color
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(100), // Rounded corners
@@ -368,14 +359,12 @@ class _AccLinkPageState extends State<AccLinkPage> {
                   shadowColor: Colors.black, // Shadow color
                   elevation: 5, // Shadow elevation
                 ),
-                onPressed:
-                    _startApiProcess, // Trigger full API process when button is pressed
-                child: const Text(
+                onPressed: _startApiProcess, // Trigger full API process when button is pressed
+                child: Text(
                   'الاستمرار في اجراءات الربط',
                   style: TextStyle(
                     fontSize: 18,
-                    fontFamily:
-                        'GE-SS-Two-Light', // Use the same font as the project
+                    fontFamily: 'GE-SS-Two-Light', // Use the same font as the project
                   ),
                 ),
               ),

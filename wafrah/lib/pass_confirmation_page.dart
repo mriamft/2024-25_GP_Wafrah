@@ -88,7 +88,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
   }
 
   Future<void> resetPassword(String phoneNumber, String newPassword) async {
-    final url = Uri.parse('https://3731-82-167-74-251.ngrok-free.app/forget-password');
+    final url = Uri.parse('https://514b-212-57-208-72.ngrok-free.app/forget-password');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
