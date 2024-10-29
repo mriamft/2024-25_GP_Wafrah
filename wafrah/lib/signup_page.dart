@@ -197,17 +197,20 @@ bool _isConfirmPasswordVisible = false;
                     ),
                   ),
                 ),
-                Positioned(
-                  left: 140,
-                  top: 130,
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    width: 90,
-                    height: 82,
+                 Positioned(
+                  left: -1, // Adjusted x position
+                  top: -99, // Adjusted y position
+                  child: Opacity(
+                    opacity: 0.15, // 15% opacity
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 509,
+                      height: 470,
+                    ),
                   ),
                 ),
                 _buildInputField(
-                  top: 235,
+                  top: 200,
                   hintText: 'الاسم الأول',
                   controller: firstNameController,
                 ),
