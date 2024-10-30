@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart'; // Import for URL launching
 import 'package:uni_links/uni_links.dart';
 import 'dart:async';
 import 'banks_page.dart'; // Import the BanksPage file
+import 'transactions_page.dart';
 
 class AccLinkPage extends StatefulWidget {
   final String userName; // Accept userName from previous page
@@ -100,7 +101,10 @@ class _AccLinkPageState extends State<AccLinkPage> {
       // Step: Get Account Details (Before fetching transactions)
       await _getAccountDetails(); // Fetch account details and store them
 
-      // Step 8 & 9: Get Transactions for All Accounts
+      // Step 8: Get Accounts
+      await _apiService.getAllAccountTransactions(_finalAccessToken);
+
+      // Step 9: Get Transactions for All Accounts
       await _apiService.getAllAccountTransactions(_finalAccessToken);
 
       // Show success dialog
@@ -112,44 +116,44 @@ class _AccLinkPageState extends State<AccLinkPage> {
   }
 
   Future<void> _getAccountDetails() async {
-    try {
-      final List<dynamic> accounts = await _apiService.getAccountDetails(_finalAccessToken);
+  try {
+    final List<dynamic> accounts = await _apiService.getAccountDetails(_finalAccessToken);
     
-      List<Map<String, dynamic>> accountsWithBalances = [];
+    List<Map<String, dynamic>> accountsWithBalances = [];
 
-      for (var account in accounts) {
-        String accountId = account['AccountId'];
-        String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
-        String iban = account['AccountIdentifiers'][0]['Identification'];
+    for (var account in accounts) {
+      String accountId = account['AccountId'];
+      String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
+      String iban = account['AccountIdentifiers'][0]['Identification'];
 
-        // Fetch balance for the current account
-        Map<String, dynamic> balanceData = await _apiService.getAccountBalance(_finalAccessToken, accountId);
-        String balance = balanceData['Amount'];  // Extract just the amount without currency
+      // Fetch balance for the current account
+      String balance = await _apiService.getAccountBalance(_finalAccessToken, accountId);
 
-        // Fetch transactions for this account
-        Map<String, dynamic> transactionData = await _apiService.getAccountTransactions(_finalAccessToken, accountId);
-        List<dynamic> transactions = transactionData['Data']['Transaction']; // Extract the list of transactions
+      // Fetch transactions for this account
+      List<Map<String, dynamic>> transactions = await _apiService.getAccountTransactions(_finalAccessToken, accountId);
 
-        // Add account details along with the balance and transactions to the list
-        accountsWithBalances.add({
-          'IBAN': iban,
-          'AccountSubType': accountSubType,
-          'Balance': balance,
-          'transactions': transactions,
-        });
-      }
+      // Add account details along with the balance and transactions to the list
+      accountsWithBalances.add({
+        'IBAN': iban,
+        'AccountSubType': accountSubType,
+        'Balance': balance, // Only the balance without currency
+        'transactions': transactions, // Add transactions to the account
+      });
+    }
 
-      if (mounted) {
-        setState(() {
-          _accounts = accountsWithBalances;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        _showErrorDialog('Error fetching account details or balance: $e');
-      }
+    if (mounted) {
+      setState(() {
+        _accounts = accountsWithBalances;
+      });
+
+      _redirectToBanksPage(); // Redirect after fetching details
+    }
+  } catch (e) {
+    if (mounted) {
+      _showErrorDialog('Error fetching account details or balance: $e');
     }
   }
+}
 
   // Step 10: Redirect to BanksPage with accounts
   void _redirectToBanksPage() {
@@ -165,7 +169,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
     );
   }
 
-  // Dialog for success message
+ // Dialog for success message
   void _showSuccessDialog(String successMessage) {
     if (!mounted) return;
 
@@ -231,17 +235,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
                   setState(() {
                     _arrowColor = Color(0xFF3D3D3D); // Reset color after a short delay
                   });
-                  // Navigate to BanksPage instead of popping the screen
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BanksPage(
-                        userName: widget.userName,
-                        phoneNumber: widget.phoneNumber,
-                        accounts: _accounts, // Pass any necessary account data here
-                      ),
-                    ),
-                  );
+                  Navigator.pop(context); // Navigate back to settings page
                 });
               },
               child: Icon(

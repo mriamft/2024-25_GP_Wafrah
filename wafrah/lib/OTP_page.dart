@@ -38,9 +38,10 @@ class _OTPPageState extends State<OTPPage> {
   bool showErrorNotification = false;
   String errorMessage = '';
   Color notificationColor = Colors.red;
+Timer? _timer; // Nullable Timer instance
+  Timer? _notificationTimer; // Timer for showNotification timeout
 
   bool canResend = false;
-  late Timer _timer;
   int resendTimeLeft = 120; // 2 minutes in seconds
 
   @override
@@ -49,18 +50,39 @@ class _OTPPageState extends State<OTPPage> {
     startResendOTPCountdown();
   }
 
-  void startResendOTPCountdown() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+@override
+void dispose() {
+  _timer?.cancel(); // Cancel the resend timer
+  _notificationTimer?.cancel(); // Cancel the notification timer if active
+  
+  // Dispose text controllers
+  otpController1.dispose();
+  otpController2.dispose();
+  otpController3.dispose();
+  otpController4.dispose();
+  otpController5.dispose();
+  otpController6.dispose();
+
+  super.dispose();
+}
+
+
+void startResendOTPCountdown() {
+  _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    if (mounted) {
       setState(() {
         if (resendTimeLeft > 0) {
           resendTimeLeft--;
         } else {
           canResend = true;
-          _timer.cancel();
+          _timer?.cancel();
         }
       });
-    });
-  }
+    } else {
+      _timer?.cancel();
+    }
+  });
+}
 
   String getOTP() {
     return otpController1.text +
@@ -71,19 +93,25 @@ class _OTPPageState extends State<OTPPage> {
         otpController6.text;
   }
 
-  void showNotification(String message, {Color color = Colors.red}) {
-    setState(() {
-      errorMessage = message;
-      notificationColor = color;
-      showErrorNotification = true;
-    });
+void showNotification(String message, {Color color = Colors.red}) {
+  if (!mounted) return; // Ensure widget is still in the widget tree
+  
+  setState(() {
+    errorMessage = message;
+    notificationColor = color;
+    showErrorNotification = true;
+  });
 
-    Timer(const Duration(seconds: 5), () {
+  // Cancel any previous notification timer
+  _notificationTimer?.cancel();
+  _notificationTimer = Timer(const Duration(seconds: 5), () {
+    if (mounted) {
       setState(() {
         showErrorNotification = false;
       });
-    });
-  }
+    }
+  });
+}
 
   Future<void> verifyOTP() async {
     String otp = getOTP();
@@ -92,7 +120,7 @@ class _OTPPageState extends State<OTPPage> {
       return;
     }
 
-    final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/verify-otp');
+    final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -135,7 +163,7 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/adduser');
+    final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -167,7 +195,7 @@ class _OTPPageState extends State<OTPPage> {
 
   Future<void> resendOTP() async {
     if (canResend) {
-      final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/send-otp');
+      final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -186,11 +214,7 @@ class _OTPPageState extends State<OTPPage> {
     }
   }
 
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
+
 
   String formatPhoneNumber(String phoneNumber) {
     if (phoneNumber.length > 4) {

@@ -201,7 +201,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
 
             // Title
             const Positioned(
-              top: 263,
+              top: 230,
               left: 75,
               child: Text(
                 'تغيير كلمة المرور',
@@ -216,7 +216,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
 
             // Password Input Fields
             _buildInputField(
-              top: 320,
+              top: 280,
               hintText: 'رمز المرور',
               controller: passwordController,
               obscureText: !_isPasswordVisible,
@@ -234,7 +234,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
               onChanged: validatePasswordInput,
             ),
             _buildInputField(
-              top: 400,
+              top: 350,
               hintText: 'تأكيد رمز المرور',
               controller: confirmPasswordController,
               obscureText: !_isConfirmPasswordVisible,
@@ -255,7 +255,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
             Positioned(
               left: 24,
               right: 10,
-              top: 465,
+              top: 420,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [

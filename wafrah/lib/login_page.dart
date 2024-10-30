@@ -28,23 +28,39 @@ class _LoginPageState extends State<LoginPage> {
   Color _signupColor = Colors.white; // Default color for the signup text
 
   bool _isPasswordVisible = false;
+  Timer? _notificationTimer; // Timer instance
 
 
   // Show notification method
-  void showNotification(String message,
-      {Color color = const Color(0xFFC62C2C)}) {
-    setState(() {
-      errorMessage = message;
-      notificationColor = color; // Set notification color dynamically
-      showErrorNotification = true;
-    });
+void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
+  setState(() {
+    errorMessage = message;
+    notificationColor = color;
+    showErrorNotification = true;
+  });
 
-    Timer(const Duration(seconds: 10), () {
+  // Cancel any existing timer to prevent multiple timers from stacking
+  _notificationTimer?.cancel();
+
+  // Start a new timer and store it in _notificationTimer
+  _notificationTimer = Timer(const Duration(seconds: 10), () {
+    if (mounted) { // Check if the widget is still in the widget tree
       setState(() {
         showErrorNotification = false;
       });
-    });
-  }
+    }
+  });
+}
+
+
+  @override
+void dispose() {
+  _notificationTimer?.cancel(); // Cancel the Timer if active
+  phoneNumberController.dispose();
+  passwordController.dispose();
+  super.dispose();
+}
+
 
   // Handle login logic with API call
   Future<void> handleLogin() async {
@@ -58,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // Send request to the server to validate login
-      final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/login');
+      final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -88,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -119,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Container(
@@ -133,45 +149,85 @@ class _LoginPageState extends State<LoginPage> {
             child: Stack(
               children: [
                 // Back Arrow Icon
-                Positioned(
-                  top: 60,
-                  right: 15,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    onTapDown: (_) {
-                      setState(() {
-                        _arrowColor = Colors.grey;
-                      });
-                    },
-                    onTapUp: (_) {
-                      setState(() {
-                        _arrowColor = Colors.white;
-                      });
-                    },
-                    onTapCancel: () {
-                      setState(() {
-                        _arrowColor = Colors.white;
-                      });
-                    },
-                    child: Icon(
-                      Icons.arrow_forward_ios,
-                      color: _arrowColor,
-                      size: 28,
-                    ),
-                  ),
+               Positioned(
+
+              top: 60,
+
+              right: 15,
+
+              child: GestureDetector(
+
+                onTap: () {
+
+                  Navigator.pop(context);
+
+                },
+
+                onTapDown: (_) {
+
+                  setState(() {
+
+                    _arrowColor = Colors.grey;
+
+                  });
+
+                },
+
+                onTapUp: (_) {
+
+                  setState(() {
+
+                    _arrowColor = Colors.white;
+
+                  });
+
+                },
+
+                onTapCancel: () {
+
+                  setState(() {
+
+                    _arrowColor = Colors.white;
+
+                  });
+
+                },
+
+                child: Icon(
+
+                  Icons.arrow_forward_ios,
+
+                  color: _arrowColor,
+
+                  size: 28,
+
                 ),
 
-                // Logo Image
-                Positioned(
-                  left: 140,
-                  top: 161,
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    width: 90,
-                    height: 82,
+              ),
+
+            ),
+            Positioned(
+
+                  left: -1, // Adjusted x position
+
+                  top: -99, // Adjusted y position
+
+                  child: Opacity(
+
+                    opacity: 0.05, // 15% opacity
+
+                    child: Image.asset(
+
+                      'assets/images/logo.png',
+
+                      width: 509,
+
+                      height: 470,
+
+                    ),
+
                   ),
+
                 ),
 
                 // Phone Number Input Field with Gradient Bar
@@ -304,7 +360,7 @@ Positioned(
                           BoxShadow(
                             color: Colors.black.withOpacity(0.5),
                             blurRadius: 10,
-                            offset: const Offset(0, 5),
+                            offset: const Offset(0.4, -5),
                           ),
                         ],
                       ),

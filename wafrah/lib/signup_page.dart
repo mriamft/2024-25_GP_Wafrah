@@ -31,6 +31,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _isPasswordVisible = false;
 bool _isConfirmPasswordVisible = false;
+Timer? _notificationTimer;
 
 
   // State variables to track password criteria
@@ -41,32 +42,44 @@ bool _isConfirmPasswordVisible = false;
   bool isSymbolValid = false;
 
   // Show notification method
-  void showNotification(String message,
-      {Color color = const Color(0xFFC62C2C)}) {
-    setState(() {
-      errorMessage = message;
-      notificationColor = color; // Set the dynamic color
-      showErrorNotification = true;
-    });
+void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
+  setState(() {
+    errorMessage = message;
+    notificationColor = color;
+    showErrorNotification = true;
+  });
 
-    Timer(const Duration(seconds: 10), () {
+  // Cancel any previous timer to prevent multiple timers from stacking
+  _notificationTimer?.cancel();
+  _notificationTimer = Timer(const Duration(seconds: 10), () {
+    if (mounted) {
       setState(() {
         showErrorNotification = false;
       });
-    });
-  }
+    }
+  });
+}
+@override
+void dispose() {
+  _notificationTimer?.cancel(); // Safely cancel the timer if active
+  
+  // Dispose text controllers to avoid memory leaks
+  firstNameController.dispose();
+  lastNameController.dispose();
+  phoneNumberController.dispose();
+  passwordController.dispose();
+  confirmPasswordController.dispose();
+
+  super.dispose();
+}
 
   // Method to validate password complexity
-  bool validatePassword(String password) {
-    final RegExp passwordRegExp =
-        RegExp(r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[!@#\$&*~]).{8,}$');
-    return passwordRegExp.hasMatch(password);
-  }
+  
 
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url =
-        Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/checkPhoneNumber');
+        Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -90,7 +103,7 @@ bool _isConfirmPasswordVisible = false;
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -144,7 +157,7 @@ bool _isConfirmPasswordVisible = false;
       return;
     }
 
-    if (!validatePassword(password)) {
+    if (!validatePasswordInput(password)) {
       showNotification(
           'حدث خطأ ما\nرمز المرور لا يحقق الشروط المذكورة');
       return;
@@ -155,19 +168,38 @@ bool _isConfirmPasswordVisible = false;
   }
 
   // Updated method to validate password complexity
-  void validatePasswordInput(String password) {
-    setState(() {
-      isLengthValid = password.length >= 8;
-      isNumberValid = password.contains(RegExp(r'\d'));
-      isLowercaseValid = password.contains(RegExp(r'[a-z]'));
-      isUppercaseValid = password.contains(RegExp(r'[A-Z]'));
-      isSymbolValid = password.contains(RegExp(r'[!@#\$&*~]'));
-    });
-  }
+  bool validatePasswordInput(String password) {
+
+  bool isValid = false;
+
+  setState(() {
+
+    isLengthValid = password.length >= 8;
+
+    isNumberValid = password.contains(RegExp(r'\d'));
+
+    isLowercaseValid = password.contains(RegExp(r'[a-z]'));
+
+    isUppercaseValid = password.contains(RegExp(r'[A-Z]'));
+
+    isSymbolValid = password.contains(RegExp(r'[!@#\$&*~]'));
+
+ 
+
+    // Check if all conditions are met
+
+    isValid = isLengthValid && isNumberValid && isLowercaseValid && isUppercaseValid && isSymbolValid;
+
+  });
+
+  return isValid;
+
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Container(
@@ -201,7 +233,7 @@ bool _isConfirmPasswordVisible = false;
                   left: -1, // Adjusted x position
                   top: -99, // Adjusted y position
                   child: Opacity(
-                    opacity: 0.15, // 15% opacity
+                    opacity: 0.05, // 15% opacity
                     child: Image.asset(
                       'assets/images/logo.png',
                       width: 509,
@@ -210,28 +242,28 @@ bool _isConfirmPasswordVisible = false;
                   ),
                 ),
                 _buildInputField(
-                  top: 200,
+                  top: 140,
                   hintText: 'الاسم الأول',
                   controller: firstNameController,
                 ),
                 _buildInputField(
-                  top: 300,
+                  top: 190,
                   hintText: 'الاسم الأخير',
                   controller: lastNameController,
                 ),
                 _buildInputField(
-                  top: 365,
+                  top: 240,
                   hintText: '(+966555555555) رقم الجوال',
                   controller: phoneNumberController,
                   keyboardType: TextInputType.phone,
                 ),
               _buildInputField(
-  top: 430,
+  top: 290,
   hintText: 'رمز المرور',
   controller: passwordController,
   obscureText: !_isPasswordVisible, // Toggle visibility based on state
   prefixIcon: Padding(
-    padding: const EdgeInsets.only(left: 30.0), // Adjust padding to move icon slightly right
+    padding: const EdgeInsets.only(left: 5.0), // Adjust padding to move icon slightly right
     child: IconButton(
       icon: Icon(
         _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -248,12 +280,12 @@ bool _isConfirmPasswordVisible = false;
 ),
 
             _buildInputField(
-  top: 495,
+  top: 340,
   hintText: 'تأكيد رمز المرور',
   controller: confirmPasswordController,
   obscureText: !_isConfirmPasswordVisible, // Toggle visibility based on state
   prefixIcon: Padding(
-    padding: const EdgeInsets.only(left: 30.0), // Adjust padding to move icon slightly right
+    padding: const EdgeInsets.only(left: 5.0), // Adjust padding to move icon slightly right
     child: IconButton(
       icon: Icon(
         _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -272,7 +304,7 @@ bool _isConfirmPasswordVisible = false;
                 Positioned(
                   left: 24,
                   right: 10,
-                  top: 570,
+                  top: 400,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [

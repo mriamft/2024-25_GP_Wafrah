@@ -171,6 +171,29 @@ class TransactionsPage extends StatelessWidget {
               ),
             ),
           ),
+           Positioned(
+
+            right: 225,
+
+            top: 762,
+
+            child: Container(
+
+              width: 6,
+
+              height: 6,
+
+              decoration: BoxDecoration(
+
+                color: Color(0xFF2C8C68), // Point color
+
+                shape: BoxShape.circle,
+
+              ),
+
+            ),
+
+          ),
 
           // Circular Button for Banks Page
           Positioned(

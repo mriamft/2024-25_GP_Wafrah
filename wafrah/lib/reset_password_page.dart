@@ -97,7 +97,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://aae9-2001-16a2-c042-93d9-581d-dbf3-dd15-5a6.ngrok-free.app/reset-password'),
+        Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/reset-password'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
