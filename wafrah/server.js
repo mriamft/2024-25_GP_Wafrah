@@ -35,6 +35,7 @@ const db = mysql.createConnection({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   port: process.env.DB_PORT,
+
 });
  
 
@@ -270,15 +271,19 @@ app.post('/login', (req, res) => {
 });
 
  
-
-// Route to update user's password (for password reset - "Forgot Password" feature)
 app.post('/forget-password', async (req, res) => {
   const { phoneNumber, newPassword } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-    let sql = 'UPDATE user SET password = ? WHERE phoneNumber = ?';
+    const sql = 'UPDATE user SET password = ? WHERE phoneNumber = ?';
     db.query(sql, [hashedPassword, phoneNumber], (err, result) => {
-      if (err) throw err;
+      if (err) {
+        console.error('Error during password update:', err);
+        return res.status(500).send('Server error during password reset');
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).send('User not found');
+      }
       res.send('Password updated successfully');
     });
   } catch (err) {
@@ -286,6 +291,7 @@ app.post('/forget-password', async (req, res) => {
     res.status(500).send('Server error during password reset');
   }
 });
+
 
 app.post('/reset-password', async (req, res) => {
   const { phoneNumber, currentPassword, newPassword } = req.body;

@@ -252,8 +252,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
           // Point under "إعدادات"
           Positioned(
-            right: 320,
-            top: 762,
+            right: 350,
+            top: 790,
             child: Container(
               width: 6,
               height: 6,

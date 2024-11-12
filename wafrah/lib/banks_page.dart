@@ -407,19 +407,13 @@ class BanksPage extends StatelessWidget {
 
                 },
 
-                style: OutlinedButton.styleFrom(
-
-                  shape: RoundedRectangleBorder(
-
-                    borderRadius: BorderRadius.circular(25),
-
-                  ),
-
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-
-                  side: BorderSide(color: Color(0xFF3D3D3D)),
-
-                ),
+                style: TextButton.styleFrom(
+    backgroundColor: Colors.transparent, // Ensures no background color
+    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(25),
+    ),
+  ),
 
                 child: Row(
 

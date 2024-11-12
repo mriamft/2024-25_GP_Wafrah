@@ -79,7 +79,7 @@ void dispose() {
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url =
-        Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/checkPhoneNumber');
+        Uri.parse('https://0879-2001-16a2-c527-6700-2cd3-bb86-1aa2-5183.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -103,7 +103,7 @@ void dispose() {
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://0879-2001-16a2-c527-6700-2cd3-bb86-1aa2-5183.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},

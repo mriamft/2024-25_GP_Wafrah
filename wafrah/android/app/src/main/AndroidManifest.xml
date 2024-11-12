@@ -24,6 +24,13 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter android:label="authorization_code_handler">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Capture myapp://callback -->
+                <data android:scheme="wafrah2" android:host="auth-callback" />
+            </intent-filter>
             <!-- Intent filter to capture the deep link (custom scheme) for authorization code -->
             <intent-filter android:label="authorization_code_handler">
                 <action android:name="android.intent.action.VIEW" />

@@ -97,7 +97,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/reset-password'),
+        Uri.parse('https://564d-2001-16a2-c042-93d9-1d19-1bdf-6bd3-c210.ngrok-free.app/reset-password'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -111,7 +111,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       if (response.statusCode == 200) {
         showNotification(
           'تم تعديل كلمة المرور بنجاح',
-          color: Colors.grey,
+          color: Color(0xFF07746A2A996F),
           navigateAfter: true,
         );
       } else {

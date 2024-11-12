@@ -120,7 +120,7 @@ void showNotification(String message, {Color color = Colors.red}) {
       return;
     }
 
-    final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/verify-otp');
+    final url = Uri.parse('https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -131,7 +131,7 @@ void showNotification(String message, {Color color = Colors.red}) {
     );
 
     if (response.statusCode == 200) {
-      showNotification('تم التحقق بنجاح', color: Colors.grey);
+      showNotification('تم التحقق بنجاح', color: Color(0xFF07746A2A996F));
 
       Timer(const Duration(seconds: 2), () {
         if (widget.isForget) {
@@ -163,7 +163,7 @@ void showNotification(String message, {Color color = Colors.red}) {
   }
 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/adduser');
+    final url = Uri.parse('https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -175,7 +175,7 @@ void showNotification(String message, {Color color = Colors.red}) {
     );
 
     if (response.statusCode == 200) {
-      showNotification("تم التسجيل بنجاح", color: Colors.grey);
+      showNotification("تم التسجيل بنجاح", color: Color(0xFF07746A2A996F));
 
       Timer(const Duration(seconds: 2), () {
         Navigator.pushReplacement(
@@ -195,7 +195,7 @@ void showNotification(String message, {Color color = Colors.red}) {
 
   Future<void> resendOTP() async {
     if (canResend) {
-      final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/send-otp');
+      final url = Uri.parse('https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

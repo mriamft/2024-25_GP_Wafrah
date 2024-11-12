@@ -173,9 +173,9 @@ class TransactionsPage extends StatelessWidget {
           ),
            Positioned(
 
-            right: 225,
+            right: 245,
 
-            top: 762,
+            top: 790,
 
             child: Container(
 
@@ -268,7 +268,7 @@ class TransactionsPage extends StatelessWidget {
       'WithdrawalReversal': 'سحب عكسي',
       'Withdrawal': 'سحب مبلغ',
       'Deposit': 'إيداع',
-      'NotApplicable': 'غير محدد',
+      'NotApplicable': 'سحب مبلغ',
       'Purchase': 'شراء بضاعة',
       'Refund': 'إعادة مبلغ',
       'DepositReversal': 'إيداع عكسي',
