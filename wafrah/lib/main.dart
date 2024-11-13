@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'login_page.dart';
-import 'package:wafrah/signup_page.dart' as signup;
 import 'info_page.dart';
 
 void main() {
@@ -145,7 +144,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => InfoPage(),
+                            builder: (context) => const InfoPage(),
                           ),
                         );
                         // Delay resetting the drag value to create a smooth transition
@@ -184,7 +183,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   top: 17,
                   child: Opacity(
                     opacity: (1 - _dragValue).clamp(0.0, 1.0),
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_back_ios,
                       color: Colors.white,
                       size: 17,
@@ -196,7 +195,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   top: 17,
                   child: Opacity(
                     opacity: (0.7 - _dragValue).clamp(0.0, 1.0),
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_back_ios,
                       color: Colors.white,
                       size: 17,
@@ -208,7 +207,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   top: 17,
                   child: Opacity(
                     opacity: (0.5 - _dragValue).clamp(0.0, 1.0),
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_back_ios,
                       color: Colors.white,
                       size: 17,

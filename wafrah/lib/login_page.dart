@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:wafrah/OTP_page.dart';
+import 'package:wafrah/home_page.dart';
 import 'package:wafrah/forget_pass_page.dart';
 import 'package:wafrah/signup_page.dart' as signup;
 import 'package:http/http.dart' as http;
@@ -30,37 +31,36 @@ class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
   Timer? _notificationTimer; // Timer instance
 
-
   // Show notification method
-void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
-  setState(() {
-    errorMessage = message;
-    notificationColor = color;
-    showErrorNotification = true;
-  });
+  void showNotification(String message,
+      {Color color = const Color(0xFFC62C2C)}) {
+    setState(() {
+      errorMessage = message;
+      notificationColor = color;
+      showErrorNotification = true;
+    });
 
-  // Cancel any existing timer to prevent multiple timers from stacking
-  _notificationTimer?.cancel();
+    // Cancel any existing timer to prevent multiple timers from stacking
+    _notificationTimer?.cancel();
 
-  // Start a new timer and store it in _notificationTimer
-  _notificationTimer = Timer(const Duration(seconds: 10), () {
-    if (mounted) { // Check if the widget is still in the widget tree
-      setState(() {
-        showErrorNotification = false;
-      });
-    }
-  });
-}
-
+    // Start a new timer and store it in _notificationTimer
+    _notificationTimer = Timer(const Duration(seconds: 10), () {
+      if (mounted) {
+        // Check if the widget is still in the widget tree
+        setState(() {
+          showErrorNotification = false;
+        });
+      }
+    });
+  }
 
   @override
-void dispose() {
-  _notificationTimer?.cancel(); // Cancel the Timer if active
-  phoneNumberController.dispose();
-  passwordController.dispose();
-  super.dispose();
-}
-
+  void dispose() {
+    _notificationTimer?.cancel(); // Cancel the Timer if active
+    phoneNumberController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   // Handle login logic with API call
   Future<void> handleLogin() async {
@@ -74,7 +74,8 @@ void dispose() {
 
     try {
       // Send request to the server to validate login
-      final url = Uri.parse('https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/login');
+      final url = Uri.parse(
+          'https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -104,7 +105,8 @@ void dispose() {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/send-otp');
+    final url = Uri.parse(
+        'https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -149,85 +151,94 @@ void dispose() {
             child: Stack(
               children: [
                 // Back Arrow Icon
-               Positioned(
-
-              top: 60,
-
-              right: 15,
-
-              child: GestureDetector(
-
-                onTap: () {
-
-                  Navigator.pop(context);
-
-                },
-
-                onTapDown: (_) {
-
-                  setState(() {
-
-                    _arrowColor = Colors.grey;
-
-                  });
-
-                },
-
-                onTapUp: (_) {
-
-                  setState(() {
-
-                    _arrowColor = Colors.white;
-
-                  });
-
-                },
-
-                onTapCancel: () {
-
-                  setState(() {
-
-                    _arrowColor = Colors.white;
-
-                  });
-
-                },
-
-                child: Icon(
-
-                  Icons.arrow_forward_ios,
-
-                  color: _arrowColor,
-
-                  size: 28,
-
+                Positioned(
+                  left: (MediaQuery.of(context).size.width - 200) /
+                      2, // Center horizontally
+                  top: 700, // Position near the bottom
+                  child: GestureDetector(
+                    onTap: () {
+                      // Directly navigate to HomePage, skipping the login and OTP process
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomePage(
+                            userName: 'Admin', // Use placeholder data
+                            phoneNumber:
+                                '+966543080394', // Placeholder phone number
+                            accounts: [], // Adjust if you want specific account data
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 200,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.blue, // Set color for the backdoor button
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 10,
+                            offset: const Offset(0.4, -5),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Backdoor Login',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-
-              ),
-
-            ),
-            Positioned(
-
+                Positioned(
+                  top: 60,
+                  right: 15,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    onTapDown: (_) {
+                      setState(() {
+                        _arrowColor = Colors.grey;
+                      });
+                    },
+                    onTapUp: (_) {
+                      setState(() {
+                        _arrowColor = Colors.white;
+                      });
+                    },
+                    onTapCancel: () {
+                      setState(() {
+                        _arrowColor = Colors.white;
+                      });
+                    },
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      color: _arrowColor,
+                      size: 28,
+                    ),
+                  ),
+                ),
+                Positioned(
                   left: -1, // Adjusted x position
 
                   top: -99, // Adjusted y position
 
                   child: Opacity(
-
                     opacity: 0.05, // 15% opacity
 
                     child: Image.asset(
-
                       'assets/images/logo.png',
-
                       width: 509,
-
                       height: 470,
-
                     ),
-
                   ),
-
                 ),
 
                 // Phone Number Input Field with Gradient Bar
@@ -275,59 +286,64 @@ void dispose() {
                   ),
                 ),
 // Password Input Field with Toggle Visibility (Icon Adjusted Slightly)
-Positioned(
-  left: 24,
-  right: 24,
-  top: 380,
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.end,
-    children: [
-      TextField(
-        controller: passwordController,
-        obscureText: !_isPasswordVisible, // Toggle visibility based on state
-        textAlign: TextAlign.right,
-        decoration: InputDecoration(
-          hintText: 'رمز المرور',
-          hintStyle: const TextStyle(
-            fontFamily: 'GE-SS-Two-Light',
-            fontSize: 14,
-            color: Colors.white,
-          ),
-          border: InputBorder.none,
-          prefixIcon: Transform.translate(
-            offset: const Offset(8, -5), // Move right (8) and up (-5)
-            child: IconButton(
-              icon: Icon(
-                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isPasswordVisible = !_isPasswordVisible;
-                });
-              },
-            ),
-          ),
-          contentPadding: const EdgeInsets.only(left: 10), // Adjust content padding if needed
-        ),
-        style: const TextStyle(color: Colors.white),
-        cursorColor: Colors.white,
-      ),
-      const SizedBox(height: 5),
-      Container(
-        width: 313,
-        height: 2.95,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF60B092), Colors.white],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-        ),
-      ),
-    ],
-  ),
-),
+                Positioned(
+                  left: 24,
+                  right: 24,
+                  top: 380,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      TextField(
+                        controller: passwordController,
+                        obscureText:
+                            !_isPasswordVisible, // Toggle visibility based on state
+                        textAlign: TextAlign.right,
+                        decoration: InputDecoration(
+                          hintText: 'رمز المرور',
+                          hintStyle: const TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                          border: InputBorder.none,
+                          prefixIcon: Transform.translate(
+                            offset: const Offset(
+                                8, -5), // Move right (8) and up (-5)
+                            child: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.only(
+                              left: 10), // Adjust content padding if needed
+                        ),
+                        style: const TextStyle(color: Colors.white),
+                        cursorColor: Colors.white,
+                      ),
+                      const SizedBox(height: 5),
+                      Container(
+                        width: 313,
+                        height: 2.95,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF60B092), Colors.white],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
                 // Login Button
                 Positioned(
@@ -446,7 +462,7 @@ Positioned(
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ForgetPassPage(),
+                    builder: (context) => const ForgetPassPage(),
                   ),
                 );
               },

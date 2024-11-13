@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:wafrah/signup_page.dart'; // Import your sign-up page
 
 class InfoPage extends StatefulWidget {
+  const InfoPage({super.key});
+
   @override
   _InfoPageState createState() => _InfoPageState();
 }
@@ -46,7 +48,8 @@ class _InfoPageState extends State<InfoPage> {
                 width: 300, // Fixed width for the image
                 height: 500, // Fixed height for the image
                 child: Transform.translate(
-                  offset: Offset(0, -80), // Move the images up by 80 pixels
+                  offset:
+                      const Offset(0, -80), // Move the images up by 80 pixels
                   child: Image.asset(
                     images[index], // Display images
                     fit: BoxFit.scaleDown, // Scale down if needed
@@ -63,7 +66,7 @@ class _InfoPageState extends State<InfoPage> {
               right: 15,
               child: GestureDetector(
                 onTap: _goBack, // Navigate back to the previous page
-                child: Icon(
+                child: const Icon(
                   Icons.arrow_forward_ios,
                   color: Colors.white, // Set the arrow color to white
                   size: 28,
@@ -81,13 +84,13 @@ class _InfoPageState extends State<InfoPage> {
                   // Navigate to sign-up page
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SignUpPage()),
+                    MaterialPageRoute(builder: (context) => const SignUpPage()),
                   );
                 },
                 child: Container(
                   width: 70,
                   height: 70,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
                       begin: Alignment.topLeft,

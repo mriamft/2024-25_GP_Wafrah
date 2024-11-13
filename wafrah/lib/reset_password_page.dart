@@ -8,18 +8,21 @@ class ResetPasswordPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
 
-  ResetPasswordPage({required this.userName, required this.phoneNumber});
+  const ResetPasswordPage(
+      {super.key, required this.userName, required this.phoneNumber});
 
   @override
   _ResetPasswordPageState createState() => _ResetPasswordPageState();
 }
 
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
-  Color _arrowColor = Color(0xFF3D3D3D);
+  final Color _arrowColor = const Color(0xFF3D3D3D);
   bool _showNotification = false;
   String _notificationMessage = '';
   Color _notificationColor = Colors.red;
@@ -36,7 +39,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   bool isSymbolValid = false;
 
   // Show notification method
-  void showNotification(String message, {Color color = Colors.red, bool navigateAfter = false}) {
+  void showNotification(String message,
+      {Color color = Colors.red, bool navigateAfter = false}) {
     setState(() {
       _notificationMessage = message;
       _notificationColor = color;
@@ -77,8 +81,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (!isLengthValid || !isNumberValid || !isLowercaseValid || !isUppercaseValid || !isSymbolValid) {
-      showNotification('رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص');
+    if (!isLengthValid ||
+        !isNumberValid ||
+        !isLowercaseValid ||
+        !isUppercaseValid ||
+        !isSymbolValid) {
+      showNotification(
+          'رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص');
       return false;
     }
 
@@ -97,7 +106,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://564d-2001-16a2-c042-93d9-1d19-1bdf-6bd3-c210.ngrok-free.app/reset-password'),
+        Uri.parse(
+            'https://564d-2001-16a2-c042-93d9-1d19-1bdf-6bd3-c210.ngrok-free.app/reset-password'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -111,7 +121,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       if (response.statusCode == 200) {
         showNotification(
           'تم تعديل كلمة المرور بنجاح',
-          color: Color(0xFF07746A2A996F),
+          color: const Color(0xff07746a2a996f),
           navigateAfter: true,
         );
       } else {
@@ -127,26 +137,32 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(
+          title: const Text(
             'تأكيد إعادة تعيين كلمة المرور',
-            style: TextStyle(fontFamily: 'GE-SS-Two-Bold', color: Color(0xFF3D3D3D)),
+            style: TextStyle(
+                fontFamily: 'GE-SS-Two-Bold', color: Color(0xFF3D3D3D)),
           ),
-          content: Text(
+          content: const Text(
             'هل أنت متأكد أنك تريد إعادة تعيين كلمة المرور؟',
-            style: TextStyle(fontFamily: 'GE-SS-Two-Light', color: Color(0xFF3D3D3D)),
+            style: TextStyle(
+                fontFamily: 'GE-SS-Two-Light', color: Color(0xFF3D3D3D)),
           ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('إلغاء', style: TextStyle(fontFamily: 'GE-SS-Two-Light', color: Color(0xFF838383))),
+              child: const Text('إلغاء',
+                  style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light', color: Color(0xFF838383))),
             ),
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _resetPassword();
               },
-              child: Text('تأكيد', style: TextStyle(fontFamily: 'GE-SS-Two-Light', color: Color(0xFF2C8C68))),
+              child: const Text('تأكيد',
+                  style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light', color: Color(0xFF2C8C68))),
             ),
           ],
         ),
@@ -171,7 +187,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9),
+      backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
           Positioned(
@@ -179,21 +195,26 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             right: 15,
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
-              child: Icon(Icons.arrow_forward_ios, color: _arrowColor, size: 28),
+              child:
+                  Icon(Icons.arrow_forward_ios, color: _arrowColor, size: 28),
             ),
           ),
-          Positioned(
+          const Positioned(
             top: 58,
             left: 110,
             child: Text(
               'إعادة تعيين رمز المرور',
-              style: TextStyle(color: Color(0xFF3D3D3D), fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'GE-SS-Two-Bold'),
+              style: TextStyle(
+                  color: Color(0xFF3D3D3D),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'GE-SS-Two-Bold'),
             ),
           ),
           Positioned(
             top: 135,
             left: 24,
-            child: Container(
+            child: SizedBox(
               width: 325,
               height: 50,
               child: TextField(
@@ -202,11 +223,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 obscureText: !_isCurrentPasswordVisible,
                 decoration: InputDecoration(
                   hintText: 'رمز المرور الحالي',
-                  hintStyle: TextStyle(color: Color(0xFF888888), fontFamily: 'GE-SS-Two-Light'),
+                  hintStyle: const TextStyle(
+                      color: Color(0xFF888888), fontFamily: 'GE-SS-Two-Light'),
                   prefixIcon: IconButton(
                     icon: Icon(
-                      _isCurrentPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                      color: Color(0xFF3D3D3D),
+                      _isCurrentPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: const Color(0xFF3D3D3D),
                     ),
                     onPressed: () {
                       setState(() {
@@ -221,7 +245,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           Positioned(
             top: 205,
             left: 24,
-            child: Container(
+            child: SizedBox(
               width: 325,
               height: 50,
               child: TextField(
@@ -231,11 +255,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 onChanged: validatePasswordInput,
                 decoration: InputDecoration(
                   hintText: 'رمز المرور الجديد',
-                  hintStyle: TextStyle(color: Color(0xFF888888), fontFamily: 'GE-SS-Two-Light'),
+                  hintStyle: const TextStyle(
+                      color: Color(0xFF888888), fontFamily: 'GE-SS-Two-Light'),
                   prefixIcon: IconButton(
                     icon: Icon(
-                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                      color: Color(0xFF3D3D3D),
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: const Color(0xFF3D3D3D),
                     ),
                     onPressed: () {
                       setState(() {
@@ -250,7 +277,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           Positioned(
             top: 275,
             left: 24,
-            child: Container(
+            child: SizedBox(
               width: 325,
               height: 50,
               child: TextField(
@@ -259,11 +286,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 obscureText: !_isConfirmPasswordVisible,
                 decoration: InputDecoration(
                   hintText: 'تأكيد رمز المرور الجديد',
-                  hintStyle: TextStyle(color: Color(0xFF888888), fontFamily: 'GE-SS-Two-Light'),
+                  hintStyle: const TextStyle(
+                      color: Color(0xFF888888), fontFamily: 'GE-SS-Two-Light'),
                   prefixIcon: IconButton(
                     icon: Icon(
-                      _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                      color: Color(0xFF3D3D3D),
+                      _isConfirmPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: const Color(0xFF3D3D3D),
                     ),
                     onPressed: () {
                       setState(() {
@@ -281,7 +311,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                _buildCriteriaText('أن يتكون من 8 خانات على الأقل.', isLengthValid),
+                _buildCriteriaText(
+                    'أن يتكون من 8 خانات على الأقل.', isLengthValid),
                 _buildCriteriaText('أن يحتوي على رقم.', isNumberValid),
                 _buildCriteriaText('أن يحتوي على حرف صغير.', isLowercaseValid),
                 _buildCriteriaText('أن يحتوي على حرف كبير.', isUppercaseValid),
@@ -297,13 +328,18 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               height: 38,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF3D3D3D),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                  backgroundColor: const Color(0xFF3D3D3D),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100)),
                   shadowColor: Colors.black,
                   elevation: 5,
                 ),
                 onPressed: _showResetConfirmationDialog,
-                child: Text('تعديل', style: TextStyle(color: Colors.white, fontSize: 20, fontFamily: 'GE-SS-Two-Light')),
+                child: const Text('تعديل',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontFamily: 'GE-SS-Two-Light')),
               ),
             ),
           ),
