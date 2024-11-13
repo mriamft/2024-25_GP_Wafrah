@@ -126,6 +126,9 @@ dependencies:
   webview_flutter: ^4.0.0
   uni_links: ^0.5.1
   flutter_dotenv: ^5.0.2
+  fl_chart: ^0.69.0  
+  intl: ^0.17.0
+
 
 dev_dependencies:
   flutter_test:
