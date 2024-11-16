@@ -3,10 +3,9 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:wafrah/OTP_page.dart';
 import 'package:wafrah/forget_pass_page.dart';
+import 'package:wafrah/home_page.dart';
 import 'package:wafrah/signup_page.dart' as signup;
 import 'package:http/http.dart' as http;
-import 'package:wafrah/home_page.dart';
-
 import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
@@ -76,7 +75,7 @@ void dispose() {
 
     try {
       // Send request to the server to validate login
-      final url = Uri.parse('https://6179-2001-16a2-dd3a-9600-43a-a18a-72b9-baf9.ngrok-free.app/login');
+      final url = Uri.parse('https://b473-2a00-5400-e052-1180-cd36-69e7-9750-1691.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -106,7 +105,7 @@ void dispose() {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://6179-2001-16a2-dd3a-9600-43a-a18a-72b9-baf9.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://b473-2a00-5400-e052-1180-cd36-69e7-9750-1691.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -194,7 +193,6 @@ void dispose() {
     ),
   ),
 ),
-
                Positioned(
 
               top: 60,

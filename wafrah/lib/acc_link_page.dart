@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart'; // Ensure the ApiService is imported
 import 'package:url_launcher/url_launcher.dart'; // Import for URL launching
+import 'gpt_service.dart'; // Import GPT service
 import 'package:uni_links/uni_links.dart';
 import 'dart:async';
 import 'banks_page.dart'; // Import the BanksPage file
@@ -12,7 +13,9 @@ class AccLinkPage extends StatefulWidget {
   const AccLinkPage(
       {super.key,
       required this.userName,
-      required this.phoneNumber}); // Constructor
+      required this.phoneNumber
+      }
+      ); // Constructor
 
   @override
   _AccLinkPageState createState() => _AccLinkPageState();
@@ -21,6 +24,7 @@ class AccLinkPage extends StatefulWidget {
 class _AccLinkPageState extends State<AccLinkPage> {
   Color _arrowColor = const Color(0xFF3D3D3D); // Default arrow color
   final ApiService _apiService = ApiService(); // Initialize ApiService
+  final GPTService _gptService = GPTService(); // Initialize GPT service
   String _accessToken = '';
   String _authorizationCode = '';
   String _finalAccessToken = '';
@@ -118,48 +122,70 @@ class _AccLinkPageState extends State<AccLinkPage> {
     }
   }
 
-  Future<void> _getAccountDetails() async {
-    try {
-      final List<dynamic> accounts =
-          await _apiService.getAccountDetails(_finalAccessToken);
 
-      List<Map<String, dynamic>> accountsWithBalances = [];
+Future<void> _getAccountDetails() async {
+  try {
+    final List<dynamic> accounts = await _apiService.getAccountDetails(_finalAccessToken);
 
-      for (var account in accounts) {
-        String accountId = account['AccountId'];
-        String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
-        String iban = account['AccountIdentifiers'][0]['Identification'];
+    List<Map<String, dynamic>> accountsWithBalances = [];
 
-        // Fetch balance for the current account
-        String balance =
-            await _apiService.getAccountBalance(_finalAccessToken, accountId);
+    for (var account in accounts) {
+      String accountId = account['AccountId'];
+      String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
+      String iban = account['AccountIdentifiers'][0]['Identification'];
+      String balance = await _apiService.getAccountBalance(_finalAccessToken, accountId);
 
-        // Fetch transactions for this account
-        List<Map<String, dynamic>> transactions = await _apiService
-            .getAccountTransactions(_finalAccessToken, accountId);
+      // Fetch transactions
+      List<Map<String, dynamic>> transactions = await _apiService.getAccountTransactions(_finalAccessToken, accountId);
 
-        // Add account details along with the balance and transactions to the list
-        accountsWithBalances.add({
-          'IBAN': iban,
-          'AccountSubType': accountSubType,
-          'Balance': balance, // Only the balance without currency
-          'transactions': transactions, // Add transactions to the account
+      // Categorize transactions
+      List<Map<String, dynamic>> categorizedTransactions = [];
+      for (var transaction in transactions) {
+        String transactionInfo = transaction['TransactionInformation'] ?? 'معلومات غير متوفرة';
+        String category = 'غير مصنف'; // Default category
+
+        try {
+          category = await _gptService.categorizeTransaction(transactionInfo);
+        } catch (e) {
+          print('Error categorizing transaction: $e');
+        }
+
+        categorizedTransactions.add({
+          ...transaction, // Include all original transaction data
+          'Category': category, // Add the category
         });
       }
 
-      if (mounted) {
-        setState(() {
-          _accounts = accountsWithBalances;
-        });
+      // Debugging categorized transactions
+      print('Categorized Transactions for Account $accountId: $categorizedTransactions');
 
-        _redirectToBanksPage(); // Redirect after fetching details
-      }
-    } catch (e) {
-      if (mounted) {
-        _showErrorDialog('Error fetching account details or balance: $e');
-      }
+      // Add account details to the final structure
+      accountsWithBalances.add({
+        'IBAN': iban,
+        'AccountSubType': accountSubType,
+        'Balance': balance,
+        'transactions': categorizedTransactions,
+      });
     }
+
+    // Debug final accounts with balances and categorized transactions
+    print('Final Categorized Accounts: $accountsWithBalances');
+
+    // Update state
+    if (mounted) {
+      setState(() {
+        _accounts = accountsWithBalances;
+        print('State Updated: $_accounts');
+      });
+
+      _redirectToBanksPage();
+    }
+  } catch (e) {
+    _showErrorDialog('Error fetching account details or balance: $e');
   }
+}
+
+
 
   // Step 10: Redirect to BanksPage with accounts
   void _redirectToBanksPage() {
@@ -169,7 +195,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
         builder: (context) => BanksPage(
           userName: widget.userName,
           phoneNumber: widget.phoneNumber,
-          accounts: _accounts, // Pass the retrieved accounts to BanksPage
+          accounts: _accounts,
         ),
       ),
     );
@@ -205,16 +231,14 @@ class _AccLinkPageState extends State<AccLinkPage> {
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
-          title: const Text('Error'),
+          title: Text('Error'),
           content: Text(errorMessage),
           actions: [
             TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              child: Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         );

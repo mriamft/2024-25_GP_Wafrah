@@ -25,7 +25,26 @@ class BanksPage extends StatelessWidget {
   });
 
   // Method to build account card
+  // Helper method to calculate transaction categories
+  Map<String, double> calculateTransactionCategories(
+      List<Map<String, dynamic>> accounts) {
+    Map<String, double> categories = {};
 
+    for (var account in accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String category = transaction['Category'] ?? 'غير مصنف';
+        double amount =
+            double.tryParse(transaction['Amount']?['Amount']?.toString() ?? '0.0') ?? 0.0;
+
+        categories[category] = (categories[category] ?? 0.0) + amount;
+      }
+    }
+
+    print('Transaction Categories: $categories'); // Debugging
+    return categories;
+  }
+  
   Widget _buildAccountCard(Map<String, dynamic> account) {
     Map<String, String> accountTypeTranslations = {
       'CurrentAccount': 'الحساب الجاري',
@@ -362,4 +381,6 @@ class BanksPage extends StatelessWidget {
       ),
     );
   }
+
+
 }

@@ -1,21 +1,22 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'settings_page.dart';
 import 'transactions_page.dart';
 import 'saving_plan_page.dart';
+import 'dart:math';
 import 'banks_page.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 
 class HomePage extends StatefulWidget {
-  final String userName; // Dynamic user name passed from SignUp or Login
+  final String userName;
   final String phoneNumber;
-  final List<Map<String, dynamic>> accounts; // Add accounts parameter
+  final List<Map<String, dynamic>> accounts;
 
   const HomePage({
     super.key,
     required this.userName,
     required this.phoneNumber,
-    this.accounts = const [], // Default to empty list if not passed
+    this.accounts = const [],
   });
 
   @override
@@ -23,7 +24,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
+
     with SingleTickerProviderStateMixin {
+        Map<String, double> transactionCategories = {};
+
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   String _selectedPeriod = 'شهري';
@@ -39,32 +43,62 @@ double _minIncome = double.infinity;
 double _maxIncome = double.negativeInfinity;
 double _minExpense = double.infinity;
 double _maxExpense = double.negativeInfinity;
+int _touchedIndex = -1; // Track the currently touched slice index
+bool _isPieChartVisible = true; // Tracks pie chart visibility
 
 
   @override
-  void initState() {
-    super.initState();
+@override
+void initState() {
+  super.initState();
+  transactionCategories = _calculateTransactionCategories(widget.accounts);
 
-    // Initialize the animation controller
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
+  // Log the transaction categories to verify the data
+  print('Transaction Categories33: ${transactionCategories}');
 
-    // Define the animation for the green square image (from top to its final position y = -100)
-    _offsetAnimation =
-        Tween<Offset>(begin: const Offset(0, -1), end: const Offset(0, 0))
-            .animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+  // Initialize the animation controller
+  _controller = AnimationController(
+    duration: const Duration(seconds: 2),
+    vsync: this,
+  );
 
-    // Start the animation when the page is opened
-    _controller.forward();
+  // Define the animation for the green square image (from top to its final position y = -100)
+  _offsetAnimation =
+      Tween<Offset>(begin: const Offset(0, -1), end: const Offset(0, 0))
+          .animate(
+    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+  );
 
-      // Initialize the dashboard data
+  // Start the animation when the page is opened
+  _controller.forward();
+
+  // Initialize the dashboard data
   updateDashboardData(); // Call this to populate the initial chart data
+}
+Map<String, double> _calculateTransactionCategories(
+    List<Map<String, dynamic>> accounts) {
+  Map<String, double> categories = {};
 
+  for (var account in accounts) {
+    print('Account: $account'); // Debug the account data
+    var transactions = account['transactions'] ?? [];
+    for (var transaction in transactions) {
+      print('Transaction: $transaction'); // Debug each transaction
+      String category = transaction['Category'] ?? transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير مصنف';
+      double amount = double.tryParse(transaction['Amount']?['Amount']?.toString() ?? '0.0') ?? 0.0;
+      print('Category: $category, Amount: $amount');
+
+      if (amount > 0.0) { // Ensure we are only adding valid amounts
+        categories[category] = (categories[category] ?? 0.0) + amount;
+      }
+    }
   }
+
+  print('Calculated Categories: $categories'); // Debug final output
+  return categories;
+}
+
+
 
   @override
   void dispose() {
@@ -73,11 +107,13 @@ double _maxExpense = double.negativeInfinity;
     super.dispose();
   }
 
-  void _toggleBalanceVisibility() {
+void _toggleBalanceVisibility() {
   setState(() {
     _isBalanceVisible = !_isBalanceVisible;
+    _isPieChartVisible = _isBalanceVisible; // Sync pie chart visibility with balance visibility
   });
 }
+
 
 Widget buildTimePeriodSelector() {
   return DropdownButton<String>(
@@ -125,8 +161,12 @@ void updateDashboardData() {
     calculateStatistics('اسبوعي', weeklyDate);
   }
 
+  // Update the pie chart data
+  transactionCategories = _calculateCategoryDataForPieChart();
+
   setState(() {});
 }
+
 
 
 void calculateStatistics(String period, DateTime selectedDate) {
@@ -1050,6 +1090,181 @@ Widget buildStatisticsSummary() {
     ),
   );
 }
+// Pie chart to show transaction categories
+Widget buildPieChart() {
+  if (!_isPieChartVisible) {
+    return const Center(
+      child: Text(
+        'لا توجد عمليات للعرض',
+        style: TextStyle(
+          fontSize: 14,
+          fontFamily: 'GE-SS-Two-Light',
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Map<String, double> pieChartData = _calculateCategoryDataForPieChart();
+  if (pieChartData.isEmpty ||
+      pieChartData.values.every((value) => value == 0)) {
+    return const Center(
+      child: Text(
+        'لا توجد عمليات لعرض تصنيفاتها',
+        style: TextStyle(
+          fontSize: 14,
+          fontFamily: 'GE-SS-Two-Light',
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  List<Color> colors = generateDynamicGreenShades(pieChartData.length);
+  double total = pieChartData.values.reduce((a, b) => a + b);
+
+  return PieChart(
+    PieChartData(
+      sections: pieChartData.entries.map((entry) {
+        final index = pieChartData.keys.toList().indexOf(entry.key);
+        final color = colors[index % colors.length];
+        final value = entry.value;
+        final percentage = (value / total) * 100;
+
+        return PieChartSectionData(
+          color: color,
+          value: value,
+          title: '${percentage.toStringAsFixed(1)}%',
+          titlePositionPercentageOffset: 0.55,
+          titleStyle: const TextStyle(
+            fontSize: 12,
+            fontFamily: 'GE-SS-Two-Light',
+            color: Colors.white,
+          ),
+          radius: _touchedIndex == index ? 60 : 50,
+          badgeWidget: _buildBadge(entry.key, percentage),
+          badgePositionPercentageOffset: 1.4,
+        );
+      }).toList(),
+      sectionsSpace: 2,
+      centerSpaceRadius: 40,
+      pieTouchData: PieTouchData(
+        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+          setState(() {
+            if (!event.isInterestedForInteractions ||
+                pieTouchResponse == null ||
+                pieTouchResponse.touchedSection == null) {
+              _touchedIndex = -1;
+              return;
+            }
+            _touchedIndex =
+                pieTouchResponse.touchedSection!.touchedSectionIndex;
+          });
+        },
+      ),
+    ),
+  );
+}
+
+
+Widget buildPieChartWithBorder() {
+  return Container(
+    padding: const EdgeInsets.all(10.0), // Space inside the container
+    decoration: BoxDecoration(
+      color: Colors.white, // Background color
+      borderRadius: BorderRadius.circular(12.0), // Rounded corners
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.2), // Shadow color
+          spreadRadius: 2,
+          blurRadius: 5,
+        ),
+      ],
+    ),
+    child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end, // Align children to the right
+
+      children: [
+        Text(
+        'تصنيف العمليات',
+            textDirection: TextDirection.rtl, // Ensures right-to-left alignment
+          style: TextStyle(
+            fontFamily: 'GE-SS-Two-Bold',
+            fontSize: 14,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 10), // Space between title and chart
+        SizedBox(
+          height: 200, // Adjust the height as needed
+          child: buildPieChart(), // Call the existing pie chart function
+        ),
+      ],
+    ),
+  );
+}
+
+  // Badge widget to display category name and percentage outside each slice
+  Widget _buildBadge(String category, double percentage) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          category,
+          style: const TextStyle(
+            fontSize: 10,
+            fontFamily: 'GE-SS-Two-Light',
+            color: Colors.black,
+          ),
+        ),
+
+      ],
+    );
+  }
+
+  // Generate dynamic colors based on the number of categories
+// Generate dynamic green shades between the base colors
+List<Color> generateDynamicGreenShades(int count) {
+  // Base colors to interpolate between
+  List<Color> baseColors = [
+    Color(0xFFF4D968), // Yellowish-green
+    Color(0xFF92A662), // Light green
+    Color(0xFF2C8C68), // Medium green
+    Color(0xFF1C5B42), // Dark green
+  ];
+
+  // If the number of shades is less than or equal to the base colors, just use the base colors
+  if (count <= baseColors.length) {
+    return baseColors.sublist(0, count);
+  }
+
+  // Interpolate to create more shades
+  List<Color> greenShades = [];
+  double step = (baseColors.length - 1) / (count - 1);
+
+  for (int i = 0; i < count; i++) {
+    // Determine start and end colors for this step
+    double position = i * step;
+    int startIndex = position.floor();
+    int endIndex = (startIndex + 1).clamp(0, baseColors.length - 1);
+    double t = position - startIndex;
+
+    // Interpolate between startIndex and endIndex
+    Color startColor = baseColors[startIndex];
+    Color endColor = baseColors[endIndex];
+
+    int red = (startColor.red + (endColor.red - startColor.red) * t).toInt();
+    int green = (startColor.green + (endColor.green - startColor.green) * t).toInt();
+    int blue = (startColor.blue + (endColor.blue - startColor.blue) * t).toInt();
+
+    greenShades.add(Color.fromARGB(255, red, green, blue));
+  }
+
+  return greenShades;
+}
+
+
+
 
 Widget buildBarChart() {
   Map<String, double> categoryData = _calculateCategoryExpenses(); // Calculate from real data
@@ -1678,10 +1893,8 @@ Map<String, double> calculateIncomeAndExpense() {
   );
 }
 
-
-
-
   // Second Dashboard Layout
+// Second Dashboard Layout
 Widget buildSecondDashboard() {
   return Padding(
     padding: const EdgeInsets.all(20.0),
@@ -1703,13 +1916,12 @@ Widget buildSecondDashboard() {
           if (_selectedPeriod == 'اسبوعي') buildWeekNavigationButtons(),
           if (_selectedPeriod == 'شهري') buildMonthNavigationButtons(),
           if (_selectedPeriod == 'سنوي') buildYearNavigationButtons(),
-
           const SizedBox(height: 10),
           Stack(
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 8.0), // Add top padding for label
+                padding: const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 8.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12.0),
@@ -1727,12 +1939,12 @@ Widget buildSecondDashboard() {
                 ),
               ),
               Positioned(
-                top: 5, // Move it a bit higher to avoid overlap
-                right: 15, // Add some space from the right edge
+                top: 5,
+                right: 15,
                 child: Text(
                   'تحليل الإنفاق',
                   style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Bold', // Ensure consistency with other text
+                    fontFamily: 'GE-SS-Two-Bold',
                     fontSize: 14,
                     color: Colors.grey[700],
                   ),
@@ -1743,13 +1955,63 @@ Widget buildSecondDashboard() {
           const SizedBox(height: 10),
           buildStatisticsSummary(),
           const SizedBox(height: 10),
-          Container(
-            height: 200,
-            child: buildBarChart(),
-          ),
+          buildPieChartWithBorder(), // Updated pie chart with border
         ],
       ),
     ),
   );
 }
+
+Map<String, double> _calculateCategoryDataForPieChart() {
+  List<Map<String, dynamic>> filteredTransactions = [];
+  DateTime now = DateTime.now();
+  DateTime selectedDate = DateTime(2016, now.month - monthOffset, now.day);
+
+  if (_selectedPeriod == 'اسبوعي') {
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      filteredTransactions.addAll(transactions.where((transaction) {
+        String dateStr = transaction['TransactionDateTime'] ?? '';
+        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+        return transactionDate.year == 2016 &&
+            transactionDate.month == selectedDate.month &&
+            _getWeekOfMonth(transactionDate.day) == _getWeekOfMonth(selectedDate.day);
+      }));
+    }
+  } else if (_selectedPeriod == 'شهري') {
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      filteredTransactions.addAll(transactions.where((transaction) {
+        String dateStr = transaction['TransactionDateTime'] ?? '';
+        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+        return transactionDate.year == 2016 && transactionDate.month == selectedDate.month;
+      }));
+    }
+  } else if (_selectedPeriod == 'سنوي') {
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      filteredTransactions.addAll(transactions.where((transaction) {
+        String dateStr = transaction['TransactionDateTime'] ?? '';
+        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+        return transactionDate.year == 2016;
+      }));
+    }
+  }
+
+  // Aggregate transactions by category
+  Map<String, double> categoryTotals = {};
+  for (var transaction in filteredTransactions) {
+    String category = transaction['Category'] ??
+        transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+        'غير مصنف';
+    double amount = double.tryParse(transaction['Amount']?['Amount'] ?? '0.0') ?? 0.0;
+
+    if (amount > 0.0) {
+      categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
+    }
+  }
+  return categoryTotals;
 }
+
+
+    }

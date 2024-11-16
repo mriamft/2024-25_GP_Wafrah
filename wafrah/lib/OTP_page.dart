@@ -38,7 +38,7 @@ class _OTPPageState extends State<OTPPage> {
   bool showErrorNotification = false;
   String errorMessage = '';
   Color notificationColor = Colors.red;
-  Timer? _timer; // Nullable Timer instance
+Timer? _timer; // Nullable Timer instance
   Timer? _notificationTimer; // Timer for showNotification timeout
 
   bool canResend = false;
@@ -50,38 +50,39 @@ class _OTPPageState extends State<OTPPage> {
     startResendOTPCountdown();
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel(); // Cancel the resend timer
-    _notificationTimer?.cancel(); // Cancel the notification timer if active
+@override
+void dispose() {
+  _timer?.cancel(); // Cancel the resend timer
+  _notificationTimer?.cancel(); // Cancel the notification timer if active
+  
+  // Dispose text controllers
+  otpController1.dispose();
+  otpController2.dispose();
+  otpController3.dispose();
+  otpController4.dispose();
+  otpController5.dispose();
+  otpController6.dispose();
 
-    // Dispose text controllers
-    otpController1.dispose();
-    otpController2.dispose();
-    otpController3.dispose();
-    otpController4.dispose();
-    otpController5.dispose();
-    otpController6.dispose();
+  super.dispose();
+}
 
-    super.dispose();
-  }
 
-  void startResendOTPCountdown() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          if (resendTimeLeft > 0) {
-            resendTimeLeft--;
-          } else {
-            canResend = true;
-            _timer?.cancel();
-          }
-        });
-      } else {
-        _timer?.cancel();
-      }
-    });
-  }
+void startResendOTPCountdown() {
+  _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    if (mounted) {
+      setState(() {
+        if (resendTimeLeft > 0) {
+          resendTimeLeft--;
+        } else {
+          canResend = true;
+          _timer?.cancel();
+        }
+      });
+    } else {
+      _timer?.cancel();
+    }
+  });
+}
 
   String getOTP() {
     return otpController1.text +
@@ -92,25 +93,25 @@ class _OTPPageState extends State<OTPPage> {
         otpController6.text;
   }
 
-  void showNotification(String message, {Color color = Colors.red}) {
-    if (!mounted) return; // Ensure widget is still in the widget tree
+void showNotification(String message, {Color color = Colors.red}) {
+  if (!mounted) return; // Ensure widget is still in the widget tree
+  
+  setState(() {
+    errorMessage = message;
+    notificationColor = color;
+    showErrorNotification = true;
+  });
 
-    setState(() {
-      errorMessage = message;
-      notificationColor = color;
-      showErrorNotification = true;
-    });
-
-    // Cancel any previous notification timer
-    _notificationTimer?.cancel();
-    _notificationTimer = Timer(const Duration(seconds: 5), () {
-      if (mounted) {
-        setState(() {
-          showErrorNotification = false;
-        });
-      }
-    });
-  }
+  // Cancel any previous notification timer
+  _notificationTimer?.cancel();
+  _notificationTimer = Timer(const Duration(seconds: 5), () {
+    if (mounted) {
+      setState(() {
+        showErrorNotification = false;
+      });
+    }
+  });
+}
 
   Future<void> verifyOTP() async {
     String otp = getOTP();
@@ -119,8 +120,7 @@ class _OTPPageState extends State<OTPPage> {
       return;
     }
 
-    final url = Uri.parse(
-        'https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/verify-otp');
+    final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -131,7 +131,7 @@ class _OTPPageState extends State<OTPPage> {
     );
 
     if (response.statusCode == 200) {
-      showNotification('تم التحقق بنجاح', color: const Color(0xff07746a2a996f));
+      showNotification('تم التحقق بنجاح', color: Colors.grey);
 
       Timer(const Duration(seconds: 2), () {
         if (widget.isForget) {
@@ -163,8 +163,7 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse(
-        'https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/adduser');
+    final url = Uri.parse('https://b473-2a00-5400-e052-1180-cd36-69e7-9750-1691.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -176,8 +175,7 @@ class _OTPPageState extends State<OTPPage> {
     );
 
     if (response.statusCode == 200) {
-      showNotification("تم التسجيل بنجاح",
-          color: const Color(0xff07746a2a996f));
+      showNotification("تم التسجيل بنجاح", color: Colors.grey);
 
       Timer(const Duration(seconds: 2), () {
         Navigator.pushReplacement(
@@ -197,8 +195,7 @@ class _OTPPageState extends State<OTPPage> {
 
   Future<void> resendOTP() async {
     if (canResend) {
-      final url = Uri.parse(
-          'https://cade-2001-16a2-3f17-d400-39f6-2efd-b566-5e80.ngrok-free.app/send-otp');
+      final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -212,15 +209,16 @@ class _OTPPageState extends State<OTPPage> {
         });
         startResendOTPCountdown();
       } else {
-        showNotification(
-            'فشل في إعادة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.');
+        showNotification('فشل في إعادة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.');
       }
     }
   }
 
+
+
   String formatPhoneNumber(String phoneNumber) {
     if (phoneNumber.length > 4) {
-      return '0${phoneNumber.substring(4)}';
+      return '0' + phoneNumber.substring(4);
     }
     return phoneNumber;
   }
