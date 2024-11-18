@@ -1,11 +1,9 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'settings_page.dart';
 import 'transactions_page.dart';
 import 'saving_plan_page.dart';
-import 'dart:math';
 import 'banks_page.dart';
 import 'package:fl_chart/fl_chart.dart';
-
 
 class HomePage extends StatefulWidget {
   final String userName;
@@ -24,81 +22,83 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
-
     with SingleTickerProviderStateMixin {
-        Map<String, double> transactionCategories = {};
+  Map<String, double> transactionCategories = {};
 
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   String _selectedPeriod = 'شهري';
-double _filteredIncome = 0.0;
-double _filteredExpense = 0.0;
+  double _filteredIncome = 0.0;
+  double _filteredExpense = 0.0;
 
   int currentPage = 0; // Track the current dashboard
   final PageController _pageController =
       PageController(); // Controller for PageView
   bool _isCirclePressed = false; // Track if the circle button is pressed
   bool _isBalanceVisible = true; // New variable to toggle visibility
-double _minIncome = double.infinity;
-double _maxIncome = double.negativeInfinity;
-double _minExpense = double.infinity;
-double _maxExpense = double.negativeInfinity;
-int _touchedIndex = -1; // Track the currently touched slice index
-bool _isPieChartVisible = true; // Tracks pie chart visibility
-
+  double _minIncome = double.infinity;
+  double _maxIncome = double.negativeInfinity;
+  double _minExpense = double.infinity;
+  double _maxExpense = double.negativeInfinity;
+  int _touchedIndex = -1; // Track the currently touched slice index
+  bool _isPieChartVisible = true; // Tracks pie chart visibility
 
   @override
-@override
-void initState() {
-  super.initState();
-  transactionCategories = _calculateTransactionCategories(widget.accounts);
+  @override
+  void initState() {
+    super.initState();
+    transactionCategories = _calculateTransactionCategories(widget.accounts);
 
-  // Log the transaction categories to verify the data
-  print('Transaction Categories33: ${transactionCategories}');
+    // Log the transaction categories to verify the data
+    print('Transaction Categories33: $transactionCategories');
 
-  // Initialize the animation controller
-  _controller = AnimationController(
-    duration: const Duration(seconds: 2),
-    vsync: this,
-  );
+    // Initialize the animation controller
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
 
-  // Define the animation for the green square image (from top to its final position y = -100)
-  _offsetAnimation =
-      Tween<Offset>(begin: const Offset(0, -1), end: const Offset(0, 0))
-          .animate(
-    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-  );
+    // Define the animation for the green square image (from top to its final position y = -100)
+    _offsetAnimation =
+        Tween<Offset>(begin: const Offset(0, -1), end: const Offset(0, 0))
+            .animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
 
-  // Start the animation when the page is opened
-  _controller.forward();
+    // Start the animation when the page is opened
+    _controller.forward();
 
-  // Initialize the dashboard data
-  updateDashboardData(); // Call this to populate the initial chart data
-}
-Map<String, double> _calculateTransactionCategories(
-    List<Map<String, dynamic>> accounts) {
-  Map<String, double> categories = {};
-
-  for (var account in accounts) {
-    print('Account: $account'); // Debug the account data
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      print('Transaction: $transaction'); // Debug each transaction
-      String category = transaction['Category'] ?? transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير مصنف';
-      double amount = double.tryParse(transaction['Amount']?['Amount']?.toString() ?? '0.0') ?? 0.0;
-      print('Category: $category, Amount: $amount');
-
-      if (amount > 0.0) { // Ensure we are only adding valid amounts
-        categories[category] = (categories[category] ?? 0.0) + amount;
-      }
-    }
+    // Initialize the dashboard data
+    updateDashboardData(); // Call this to populate the initial chart data
   }
 
-  print('Calculated Categories: $categories'); // Debug final output
-  return categories;
-}
+  Map<String, double> _calculateTransactionCategories(
+      List<Map<String, dynamic>> accounts) {
+    Map<String, double> categories = {};
 
+    for (var account in accounts) {
+      print('Account: $account'); // Debug the account data
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        print('Transaction: $transaction'); // Debug each transaction
+        String category = transaction['Category'] ??
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+            'غير مصنف';
+        double amount = double.tryParse(
+                transaction['Amount']?['Amount']?.toString() ?? '0.0') ??
+            0.0;
+        print('Category: $category, Amount: $amount');
 
+        if (amount > 0.0) {
+          // Ensure we are only adding valid amounts
+          categories[category] = (categories[category] ?? 0.0) + amount;
+        }
+      }
+    }
+
+    print('Calculated Categories: $categories'); // Debug final output
+    return categories;
+  }
 
   @override
   void dispose() {
@@ -107,1102 +107,1251 @@ Map<String, double> _calculateTransactionCategories(
     super.dispose();
   }
 
-void _toggleBalanceVisibility() {
-  setState(() {
-    _isBalanceVisible = !_isBalanceVisible;
-    _isPieChartVisible = _isBalanceVisible; // Sync pie chart visibility with balance visibility
-  });
-}
-
-
-Widget buildTimePeriodSelector() {
-  return DropdownButton<String>(
-    value: _selectedPeriod,
-    items: ['اسبوعي', 'شهري', 'سنوي'] // Removed "يومي"
-        .map((period) => DropdownMenuItem(
-              value: period,
-              child: Text(
-                period,
-                style: const TextStyle(fontFamily: 'GE-SS-Two-Light'),
-              ),
-            ))
-        .toList(),
-    onChanged: (newValue) {
-      setState(() {
-        _selectedPeriod = newValue!;
-        updateDashboardData(); // Refresh data based on selected period
-      });
-    },
-  );
-}
-
-List<FlSpot> incomeData = [];
-List<FlSpot> expenseData = [];
-
-void updateDashboardData() {
-  DateTime now = DateTime.now();
-  DateTime selectedDate = DateTime(2016, now.month - monthOffset, now.day);
-
-  // Clear existing data
-  incomeData.clear();
-  expenseData.clear();
-
-  if (_selectedPeriod == 'سنوي') {
-    _calculateMonthlyData(selectedDate);
-    calculateStatistics('سنوي', selectedDate);
-  } else if (_selectedPeriod == 'شهري') {
-    _calculateWeeklyData(selectedDate);
-    calculateStatistics('شهري', selectedDate);
-  } else if (_selectedPeriod == 'اسبوعي') {
-    int startDay = ((4 - weekOffset) * 7) - 6;
-    int endDay = (4 - weekOffset) * 7;
-    DateTime weeklyDate = DateTime(selectedDate.year, selectedDate.month, startDay);
-    _calculateDailyData(weeklyDate);
-    calculateStatistics('اسبوعي', weeklyDate);
+  void _toggleBalanceVisibility() {
+    setState(() {
+      _isBalanceVisible = !_isBalanceVisible;
+      _isPieChartVisible =
+          _isBalanceVisible; // Sync pie chart visibility with balance visibility
+    });
   }
 
-  // Update the pie chart data
-  transactionCategories = _calculateCategoryDataForPieChart();
+  Widget buildTimePeriodSelector() {
+    return DropdownButton<String>(
+      value: _selectedPeriod,
+      items: ['اسبوعي', 'شهري', 'سنوي'] // Removed "يومي"
+          .map((period) => DropdownMenuItem(
+                value: period,
+                child: Text(
+                  period,
+                  style: const TextStyle(fontFamily: 'GE-SS-Two-Light'),
+                ),
+              ))
+          .toList(),
+      onChanged: (newValue) {
+        setState(() {
+          _selectedPeriod = newValue!;
+          updateDashboardData(); // Refresh data based on selected period
+        });
+      },
+    );
+  }
 
-  setState(() {});
-}
+  List<FlSpot> incomeData = [];
+  List<FlSpot> expenseData = [];
 
+  void updateDashboardData() {
+    DateTime now = DateTime.now();
+    DateTime selectedDate = DateTime(2016, now.month - monthOffset, now.day);
 
+    // Clear existing data
+    incomeData.clear();
+    expenseData.clear();
 
-void calculateStatistics(String period, DateTime selectedDate) {
-  // Define a cutoff date based on the current day and month in 2016
-  DateTime now = DateTime.now();
-  DateTime cutoffDate = DateTime(2016, now.month, now.day);
+    if (_selectedPeriod == 'سنوي') {
+      _calculateMonthlyData(selectedDate);
+      calculateStatistics('سنوي', selectedDate);
+    } else if (_selectedPeriod == 'شهري') {
+      _calculateWeeklyData(selectedDate);
+      calculateStatistics('شهري', selectedDate);
+    } else if (_selectedPeriod == 'اسبوعي') {
+      int startDay = ((4 - weekOffset) * 7) - 6;
+      int endDay = (4 - weekOffset) * 7;
+      DateTime weeklyDate =
+          DateTime(selectedDate.year, selectedDate.month, startDay);
+      _calculateDailyData(weeklyDate);
+      calculateStatistics('اسبوعي', weeklyDate);
+    }
 
-  // Reset statistics
-  _minIncome = double.infinity;
-  _maxIncome = double.negativeInfinity;
-  _minExpense = double.infinity;
-  _maxExpense = double.negativeInfinity;
-  double totalIncome = 0.0;
-  double totalExpense = 0.0;
-  int incomeCount = 0;
-  int expenseCount = 0;
+    // Update the pie chart data
+    transactionCategories = _calculateCategoryDataForPieChart();
 
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String dateStr = transaction['TransactionDateTime'] ?? '';
-      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+    setState(() {});
+  }
 
-      bool includeTransaction = false;
-      // Apply period-specific filtering with the cutoff date
-      if (transactionDate.isAfter(cutoffDate)) {
-        continue; // Skip transactions beyond the cutoff date
-      }
+  void calculateStatistics(String period, DateTime selectedDate) {
+    // Define a cutoff date based on the current day and month in 2016
+    DateTime now = DateTime.now();
+    DateTime cutoffDate = DateTime(2016, now.month, now.day);
 
-      if (period == 'اسبوعي' &&
-          transactionDate.year == 2016 &&
-          transactionDate.month == selectedDate.month &&
-          _getWeekOfMonth(transactionDate.day) == _getWeekOfMonth(selectedDate.day)) {
-        includeTransaction = true;
-      } else if (period == 'شهري' &&
-                 transactionDate.year == 2016 &&
-                 transactionDate.month == selectedDate.month) {
-        includeTransaction = true;
-      } else if (period == 'سنوي' && transactionDate.year == 2016) {
-        includeTransaction = true;
-      }
+    // Reset statistics
+    _minIncome = double.infinity;
+    _maxIncome = double.negativeInfinity;
+    _minExpense = double.infinity;
+    _maxExpense = double.negativeInfinity;
+    double totalIncome = 0.0;
+    double totalExpense = 0.0;
+    int incomeCount = 0;
+    int expenseCount = 0;
 
-      if (includeTransaction) {
-        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-        double amount = double.tryParse(transaction['Amount']?['Amount'] ?? '0') ?? 0.0;
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String dateStr = transaction['TransactionDateTime'] ?? '';
+        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
 
-        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
-          totalIncome += amount;
-          incomeCount++;
-          _minIncome = amount < _minIncome ? amount : _minIncome;
-          _maxIncome = amount > _maxIncome ? amount : _maxIncome;
-        } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
-          totalExpense += amount;
-          expenseCount++;
-          _minExpense = amount < _minExpense ? amount : _minExpense;
-          _maxExpense = amount > _maxExpense ? amount : _maxExpense;
+        bool includeTransaction = false;
+        // Apply period-specific filtering with the cutoff date
+        if (transactionDate.isAfter(cutoffDate)) {
+          continue; // Skip transactions beyond the cutoff date
+        }
+
+        if (period == 'اسبوعي' &&
+            transactionDate.year == 2016 &&
+            transactionDate.month == selectedDate.month &&
+            _getWeekOfMonth(transactionDate.day) ==
+                _getWeekOfMonth(selectedDate.day)) {
+          includeTransaction = true;
+        } else if (period == 'شهري' &&
+            transactionDate.year == 2016 &&
+            transactionDate.month == selectedDate.month) {
+          includeTransaction = true;
+        } else if (period == 'سنوي' && transactionDate.year == 2016) {
+          includeTransaction = true;
+        }
+
+        if (includeTransaction) {
+          String subtype =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                  'غير معروف';
+          double amount =
+              double.tryParse(transaction['Amount']?['Amount'] ?? '0') ?? 0.0;
+
+          if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
+            totalIncome += amount;
+            incomeCount++;
+            _minIncome = amount < _minIncome ? amount : _minIncome;
+            _maxIncome = amount > _maxIncome ? amount : _maxIncome;
+          } else if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(subtype)) {
+            totalExpense += amount;
+            expenseCount++;
+            _minExpense = amount < _minExpense ? amount : _minExpense;
+            _maxExpense = amount > _maxExpense ? amount : _maxExpense;
+          }
         }
       }
     }
+
+    // Calculate averages
+    _filteredIncome = incomeCount > 0 ? totalIncome / incomeCount : 0.0;
+    _filteredExpense = expenseCount > 0 ? totalExpense / expenseCount : 0.0;
+
+    // Set to zero if no data was found
+    _minIncome = _minIncome == double.infinity ? 0.0 : _minIncome;
+    _maxIncome = _maxIncome == double.negativeInfinity ? 0.0 : _maxIncome;
+    _minExpense = _minExpense == double.infinity ? 0.0 : _minExpense;
+    _maxExpense = _maxExpense == double.negativeInfinity ? 0.0 : _maxExpense;
+
+    setState(() {});
   }
 
-  // Calculate averages
-  _filteredIncome = incomeCount > 0 ? totalIncome / incomeCount : 0.0;
-  _filteredExpense = expenseCount > 0 ? totalExpense / expenseCount : 0.0;
+  void _calculateWeeklyData(DateTime currentDate) {
+    // Get the actual current date for comparison
+    DateTime now = DateTime.now();
 
-  // Set to zero if no data was found
-  _minIncome = _minIncome == double.infinity ? 0.0 : _minIncome;
-  _maxIncome = _maxIncome == double.negativeInfinity ? 0.0 : _maxIncome;
-  _minExpense = _minExpense == double.infinity ? 0.0 : _minExpense;
-  _maxExpense = _maxExpense == double.negativeInfinity ? 0.0 : _maxExpense;
+    // Create a cutoff date only for the current month and year in 2016
+    DateTime cutoffDate;
+    if (currentDate.month == now.month && currentDate.year == 2016) {
+      cutoffDate = DateTime(2016, now.month, now.day);
+    } else {
+      // Set a date beyond the month's last day if it's not the current month
+      cutoffDate = DateTime(2016, currentDate.month + 1, 0);
+    }
 
-  setState(() {});
-}
+    // Initialize weekly income and expense
+    Map<int, double> weeklyIncome = {for (int i = 0; i < 4; i++) i: 0.0};
+    Map<int, double> weeklyExpense = {for (int i = 0; i < 4; i++) i: 0.0};
 
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String dateStr = transaction['TransactionDateTime'] ?? '';
+        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
 
-void _calculateWeeklyData(DateTime currentDate) {
-  // Get the actual current date for comparison
-  DateTime now = DateTime.now();
+        // Filter transactions for the correct month and year, and apply cutoff if needed
+        if (transactionDate.year == 2016 &&
+            transactionDate.month == currentDate.month &&
+            transactionDate.isBefore(cutoffDate)) {
+          int week = ((transactionDate.day - 1) / 7).floor();
+          double amount =
+              double.tryParse(transaction['Amount']['Amount'] ?? '0') ?? 0.0;
+          String type =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
 
-  // Create a cutoff date only for the current month and year in 2016
-  DateTime cutoffDate;
-  if (currentDate.month == now.month && currentDate.year == 2016) {
-    cutoffDate = DateTime(2016, now.month, now.day);
-  } else {
-    // Set a date beyond the month's last day if it's not the current month
-    cutoffDate = DateTime(2016, currentDate.month + 1, 0);
-  }
-
-  // Initialize weekly income and expense
-  Map<int, double> weeklyIncome = {for (int i = 0; i < 4; i++) i: 0.0};
-  Map<int, double> weeklyExpense = {for (int i = 0; i < 4; i++) i: 0.0};
-
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String dateStr = transaction['TransactionDateTime'] ?? '';
-      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
-
-      // Filter transactions for the correct month and year, and apply cutoff if needed
-      if (transactionDate.year == 2016 && transactionDate.month == currentDate.month && transactionDate.isBefore(cutoffDate)) {
-        int week = ((transactionDate.day - 1) / 7).floor();
-        double amount = double.tryParse(transaction['Amount']['Amount'] ?? '0') ?? 0.0;
-        String type = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
-
-        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
-          weeklyIncome[week] = (weeklyIncome[week] ?? 0.0) + amount;
-        } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(type)) {
-          weeklyExpense[week] = (weeklyExpense[week] ?? 0.0) + amount;
+          if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
+            weeklyIncome[week] = (weeklyIncome[week] ?? 0.0) + amount;
+          } else if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(type)) {
+            weeklyExpense[week] = (weeklyExpense[week] ?? 0.0) + amount;
+          }
         }
       }
     }
+
+    // Update chart data with calculated values
+    incomeData.clear();
+    expenseData.clear();
+    for (int i = 0; i < 4; i++) {
+      incomeData.add(FlSpot(i.toDouble(), weeklyIncome[i] ?? 0.0));
+      expenseData.add(FlSpot(i.toDouble(), weeklyExpense[i] ?? 0.0));
+    }
+
+    setState(() {});
   }
 
-  // Update chart data with calculated values
-  incomeData.clear();
-  expenseData.clear();
-  for (int i = 0; i < 4; i++) {
-    incomeData.add(FlSpot(i.toDouble(), weeklyIncome[i] ?? 0.0));
-    expenseData.add(FlSpot(i.toDouble(), weeklyExpense[i] ?? 0.0));
-  }
-
-  setState(() {});
-}
 // Helper function to get week number in a month
-int _getWeekOfMonth(int day) {
-  if (day <= 7) {
-    return 1;
-  } else if (day <= 14) {
-    return 2;
-  } else if (day <= 21) {
-    return 3;
-  } else {
-    return 4;
+  int _getWeekOfMonth(int day) {
+    if (day <= 7) {
+      return 1;
+    } else if (day <= 14) {
+      return 2;
+    } else if (day <= 21) {
+      return 3;
+    } else {
+      return 4;
+    }
   }
-}
-
 
 // Monthly data calculation for the 'سنوي' view (for completeness)
-void _calculateMonthlyData(DateTime currentDate) {
-  // Define the current date and a cutoff date based on the current month
-  DateTime now = DateTime.now();
-  DateTime cutoffDate = DateTime(2016, now.month, 1).subtract(Duration(days: 1));
+  void _calculateMonthlyData(DateTime currentDate) {
+    // Define the current date and a cutoff date based on the current month
+    DateTime now = DateTime.now();
+    DateTime cutoffDate =
+        DateTime(2016, now.month, 1).subtract(const Duration(days: 1));
 
-  // Initialize monthly income and expense maps for each month
-  Map<int, double> monthlyIncome = {for (int i = 0; i < 12; i++) i: 0.0};
-  Map<int, double> monthlyExpense = {for (int i = 0; i < 12; i++) i: 0.0};
+    // Initialize monthly income and expense maps for each month
+    Map<int, double> monthlyIncome = {for (int i = 0; i < 12; i++) i: 0.0};
+    Map<int, double> monthlyExpense = {for (int i = 0; i < 12; i++) i: 0.0};
 
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String dateStr = transaction['TransactionDateTime'] ?? '';
-      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String dateStr = transaction['TransactionDateTime'] ?? '';
+        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
 
-      // Only include transactions within 2016 and up to the cutoff month
-      if (transactionDate.year == 2016 && transactionDate.isBefore(cutoffDate)) {
-        int month = transactionDate.month - 1;
-        double amount = double.tryParse(transaction['Amount']['Amount'] ?? '0') ?? 0.0;
-        String type = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+        // Only include transactions within 2016 and up to the cutoff month
+        if (transactionDate.year == 2016 &&
+            transactionDate.isBefore(cutoffDate)) {
+          int month = transactionDate.month - 1;
+          double amount =
+              double.tryParse(transaction['Amount']['Amount'] ?? '0') ?? 0.0;
+          String type =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
 
-        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
-          monthlyIncome[month] = (monthlyIncome[month] ?? 0.0) + amount;
-        } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(type)) {
-          monthlyExpense[month] = (monthlyExpense[month] ?? 0.0) + amount;
+          if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
+            monthlyIncome[month] = (monthlyIncome[month] ?? 0.0) + amount;
+          } else if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(type)) {
+            monthlyExpense[month] = (monthlyExpense[month] ?? 0.0) + amount;
+          }
         }
       }
     }
-  }
 
-  incomeData.clear();
-  expenseData.clear();
+    incomeData.clear();
+    expenseData.clear();
 
-  // Populate FlSpot data up to the current month, set remaining months to zero
-  for (int i = 0; i < 12; i++) {
-    if (i < now.month - 1) { // months before the current month
-      incomeData.add(FlSpot(i.toDouble(), monthlyIncome[i] ?? 0.0));
-      expenseData.add(FlSpot(i.toDouble(), monthlyExpense[i] ?? 0.0));
-    } else { // current and future months
-      incomeData.add(FlSpot(i.toDouble(), 0.0));
-      expenseData.add(FlSpot(i.toDouble(), 0.0));
+    // Populate FlSpot data up to the current month, set remaining months to zero
+    for (int i = 0; i < 12; i++) {
+      if (i < now.month - 1) {
+        // months before the current month
+        incomeData.add(FlSpot(i.toDouble(), monthlyIncome[i] ?? 0.0));
+        expenseData.add(FlSpot(i.toDouble(), monthlyExpense[i] ?? 0.0));
+      } else {
+        // current and future months
+        incomeData.add(FlSpot(i.toDouble(), 0.0));
+        expenseData.add(FlSpot(i.toDouble(), 0.0));
+      }
     }
+
+    setState(() {});
   }
 
-  setState(() {});
-}
+  int weekOffset = 0;
+  int monthOffset = 0;
+  int yearOffset = 0;
 
-int weekOffset = 0;
-int monthOffset = 0;
-int yearOffset = 0;
+  void _calculateDailyData(DateTime currentDate) {
+    DateTime now = DateTime.now();
+    DateTime cutoffDate = (currentDate.month == now.month)
+        ? DateTime(2016, now.month, now.day)
+        : DateTime(2016, currentDate.month + 1, 1)
+            .subtract(const Duration(days: 1));
 
-void _calculateDailyData(DateTime currentDate) {
-  DateTime now = DateTime.now();
-  DateTime cutoffDate = (currentDate.month == now.month)
-      ? DateTime(2016, now.month, now.day)
-      : DateTime(2016, currentDate.month + 1, 1).subtract(Duration(days: 1));
+    int selectedWeek = 4 - (weekOffset % 4);
+    int startDay = (selectedWeek - 1) * 7 + 1;
+    int endDay = selectedWeek * 7;
 
-  int selectedWeek = 4 - (weekOffset % 4);
-  int startDay = (selectedWeek - 1) * 7 + 1;
-  int endDay = selectedWeek * 7;
+    Map<int, double> dailyIncome = {
+      for (int i = startDay; i <= endDay; i++) i: 0.0
+    };
+    Map<int, double> dailyExpense = {
+      for (int i = startDay; i <= endDay; i++) i: 0.0
+    };
 
-  Map<int, double> dailyIncome = {for (int i = startDay; i <= endDay; i++) i: 0.0};
-  Map<int, double> dailyExpense = {for (int i = startDay; i <= endDay; i++) i: 0.0};
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String dateStr = transaction['TransactionDateTime'] ?? '';
+        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
 
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String dateStr = transaction['TransactionDateTime'] ?? '';
-      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+        if (transactionDate.year == 2016 &&
+            transactionDate.month == currentDate.month &&
+            transactionDate.day >= startDay &&
+            transactionDate.day <= endDay &&
+            transactionDate.isBefore(cutoffDate)) {
+          int day = transactionDate.day;
+          double amount =
+              double.tryParse(transaction['Amount']['Amount'] ?? '0') ?? 0.0;
+          String type =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
 
-      if (transactionDate.year == 2016 &&
-          transactionDate.month == currentDate.month &&
-          transactionDate.day >= startDay &&
-          transactionDate.day <= endDay &&
-          transactionDate.isBefore(cutoffDate)) {
-
-        int day = transactionDate.day;
-        double amount = double.tryParse(transaction['Amount']['Amount'] ?? '0') ?? 0.0;
-        String type = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
-
-        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
-          dailyIncome[day] = (dailyIncome[day] ?? 0.0) + amount;
-        } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(type)) {
-          dailyExpense[day] = (dailyExpense[day] ?? 0.0) + amount;
+          if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
+            dailyIncome[day] = (dailyIncome[day] ?? 0.0) + amount;
+          } else if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(type)) {
+            dailyExpense[day] = (dailyExpense[day] ?? 0.0) + amount;
+          }
         }
       }
     }
+
+    incomeData.clear();
+    expenseData.clear();
+
+    for (int i = startDay; i <= endDay; i++) {
+      incomeData.add(FlSpot(i.toDouble() - startDay, dailyIncome[i] ?? 0.0));
+      expenseData.add(FlSpot(i.toDouble() - startDay, dailyExpense[i] ?? 0.0));
+    }
+
+    setState(() {});
   }
 
-  incomeData.clear();
-  expenseData.clear();
-
-  for (int i = startDay; i <= endDay; i++) {
-    incomeData.add(FlSpot(i.toDouble() - startDay, dailyIncome[i] ?? 0.0));
-    expenseData.add(FlSpot(i.toDouble() - startDay, dailyExpense[i] ?? 0.0));
+  String getCurrentWeekLabel() {
+    int currentWeek = 4 - (weekOffset % 4);
+    DateTime currentDate =
+        DateTime(2016, DateTime.now().month - monthOffset, 1);
+    String monthName = getMonthName(currentDate.month);
+    return '$monthName 2016 - الأسبوع $currentWeek';
   }
 
-  setState(() {});
-}
+  Widget buildDailyNavigationButtons() {
+    // Ensure that the weekOffset does not go below the current week in the current month
+    bool disableLeft = weekOffset >= 3; // Reached the beginning of the month
+    bool disableRight =
+        weekOffset <= 0; // Reached the current week in the current month
 
-String getCurrentWeekLabel() {
-  int currentWeek = 4 - (weekOffset % 4);
-  DateTime currentDate = DateTime(2016, DateTime.now().month - monthOffset, 1);
-  String monthName = getMonthName(currentDate.month);
-  return '$monthName 2016 - الأسبوع $currentWeek';
-}
-
-Widget buildDailyNavigationButtons() {
-  // Ensure that the weekOffset does not go below the current week in the current month
-  bool disableLeft = weekOffset >= 3; // Reached the beginning of the month
-  bool disableRight = weekOffset <= 0; // Reached the current week in the current month
-
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: disableLeft ? Colors.grey : Colors.black,
-        ),
-        onPressed: disableLeft
-            ? null
-            : () {
-                setState(() {
-                  weekOffset++;
-                  updateDashboardData();
-                });
-              },
-      ),
-      Text(
-        getCurrentWeekLabel(), // Display the current week label
-        style: TextStyle(fontFamily: 'GE-SS-Two-Light'),
-      ),
-      IconButton(
-        icon: Icon(
-          Icons.arrow_forward,
-          color: disableRight ? Colors.grey : Colors.black,
-        ),
-        onPressed: disableRight
-            ? null
-            : () {
-                setState(() {
-                  weekOffset--;
-                  updateDashboardData();
-                });
-              },
-      ),
-    ],
-  );
-}
-
-
-String getMonthName(int month) {
-  switch (month) {
-    case 1:
-      return 'يناير';
-    case 2:
-      return 'فبراير';
-    case 3:
-      return 'مارس';
-    case 4:
-      return 'أبريل';
-    case 5:
-      return 'مايو';
-    case 6:
-      return 'يونيو';
-    case 7:
-      return 'يوليو';
-    case 8:
-      return 'أغسطس';
-    case 9:
-      return 'سبتمبر';
-    case 10:
-      return 'أكتوبر';
-    case 11:
-      return 'نوفمبر';
-    case 12:
-      return 'ديسمبر';
-    default:
-      return '';
-  }
-}
-
-
-Widget buildWeekNavigationButtons() {
-  DateTime now = DateTime.now();
-  DateTime selectedDate = DateTime(2016, now.month - monthOffset, 1);
-  bool isCurrentMonth = selectedDate.month == now.month && selectedDate.year == now.year;
-
-  // Get the current week number based on today's date
-  int currentWeekInMonth = ((now.day - 1) / 7).floor() + 1;
-  int displayedWeek = 4 - weekOffset;
-
-  // Determine if the left or right buttons should be disabled
-  bool disableLeft = displayedWeek == 1; // Disable left arrow for Week 1
-  bool disableRight = isCurrentMonth ? (displayedWeek >= currentWeekInMonth) : (displayedWeek == 4);
-
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: disableLeft ? Colors.grey : Colors.black,
-        ),
-        onPressed: disableLeft
-            ? null
-            : () {
-                setState(() {
-                  weekOffset++;
-                  updateDashboardData();
-                });
-              },
-      ),
-      Text(
-        getCurrentWeekLabel(),
-        style: TextStyle(fontFamily: 'GE-SS-Two-Light'),
-      ),
-      IconButton(
-        icon: Icon(
-          Icons.arrow_forward,
-          color: disableRight ? Colors.grey : Colors.black,
-        ),
-        onPressed: disableRight
-            ? null
-            : () {
-                setState(() {
-                  weekOffset--;
-                  updateDashboardData();
-                });
-              },
-      ),
-    ],
-  );
-}
-
-String getCurrentMonthName() {
-  DateTime targetMonth = DateTime(2016, DateTime.now().month - monthOffset);
-  List<String> monthNames = [
-    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-  ];
-  return monthNames[targetMonth.month - 1];
-}
-
-Widget buildMonthNavigationButtons() {
-  // Get the actual current month
-  DateTime now = DateTime.now();
-  int currentMonth = now.month;
-
-  // Calculate the displayed month based on the offset
-  int displayedMonth = currentMonth - monthOffset;
-
-  // Determine if left or right button should be disabled
-  bool disableLeft = displayedMonth == 1; // January
-  bool disableRight = displayedMonth == currentMonth; // Current month
-
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: disableLeft ? Colors.grey : Colors.black,
-        ),
-        onPressed: disableLeft
-            ? null
-            : () {
-                setState(() {
-                  monthOffset++;
-                  updateDashboardData();
-                });
-              },
-      ),
-      Text(
-        getLocalizedMonthName(displayedMonth), // Display the current month name
-        style: TextStyle(fontFamily: 'GE-SS-Two-Light'),
-      ),
-      IconButton(
-        icon: Icon(
-          Icons.arrow_forward,
-          color: disableRight ? Colors.grey : Colors.black,
-        ),
-        onPressed: disableRight
-            ? null
-            : () {
-                setState(() {
-                  monthOffset--;
-                  updateDashboardData();
-                });
-              },
-      ),
-    ],
-  );
-}
-
-String getLocalizedMonthName(int month) {
-  List<String> monthNames = [
-    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-  ];
-  return monthNames[month - 1];
-}
-
-String getCurrentYear() {
-  int baseYear = 2016;
-  return (baseYear - yearOffset).toString();
-}
-
-
-Widget buildYearNavigationButtons() {
-  return Center(
-    child: Text(
-      getCurrentYear(), // Display the current year
-      style: TextStyle(
-        fontFamily: 'GE-SS-Two-Light',
-        fontSize: 16, // Adjust font size if needed
-        color: Colors.grey[700],
-      ),
-    ),
-  );
-}
-
-
-
-Widget buildIncomeExpenseGraph() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          width: MediaQuery.of(context).size.width * 0.95,
-          height: 250, // Keep height at 250 as required
-          padding: const EdgeInsets.all(8.0),
-          child: LineChart(
-            LineChartData(
-              minY: 0,
-              maxY: 400,
-              titlesData: FlTitlesData(
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 25,
-                    interval: 50,
-                    getTitlesWidget: (value, meta) {
-                      return Text(
-                        _isBalanceVisible ? value.toInt().toString() : getMaskedValue(),
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                          fontFamily: 'GE-SS-Two-Light',
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 35,
-                    interval: 1,
-                  getTitlesWidget: (value, _) {
-  List<String> labels;
-
-  // Determine the labels based on the selected period
-  switch (_selectedPeriod) {
-    case 'اسبوعي':
-      labels = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
-      break;
-    case 'شهري':
-      labels = ['1 الأسبوع', '2 الأسبوع', '3 الأسبوع', '4 الأسبوع'];
-      break;
-    case 'سنوي':
-      labels = [
-        'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-      ];
-      break;
-    default:
-      labels = [];
+        IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: disableLeft ? Colors.grey : Colors.black,
+          ),
+          onPressed: disableLeft
+              ? null
+              : () {
+                  setState(() {
+                    weekOffset++;
+                    updateDashboardData();
+                  });
+                },
+        ),
+        Text(
+          getCurrentWeekLabel(), // Display the current week label
+          style: const TextStyle(fontFamily: 'GE-SS-Two-Light'),
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.arrow_forward,
+            color: disableRight ? Colors.grey : Colors.black,
+          ),
+          onPressed: disableRight
+              ? null
+              : () {
+                  setState(() {
+                    weekOffset--;
+                    updateDashboardData();
+                  });
+                },
+        ),
+      ],
+    );
   }
 
-  // Display the appropriate label based on the index
-  final index = value.toInt();
-  if (index >= 0 && index < labels.length) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 6.0),
-      child: Transform.rotate(
-        angle: _selectedPeriod == 'سنوي' ? -0.4 : 0.0, // Rotate for 'سنوي' only
-        child: Text(
-          labels[index],
-          style: TextStyle(
-            fontSize: 10,
-            fontFamily: 'GE-SS-Two-Light',
-            color: Colors.grey[600],
+  String getMonthName(int month) {
+    switch (month) {
+      case 1:
+        return 'يناير';
+      case 2:
+        return 'فبراير';
+      case 3:
+        return 'مارس';
+      case 4:
+        return 'أبريل';
+      case 5:
+        return 'مايو';
+      case 6:
+        return 'يونيو';
+      case 7:
+        return 'يوليو';
+      case 8:
+        return 'أغسطس';
+      case 9:
+        return 'سبتمبر';
+      case 10:
+        return 'أكتوبر';
+      case 11:
+        return 'نوفمبر';
+      case 12:
+        return 'ديسمبر';
+      default:
+        return '';
+    }
+  }
+
+  Widget buildWeekNavigationButtons() {
+    DateTime now = DateTime.now();
+    DateTime selectedDate = DateTime(2016, now.month - monthOffset, 1);
+    bool isCurrentMonth =
+        selectedDate.month == now.month && selectedDate.year == now.year;
+
+    // Get the current week number based on today's date
+    int currentWeekInMonth = ((now.day - 1) / 7).floor() + 1;
+    int displayedWeek = 4 - weekOffset;
+
+    // Determine if the left or right buttons should be disabled
+    bool disableLeft = displayedWeek == 1; // Disable left arrow for Week 1
+    bool disableRight = isCurrentMonth
+        ? (displayedWeek >= currentWeekInMonth)
+        : (displayedWeek == 4);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: disableLeft ? Colors.grey : Colors.black,
           ),
+          onPressed: disableLeft
+              ? null
+              : () {
+                  setState(() {
+                    weekOffset++;
+                    updateDashboardData();
+                  });
+                },
+        ),
+        Text(
+          getCurrentWeekLabel(),
+          style: const TextStyle(fontFamily: 'GE-SS-Two-Light'),
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.arrow_forward,
+            color: disableRight ? Colors.grey : Colors.black,
+          ),
+          onPressed: disableRight
+              ? null
+              : () {
+                  setState(() {
+                    weekOffset--;
+                    updateDashboardData();
+                  });
+                },
+        ),
+      ],
+    );
+  }
+
+  String getCurrentMonthName() {
+    DateTime targetMonth = DateTime(2016, DateTime.now().month - monthOffset);
+    List<String> monthNames = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر'
+    ];
+    return monthNames[targetMonth.month - 1];
+  }
+
+  Widget buildMonthNavigationButtons() {
+    // Get the actual current month
+    DateTime now = DateTime.now();
+    int currentMonth = now.month;
+
+    // Calculate the displayed month based on the offset
+    int displayedMonth = currentMonth - monthOffset;
+
+    // Determine if left or right button should be disabled
+    bool disableLeft = displayedMonth == 1; // January
+    bool disableRight = displayedMonth == currentMonth; // Current month
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: disableLeft ? Colors.grey : Colors.black,
+          ),
+          onPressed: disableLeft
+              ? null
+              : () {
+                  setState(() {
+                    monthOffset++;
+                    updateDashboardData();
+                  });
+                },
+        ),
+        Text(
+          getLocalizedMonthName(
+              displayedMonth), // Display the current month name
+          style: const TextStyle(fontFamily: 'GE-SS-Two-Light'),
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.arrow_forward,
+            color: disableRight ? Colors.grey : Colors.black,
+          ),
+          onPressed: disableRight
+              ? null
+              : () {
+                  setState(() {
+                    monthOffset--;
+                    updateDashboardData();
+                  });
+                },
+        ),
+      ],
+    );
+  }
+
+  String getLocalizedMonthName(int month) {
+    List<String> monthNames = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر'
+    ];
+    return monthNames[month - 1];
+  }
+
+  String getCurrentYear() {
+    int baseYear = 2016;
+    return (baseYear - yearOffset).toString();
+  }
+
+  Widget buildYearNavigationButtons() {
+    return Center(
+      child: Text(
+        getCurrentYear(), // Display the current year
+        style: TextStyle(
+          fontFamily: 'GE-SS-Two-Light',
+          fontSize: 16, // Adjust font size if needed
+          color: Colors.grey[700],
         ),
       ),
     );
   }
-  return const SizedBox.shrink();
-},
 
-                  ),
-                ),
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              ),
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: true,
-                drawHorizontalLine: true,
-                verticalInterval: 1,
-                horizontalInterval: 50,
-                getDrawingHorizontalLine: (value) => FlLine(
-                  color: Colors.grey.withOpacity(0.2),
-                  strokeWidth: 1,
-                ),
-                getDrawingVerticalLine: (value) => FlLine(
-                  color: Colors.grey.withOpacity(0.2),
-                  strokeWidth: 1,
-                ),
-              ),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: _isBalanceVisible ? incomeData : [], // Hide data if balance is hidden
-                  isCurved: true,
-                  color: Colors.green,
-                  barWidth: 3,
-                  belowBarData: BarAreaData(show: true, color: Colors.green.withOpacity(0.4)),
-                ),
-                LineChartBarData(
-                  spots: _isBalanceVisible ? expenseData : [], // Hide data if balance is hidden
-                  isCurved: true,
-                  color: Colors.red,
-                  barWidth: 3,
-                  belowBarData: BarAreaData(show: true, color: Colors.red.withOpacity(0.3)),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 8), // Space between chart and legend
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Legend for Income
-            Row(
-              children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  color: Colors.green,
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  'الدخل',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontFamily: 'GE-SS-Two-Light',
-                    color: Colors.grey[800],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 20), // Space between legends
-            // Legend for Expense
-            Row(
-              children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  color: Colors.red,
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  'الصرف',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontFamily: 'GE-SS-Two-Light',
-                    color: Colors.grey[800],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-
-List<FlSpot> _generateIncomeData() {
-  List<FlSpot> incomeSpots = [];
-  Map<int, double> monthlyIncome = {}; // To accumulate monthly data
-
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String? dateStr = transaction['TransactionDateTime'];
-      if (dateStr != null) {
-        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
-        int month = transactionDate.month - 1;
-        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-        String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-        double amount = double.tryParse(amountStr) ?? 0.0;
-
-        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
-          monthlyIncome[month] = (monthlyIncome[month] ?? 0) + amount;
-        }
-      }
-    }
-  }
-
-  for (int i = 0; i < 12; i++) {
-    incomeSpots.add(FlSpot(i.toDouble(), monthlyIncome[i] ?? 0));
-  }
-  return incomeSpots;
-}
-
-List<FlSpot> _generateExpenseData() {
-  List<FlSpot> expenseSpots = [];
-  Map<int, double> monthlyExpense = {}; // To accumulate monthly data
-
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String? dateStr = transaction['TransactionDateTime'];
-      if (dateStr != null) {
-        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
-        int month = transactionDate.month - 1;
-        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-        String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-        double amount = double.tryParse(amountStr) ?? 0.0;
-
-        if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
-          monthlyExpense[month] = (monthlyExpense[month] ?? 0) + amount;
-        }
-      }
-    }
-  }
-
-  for (int i = 0; i < 12; i++) {
-    expenseSpots.add(FlSpot(i.toDouble(), monthlyExpense[i] ?? 0));
-  }
-  return expenseSpots;
-}
-
-
-double calculateMinIncome() {
-  double minIncome = double.infinity;
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-      String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-      double amount = double.tryParse(amountStr) ?? 0.0;
-
-      if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
-        if (amount < minIncome) {
-          minIncome = amount;
-        }
-      }
-    }
-  }
-  return minIncome == double.infinity ? 0.0 : minIncome;
-}
-
-double calculateMaxIncome() {
-  double maxIncome = double.negativeInfinity;
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-      String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-      double amount = double.tryParse(amountStr) ?? 0.0;
-
-      if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
-        if (amount > maxIncome) {
-          maxIncome = amount;
-        }
-      }
-    }
-  }
-  return maxIncome == double.negativeInfinity ? 0.0 : maxIncome;
-}
-
-double calculateAvgIncome() {
-  double totalIncome = 0.0;
-  int count = 0;
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-      String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-      double amount = double.tryParse(amountStr) ?? 0.0;
-
-      if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
-        totalIncome += amount;
-        count++;
-      }
-    }
-  }
-  return count == 0 ? 0.0 : totalIncome / count;
-}
-
-double calculateMinExpense() {
-  double minExpense = double.infinity;
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-      String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-      double amount = double.tryParse(amountStr) ?? 0.0;
-
-      if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
-        if (amount < minExpense) {
-          minExpense = amount;
-        }
-      }
-    }
-  }
-  return minExpense == double.infinity ? 0.0 : minExpense;
-}
-
-double calculateMaxExpense() {
-  double maxExpense = double.negativeInfinity;
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-      String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-      double amount = double.tryParse(amountStr) ?? 0.0;
-
-      if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
-        if (amount > maxExpense) {
-          maxExpense = amount;
-        }
-      }
-    }
-  }
-  return maxExpense == double.negativeInfinity ? 0.0 : maxExpense;
-}
-
-double calculateAvgExpense() {
-  double totalExpense = 0.0;
-  int count = 0;
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-      String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-      double amount = double.tryParse(amountStr) ?? 0.0;
-
-      if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
-        totalExpense += amount;
-        count++;
-      }
-    }
-  }
-  return count == 0 ? 0.0 : totalExpense / count;
-}
-
-
-//static part
-Widget buildStatisticsSummary() {
-  // Calculated values based on the selected period
-  
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 239, 239, 239),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+  Widget buildIncomeExpenseGraph() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Minimum Column
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'الحد الأدنى',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Bold',
-                  fontSize: 12,
-                  color: Colors.grey[800],
+          Container(
+            width: MediaQuery.of(context).size.width * 0.95,
+            height: 250, // Keep height at 250 as required
+            padding: const EdgeInsets.all(8.0),
+            child: LineChart(
+              LineChartData(
+                minY: 0,
+                maxY: 400,
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 25,
+                      interval: 50,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          _isBalanceVisible
+                              ? value.toInt().toString()
+                              : getMaskedValue(),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                            fontFamily: 'GE-SS-Two-Light',
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 35,
+                      interval: 1,
+                      getTitlesWidget: (value, _) {
+                        List<String> labels;
+
+                        // Determine the labels based on the selected period
+                        switch (_selectedPeriod) {
+                          case 'اسبوعي':
+                            labels = [
+                              'السبت',
+                              'الأحد',
+                              'الاثنين',
+                              'الثلاثاء',
+                              'الأربعاء',
+                              'الخميس',
+                              'الجمعة'
+                            ];
+                            break;
+                          case 'شهري':
+                            labels = [
+                              '1 الأسبوع',
+                              '2 الأسبوع',
+                              '3 الأسبوع',
+                              '4 الأسبوع'
+                            ];
+                            break;
+                          case 'سنوي':
+                            labels = [
+                              'يناير',
+                              'فبراير',
+                              'مارس',
+                              'أبريل',
+                              'مايو',
+                              'يونيو',
+                              'يوليو',
+                              'أغسطس',
+                              'سبتمبر',
+                              'أكتوبر',
+                              'نوفمبر',
+                              'ديسمبر'
+                            ];
+                            break;
+                          default:
+                            labels = [];
+                        }
+
+                        // Display the appropriate label based on the index
+                        final index = value.toInt();
+                        if (index >= 0 && index < labels.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6.0),
+                            child: Transform.rotate(
+                              angle: _selectedPeriod == 'سنوي'
+                                  ? -0.4
+                                  : 0.0, // Rotate for 'سنوي' only
+                              child: Text(
+                                labels[index],
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontFamily: 'GE-SS-Two-Light',
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _isBalanceVisible ? '${_minIncome.toStringAsFixed(2)} ر.س' : getMaskedValue(),
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 12,
-                  color: Colors.green[700],
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: true,
+                  drawHorizontalLine: true,
+                  verticalInterval: 1,
+                  horizontalInterval: 50,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: Colors.grey.withOpacity(0.2),
+                    strokeWidth: 1,
+                  ),
+                  getDrawingVerticalLine: (value) => FlLine(
+                    color: Colors.grey.withOpacity(0.2),
+                    strokeWidth: 1,
+                  ),
                 ),
-                textDirection: TextDirection.rtl,
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: _isBalanceVisible
+                        ? incomeData
+                        : [], // Hide data if balance is hidden
+                    isCurved: true,
+                    color: Colors.green,
+                    barWidth: 3,
+                    belowBarData: BarAreaData(
+                        show: true, color: Colors.green.withOpacity(0.4)),
+                  ),
+                  LineChartBarData(
+                    spots: _isBalanceVisible
+                        ? expenseData
+                        : [], // Hide data if balance is hidden
+                    isCurved: true,
+                    color: Colors.red,
+                    barWidth: 3,
+                    belowBarData: BarAreaData(
+                        show: true, color: Colors.red.withOpacity(0.3)),
+                  ),
+                ],
               ),
-              Text(
-                _isBalanceVisible ? '${_minExpense.toStringAsFixed(2)} ر.س' : getMaskedValue(),
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 12,
-                  color: Colors.red[700],
-                ),
-                textDirection: TextDirection.rtl,
-              ),
-            ],
+            ),
           ),
-          // Maximum Column
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          const SizedBox(height: 8), // Space between chart and legend
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'الحد الأعلى',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Bold',
-                  fontSize: 12,
-                  color: Colors.grey[800],
-                ),
+              // Legend for Income
+              Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    color: Colors.green,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    'الدخل',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'GE-SS-Two-Light',
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                _isBalanceVisible ? '${_maxIncome.toStringAsFixed(2)} ر.س' : getMaskedValue(),
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 12,
-                  color: Colors.green[700],
-                ),
-                textDirection: TextDirection.rtl,
-              ),
-              Text(
-                _isBalanceVisible ? '${_maxExpense.toStringAsFixed(2)} ر.س' : getMaskedValue(),
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 12,
-                  color: Colors.red[700],
-                ),
-                textDirection: TextDirection.rtl,
-              ),
-            ],
-          ),
-          // Average Column
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'المتوسط',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Bold',
-                  fontSize: 12,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _isBalanceVisible ? '${_filteredIncome.toStringAsFixed(2)} ر.س' : getMaskedValue(),
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 12,
-                  color: Colors.green[700],
-                ),
-                textDirection: TextDirection.rtl,
-              ),
-              Text(
-                _isBalanceVisible ? '${_filteredExpense.toStringAsFixed(2)} ر.س' : getMaskedValue(),
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 12,
-                  color: Colors.red[700],
-                ),
-                textDirection: TextDirection.rtl,
+              const SizedBox(width: 20), // Space between legends
+              // Legend for Expense
+              Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    'الصرف',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'GE-SS-Two-Light',
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
+
+  List<FlSpot> _generateIncomeData() {
+    List<FlSpot> incomeSpots = [];
+    Map<int, double> monthlyIncome = {}; // To accumulate monthly data
+
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String? dateStr = transaction['TransactionDateTime'];
+        if (dateStr != null) {
+          DateTime transactionDate =
+              DateTime.tryParse(dateStr) ?? DateTime.now();
+          int month = transactionDate.month - 1;
+          String subtype =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                  'غير معروف';
+          String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+          double amount = double.tryParse(amountStr) ?? 0.0;
+
+          if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
+            monthlyIncome[month] = (monthlyIncome[month] ?? 0) + amount;
+          }
+        }
+      }
+    }
+
+    for (int i = 0; i < 12; i++) {
+      incomeSpots.add(FlSpot(i.toDouble(), monthlyIncome[i] ?? 0));
+    }
+    return incomeSpots;
+  }
+
+  List<FlSpot> _generateExpenseData() {
+    List<FlSpot> expenseSpots = [];
+    Map<int, double> monthlyExpense = {}; // To accumulate monthly data
+
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String? dateStr = transaction['TransactionDateTime'];
+        if (dateStr != null) {
+          DateTime transactionDate =
+              DateTime.tryParse(dateStr) ?? DateTime.now();
+          int month = transactionDate.month - 1;
+          String subtype =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                  'غير معروف';
+          String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+          double amount = double.tryParse(amountStr) ?? 0.0;
+
+          if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(subtype)) {
+            monthlyExpense[month] = (monthlyExpense[month] ?? 0) + amount;
+          }
+        }
+      }
+    }
+
+    for (int i = 0; i < 12; i++) {
+      expenseSpots.add(FlSpot(i.toDouble(), monthlyExpense[i] ?? 0));
+    }
+    return expenseSpots;
+  }
+
+  double calculateMinIncome() {
+    double minIncome = double.infinity;
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+        double amount = double.tryParse(amountStr) ?? 0.0;
+
+        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
+          if (amount < minIncome) {
+            minIncome = amount;
+          }
+        }
+      }
+    }
+    return minIncome == double.infinity ? 0.0 : minIncome;
+  }
+
+  double calculateMaxIncome() {
+    double maxIncome = double.negativeInfinity;
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+        double amount = double.tryParse(amountStr) ?? 0.0;
+
+        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
+          if (amount > maxIncome) {
+            maxIncome = amount;
+          }
+        }
+      }
+    }
+    return maxIncome == double.negativeInfinity ? 0.0 : maxIncome;
+  }
+
+  double calculateAvgIncome() {
+    double totalIncome = 0.0;
+    int count = 0;
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+        double amount = double.tryParse(amountStr) ?? 0.0;
+
+        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
+          totalIncome += amount;
+          count++;
+        }
+      }
+    }
+    return count == 0 ? 0.0 : totalIncome / count;
+  }
+
+  double calculateMinExpense() {
+    double minExpense = double.infinity;
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+        double amount = double.tryParse(amountStr) ?? 0.0;
+
+        if ([
+          'MoneyTransfer',
+          'Withdrawal',
+          'Purchase',
+          'DepositReversal',
+          'NotApplicable'
+        ].contains(subtype)) {
+          if (amount < minExpense) {
+            minExpense = amount;
+          }
+        }
+      }
+    }
+    return minExpense == double.infinity ? 0.0 : minExpense;
+  }
+
+  double calculateMaxExpense() {
+    double maxExpense = double.negativeInfinity;
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+        double amount = double.tryParse(amountStr) ?? 0.0;
+
+        if ([
+          'MoneyTransfer',
+          'Withdrawal',
+          'Purchase',
+          'DepositReversal',
+          'NotApplicable'
+        ].contains(subtype)) {
+          if (amount > maxExpense) {
+            maxExpense = amount;
+          }
+        }
+      }
+    }
+    return maxExpense == double.negativeInfinity ? 0.0 : maxExpense;
+  }
+
+  double calculateAvgExpense() {
+    double totalExpense = 0.0;
+    int count = 0;
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+        double amount = double.tryParse(amountStr) ?? 0.0;
+
+        if ([
+          'MoneyTransfer',
+          'Withdrawal',
+          'Purchase',
+          'DepositReversal',
+          'NotApplicable'
+        ].contains(subtype)) {
+          totalExpense += amount;
+          count++;
+        }
+      }
+    }
+    return count == 0 ? 0.0 : totalExpense / count;
+  }
+
+//static part
+  Widget buildStatisticsSummary() {
+    // Calculated values based on the selected period
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 239, 239, 239),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // Minimum Column
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'الحد الأدنى',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Bold',
+                    fontSize: 12,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _isBalanceVisible
+                      ? '${_minIncome.toStringAsFixed(2)} ر.س'
+                      : getMaskedValue(),
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 12,
+                    color: Colors.green[700],
+                  ),
+                  textDirection: TextDirection.rtl,
+                ),
+                Text(
+                  _isBalanceVisible
+                      ? '${_minExpense.toStringAsFixed(2)} ر.س'
+                      : getMaskedValue(),
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 12,
+                    color: Colors.red[700],
+                  ),
+                  textDirection: TextDirection.rtl,
+                ),
+              ],
+            ),
+            // Maximum Column
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'الحد الأعلى',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Bold',
+                    fontSize: 12,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _isBalanceVisible
+                      ? '${_maxIncome.toStringAsFixed(2)} ر.س'
+                      : getMaskedValue(),
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 12,
+                    color: Colors.green[700],
+                  ),
+                  textDirection: TextDirection.rtl,
+                ),
+                Text(
+                  _isBalanceVisible
+                      ? '${_maxExpense.toStringAsFixed(2)} ر.س'
+                      : getMaskedValue(),
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 12,
+                    color: Colors.red[700],
+                  ),
+                  textDirection: TextDirection.rtl,
+                ),
+              ],
+            ),
+            // Average Column
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'المتوسط',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Bold',
+                    fontSize: 12,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _isBalanceVisible
+                      ? '${_filteredIncome.toStringAsFixed(2)} ر.س'
+                      : getMaskedValue(),
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 12,
+                    color: Colors.green[700],
+                  ),
+                  textDirection: TextDirection.rtl,
+                ),
+                Text(
+                  _isBalanceVisible
+                      ? '${_filteredExpense.toStringAsFixed(2)} ر.س'
+                      : getMaskedValue(),
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 12,
+                    color: Colors.red[700],
+                  ),
+                  textDirection: TextDirection.rtl,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 // Pie chart to show transaction categories
-Widget buildPieChart() {
-  if (!_isPieChartVisible) {
-    return const Center(
-      child: Text(
-        'لا توجد عمليات للعرض',
-        style: TextStyle(
-          fontSize: 14,
-          fontFamily: 'GE-SS-Two-Light',
-          color: Colors.grey,
-        ),
-      ),
-    );
-  }
-
-  Map<String, double> pieChartData = _calculateCategoryDataForPieChart();
-  if (pieChartData.isEmpty ||
-      pieChartData.values.every((value) => value == 0)) {
-    return const Center(
-      child: Text(
-        'لا توجد عمليات لعرض تصنيفاتها',
-        style: TextStyle(
-          fontSize: 14,
-          fontFamily: 'GE-SS-Two-Light',
-          color: Colors.grey,
-        ),
-      ),
-    );
-  }
-
-  List<Color> colors = generateDynamicGreenShades(pieChartData.length);
-  double total = pieChartData.values.reduce((a, b) => a + b);
-
-  return PieChart(
-    PieChartData(
-      sections: pieChartData.entries.map((entry) {
-        final index = pieChartData.keys.toList().indexOf(entry.key);
-        final color = colors[index % colors.length];
-        final value = entry.value;
-        final percentage = (value / total) * 100;
-
-        return PieChartSectionData(
-          color: color,
-          value: value,
-          title: '${percentage.toStringAsFixed(1)}%',
-          titlePositionPercentageOffset: 0.55,
-          titleStyle: const TextStyle(
-            fontSize: 12,
-            fontFamily: 'GE-SS-Two-Light',
-            color: Colors.white,
-          ),
-          radius: _touchedIndex == index ? 60 : 50,
-          badgeWidget: _buildBadge(entry.key, percentage),
-          badgePositionPercentageOffset: 1.4,
-        );
-      }).toList(),
-      sectionsSpace: 2,
-      centerSpaceRadius: 40,
-      pieTouchData: PieTouchData(
-        touchCallback: (FlTouchEvent event, pieTouchResponse) {
-          setState(() {
-            if (!event.isInterestedForInteractions ||
-                pieTouchResponse == null ||
-                pieTouchResponse.touchedSection == null) {
-              _touchedIndex = -1;
-              return;
-            }
-            _touchedIndex =
-                pieTouchResponse.touchedSection!.touchedSectionIndex;
-          });
-        },
-      ),
-    ),
-  );
-}
-
-
-Widget buildPieChartWithBorder() {
-  return Container(
-    padding: const EdgeInsets.all(10.0), // Space inside the container
-    decoration: BoxDecoration(
-      color: Colors.white, // Background color
-      borderRadius: BorderRadius.circular(12.0), // Rounded corners
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.2), // Shadow color
-          spreadRadius: 2,
-          blurRadius: 5,
-        ),
-      ],
-    ),
-    child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end, // Align children to the right
-
-      children: [
-        Text(
-        'تصنيف العمليات',
-            textDirection: TextDirection.rtl, // Ensures right-to-left alignment
+  Widget buildPieChart() {
+    if (!_isPieChartVisible) {
+      return const Center(
+        child: Text(
+          'لا توجد عمليات للعرض',
           style: TextStyle(
-            fontFamily: 'GE-SS-Two-Bold',
             fontSize: 14,
-            color: Colors.grey[700],
+            fontFamily: 'GE-SS-Two-Light',
+            color: Colors.grey,
           ),
         ),
-        const SizedBox(height: 10), // Space between title and chart
-        SizedBox(
-          height: 200, // Adjust the height as needed
-          child: buildPieChart(), // Call the existing pie chart function
+      );
+    }
+
+    Map<String, double> pieChartData = _calculateCategoryDataForPieChart();
+    if (pieChartData.isEmpty ||
+        pieChartData.values.every((value) => value == 0)) {
+      return const Center(
+        child: Text(
+          'لا توجد عمليات لعرض تصنيفاتها',
+          style: TextStyle(
+            fontSize: 14,
+            fontFamily: 'GE-SS-Two-Light',
+            color: Colors.grey,
+          ),
         ),
-      ],
-    ),
-  );
-}
+      );
+    }
+
+    List<Color> colors = generateDynamicGreenShades(pieChartData.length);
+    double total = pieChartData.values.reduce((a, b) => a + b);
+
+    return PieChart(
+      PieChartData(
+        sections: pieChartData.entries.map((entry) {
+          final index = pieChartData.keys.toList().indexOf(entry.key);
+          final color = colors[index % colors.length];
+          final value = entry.value;
+          final percentage = (value / total) * 100;
+
+          return PieChartSectionData(
+            color: color,
+            value: value,
+            title: '${percentage.toStringAsFixed(1)}%',
+            titlePositionPercentageOffset: 0.55,
+            titleStyle: const TextStyle(
+              fontSize: 12,
+              fontFamily: 'GE-SS-Two-Light',
+              color: Colors.white,
+            ),
+            radius: _touchedIndex == index ? 60 : 50,
+            badgeWidget: _buildBadge(entry.key, percentage),
+            badgePositionPercentageOffset: 1.4,
+          );
+        }).toList(),
+        sectionsSpace: 2,
+        centerSpaceRadius: 40,
+        pieTouchData: PieTouchData(
+          touchCallback: (FlTouchEvent event, pieTouchResponse) {
+            setState(() {
+              if (!event.isInterestedForInteractions ||
+                  pieTouchResponse == null ||
+                  pieTouchResponse.touchedSection == null) {
+                _touchedIndex = -1;
+                return;
+              }
+              _touchedIndex =
+                  pieTouchResponse.touchedSection!.touchedSectionIndex;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget buildPieChartWithBorder() {
+    return Container(
+      padding: const EdgeInsets.all(50.0), // Space inside the container
+      decoration: BoxDecoration(
+        color: Colors.white, // Background color
+        borderRadius: BorderRadius.circular(12.0), // Rounded corners
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2), // Shadow color
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.end, // Align children to the right
+
+        children: [
+          Text(
+            'تصنيف العمليات',
+            textDirection: TextDirection.rtl, // Ensures right-to-left alignment
+            style: TextStyle(
+              fontFamily: 'GE-SS-Two-Bold',
+              fontSize: 14,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 10), // Space between title and chart
+          SizedBox(
+            height: 200, // Adjust the height as needed
+            child: buildPieChart(), // Call the existing pie chart function
+          ),
+        ],
+      ),
+    );
+  }
 
   // Badge widget to display category name and percentage outside each slice
   Widget _buildBadge(String category, double percentage) {
@@ -1217,111 +1366,113 @@ Widget buildPieChartWithBorder() {
             color: Colors.black,
           ),
         ),
-
       ],
     );
   }
 
   // Generate dynamic colors based on the number of categories
 // Generate dynamic green shades between the base colors
-List<Color> generateDynamicGreenShades(int count) {
-  // Base colors to interpolate between
-  List<Color> baseColors = [
-    Color(0xFFF4D968), // Yellowish-green
-    Color(0xFF92A662), // Light green
-    Color(0xFF2C8C68), // Medium green
-    Color(0xFF1C5B42), // Dark green
-  ];
+  List<Color> generateDynamicGreenShades(int count) {
+    // Base colors to interpolate between
+    List<Color> baseColors = [
+      const Color(0xFFF4D968), // Yellowish-green
+      const Color(0xFF92A662), // Light green
+      const Color(0xFF2C8C68), // Medium green
+      const Color(0xFF1C5B42), // Dark green
+    ];
 
-  // If the number of shades is less than or equal to the base colors, just use the base colors
-  if (count <= baseColors.length) {
-    return baseColors.sublist(0, count);
+    // If the number of shades is less than or equal to the base colors, just use the base colors
+    if (count <= baseColors.length) {
+      return baseColors.sublist(0, count);
+    }
+
+    // Interpolate to create more shades
+    List<Color> greenShades = [];
+    double step = (baseColors.length - 1) / (count - 1);
+
+    for (int i = 0; i < count; i++) {
+      // Determine start and end colors for this step
+      double position = i * step;
+      int startIndex = position.floor();
+      int endIndex = (startIndex + 1).clamp(0, baseColors.length - 1);
+      double t = position - startIndex;
+
+      // Interpolate between startIndex and endIndex
+      Color startColor = baseColors[startIndex];
+      Color endColor = baseColors[endIndex];
+
+      int red = (startColor.red + (endColor.red - startColor.red) * t).toInt();
+      int green =
+          (startColor.green + (endColor.green - startColor.green) * t).toInt();
+      int blue =
+          (startColor.blue + (endColor.blue - startColor.blue) * t).toInt();
+
+      greenShades.add(Color.fromARGB(255, red, green, blue));
+    }
+
+    return greenShades;
   }
 
-  // Interpolate to create more shades
-  List<Color> greenShades = [];
-  double step = (baseColors.length - 1) / (count - 1);
+  Widget buildBarChart() {
+    Map<String, double> categoryData =
+        _calculateCategoryExpenses(); // Calculate from real data
 
-  for (int i = 0; i < count; i++) {
-    // Determine start and end colors for this step
-    double position = i * step;
-    int startIndex = position.floor();
-    int endIndex = (startIndex + 1).clamp(0, baseColors.length - 1);
-    double t = position - startIndex;
-
-    // Interpolate between startIndex and endIndex
-    Color startColor = baseColors[startIndex];
-    Color endColor = baseColors[endIndex];
-
-    int red = (startColor.red + (endColor.red - startColor.red) * t).toInt();
-    int green = (startColor.green + (endColor.green - startColor.green) * t).toInt();
-    int blue = (startColor.blue + (endColor.blue - startColor.blue) * t).toInt();
-
-    greenShades.add(Color.fromARGB(255, red, green, blue));
-  }
-
-  return greenShades;
-}
-
-
-
-
-Widget buildBarChart() {
-  Map<String, double> categoryData = _calculateCategoryExpenses(); // Calculate from real data
-
-  return BarChart(
-    BarChartData(
-      barGroups: categoryData.entries.map((entry) {
-        return BarChartGroupData(
-          x: categoryData.keys.toList().indexOf(entry.key),
-          barRods: [
-            BarChartRodData(
-              toY: entry.value,
-              width: 15,
-              color: Colors.blueAccent,
-              borderRadius: BorderRadius.circular(4),
+    return BarChart(
+      BarChartData(
+        barGroups: categoryData.entries.map((entry) {
+          return BarChartGroupData(
+            x: categoryData.keys.toList().indexOf(entry.key),
+            barRods: [
+              BarChartRodData(
+                toY: entry.value,
+                width: 15,
+                color: Colors.blueAccent,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ],
+          );
+        }).toList(),
+        titlesData: FlTitlesData(
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (index, _) {
+                String category = categoryData.keys.toList()[index.toInt()];
+                return Text(category,
+                    style: const TextStyle(
+                        fontSize: 10, fontFamily: 'GE-SS-Two-Light'));
+              },
             ),
-          ],
-        );
-      }).toList(),
-      titlesData: FlTitlesData(
-        leftTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: true, reservedSize: 40),
-        ),
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            getTitlesWidget: (index, _) {
-              String category = categoryData.keys.toList()[index.toInt()];
-              return Text(category, style: TextStyle(fontSize: 10, fontFamily: 'GE-SS-Two-Light'));
-            },
           ),
         ),
       ),
-    ),
-  );
-}
-// Example method to calculate real income and expense for line chart
-List<FlSpot> _generateSpotsForIncome() {
-  // Generate spots based on transactions data
-  List<FlSpot> incomeSpots = [];
-  // Populate incomeSpots with real data points
-  return incomeSpots;
-}
+    );
+  }
 
-List<FlSpot> _generateSpotsForExpense() {
-  // Generate spots based on transactions data
-  List<FlSpot> expenseSpots = [];
-  // Populate expenseSpots with real data points
-  return expenseSpots;
-}
+// Example method to calculate real income and expense for line chart
+  List<FlSpot> _generateSpotsForIncome() {
+    // Generate spots based on transactions data
+    List<FlSpot> incomeSpots = [];
+    // Populate incomeSpots with real data points
+    return incomeSpots;
+  }
+
+  List<FlSpot> _generateSpotsForExpense() {
+    // Generate spots based on transactions data
+    List<FlSpot> expenseSpots = [];
+    // Populate expenseSpots with real data points
+    return expenseSpots;
+  }
 
 // Example method to calculate category expenses for bar chart
-Map<String, double> _calculateCategoryExpenses() {
-  Map<String, double> categoryExpenses = {};
-  // Populate categoryExpenses with real data from widget.accounts
-  return categoryExpenses;
-}
+  Map<String, double> _calculateCategoryExpenses() {
+    Map<String, double> categoryExpenses = {};
+    // Populate categoryExpenses with real data from widget.accounts
+    return categoryExpenses;
+  }
 
 // Masked display for hidden values
   String getMaskedValue() => '****';
@@ -1335,48 +1486,59 @@ Map<String, double> _calculateCategoryExpenses() {
   }
 
   // Calculate the total income and expense from transactions for a specific month in 2016
-Map<String, double> calculateIncomeAndExpense() {
-  double totalIncome = 0.0;
-  double totalExpense = 0.0;
+  Map<String, double> calculateIncomeAndExpense() {
+    double totalIncome = 0.0;
+    double totalExpense = 0.0;
 
-  // Get the current month and specify the year as 2016
-  int month = DateTime.now().month;
-  int year = 2016;
-  DateTime startOfMonth = DateTime(year, month, 1);
-  DateTime endOfMonth = DateTime(year, month + 1, 0); // Last day of the month
+    // Get the current month and specify the year as 2016
+    int month = DateTime.now().month;
+    int year = 2016;
+    DateTime startOfMonth = DateTime(year, month, 1);
+    DateTime endOfMonth = DateTime(year, month + 1, 0); // Last day of the month
 
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      // Retrieve the transaction date from 'TransactionDateTime'
-      String? dateStr = transaction['TransactionDateTime'];
-      if (dateStr != null) {
-        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+    for (var account in widget.accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        // Retrieve the transaction date from 'TransactionDateTime'
+        String? dateStr = transaction['TransactionDateTime'];
+        if (dateStr != null) {
+          DateTime transactionDate =
+              DateTime.tryParse(dateStr) ?? DateTime.now();
 
-        // Check if the transaction date is within the specified month and year
-        if (transactionDate.isAfter(startOfMonth.subtract(Duration(days: 1))) &&
-            transactionDate.isBefore(endOfMonth.add(Duration(days: 1)))) {
-          String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-          String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-          double amount = double.tryParse(amountStr) ?? 0.0;
+          // Check if the transaction date is within the specified month and year
+          if (transactionDate
+                  .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+              transactionDate
+                  .isBefore(endOfMonth.add(const Duration(days: 1)))) {
+            String subtype =
+                transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                    'غير معروف';
+            String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+            double amount = double.tryParse(amountStr) ?? 0.0;
 
-          if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
-            totalExpense += amount;
-          } else if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
-            totalIncome += amount;
+            if ([
+              'MoneyTransfer',
+              'Withdrawal',
+              'Purchase',
+              'DepositReversal',
+              'NotApplicable'
+            ].contains(subtype)) {
+              totalExpense += amount;
+            } else if (['Deposit', 'WithdrawalReversal', 'Refund']
+                .contains(subtype)) {
+              totalIncome += amount;
+            }
           }
         }
       }
     }
+
+    return {'income': totalIncome, 'expense': totalExpense};
   }
-
-  return {'income': totalIncome, 'expense': totalExpense};
-}
-
 
   @override
   Widget build(BuildContext context) {
-    Map<String, double> totals = calculateIncomeAndExpense(); 
+    Map<String, double> totals = calculateIncomeAndExpense();
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
@@ -1709,309 +1871,320 @@ Map<String, double> calculateIncomeAndExpense() {
   }
 
   // First Dashboard Layout
- Widget buildFirstDashboard(double totalIncome, double totalExpense) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const SizedBox(height: 80), // Additional top padding for centering
+  Widget buildFirstDashboard(double totalIncome, double totalExpense) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 80), // Additional top padding for centering
 
-        Stack(
-          children: [
-            // "مجموع أموالك" Text and Balance Display
-            Column(
-              children: [
-                const Text(
-                  'مجموع أموالك',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Display total balance with toggle
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'ر.س', // Currency symbol
-                      style: TextStyle(
-                        fontFamily: 'GE-SS-Two-Light',
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      _isBalanceVisible ? getTotalBalance() : getMaskedValue(),
-                      style: const TextStyle(
-                        fontFamily: 'GE-SS-Two-Bold',
-                        fontSize: 32,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            // Eye icon to toggle balance visibility
-            Positioned(
-              top: -10, // Move it up further
-              right: 0,
-              child: IconButton(
-                icon: Icon(
-                  _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.black,
-                  size: 24,
-                ),
-                onPressed: _toggleBalanceVisibility,
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 60), // Increase spacing for a more centered look
-
-        // "تدفقك المالي لهذا الشهر" Box
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF9F9F9),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
+          Stack(
             children: [
-              const Text(
-                'تدفقك المالي لهذا الشهر',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              // "مجموع أموالك" Text and Balance Display
+              Column(
                 children: [
-                  // Expense Section
-                  Column(
+                  const Text(
+                    'مجموع أموالك',
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Display total balance with toggle
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.arrow_downward, color: Colors.red, size: 24),
-                      const SizedBox(height: 5),
                       const Text(
-                        'الصرف',
+                        'ر.س', // Currency symbol
                         style: TextStyle(
                           fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 14,
-                          color: Colors.grey,
+                          fontSize: 18,
+                          color: Colors.black,
                         ),
                       ),
-                      const SizedBox(height: 5),
-                      Row(
-                        children: [
-                          const Text(
-                            'ر.س', // Currency symbol
-                            style: TextStyle(
-                              fontFamily: 'GE-SS-Two-Light',
-                              fontSize: 14,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            _isBalanceVisible
-                                ? totalExpense.toStringAsFixed(2)
-                                : getMaskedValue(),
-                            style: const TextStyle(
-                              fontFamily: 'GE-SS-Two-Bold',
-                              fontSize: 18,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  // Divider
-                  Container(
-                    width: 1,
-                    height: 50,
-                    color: Colors.grey[300],
-                  ),
-
-                  // Income Section
-                  Column(
-                    children: [
-                      Icon(Icons.arrow_upward, color: Colors.green, size: 24),
-                      const SizedBox(height: 5),
-                      const Text(
-                        'الدخل',
-                        style: TextStyle(
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 14,
-                          color: Colors.grey,
+                      const SizedBox(width: 5),
+                      Text(
+                        _isBalanceVisible
+                            ? getTotalBalance()
+                            : getMaskedValue(),
+                        style: const TextStyle(
+                          fontFamily: 'GE-SS-Two-Bold',
+                          fontSize: 32,
+                          color: Colors.black,
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                      Row(
-                        children: [
-                          const Text(
-                            'ر.س', // Currency symbol
-                            style: TextStyle(
-                              fontFamily: 'GE-SS-Two-Light',
-                              fontSize: 14,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            _isBalanceVisible
-                                ? totalIncome.toStringAsFixed(2)
-                                : getMaskedValue(),
-                            style: const TextStyle(
-                              fontFamily: 'GE-SS-Two-Bold',
-                              fontSize: 18,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-  // Second Dashboard Layout
-// Second Dashboard Layout
-Widget buildSecondDashboard() {
-  return Padding(
-    padding: const EdgeInsets.all(20.0),
-    child: SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              buildTimePeriodSelector(),
-              IconButton(
-                icon: Icon(_isBalanceVisible ? Icons.visibility : Icons.visibility_off),
-                onPressed: _toggleBalanceVisibility,
+              // Eye icon to toggle balance visibility
+              Positioned(
+                top: -10, // Move it up further
+                right: 0,
+                child: IconButton(
+                  icon: Icon(
+                    _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.black,
+                    size: 24,
+                  ),
+                  onPressed: _toggleBalanceVisibility,
+                ),
               ),
             ],
           ),
-          if (_selectedPeriod == 'اسبوعي') buildWeekNavigationButtons(),
-          if (_selectedPeriod == 'شهري') buildMonthNavigationButtons(),
-          if (_selectedPeriod == 'سنوي') buildYearNavigationButtons(),
-          const SizedBox(height: 10),
-          Stack(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 8.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 5,
+
+          const SizedBox(
+              height: 60), // Increase spacing for a more centered look
+
+          // "تدفقك المالي لهذا الشهر" Box
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9F9F9),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  'تدفقك المالي لهذا الشهر',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Expense Section
+                    Column(
+                      children: [
+                        const Icon(Icons.arrow_downward,
+                            color: Colors.red, size: 24),
+                        const SizedBox(height: 5),
+                        const Text(
+                          'الصرف',
+                          style: TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            const Text(
+                              'ر.س', // Currency symbol
+                              style: TextStyle(
+                                fontFamily: 'GE-SS-Two-Light',
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              _isBalanceVisible
+                                  ? totalExpense.toStringAsFixed(2)
+                                  : getMaskedValue(),
+                              style: const TextStyle(
+                                fontFamily: 'GE-SS-Two-Bold',
+                                fontSize: 18,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    // Divider
+                    Container(
+                      width: 1,
+                      height: 50,
+                      color: Colors.grey[300],
+                    ),
+
+                    // Income Section
+                    Column(
+                      children: [
+                        const Icon(Icons.arrow_upward,
+                            color: Colors.green, size: 24),
+                        const SizedBox(height: 5),
+                        const Text(
+                          'الدخل',
+                          style: TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            const Text(
+                              'ر.س', // Currency symbol
+                              style: TextStyle(
+                                fontFamily: 'GE-SS-Two-Light',
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              _isBalanceVisible
+                                  ? totalIncome.toStringAsFixed(2)
+                                  : getMaskedValue(),
+                              style: const TextStyle(
+                                fontFamily: 'GE-SS-Two-Bold',
+                                fontSize: 18,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                child: SizedBox(
-                  height: 290,
-                  child: buildIncomeExpenseGraph(),
-                ),
-              ),
-              Positioned(
-                top: 5,
-                right: 15,
-                child: Text(
-                  'تحليل الإنفاق',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Bold',
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
-          buildStatisticsSummary(),
-          const SizedBox(height: 10),
-          buildPieChartWithBorder(), // Updated pie chart with border
         ],
       ),
-    ),
-  );
-}
-
-Map<String, double> _calculateCategoryDataForPieChart() {
-  List<Map<String, dynamic>> filteredTransactions = [];
-  DateTime now = DateTime.now();
-  DateTime selectedDate = DateTime(2016, now.month - monthOffset, now.day);
-
-  if (_selectedPeriod == 'اسبوعي') {
-    for (var account in widget.accounts) {
-      var transactions = account['transactions'] ?? [];
-      filteredTransactions.addAll(transactions.where((transaction) {
-        String dateStr = transaction['TransactionDateTime'] ?? '';
-        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
-        return transactionDate.year == 2016 &&
-            transactionDate.month == selectedDate.month &&
-            _getWeekOfMonth(transactionDate.day) == _getWeekOfMonth(selectedDate.day);
-      }));
-    }
-  } else if (_selectedPeriod == 'شهري') {
-    for (var account in widget.accounts) {
-      var transactions = account['transactions'] ?? [];
-      filteredTransactions.addAll(transactions.where((transaction) {
-        String dateStr = transaction['TransactionDateTime'] ?? '';
-        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
-        return transactionDate.year == 2016 && transactionDate.month == selectedDate.month;
-      }));
-    }
-  } else if (_selectedPeriod == 'سنوي') {
-    for (var account in widget.accounts) {
-      var transactions = account['transactions'] ?? [];
-      filteredTransactions.addAll(transactions.where((transaction) {
-        String dateStr = transaction['TransactionDateTime'] ?? '';
-        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
-        return transactionDate.year == 2016;
-      }));
-    }
+    );
   }
 
-  // Aggregate transactions by category
-  Map<String, double> categoryTotals = {};
-  for (var transaction in filteredTransactions) {
-    String category = transaction['Category'] ??
-        transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-        'غير مصنف';
-    double amount = double.tryParse(transaction['Amount']?['Amount'] ?? '0.0') ?? 0.0;
-
-    if (amount > 0.0) {
-      categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
-    }
+  // Second Dashboard Layout
+// Second Dashboard Layout
+  Widget buildSecondDashboard() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                buildTimePeriodSelector(),
+                IconButton(
+                  icon: Icon(_isBalanceVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: _toggleBalanceVisibility,
+                ),
+              ],
+            ),
+            if (_selectedPeriod == 'اسبوعي') buildWeekNavigationButtons(),
+            if (_selectedPeriod == 'شهري') buildMonthNavigationButtons(),
+            if (_selectedPeriod == 'سنوي') buildYearNavigationButtons(),
+            const SizedBox(height: 10),
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: SizedBox(
+                    height: 290,
+                    child: buildIncomeExpenseGraph(),
+                  ),
+                ),
+                Positioned(
+                  top: 5,
+                  right: 15,
+                  child: Text(
+                    'تحليل الإنفاق',
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Bold',
+                      fontSize: 14,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            buildStatisticsSummary(),
+            const SizedBox(height: 10),
+            buildPieChartWithBorder(), // Updated pie chart with border
+          ],
+        ),
+      ),
+    );
   }
-  return categoryTotals;
-}
 
+  Map<String, double> _calculateCategoryDataForPieChart() {
+    List<Map<String, dynamic>> filteredTransactions = [];
+    DateTime now = DateTime.now();
+    DateTime selectedDate = DateTime(2016, now.month - monthOffset, now.day);
 
+    if (_selectedPeriod == 'اسبوعي') {
+      for (var account in widget.accounts) {
+        var transactions = account['transactions'] ?? [];
+        filteredTransactions.addAll(transactions.where((transaction) {
+          String dateStr = transaction['TransactionDateTime'] ?? '';
+          DateTime transactionDate =
+              DateTime.tryParse(dateStr) ?? DateTime.now();
+          return transactionDate.year == 2016 &&
+              transactionDate.month == selectedDate.month &&
+              _getWeekOfMonth(transactionDate.day) ==
+                  _getWeekOfMonth(selectedDate.day);
+        }));
+      }
+    } else if (_selectedPeriod == 'شهري') {
+      for (var account in widget.accounts) {
+        var transactions = account['transactions'] ?? [];
+        filteredTransactions.addAll(transactions.where((transaction) {
+          String dateStr = transaction['TransactionDateTime'] ?? '';
+          DateTime transactionDate =
+              DateTime.tryParse(dateStr) ?? DateTime.now();
+          return transactionDate.year == 2016 &&
+              transactionDate.month == selectedDate.month;
+        }));
+      }
+    } else if (_selectedPeriod == 'سنوي') {
+      for (var account in widget.accounts) {
+        var transactions = account['transactions'] ?? [];
+        filteredTransactions.addAll(transactions.where((transaction) {
+          String dateStr = transaction['TransactionDateTime'] ?? '';
+          DateTime transactionDate =
+              DateTime.tryParse(dateStr) ?? DateTime.now();
+          return transactionDate.year == 2016;
+        }));
+      }
     }
+
+    // Aggregate transactions by category
+    Map<String, double> categoryTotals = {};
+    for (var transaction in filteredTransactions) {
+      String category = transaction['Category'] ??
+          transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+          'غير مصنف';
+      double amount =
+          double.tryParse(transaction['Amount']?['Amount'] ?? '0.0') ?? 0.0;
+
+      if (amount > 0.0) {
+        categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
+      }
+    }
+    return categoryTotals;
+  }
+}

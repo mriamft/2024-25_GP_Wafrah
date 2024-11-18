@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:wafrah/config.dart';
 
 class GPTService {
-
   Future<String> categorizeTransaction(String transactionInfo) async {
     const String url = 'https://api.openai.com/v1/chat/completions';
     const String categories =
@@ -13,7 +12,8 @@ class GPTService {
     final messages = [
       {
         "role": "system",
-        "content": "You are a helpful assistant that categorizes transactions into predefined categories in Arabic."
+        "content":
+            "You are a helpful assistant that categorizes transactions into predefined categories in Arabic."
       },
       {
         "role": "user",
@@ -44,7 +44,8 @@ class GPTService {
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
+        final Map<String, dynamic> data =
+            jsonDecode(utf8.decode(response.bodyBytes));
         return data['choices'][0]['message']['content'].trim();
       } else {
         throw Exception('Failed to fetch category: ${response.body}');
@@ -54,12 +55,15 @@ class GPTService {
     }
   }
 
-  Future<Map<String, double>> aggregateTransactions(List<Map<String, dynamic>> transactions) async {
+  Future<Map<String, double>> aggregateTransactions(
+      List<Map<String, dynamic>> transactions) async {
     final Map<String, double> categoryTotals = {};
 
     for (var transaction in transactions) {
-      final String transactionInfo = transaction['info'] ?? ''; // Replace 'info' with the actual field name
-      final double amount = transaction['amount'] ?? 0.0; // Replace 'amount' with the actual field name
+      final String transactionInfo = transaction['info'] ??
+          ''; // Replace 'info' with the actual field name
+      final double amount = transaction['amount'] ??
+          0.0; // Replace 'amount' with the actual field name
 
       if (transactionInfo.isNotEmpty) {
         final String category = await categorizeTransaction(transactionInfo);

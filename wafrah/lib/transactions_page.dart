@@ -7,18 +7,17 @@ import 'home_page.dart';
 class TransactionsPage extends StatelessWidget {
   final String userName;
   final String phoneNumber;
-  final List<Map<String, dynamic>> accounts; // Optional accounts
+  final List<Map<String, dynamic>> accounts;
 
   const TransactionsPage({
     super.key,
     required this.userName,
     required this.phoneNumber,
-    this.accounts =
-        const [], // Default to an empty list if no accounts are provided
+    this.accounts = const [],
   });
 
-  // Function to extract and sort all transactions from connected accounts
-  List<Map<String, dynamic>> getAllTransactions() {
+  // Function to extract and group transactions by date
+  List<Map<String, dynamic>> getGroupedTransactions() {
     List<Map<String, dynamic>> allTransactions = [];
 
     for (var account in accounts) {
@@ -28,31 +27,43 @@ class TransactionsPage extends StatelessWidget {
       }
     }
 
-    // Sort transactions by date (most recent to oldest)
+    // Sort transactions by date
     allTransactions.sort((a, b) {
       String dateA = a['TransactionDateTime'] ?? '';
       String dateB = b['TransactionDateTime'] ?? '';
-
       DateTime dateTimeA = DateTime.tryParse(dateA) ?? DateTime.now();
       DateTime dateTimeB = DateTime.tryParse(dateB) ?? DateTime.now();
-
-      // Sort in descending order, most recent first
       return dateTimeB.compareTo(dateTimeA);
     });
 
-    return allTransactions;
+    // Group transactions by date
+    Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
+    for (var transaction in allTransactions) {
+      String date =
+          transaction['TransactionDateTime']?.split('T').first ?? 'غير معروف';
+      if (!groupedTransactions.containsKey(date)) {
+        groupedTransactions[date] = [];
+      }
+      groupedTransactions[date]!.add(transaction);
+    }
+
+    // Convert grouped map to a list of maps for easier building
+    List<Map<String, dynamic>> result = [];
+    groupedTransactions.forEach((date, transactions) {
+      result.add({'date': date, 'transactions': transactions});
+    });
+
+    return result;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get all transactions sorted by date
-    List<Map<String, dynamic>> allTransactions = getAllTransactions();
+    List<Map<String, dynamic>> groupedTransactions = getGroupedTransactions();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9), // Background color
+      backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
-          // Green square image
           Positioned(
             top: -100,
             left: 0,
@@ -64,10 +75,8 @@ class TransactionsPage extends StatelessWidget {
               fit: BoxFit.contain,
             ),
           ),
-
-          // Title
           const Positioned(
-            top: 185,
+            top: 210,
             right: 12,
             child: Text(
               'سجل المعاملات',
@@ -75,19 +84,16 @@ class TransactionsPage extends StatelessWidget {
                 color: Color(0xFF3D3D3D),
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'GE-SS-Two-Bold', // Ensure same font as the project
+                fontFamily: 'GE-SS-Two-Bold',
               ),
             ),
           ),
-
-          // Transactions List or No Transactions Message
           Positioned(
             top: 240,
             left: 10,
             right: 10,
-            bottom:
-                90, // Added bottom padding to make space for the navigation bar
-            child: allTransactions.isEmpty
+            bottom: 90,
+            child: groupedTransactions.isEmpty
                 ? const Center(
                     child: Text(
                       'لا يوجد لديك معاملات',
@@ -100,15 +106,40 @@ class TransactionsPage extends StatelessWidget {
                     ),
                   )
                 : ListView.builder(
-                    // Use ListView.builder for better scrolling with large datasets
-                    itemCount: allTransactions.length,
+                    itemCount: groupedTransactions.length,
                     itemBuilder: (context, index) {
-                      return _buildTransactionCard(allTransactions[index]);
+                      var group = groupedTransactions[index];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 3.0),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                group['date'],
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF3D3D3D),
+                                  fontFamily: 'GE-SS-Two-Bold',
+                                ),
+                              ),
+                            ),
+                          ),
+                          ...group['transactions'].map<Widget>((transaction) {
+                            return GestureDetector(
+                              onTap: () {
+                                _showTransactionDetails(context, transaction);
+                              },
+                              child: _buildTransactionCard(transaction),
+                            );
+                          }).toList(),
+                        ],
+                      );
                     },
                   ),
           ),
-
-          // Bottom Navigation Bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -151,7 +182,7 @@ class TransactionsPage extends StatelessWidget {
                           builder: (context) => HomePage(
                                 userName: userName,
                                 phoneNumber: phoneNumber,
-                                accounts: accounts, // Pass accounts
+                                accounts: accounts,
                               )),
                     );
                   }),
@@ -163,7 +194,7 @@ class TransactionsPage extends StatelessWidget {
                           builder: (context) => SavingPlanPage(
                                 userName: userName,
                                 phoneNumber: phoneNumber,
-                                accounts: accounts, // Pass accounts
+                                accounts: accounts,
                               )),
                     );
                   }),
@@ -171,21 +202,6 @@ class TransactionsPage extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            right: 245,
-            top: 790,
-            child: Container(
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                color: Color(0xFF2C8C68), // Point color
-
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-
-          // Circular Button for Banks Page
           Positioned(
             bottom: 44,
             left: 0,
@@ -225,7 +241,7 @@ class TransactionsPage extends StatelessWidget {
                           builder: (context) => BanksPage(
                             userName: userName,
                             phoneNumber: phoneNumber,
-                            accounts: accounts, // Pass the accounts data here
+                            accounts: accounts,
                           ),
                         ),
                       );
@@ -241,49 +257,48 @@ class TransactionsPage extends StatelessWidget {
   }
 
   Widget _buildTransactionCard(Map<String, dynamic> transaction) {
-    // Extract the necessary data
-    String dateTime = transaction['TransactionDateTime'] ?? '';
-    String date = dateTime.split('T').first; // Only get the date part
-
+    String amount = transaction['Amount']?['Amount'] ?? '0.00';
     String subtype =
         transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-            'غير معروف'; // Remove KSAOB.
+            'غير معروف';
+    String category = transaction['Category'] ?? 'غير مصنف';
 
-    // Transaction amount
-    String amount = transaction['Amount']?['Amount'] ?? '0.00';
-
-    // Translate transaction subtype to Arabic
-    Map<String, String> transactionTypeTranslations = {
-      'MoneyTransfer': 'تحويل مالي',
-      'WithdrawalReversal': 'سحب عكسي',
-      'Withdrawal': 'سحب مبلغ',
-      'Deposit': 'إيداع',
-      'NotApplicable': 'سحب مبلغ',
-      'Purchase': 'شراء بضاعة',
-      'Refund': 'إعادة مبلغ',
-      'DepositReversal': 'إيداع عكسي',
-      'Reversal': 'عملية عكسية',
-    };
-    String translatedSubtype = transactionTypeTranslations[subtype] ?? subtype;
-
-    // Determine the color based on the translated subtype
     Color amountColor;
-    if (translatedSubtype == 'تحويل مالي' ||
-        translatedSubtype == 'سحب مبلغ' ||
-        translatedSubtype == 'شراء بضاعة' ||
-        translatedSubtype == 'إيداع عكسي') {
-      amountColor = Colors.red; // Red color for these transaction types
-    } else if (translatedSubtype == 'إيداع' ||
-        translatedSubtype == 'سحب عكسي' ||
-        translatedSubtype == 'إعادة مبلغ') {
-      amountColor = Colors.green; // Green color for these transaction types
-    } else if (translatedSubtype == 'عملية عكسية' ||
-        translatedSubtype == 'غير محدد') {
-      amountColor = Colors.black; // Black color for these transaction types
+    if (subtype == 'MoneyTransfer' ||
+        subtype == 'Withdrawal' ||
+        subtype == 'Purchase' ||
+        subtype == 'DepositReversal') {
+      amountColor = Colors.red;
+    } else if (subtype == 'Deposit' ||
+        subtype == 'WithdrawalReversal' ||
+        subtype == 'Refund') {
+      amountColor = Colors.green;
     } else {
-      amountColor = const Color(
-          0xFF3D3D3D); // Default color (same as used for other texts)
+      amountColor = const Color(0xFF3D3D3D);
     }
+
+    // Mapping of categories to icons
+    Map<String, IconData> categoryIcons = {
+      'المطاعم': Icons.restaurant,
+      'التعليم': Icons.school,
+      'الصحة': Icons.local_hospital,
+      'التسوق': Icons.shopping_bag,
+      'تسوق': Icons.shopping_bag,
+      'الترفيه': Icons.movie,
+      'البقالة': Icons.local_grocery_store,
+      'النقل': Icons.directions_bus,
+      'السفر': Icons.flight,
+      'الحكومة': Icons.account_balance,
+      'العمل الخيري': Icons.volunteer_activism,
+      'الاستثمار': Icons.trending_up,
+      'الإيجار': Icons.home,
+      'القروض': Icons.money,
+      'الراتب والإيرادات': Icons.account_balance_wallet,
+      'التحويلات': Icons.swap_horiz,
+      'أخرى': Icons.category,
+    };
+
+    IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -294,62 +309,163 @@ class TransactionsPage extends StatelessWidget {
       ),
       child: Row(
         children: [
+          const SizedBox(width: 10), // Space before the arrow
+          const Icon(Icons.arrow_back_ios_new,
+              color: Color(0xFF3D3D3D), size: 15), // Arrow icon
+          const SizedBox(width: 10), // Space after the arrow
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'التاريخ: $date',
-                  style: const TextStyle(
-                    color: Color(0xFF3D3D3D),
-                    fontSize: 14,
-                    fontFamily: 'GE-SS-Two-Bold',
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'ر.س',
+                      style: TextStyle(
+                        color: amountColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'GE-SS-Two-Light',
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      amount,
+                      style: TextStyle(
+                        color: amountColor,
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'GE-SS-Two-Bold',
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'نوع العملية: $translatedSubtype', // Translated transaction subtype
-                  style: const TextStyle(
-                    color: Color(0xFF3D3D3D),
-                    fontSize: 14,
-                    fontFamily: 'GE-SS-Two-Light',
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      category,
+                      style: const TextStyle(
+                        color: Color(0xFF3D3D3D),
+                        fontSize: 17,
+                        fontFamily: 'GE-SS-Two-Bold',
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          Column(
+          const SizedBox(width: 10), // Space before the icon
+          Icon(categoryIcon,
+              color: const Color(0xFF3D3D3D), size: 24), // Category icon
+        ],
+      ),
+    );
+  }
+
+  void _showTransactionDetails(
+      BuildContext context, Map<String, dynamic> transaction) {
+    String amount = transaction['Amount']?['Amount'] ?? '0.00';
+    String subtype = transaction['SubTransactionType'] ?? 'غير معروف';
+    String dateTime = transaction['TransactionDateTime'] ?? 'غير معروف';
+    String category = transaction['Category'] ?? 'غير مصنف';
+    String transactionInfo =
+        transaction['TransactionInformation'] ?? 'لا توجد معلومات';
+    String iban = transaction['IBAN'] ?? 'غير معروف';
+
+    subtype = subtype.replaceAll('KSAOB.', '').trim();
+
+    Map<String, String> transactionTypeTranslations = {
+      'MoneyTransfer': 'تحويل مالي',
+      'WithdrawalReversal': 'سحب عكسي',
+      'Withdrawal': 'سحب مبلغ',
+      'Deposit': 'إيداع',
+      'NotApplicable': 'غير قابل للتطبيق',
+      'Purchase': 'شراء بضاعة',
+      'Refund': 'إعادة مبلغ',
+      'DepositReversal': 'إيداع عكسي',
+      'Reversal': 'عملية عكسية',
+    };
+
+    if (!transactionTypeTranslations.containsKey(subtype)) {
+      debugPrint('Missing SubTransactionType: $subtype');
+    }
+
+    String translatedSubtype =
+        transactionTypeTranslations[subtype] ?? 'غير معروف';
+    String date = dateTime.split('T').first;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF308C64),
+          title: Stack(
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'ر.س',
-                    style: TextStyle(
-                      color: amountColor, // Dynamically set the color
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'GE-SS-Two-Bold',
-                    ),
+              const Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'تفاصيل العملية',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    color: Colors.white,
+                    fontSize: 15,
                   ),
-                  const SizedBox(
-                      width:
-                          4), // Add a small space between "ر.س" and the amount
-                  Text(
-                    amount,
-                    style: TextStyle(
-                      color: amountColor, // Dynamically set the color
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'GE-SS-Two-Bold',
-                    ),
+                ),
+              ),
+              Positioned(
+                right: -17,
+                top: -18,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.close,
+                    color: Colors.white,
                   ),
-                ],
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
             ],
           ),
-        ],
-      ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('المبلغ: $amount ر.س ',
+                  style: const TextStyle(
+                      fontFamily: 'GE-SS-Two-Bold',
+                      fontSize: 15,
+                      color: Colors.white)),
+              Text('النوع: $translatedSubtype',
+                  style: const TextStyle(
+                      fontFamily: 'GE-SS-Two-Bold',
+                      fontSize: 15,
+                      color: Colors.white)),
+              Text('التاريخ: $date',
+                  style: const TextStyle(
+                      fontFamily: 'GE-SS-Two-Bold',
+                      fontSize: 15,
+                      color: Colors.white)),
+              Text('الفئة: $category',
+                  style: const TextStyle(
+                      fontFamily: 'GE-SS-Two-Bold',
+                      fontSize: 15,
+                      color: Colors.white)),
+              Text('$transactionInfo :العملية من',
+                  style: const TextStyle(
+                      fontFamily: 'GE-SS-Two-Bold',
+                      fontSize: 15,
+                      color: Colors.white)),
+              Text('رقم الإيبان: $iban',
+                  style: const TextStyle(
+                      fontFamily: 'GE-SS-Two-Bold',
+                      fontSize: 15,
+                      color: Colors.white)),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -360,11 +476,7 @@ class TransactionsPage extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: const Color(0xFF2C8C68),
-            size: 30,
-          ),
+          Icon(icon, color: const Color(0xFF2C8C68), size: 30),
           Text(
             label,
             style: const TextStyle(

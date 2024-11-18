@@ -38,7 +38,7 @@ class _OTPPageState extends State<OTPPage> {
   bool showErrorNotification = false;
   String errorMessage = '';
   Color notificationColor = Colors.red;
-Timer? _timer; // Nullable Timer instance
+  Timer? _timer; // Nullable Timer instance
   Timer? _notificationTimer; // Timer for showNotification timeout
 
   bool canResend = false;
@@ -50,39 +50,38 @@ Timer? _timer; // Nullable Timer instance
     startResendOTPCountdown();
   }
 
-@override
-void dispose() {
-  _timer?.cancel(); // Cancel the resend timer
-  _notificationTimer?.cancel(); // Cancel the notification timer if active
-  
-  // Dispose text controllers
-  otpController1.dispose();
-  otpController2.dispose();
-  otpController3.dispose();
-  otpController4.dispose();
-  otpController5.dispose();
-  otpController6.dispose();
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the resend timer
+    _notificationTimer?.cancel(); // Cancel the notification timer if active
 
-  super.dispose();
-}
+    // Dispose text controllers
+    otpController1.dispose();
+    otpController2.dispose();
+    otpController3.dispose();
+    otpController4.dispose();
+    otpController5.dispose();
+    otpController6.dispose();
 
+    super.dispose();
+  }
 
-void startResendOTPCountdown() {
-  _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-    if (mounted) {
-      setState(() {
-        if (resendTimeLeft > 0) {
-          resendTimeLeft--;
-        } else {
-          canResend = true;
-          _timer?.cancel();
-        }
-      });
-    } else {
-      _timer?.cancel();
-    }
-  });
-}
+  void startResendOTPCountdown() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          if (resendTimeLeft > 0) {
+            resendTimeLeft--;
+          } else {
+            canResend = true;
+            _timer?.cancel();
+          }
+        });
+      } else {
+        _timer?.cancel();
+      }
+    });
+  }
 
   String getOTP() {
     return otpController1.text +
@@ -93,25 +92,25 @@ void startResendOTPCountdown() {
         otpController6.text;
   }
 
-void showNotification(String message, {Color color = Colors.red}) {
-  if (!mounted) return; // Ensure widget is still in the widget tree
-  
-  setState(() {
-    errorMessage = message;
-    notificationColor = color;
-    showErrorNotification = true;
-  });
+  void showNotification(String message, {Color color = Colors.red}) {
+    if (!mounted) return; // Ensure widget is still in the widget tree
 
-  // Cancel any previous notification timer
-  _notificationTimer?.cancel();
-  _notificationTimer = Timer(const Duration(seconds: 5), () {
-    if (mounted) {
-      setState(() {
-        showErrorNotification = false;
-      });
-    }
-  });
-}
+    setState(() {
+      errorMessage = message;
+      notificationColor = color;
+      showErrorNotification = true;
+    });
+
+    // Cancel any previous notification timer
+    _notificationTimer?.cancel();
+    _notificationTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          showErrorNotification = false;
+        });
+      }
+    });
+  }
 
   Future<void> verifyOTP() async {
     String otp = getOTP();
@@ -120,7 +119,8 @@ void showNotification(String message, {Color color = Colors.red}) {
       return;
     }
 
-    final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/verify-otp');
+    final url =
+        Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -163,7 +163,8 @@ void showNotification(String message, {Color color = Colors.red}) {
   }
 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://b473-2a00-5400-e052-1180-cd36-69e7-9750-1691.ngrok-free.app/adduser');
+    final url = Uri.parse(
+        'https://b473-2a00-5400-e052-1180-cd36-69e7-9750-1691.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -195,7 +196,8 @@ void showNotification(String message, {Color color = Colors.red}) {
 
   Future<void> resendOTP() async {
     if (canResend) {
-      final url = Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/send-otp');
+      final url =
+          Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -209,16 +211,15 @@ void showNotification(String message, {Color color = Colors.red}) {
         });
         startResendOTPCountdown();
       } else {
-        showNotification('فشل في إعادة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.');
+        showNotification(
+            'فشل في إعادة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.');
       }
     }
   }
 
-
-
   String formatPhoneNumber(String phoneNumber) {
     if (phoneNumber.length > 4) {
-      return '0' + phoneNumber.substring(4);
+      return '0${phoneNumber.substring(4)}';
     }
     return phoneNumber;
   }
