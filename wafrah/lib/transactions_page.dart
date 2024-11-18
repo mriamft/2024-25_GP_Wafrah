@@ -367,13 +367,22 @@ class TransactionsPage extends StatelessWidget {
 
   void _showTransactionDetails(
       BuildContext context, Map<String, dynamic> transaction) {
+    // Find the account containing this transaction
+    String accountIban = 'غير معروف';
+    for (var account in accounts) {
+      var transactions = account['transactions'] ?? [];
+      if (transactions.contains(transaction)) {
+        accountIban = account['IBAN'] ?? 'غير معروف';
+        break;
+      }
+    }
+
     String amount = transaction['Amount']?['Amount'] ?? '0.00';
     String subtype = transaction['SubTransactionType'] ?? 'غير معروف';
     String dateTime = transaction['TransactionDateTime'] ?? 'غير معروف';
     String category = transaction['Category'] ?? 'غير مصنف';
     String transactionInfo =
         transaction['TransactionInformation'] ?? 'لا توجد معلومات';
-    String iban = transaction['IBAN'] ?? 'غير معروف';
 
     subtype = subtype.replaceAll('KSAOB.', '').trim();
 
@@ -411,7 +420,7 @@ class TransactionsPage extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'GE-SS-Two-Light',
                     color: Colors.white,
-                    fontSize: 15,
+                    fontSize: 18,
                   ),
                 ),
               ),
@@ -457,7 +466,7 @@ class TransactionsPage extends StatelessWidget {
                       fontFamily: 'GE-SS-Two-Bold',
                       fontSize: 15,
                       color: Colors.white)),
-              Text('رقم الإيبان: $iban',
+              Text('رقم الإيبان: $accountIban',
                   style: const TextStyle(
                       fontFamily: 'GE-SS-Two-Bold',
                       fontSize: 15,

@@ -1335,7 +1335,7 @@ class _HomePageState extends State<HomePage>
 
         children: [
           Text(
-            'تصنيف العمليات',
+            'تصنيف عمليات الصرف',
             textDirection: TextDirection.rtl, // Ensures right-to-left alignment
             style: TextStyle(
               fontFamily: 'GE-SS-Two-Bold',
@@ -1928,7 +1928,7 @@ class _HomePageState extends State<HomePage>
                 child: IconButton(
                   icon: Icon(
                     _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.black,
+                    color: Colors.grey[800],
                     size: 24,
                   ),
                   onPressed: _toggleBalanceVisibility,
@@ -2131,48 +2131,71 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  Map<String, double> _calculateCategoryDataForPieChart() {
+  // Method to filter transactions based on the selected period
+  List<Map<String, dynamic>> _filterTransactionsByPeriod(
+      List<dynamic> accounts) {
     List<Map<String, dynamic>> filteredTransactions = [];
     DateTime now = DateTime.now();
-    DateTime selectedDate = DateTime(2016, now.month - monthOffset, now.day);
+    DateTime selectedDate;
 
+    // Determine the selected date based on the desired period
     if (_selectedPeriod == 'اسبوعي') {
-      for (var account in widget.accounts) {
-        var transactions = account['transactions'] ?? [];
-        filteredTransactions.addAll(transactions.where((transaction) {
-          String dateStr = transaction['TransactionDateTime'] ?? '';
-          DateTime transactionDate =
-              DateTime.tryParse(dateStr) ?? DateTime.now();
-          return transactionDate.year == 2016 &&
-              transactionDate.month == selectedDate.month &&
-              _getWeekOfMonth(transactionDate.day) ==
-                  _getWeekOfMonth(selectedDate.day);
-        }));
-      }
+      selectedDate = DateTime(2016, now.month - monthOffset, now.day);
     } else if (_selectedPeriod == 'شهري') {
-      for (var account in widget.accounts) {
-        var transactions = account['transactions'] ?? [];
-        filteredTransactions.addAll(transactions.where((transaction) {
-          String dateStr = transaction['TransactionDateTime'] ?? '';
-          DateTime transactionDate =
-              DateTime.tryParse(dateStr) ?? DateTime.now();
-          return transactionDate.year == 2016 &&
-              transactionDate.month == selectedDate.month;
-        }));
-      }
+      selectedDate = DateTime(2016, now.month - monthOffset);
     } else if (_selectedPeriod == 'سنوي') {
-      for (var account in widget.accounts) {
-        var transactions = account['transactions'] ?? [];
-        filteredTransactions.addAll(transactions.where((transaction) {
-          String dateStr = transaction['TransactionDateTime'] ?? '';
-          DateTime transactionDate =
-              DateTime.tryParse(dateStr) ?? DateTime.now();
-          return transactionDate.year == 2016;
-        }));
+      selectedDate = DateTime(2016);
+    } else {
+      return filteredTransactions; // Return empty if no valid period
+    }
+
+    for (var account in accounts) {
+      var transactions = account['transactions'] ?? [];
+      for (var transaction in transactions) {
+        String dateStr = transaction['TransactionDateTime'] ?? '';
+        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+
+        // Filter based on the selected period
+        if (_selectedPeriod == 'اسبوعي' &&
+            transactionDate.year == selectedDate.year &&
+            transactionDate.month == selectedDate.month &&
+            _getWeekOfMonth(transactionDate.day) ==
+                _getWeekOfMonth(selectedDate.day)) {
+          filteredTransactions.add(transaction);
+        } else if (_selectedPeriod == 'شهري' &&
+            transactionDate.year == selectedDate.year &&
+            transactionDate.month == selectedDate.month) {
+          filteredTransactions.add(transaction);
+        } else if (_selectedPeriod == 'سنوي' &&
+            transactionDate.year == selectedDate.year) {
+          filteredTransactions.add(transaction);
+        }
       }
     }
 
-    // Aggregate transactions by category
+    return filteredTransactions;
+  }
+
+// Method to calculate category data for the pie chart
+  Map<String, double> _calculateCategoryDataForPieChart() {
+    print('Accounts: ${widget.accounts}');
+
+    // Step 1: Filter transactions based on the selected period
+    List<Map<String, dynamic>> filteredTransactions =
+        _filterTransactionsByPeriod(widget.accounts);
+
+    // Step 2: Further filter transactions by the required subtypes
+    filteredTransactions = filteredTransactions.where((transaction) {
+      String subtype =
+          transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+      return ['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal']
+          .contains(subtype);
+    }).toList();
+
+    // Debugging: Check filtered transactions
+    print('Filtered Transactions: $filteredTransactions');
+
+    // Step 3: Aggregate by category
     Map<String, double> categoryTotals = {};
     for (var transaction in filteredTransactions) {
       String category = transaction['Category'] ??
@@ -2181,10 +2204,15 @@ class _HomePageState extends State<HomePage>
       double amount =
           double.tryParse(transaction['Amount']?['Amount'] ?? '0.0') ?? 0.0;
 
+      // Add the amount to the corresponding category only if amount is positive
       if (amount > 0.0) {
         categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
       }
     }
+
+    // Debugging: Check category totals
+    print('Category Totals: $categoryTotals');
+
     return categoryTotals;
   }
 }

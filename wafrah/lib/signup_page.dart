@@ -30,9 +30,8 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoginTextPressed = false;
 
   bool _isPasswordVisible = false;
-bool _isConfirmPasswordVisible = false;
-Timer? _notificationTimer;
-
+  bool _isConfirmPasswordVisible = false;
+  Timer? _notificationTimer;
 
   // State variables to track password criteria
   bool isLengthValid = false;
@@ -42,44 +41,45 @@ Timer? _notificationTimer;
   bool isSymbolValid = false;
 
   // Show notification method
-void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
-  setState(() {
-    errorMessage = message;
-    notificationColor = color;
-    showErrorNotification = true;
-  });
+  void showNotification(String message,
+      {Color color = const Color(0xFFC62C2C)}) {
+    setState(() {
+      errorMessage = message;
+      notificationColor = color;
+      showErrorNotification = true;
+    });
 
-  // Cancel any previous timer to prevent multiple timers from stacking
-  _notificationTimer?.cancel();
-  _notificationTimer = Timer(const Duration(seconds: 10), () {
-    if (mounted) {
-      setState(() {
-        showErrorNotification = false;
-      });
-    }
-  });
-}
-@override
-void dispose() {
-  _notificationTimer?.cancel(); // Safely cancel the timer if active
-  
-  // Dispose text controllers to avoid memory leaks
-  firstNameController.dispose();
-  lastNameController.dispose();
-  phoneNumberController.dispose();
-  passwordController.dispose();
-  confirmPasswordController.dispose();
+    // Cancel any previous timer to prevent multiple timers from stacking
+    _notificationTimer?.cancel();
+    _notificationTimer = Timer(const Duration(seconds: 10), () {
+      if (mounted) {
+        setState(() {
+          showErrorNotification = false;
+        });
+      }
+    });
+  }
 
-  super.dispose();
-}
+  @override
+  void dispose() {
+    _notificationTimer?.cancel(); // Safely cancel the timer if active
+
+    // Dispose text controllers to avoid memory leaks
+    firstNameController.dispose();
+    lastNameController.dispose();
+    phoneNumberController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+
+    super.dispose();
+  }
 
   // Method to validate password complexity
-  
 
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
-    final url =
-        Uri.parse('https://0879-2001-16a2-c527-6700-2cd3-bb86-1aa2-5183.ngrok-free.app/checkPhoneNumber');
+    final url = Uri.parse(
+        'https://0879-2001-16a2-c527-6700-2cd3-bb86-1aa2-5183.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -103,7 +103,8 @@ void dispose() {
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse('https://0879-2001-16a2-c527-6700-2cd3-bb86-1aa2-5183.ngrok-free.app/send-otp');
+    final url = Uri.parse(
+        'https://0879-2001-16a2-c527-6700-2cd3-bb86-1aa2-5183.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -158,8 +159,7 @@ void dispose() {
     }
 
     if (!validatePasswordInput(password)) {
-      showNotification(
-          'حدث خطأ ما\nرمز المرور لا يحقق الشروط المذكورة');
+      showNotification('حدث خطأ ما\nرمز المرور لا يحقق الشروط المذكورة');
       return;
     }
 
@@ -169,32 +169,30 @@ void dispose() {
 
   // Updated method to validate password complexity
   bool validatePasswordInput(String password) {
+    bool isValid = false;
 
-  bool isValid = false;
+    setState(() {
+      isLengthValid = password.length >= 8;
 
-  setState(() {
+      isNumberValid = password.contains(RegExp(r'\d'));
 
-    isLengthValid = password.length >= 8;
+      isLowercaseValid = password.contains(RegExp(r'[a-z]'));
 
-    isNumberValid = password.contains(RegExp(r'\d'));
+      isUppercaseValid = password.contains(RegExp(r'[A-Z]'));
 
-    isLowercaseValid = password.contains(RegExp(r'[a-z]'));
+      isSymbolValid = password.contains(RegExp(r'[!@#\$&*~]'));
 
-    isUppercaseValid = password.contains(RegExp(r'[A-Z]'));
+      // Check if all conditions are met
 
-    isSymbolValid = password.contains(RegExp(r'[!@#\$&*~]'));
+      isValid = isLengthValid &&
+          isNumberValid &&
+          isLowercaseValid &&
+          isUppercaseValid &&
+          isSymbolValid;
+    });
 
- 
-
-    // Check if all conditions are met
-
-    isValid = isLengthValid && isNumberValid && isLowercaseValid && isUppercaseValid && isSymbolValid;
-
-  });
-
-  return isValid;
-
-}
+    return isValid;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +227,7 @@ void dispose() {
                     ),
                   ),
                 ),
-                 Positioned(
+                Positioned(
                   left: -1, // Adjusted x position
                   top: -99, // Adjusted y position
                   child: Opacity(
@@ -257,50 +255,58 @@ void dispose() {
                   controller: phoneNumberController,
                   keyboardType: TextInputType.phone,
                 ),
-              _buildInputField(
-  top: 290,
-  hintText: 'رمز المرور',
-  controller: passwordController,
-  obscureText: !_isPasswordVisible, // Toggle visibility based on state
-  prefixIcon: Padding(
-    padding: const EdgeInsets.only(left: 5.0), // Adjust padding to move icon slightly right
-    child: IconButton(
-      icon: Icon(
-        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-        color: Colors.white,
-      ),
-      onPressed: () {
-        setState(() {
-          _isPasswordVisible = !_isPasswordVisible;
-        });
-      },
-    ),
-  ),
-  onChanged: validatePasswordInput, // Validate on change
-),
-
-            _buildInputField(
-  top: 340,
-  hintText: 'تأكيد رمز المرور',
-  controller: confirmPasswordController,
-  obscureText: !_isConfirmPasswordVisible, // Toggle visibility based on state
-  prefixIcon: Padding(
-    padding: const EdgeInsets.only(left: 5.0), // Adjust padding to move icon slightly right
-    child: IconButton(
-      icon: Icon(
-        _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-        color: Colors.white,
-      ),
-      onPressed: () {
-        setState(() {
-          _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-        });
-      },
-    ),
-  ),
-),
-
-
+                _buildInputField(
+                  top: 290,
+                  hintText: 'رمز المرور',
+                  controller: passwordController,
+                  obscureText:
+                      !_isPasswordVisible, // Toggle visibility based on state
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(
+                        left:
+                            5.0), // Adjust padding to move icon slightly right
+                    child: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                  onChanged: validatePasswordInput, // Validate on change
+                ),
+                _buildInputField(
+                  top: 340,
+                  hintText: 'تأكيد رمز المرور',
+                  controller: confirmPasswordController,
+                  obscureText:
+                      !_isConfirmPasswordVisible, // Toggle visibility based on state
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(
+                        left:
+                            5.0), // Adjust padding to move icon slightly right
+                    child: IconButton(
+                      icon: Icon(
+                        _isConfirmPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isConfirmPasswordVisible =
+                              !_isConfirmPasswordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                ),
                 Positioned(
                   left: 24,
                   right: 10,
@@ -463,57 +469,56 @@ void dispose() {
   }
 
   Widget _buildInputField({
-  required double top,
-  required String hintText,
-  required TextEditingController controller,
-  TextInputType keyboardType = TextInputType.text,
-  bool obscureText = false,
-  Function(String)? onChanged,
-  Widget? prefixIcon, // Update this to prefixIcon
-}) {
-  return Positioned(
-    left: 24,
-    right: 24,
-    top: top,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          obscureText: obscureText,
-          textAlign: TextAlign.right,
-          onChanged: onChanged, // Validate on change
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: const TextStyle(
-              fontFamily: 'GE-SS-Two-Light',
-              fontSize: 14,
-              color: Colors.white,
+    required double top,
+    required String hintText,
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    Function(String)? onChanged,
+    Widget? prefixIcon, // Update this to prefixIcon
+  }) {
+    return Positioned(
+      left: 24,
+      right: 24,
+      top: top,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            obscureText: obscureText,
+            textAlign: TextAlign.right,
+            onChanged: onChanged, // Validate on change
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: const TextStyle(
+                fontFamily: 'GE-SS-Two-Light',
+                fontSize: 14,
+                color: Colors.white,
+              ),
+              border: InputBorder.none,
+              prefixIcon: prefixIcon, // Update this to prefixIcon
             ),
-            border: InputBorder.none,
-            prefixIcon: prefixIcon, // Update this to prefixIcon
+            style: const TextStyle(color: Colors.white),
+            cursorColor: Colors.white,
           ),
-          style: const TextStyle(color: Colors.white),
-          cursorColor: Colors.white,
-        ),
-        const SizedBox(height: 5),
-        Container(
-          width: 313,
-          height: 2.95,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF60B092), Colors.white],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
+          const SizedBox(height: 5),
+          Container(
+            width: 313,
+            height: 2.95,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF60B092), Colors.white],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 
   Widget _buildCriteriaText(String text, bool isValid) {
     return Text(
