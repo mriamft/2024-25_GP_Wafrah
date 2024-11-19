@@ -11,9 +11,10 @@ import 'banks_page.dart';
 class SettingsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
+  final List<Map<String, dynamic>> accounts; 
 
   const SettingsPage(
-      {super.key, required this.userName, required this.phoneNumber});
+      {super.key, required this.userName, required this.phoneNumber, this.accounts = const [],});
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -228,7 +229,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(TransactionsPage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber)), // Pass userName
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts)
+                          ), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
@@ -237,7 +240,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(HomePage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber)), // Pass userName
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts)), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -246,7 +250,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       _createNoTransitionRoute(SavingPlanPage(
                           userName: widget.userName,
-                          phoneNumber: widget.phoneNumber)), // Pass userName
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts
+                          )), // Pass userName
                     );
                   }),
                 ],
@@ -602,7 +608,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         context,
                         _createNoTransitionRoute(BanksPage(
                             userName: widget.userName,
-                            phoneNumber: widget.phoneNumber)), // Pass userName
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts)), // Pass userName
                       );
                     },
                   ),

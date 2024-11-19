@@ -16,45 +16,68 @@ class TransactionsPage extends StatelessWidget {
     this.accounts = const [],
   });
 
-  // Function to extract and group transactions by date
-  List<Map<String, dynamic>> getGroupedTransactions() {
-    List<Map<String, dynamic>> allTransactions = [];
+ List<Map<String, dynamic>> getGroupedTransactions() {
+  List<Map<String, dynamic>> allTransactions = [];
 
-    for (var account in accounts) {
-      var transactions = account['transactions'] ?? [];
-      for (var transaction in transactions) {
-        allTransactions.add(transaction);
-      }
+  for (var account in accounts) {
+    var transactions = account['transactions'] ?? [];
+    for (var transaction in transactions) {
+      allTransactions.add(transaction);
     }
-
-    // Sort transactions by date
-    allTransactions.sort((a, b) {
-      String dateA = a['TransactionDateTime'] ?? '';
-      String dateB = b['TransactionDateTime'] ?? '';
-      DateTime dateTimeA = DateTime.tryParse(dateA) ?? DateTime.now();
-      DateTime dateTimeB = DateTime.tryParse(dateB) ?? DateTime.now();
-      return dateTimeB.compareTo(dateTimeA);
-    });
-
-    // Group transactions by date
-    Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
-    for (var transaction in allTransactions) {
-      String date =
-          transaction['TransactionDateTime']?.split('T').first ?? 'غير معروف';
-      if (!groupedTransactions.containsKey(date)) {
-        groupedTransactions[date] = [];
-      }
-      groupedTransactions[date]!.add(transaction);
-    }
-
-    // Convert grouped map to a list of maps for easier building
-    List<Map<String, dynamic>> result = [];
-    groupedTransactions.forEach((date, transactions) {
-      result.add({'date': date, 'transactions': transactions});
-    });
-
-    return result;
   }
+
+  // Sort transactions by date
+  allTransactions.sort((a, b) {
+    String dateA = a['TransactionDateTime'] ?? '';
+    String dateB = b['TransactionDateTime'] ?? '';
+    DateTime dateTimeA = DateTime.tryParse(dateA) ?? DateTime.now();
+    DateTime dateTimeB = DateTime.tryParse(dateB) ?? DateTime.now();
+    return dateTimeB.compareTo(dateTimeA);
+  });
+
+  // Get today's date
+  DateTime today = DateTime.now();
+
+  // Group transactions by modified date and filter future dates
+  Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
+  for (var transaction in allTransactions) {
+    String date =
+        transaction['TransactionDateTime']?.split('T').first ?? 'غير معروف';
+
+    // Modify the year mapping
+    if (date != 'غير معروف') {
+      DateTime originalDate = DateTime.tryParse(date) ?? DateTime.now();
+      int mappedYear = originalDate.year == 2016
+          ? 2024
+          : originalDate.year == 2017
+              ? 2025
+              : originalDate.year; // Keep the original year for other cases
+
+      DateTime mappedDate =
+          DateTime(mappedYear, originalDate.month, originalDate.day);
+
+      // Skip transactions with dates after today
+      if (mappedDate.isAfter(today)) {
+        continue;
+      }
+
+      date = mappedDate.toIso8601String().split('T').first;
+    }
+
+    if (!groupedTransactions.containsKey(date)) {
+      groupedTransactions[date] = [];
+    }
+    groupedTransactions[date]!.add(transaction);
+  }
+
+  // Convert grouped map to a list of maps for easier building
+  List<Map<String, dynamic>> result = [];
+  groupedTransactions.forEach((date, transactions) {
+    result.add({'date': date, 'transactions': transactions});
+  });
+
+  return result;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +190,7 @@ class TransactionsPage extends StatelessWidget {
                           builder: (context) => SettingsPage(
                                 userName: userName,
                                 phoneNumber: phoneNumber,
+                                accounts: accounts
                               )),
                     );
                   }),

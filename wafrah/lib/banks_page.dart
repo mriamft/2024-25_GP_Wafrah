@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
-
 import 'acc_link_page.dart';
-
 import 'transactions_page.dart';
-
 import 'home_page.dart';
-
 import 'saving_plan_page.dart';
-
 import 'settings_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
 
-class BanksPage extends StatelessWidget {
+class BanksPage extends StatefulWidget {
   final String userName;
-
   final String phoneNumber;
-
   final List<Map<String, dynamic>> accounts;
 
   const BanksPage({
@@ -24,8 +19,41 @@ class BanksPage extends StatelessWidget {
     this.accounts = const [],
   });
 
-  // Method to build account card
-  // Helper method to calculate transaction categories
+  @override
+  _BanksPageState createState() => _BanksPageState();
+}
+
+class _BanksPageState extends State<BanksPage> {
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  List<Map<String, dynamic>> _accounts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAccounts();
+  }
+
+  Future<void> _initializeAccounts() async {
+    if (widget.accounts.isNotEmpty) {
+      setState(() {
+        _accounts = widget.accounts;
+      });
+    } else {
+      final loadedAccounts = await _loadAccountsLocally();
+      setState(() {
+        _accounts = loadedAccounts;
+      });
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _loadAccountsLocally() async {
+    String? accountsJson = await _storage.read(key: 'user_accounts');
+    if (accountsJson != null) {
+      return List<Map<String, dynamic>>.from(jsonDecode(accountsJson));
+    }
+    return [];
+  }
+
   Map<String, double> calculateTransactionCategories(
       List<Map<String, dynamic>> accounts) {
     Map<String, double> categories = {};
@@ -44,7 +72,7 @@ class BanksPage extends StatelessWidget {
     print('Transaction Categories: $categories'); // Debugging
     return categories;
   }
-  
+
   Widget _buildAccountCard(Map<String, dynamic> account) {
     Map<String, String> accountTypeTranslations = {
       'CurrentAccount': 'الحساب الجاري',
@@ -192,8 +220,8 @@ class BanksPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => AccLinkPage(
-                          userName: userName,
-                          phoneNumber: phoneNumber,
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
                         ),
                       ),
                     );
@@ -212,58 +240,13 @@ class BanksPage extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 240,
-            left: 12,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AccLinkPage(
-                        userName: userName,
-                        phoneNumber: phoneNumber,
-                      ),
-                    ),
-                  );
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor:
-                      Colors.transparent, // Ensures no background color
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.edit,
-                      color: Color(0xFF3D3D3D),
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      '',
-                      style: TextStyle(
-                        color: Color(0xFF3D3D3D),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
             top: 350,
             left: 12,
             right: 12,
             child: SingleChildScrollView(
               child: Column(
-                children: accounts.isNotEmpty
-                    ? accounts.map((account) {
+                children: _accounts.isNotEmpty
+                    ? _accounts.map((account) {
                         return _buildAccountCard(account);
                       }).toList()
                     : [
@@ -305,8 +288,9 @@ class BanksPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => SettingsPage(
-                          userName: userName,
-                          phoneNumber: phoneNumber,
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts
                         ),
                       ),
                     );
@@ -316,9 +300,9 @@ class BanksPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => TransactionsPage(
-                          userName: userName,
-                          phoneNumber: phoneNumber,
-                          accounts: accounts,
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: _accounts,
                         ),
                       ),
                     );
@@ -328,9 +312,9 @@ class BanksPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => HomePage(
-                          userName: userName,
-                          phoneNumber: phoneNumber,
-                          accounts: accounts,
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: _accounts,
                         ),
                       ),
                     );
@@ -340,9 +324,9 @@ class BanksPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => SavingPlanPage(
-                          userName: userName,
-                          phoneNumber: phoneNumber,
-                          accounts: accounts,
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: _accounts,
                         ),
                       ),
                     );
@@ -355,8 +339,6 @@ class BanksPage extends StatelessWidget {
       ),
     );
   }
-
-  // Bottom Navigation Item
 
   Widget buildBottomNavItem(IconData icon, String label, VoidCallback onTap) {
     return GestureDetector(
@@ -381,6 +363,4 @@ class BanksPage extends StatelessWidget {
       ),
     );
   }
-
-
 }

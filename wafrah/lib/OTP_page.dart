@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:wafrah/home_page.dart';
 import 'package:wafrah/pass_confirmation_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class OTPPage extends StatefulWidget {
   final String phoneNumber;
@@ -34,6 +36,8 @@ class _OTPPageState extends State<OTPPage> {
   final TextEditingController otpController4 = TextEditingController();
   final TextEditingController otpController5 = TextEditingController();
   final TextEditingController otpController6 = TextEditingController();
+
+   final FlutterSecureStorage _storage = FlutterSecureStorage(); 
 
   bool showErrorNotification = false;
   String errorMessage = '';
@@ -120,7 +124,7 @@ class _OTPPageState extends State<OTPPage> {
     }
 
     final url =
-        Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/verify-otp');
+        Uri.parse('https://6888-2-89-25-133.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -133,7 +137,7 @@ class _OTPPageState extends State<OTPPage> {
     if (response.statusCode == 200) {
       showNotification('تم التحقق بنجاح', color: Colors.grey);
 
-      Timer(const Duration(seconds: 2), () {
+      Timer(const Duration(seconds: 2), () async {
         if (widget.isForget) {
           Navigator.pushReplacement(
             context,
@@ -146,25 +150,16 @@ class _OTPPageState extends State<OTPPage> {
         } else if (widget.isSignUp) {
           addUserToDatabase();
         } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomePage(
-                userName: '${widget.firstName} ${widget.lastName}',
-                phoneNumber: widget.phoneNumber,
-              ),
-            ),
-          );
+          await _redirectToHomePage();
         }
       });
     } else {
       showNotification('رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.');
     }
   }
-
   Future<void> addUserToDatabase() async {
     final url = Uri.parse(
-        'https://b473-2a00-5400-e052-1180-cd36-69e7-9750-1691.ngrok-free.app/adduser');
+        'https://6888-2-89-25-133.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -194,10 +189,36 @@ class _OTPPageState extends State<OTPPage> {
     }
   }
 
+Future<void> _redirectToHomePage() async {
+    List<Map<String, dynamic>> accounts = [];
+
+    try {
+      // Retrieve stored accounts from secure storage
+      String? accountsJson = await _storage.read(key: 'user_accounts');
+      if (accountsJson != null) {
+        accounts = List<Map<String, dynamic>>.from(jsonDecode(accountsJson));
+      }
+    } catch (e) {
+      print('Error loading accounts after OTP verification: $e');
+    }
+
+    // Navigate to HomePage with loaded accounts
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(
+          userName: '${widget.firstName} ${widget.lastName}',
+          phoneNumber: widget.phoneNumber,
+          accounts: accounts,
+        ),
+      ),
+    );
+  }
+
   Future<void> resendOTP() async {
     if (canResend) {
       final url =
-          Uri.parse('https://e8ab-176-17-191-196.ngrok-free.app/send-otp');
+          Uri.parse('https://6888-2-89-25-133.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

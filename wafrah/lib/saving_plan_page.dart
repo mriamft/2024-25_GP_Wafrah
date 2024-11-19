@@ -81,7 +81,7 @@ class SavingPlanPage extends StatelessWidget {
                           builder: (context) => SettingsPage(
                               userName: userName,
                               phoneNumber: phoneNumber,
-                              )), // Pass accounts here
+                              accounts: accounts)), // Pass accounts here
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
