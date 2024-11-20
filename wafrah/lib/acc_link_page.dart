@@ -199,7 +199,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
   Future<void> _saveAccountDataLocally(
       List<Map<String, dynamic>> accounts) async {
     try {
-      final storage = const FlutterSecureStorage();
+      const storage = FlutterSecureStorage();
       String accountsJson =
           jsonEncode(accounts); // Convert accounts to JSON string
       await storage.write(
@@ -212,7 +212,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
 // Method to load account data locally
   Future<List<Map<String, dynamic>>> _loadAccountDataLocally() async {
     try {
-      final storage = const FlutterSecureStorage();
+      const storage = FlutterSecureStorage();
       String? accountsJson = await storage.read(key: 'user_accounts');
       if (accountsJson != null) {
         return List<Map<String, dynamic>>.from(jsonDecode(accountsJson));
