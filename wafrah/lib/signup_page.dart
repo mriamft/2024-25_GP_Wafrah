@@ -248,6 +248,12 @@ class _SignUpPageState extends State<SignUpPage> {
                   top: 190,
                   hintText: 'الاسم الأخير',
                   controller: lastNameController,
+                  onChanged: (value) {
+                    firstNameController.text =
+                        value.replaceAll(RegExp(r'[^a-zA-Zأ-ي]'), '');
+                    firstNameController.selection = TextSelection.fromPosition(
+                        TextPosition(offset: firstNameController.text.length));
+                  },
                 ),
                 _buildInputField(
                   top: 240,

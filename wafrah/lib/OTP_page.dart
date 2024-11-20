@@ -6,7 +6,6 @@ import 'package:wafrah/home_page.dart';
 import 'package:wafrah/pass_confirmation_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-
 class OTPPage extends StatefulWidget {
   final String phoneNumber;
   final String firstName;
@@ -37,7 +36,7 @@ class _OTPPageState extends State<OTPPage> {
   final TextEditingController otpController5 = TextEditingController();
   final TextEditingController otpController6 = TextEditingController();
 
-   final FlutterSecureStorage _storage = FlutterSecureStorage(); 
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   bool showErrorNotification = false;
   String errorMessage = '';
@@ -123,8 +122,7 @@ class _OTPPageState extends State<OTPPage> {
       return;
     }
 
-    final url =
-        Uri.parse('https://6888-2-89-25-133.ngrok-free.app/verify-otp');
+    final url = Uri.parse('https://6888-2-89-25-133.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -157,9 +155,9 @@ class _OTPPageState extends State<OTPPage> {
       showNotification('رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.');
     }
   }
+
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse(
-        'https://6888-2-89-25-133.ngrok-free.app/adduser');
+    final url = Uri.parse('https://6888-2-89-25-133.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -189,7 +187,7 @@ class _OTPPageState extends State<OTPPage> {
     }
   }
 
-Future<void> _redirectToHomePage() async {
+  Future<void> _redirectToHomePage() async {
     List<Map<String, dynamic>> accounts = [];
 
     try {
@@ -217,8 +215,7 @@ Future<void> _redirectToHomePage() async {
 
   Future<void> resendOTP() async {
     if (canResend) {
-      final url =
-          Uri.parse('https://6888-2-89-25-133.ngrok-free.app/send-otp');
+      final url = Uri.parse('https://6888-2-89-25-133.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

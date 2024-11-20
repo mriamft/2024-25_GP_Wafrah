@@ -24,7 +24,7 @@ class BanksPage extends StatefulWidget {
 }
 
 class _BanksPageState extends State<BanksPage> {
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   List<Map<String, dynamic>> _accounts = [];
 
   @override
@@ -62,8 +62,9 @@ class _BanksPageState extends State<BanksPage> {
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
         String category = transaction['Category'] ?? 'غير مصنف';
-        double amount =
-            double.tryParse(transaction['Amount']?['Amount']?.toString() ?? '0.0') ?? 0.0;
+        double amount = double.tryParse(
+                transaction['Amount']?['Amount']?.toString() ?? '0.0') ??
+            0.0;
 
         categories[category] = (categories[category] ?? 0.0) + amount;
       }
@@ -240,6 +241,51 @@ class _BanksPageState extends State<BanksPage> {
             ),
           ),
           Positioned(
+            top: 240,
+            left: 12,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AccLinkPage(
+                        userName: widget.userName,
+                        phoneNumber: widget.phoneNumber,
+                      ),
+                    ),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor:
+                      Colors.transparent, // Ensures no background color
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.edit,
+                      color: Color(0xFF3D3D3D),
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      '',
+                      style: TextStyle(
+                        color: Color(0xFF3D3D3D),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
             top: 350,
             left: 12,
             right: 12,
@@ -288,10 +334,9 @@ class _BanksPageState extends State<BanksPage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => SettingsPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts
-                        ),
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts),
                       ),
                     );
                   }),
