@@ -11,10 +11,14 @@ import 'banks_page.dart';
 class SettingsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
-  final List<Map<String, dynamic>> accounts; 
+  final List<Map<String, dynamic>> accounts;
 
-  const SettingsPage(
-      {super.key, required this.userName, required this.phoneNumber, this.accounts = const [],});
+  const SettingsPage({
+    super.key,
+    required this.userName,
+    required this.phoneNumber,
+    this.accounts = const [],
+  });
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -196,7 +200,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           // Bottom Navigation Bar
           Positioned(
-            bottom: 0,
+            bottom: 0, // Keep the navigation bar at the bottom
             left: 0,
             right: 0,
             child: Container(
@@ -214,24 +218,33 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        bottom: 11, right: 0), // Position adjustments
+                    child: buildBottomNavItem(
+                      Icons.settings_outlined,
+                      "إعدادات",
+                      0,
                       onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      _createNoTransitionRoute(SettingsPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber)), // Pass userName
-                    );
-                  }),
+                        Navigator.pushReplacement(
+                          context,
+                          _createNoTransitionRoute(SettingsPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                          )), // Pass userName
+                        );
+                      },
+                    ),
+                  ),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
                       onTap: () {
                     Navigator.pushReplacement(
                       context,
                       _createNoTransitionRoute(TransactionsPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts)
-                          ), // Pass userName
+                        userName: widget.userName,
+                        phoneNumber: widget.phoneNumber,
+                        accounts: widget.accounts,
+                      )), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
@@ -239,9 +252,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     Navigator.pushReplacement(
                       context,
                       _createNoTransitionRoute(HomePage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts)), // Pass userName
+                        userName: widget.userName,
+                        phoneNumber: widget.phoneNumber,
+                        accounts: widget.accounts,
+                      )), // Pass userName
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -249,10 +263,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     Navigator.pushReplacement(
                       context,
                       _createNoTransitionRoute(SavingPlanPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts
-                          )), // Pass userName
+                        userName: widget.userName,
+                        phoneNumber: widget.phoneNumber,
+                        accounts: widget.accounts,
+                      )), // Pass userName
                     );
                   }),
                 ],
@@ -263,7 +277,7 @@ class _SettingsPageState extends State<SettingsPage> {
           // Point under "إعدادات"
           Positioned(
             right: 350,
-            top: 790,
+            top: 785,
             child: Container(
               width: 6,
               height: 6,

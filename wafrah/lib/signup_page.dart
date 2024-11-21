@@ -40,6 +40,9 @@ class _SignUpPageState extends State<SignUpPage> {
   bool isUppercaseValid = false;
   bool isSymbolValid = false;
 
+  // State for phone number validation
+  bool isPhoneNumberValid = true;
+
   // Show notification method
   void showNotification(String message,
       {Color color = const Color(0xFFC62C2C)}) {
@@ -92,6 +95,13 @@ class _SignUpPageState extends State<SignUpPage> {
       showNotification('حدث خطأ ما\nفشل في التحقق من رقم الجوال');
       return false;
     }
+  }
+
+  // Method to validate phone number format
+  void validatePhoneNumber(String phoneNumber) {
+    setState(() {
+      isPhoneNumberValid = RegExp(r'^\+9665\d{8}$').hasMatch(phoneNumber);
+    });
   }
 
   // Method to hash the password
@@ -243,11 +253,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   top: 140,
                   hintText: 'الاسم الأول',
                   controller: firstNameController,
-                ),
-                _buildInputField(
-                  top: 190,
-                  hintText: 'الاسم الأخير',
-                  controller: lastNameController,
                   onChanged: (value) {
                     firstNameController.text =
                         value.replaceAll(RegExp(r'[^a-zA-Zأ-ي]'), '');
@@ -256,13 +261,71 @@ class _SignUpPageState extends State<SignUpPage> {
                   },
                 ),
                 _buildInputField(
-                  top: 240,
-                  hintText: '(+966555555555) رقم الجوال',
-                  controller: phoneNumberController,
-                  keyboardType: TextInputType.phone,
+                  top: 200,
+                  hintText: 'الاسم الأخير',
+                  controller: lastNameController,
+                  onChanged: (value) {
+                    lastNameController.text =
+                        value.replaceAll(RegExp(r'[^a-zA-Zأ-ي]'), '');
+                    lastNameController.selection = TextSelection.fromPosition(
+                        TextPosition(offset: lastNameController.text.length));
+                  },
+                ),
+                Positioned(
+                  left: 24,
+                  right: 24,
+                  top: 260,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      TextField(
+                        controller: phoneNumberController,
+                        keyboardType: TextInputType.phone,
+                        onChanged: (value) => validatePhoneNumber(value),
+                        textAlign: TextAlign.right,
+                        decoration: InputDecoration(
+                          hintText: '(+966555555555) رقم الجوال',
+                          hintStyle: const TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        style: const TextStyle(
+                          color: Colors.white,
+                        ),
+                        cursorColor: Colors.white,
+                      ),
+                      const SizedBox(height: 5),
+                      Container(
+                        width: 313,
+                        height: 2.95,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isPhoneNumberValid
+                                ? [Color(0xFF60B092), Colors.white]
+                                : [Colors.red, Colors.red],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                        ),
+                      ),
+                      if (!isPhoneNumberValid)
+                        const Text(
+                          'صيغة خاطئة',
+                          style: TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 12,
+                            color: Colors.red,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                    ],
+                  ),
                 ),
                 _buildInputField(
-                  top: 290,
+                  top: 320,
                   hintText: 'رمز المرور',
                   controller: passwordController,
                   obscureText:
@@ -288,7 +351,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   onChanged: validatePasswordInput, // Validate on change
                 ),
                 _buildInputField(
-                  top: 340,
+                  top: 380,
                   hintText: 'تأكيد رمز المرور',
                   controller: confirmPasswordController,
                   obscureText:
@@ -316,7 +379,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 Positioned(
                   left: 24,
                   right: 10,
-                  top: 400,
+                  top: 445,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [

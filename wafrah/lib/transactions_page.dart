@@ -4,7 +4,7 @@ import 'banks_page.dart';
 import 'saving_plan_page.dart';
 import 'home_page.dart';
 
-class TransactionsPage extends StatelessWidget {
+class TransactionsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final List<Map<String, dynamic>> accounts;
@@ -16,10 +16,22 @@ class TransactionsPage extends StatelessWidget {
     this.accounts = const [],
   });
 
+  @override
+  _TransactionsPageState createState() => _TransactionsPageState();
+}
+
+class _TransactionsPageState extends State<TransactionsPage> {
+  String selectedIBAN = "الكل";
+
   List<Map<String, dynamic>> getGroupedTransactions() {
     List<Map<String, dynamic>> allTransactions = [];
 
-    for (var account in accounts) {
+    for (var account in widget.accounts) {
+      // If a specific IBAN is selected, only add transactions for that account
+      if (selectedIBAN != "الكل" && account['IBAN'] != selectedIBAN) {
+        continue;
+      }
+
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
         allTransactions.add(transaction);
@@ -81,6 +93,13 @@ class TransactionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<String> ibans = widget.accounts
+            ?.where((account) =>
+                account.containsKey('IBAN') && account['IBAN'] != null)
+            .map((account) => account['IBAN'].toString())
+            .toList() ??
+        [];
+
     List<Map<String, dynamic>> groupedTransactions = getGroupedTransactions();
 
     return Scaffold(
@@ -111,8 +130,62 @@ class TransactionsPage extends StatelessWidget {
               ),
             ),
           ),
+          // Dropdown for filtering by IBAN
           Positioned(
-            top: 240,
+            top: 250,
+            left: 10,
+            right: 10,
+            child: Directionality(
+              textDirection:
+                  TextDirection.rtl, // Ensure dropdown aligns correctly
+              child: DropdownButton<String>(
+                alignment:
+                    AlignmentDirectional.topEnd, // Align dropdown to the right
+                isExpanded: true,
+                value: selectedIBAN,
+                icon: const Icon(Icons.arrow_drop_down),
+                iconSize: 24,
+                elevation: 16,
+                style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
+                dropdownColor:
+                    const Color(0xFFFFFFFF), // Set dropdown background color
+                underline: Container(
+                  height: 2,
+                  color: const Color(0xFF2C8C68),
+                ),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedIBAN = newValue ?? "الكل";
+                  });
+                },
+                items: ["الكل", ...ibans]
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 12.0),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          value,
+                          style: const TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 16,
+                            color: Color.fromARGB(133, 0, 0, 0),
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+
+          Positioned(
+            top: 300,
             left: 10,
             right: 10,
             bottom: 90,
@@ -163,6 +236,7 @@ class TransactionsPage extends StatelessWidget {
                     },
                   ),
           ),
+          // Bottom Navigation Bar remains the same
           Positioned(
             bottom: 0,
             left: 0,
@@ -188,24 +262,28 @@ class TransactionsPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SettingsPage(
-                              userName: userName,
-                              phoneNumber: phoneNumber,
-                              accounts: accounts)),
+                                userName: widget.userName,
+                                phoneNumber: widget.phoneNumber,
+                                accounts: widget.accounts,
+                              )),
                     );
                   }),
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
-                      onTap: () {
-                    // Already on Transactions page
-                  }),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10, left: 0),
+                    child: buildBottomNavItem(
+                        Icons.credit_card, "سجل المعاملات", 1, onTap: () {
+                      // Already on Transactions page
+                    }),
+                  ),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
                       onTap: () {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => HomePage(
-                                userName: userName,
-                                phoneNumber: phoneNumber,
-                                accounts: accounts,
+                                userName: widget.userName,
+                                phoneNumber: widget.phoneNumber,
+                                accounts: widget.accounts,
                               )),
                     );
                   }),
@@ -215,13 +293,26 @@ class TransactionsPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SavingPlanPage(
-                                userName: userName,
-                                phoneNumber: phoneNumber,
-                                accounts: accounts,
+                                userName: widget.userName,
+                                phoneNumber: widget.phoneNumber,
+                                accounts: widget.accounts,
                               )),
                     );
                   }),
                 ],
+              ),
+            ),
+          ),
+
+          Positioned(
+            right: 246,
+            top: 785,
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: const BoxDecoration(
+                color: Color(0xFF2C8C68), // Point color
+                shape: BoxShape.circle,
               ),
             ),
           ),
@@ -262,9 +353,9 @@ class TransactionsPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => BanksPage(
-                            userName: userName,
-                            phoneNumber: phoneNumber,
-                            accounts: accounts,
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
                           ),
                         ),
                       );
@@ -300,42 +391,45 @@ class TransactionsPage extends StatelessWidget {
       amountColor = const Color(0xFF3D3D3D);
     }
 
-    // Mapping of categories to icons
-    Map<String, IconData> categoryIcons = {
-      'المطاعم': Icons.restaurant,
-      'التعليم': Icons.school,
-      'الصحة': Icons.local_hospital,
-      'التسوق': Icons.shopping_bag,
-      'تسوق': Icons.shopping_bag,
-      'الترفيه': Icons.movie,
-      'البقالة': Icons.local_grocery_store,
-      'النقل': Icons.directions_bus,
-      'السفر': Icons.flight,
-      'الحكومة': Icons.account_balance,
-      'العمل الخيري': Icons.volunteer_activism,
-      'الاستثمار': Icons.trending_up,
-      'الإيجار': Icons.home,
-      'القروض': Icons.money,
-      'الراتب والإيرادات': Icons.account_balance_wallet,
-      'التحويلات': Icons.swap_horiz,
-      'أخرى': Icons.category,
+    // Map categories to corresponding image paths
+    Map<String, String> categoryImages = {
+      'المطاعم': 'assets/images/مطاعم.png',
+      'التعليم': 'assets/images/تعليم.png',
+      'الصحة': 'assets/images/صحة.png',
+      'تسوق': 'assets/images/تسوق.png',
+      'التسوق': 'assets/images/تسوق.png',
+      'البقالة': 'assets/images/بقالة.png',
+      'النقل': 'assets/images/النقل.png',
+      'السفر': 'assets/images/السفر.png',
+      'الحكومة': 'assets/images/الحكومة.png',
+      'الترفيه': 'assets/images/الترفيه.png',
+      'الاستثمار': 'assets/images/استثمار.png',
+      'ايجار': 'assets/images/ايجار.png',
+      'القروض': 'assets/images/القروض.png',
+      'راتب': 'assets/images/راتب.png',
+      'التحويلات': 'assets/images/تحويلات.png',
+      'أخرى.': 'assets/images/اخرى.png',
     };
 
-    IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
+    String? categoryImagePath = categoryImages[category];
+
+    // Define image size
+    const double imageWidth = 35.0; // Adjust width as needed
+    const double imageHeight = 35.0; // Adjust height as needed
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: const Color(0xFFD9D9D9),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          const SizedBox(width: 10), // Space before the arrow
+          const SizedBox(width: 10),
           const Icon(Icons.arrow_back_ios_new,
-              color: Color(0xFF3D3D3D), size: 15), // Arrow icon
-          const SizedBox(width: 10), // Space after the arrow
+              color: Color(0xFF3D3D3D), size: 15),
+          const SizedBox(width: 10),
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -380,9 +474,16 @@ class TransactionsPage extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10), // Space before the icon
-          Icon(categoryIcon,
-              color: const Color(0xFF3D3D3D), size: 24), // Category icon
+          const SizedBox(width: 10),
+          categoryImagePath != null
+              ? Image.asset(
+                  categoryImagePath,
+                  width: imageWidth,
+                  height: imageHeight,
+                  fit: BoxFit.contain,
+                )
+              : const Icon(Icons.help_outline,
+                  color: Color(0xFF3D3D3D), size: 24),
         ],
       ),
     );
@@ -390,9 +491,8 @@ class TransactionsPage extends StatelessWidget {
 
   void _showTransactionDetails(
       BuildContext context, Map<String, dynamic> transaction) {
-    // Find the account containing this transaction
     String accountIban = 'غير معروف';
-    for (var account in accounts) {
+    for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
       if (transactions.contains(transaction)) {
         accountIban = account['IBAN'] ?? 'غير معروف';

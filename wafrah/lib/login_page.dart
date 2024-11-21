@@ -34,6 +34,9 @@ class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
   Timer? _notificationTimer; // Timer instance
 
+  // State for phone number validation
+  bool isPhoneNumberValid = true;
+
   // Show notification method
   void showNotification(String message,
       {Color color = const Color(0xFFC62C2C)}) {
@@ -63,6 +66,13 @@ class _LoginPageState extends State<LoginPage> {
     phoneNumberController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  // Method to validate phone number format
+  void validatePhoneNumber(String phoneNumber) {
+    setState(() {
+      isPhoneNumberValid = RegExp(r'^\+9665\d{8}$').hasMatch(phoneNumber);
+    });
   }
 
   // Handle login logic with API call
@@ -273,6 +283,7 @@ class _LoginPageState extends State<LoginPage> {
                             RegExp(r'[0-9+\-() ]'),
                           ),
                         ],
+                        onChanged: (value) => validatePhoneNumber(value),
                         decoration: const InputDecoration(
                           hintText: '(+966555555555) رقم الجوال',
                           hintStyle: TextStyle(
@@ -289,14 +300,26 @@ class _LoginPageState extends State<LoginPage> {
                       Container(
                         width: 313,
                         height: 2.95,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Color(0xFF60B092), Colors.white],
+                            colors: isPhoneNumberValid
+                                ? [Color(0xFF60B092), Colors.white]
+                                : [Colors.red, Colors.red], // Red if invalid
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
                           ),
                         ),
                       ),
+                      if (!isPhoneNumberValid)
+                        const Text(
+                          'صيغة خاطئة',
+                          style: TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 12,
+                            color: Colors.red,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
                     ],
                   ),
                 ),

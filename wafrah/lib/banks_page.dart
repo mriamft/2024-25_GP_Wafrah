@@ -26,6 +26,7 @@ class BanksPage extends StatefulWidget {
 class _BanksPageState extends State<BanksPage> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   List<Map<String, dynamic>> _accounts = [];
+  bool _isCirclePressed = false; // Add this line
 
   @override
   void initState() {
@@ -200,9 +201,10 @@ class _BanksPageState extends State<BanksPage> {
               'assets/images/green_square.png',
               width: MediaQuery.of(context).size.width,
               height: 289,
-              fit: BoxFit.contain,
+              fit: BoxFit.cover,
             ),
           ),
+          // Top Row with Add Button
           Positioned(
             top: 202,
             left: 12,
@@ -240,12 +242,13 @@ class _BanksPageState extends State<BanksPage> {
               ],
             ),
           ),
+          // Edit Button
           Positioned(
             top: 240,
-            left: 12,
+            left: 3,
             child: Align(
               alignment: Alignment.centerLeft,
-              child: OutlinedButton(
+              child: TextButton(
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
@@ -257,38 +260,19 @@ class _BanksPageState extends State<BanksPage> {
                     ),
                   );
                 },
-                style: TextButton.styleFrom(
-                  backgroundColor:
-                      Colors.transparent, // Ensures no background color
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.edit,
-                      color: Color(0xFF3D3D3D),
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      '',
-                      style: TextStyle(
-                        color: Color(0xFF3D3D3D),
-                      ),
-                    ),
-                  ],
+                child: const Icon(
+                  Icons.edit,
+                  color: Color(0xFF3D3D3D),
                 ),
               ),
             ),
           ),
+          // Scrollable Accounts List
           Positioned(
-            top: 350,
+            top: 280, // Adjust this value to move the list higher
             left: 12,
             right: 12,
+            bottom: 77, // Space for the bottom navigation bar
             child: SingleChildScrollView(
               child: Column(
                 children: _accounts.isNotEmpty
@@ -310,6 +294,7 @@ class _BanksPageState extends State<BanksPage> {
               ),
             ),
           ),
+          // Bottom Navigation Bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -376,6 +361,95 @@ class _BanksPageState extends State<BanksPage> {
                       ),
                     );
                   }),
+                ],
+              ),
+            ),
+          ),
+          // Point under "إعدادات"
+          Positioned(
+            right: 192,
+            top: 765,
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: const BoxDecoration(
+                color: Color(0xFF2C8C68), // Point color
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          // Circular Button above the Navigation Bar
+          Positioned(
+            bottom: 45,
+            left: 0,
+            right: 0,
+            child: GestureDetector(
+              onTapDown: (_) {
+                setState(() {
+                  _isCirclePressed = true; // Set the state to pressed
+                });
+              },
+              onTapUp: (_) {
+                setState(() {
+                  _isCirclePressed = false; // Reset the state after press
+                });
+                Navigator.of(context).pushAndRemoveUntil(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        BanksPage(
+                      userName: widget.userName,
+                      phoneNumber: widget.phoneNumber,
+                      accounts: widget.accounts, // Pass accounts
+                    ),
+                    transitionDuration:
+                        const Duration(seconds: 0), // Disable transition
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return child; // No animation
+                    },
+                  ),
+                  (route) => false,
+                );
+              },
+              onTapCancel: () {
+                setState(() {
+                  _isCirclePressed =
+                      false; // Reset the state if tap is canceled
+                });
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 92,
+                    height: 90,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF9F9F9),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: _isCirclePressed
+                            ? [const Color(0xFF1A7A5E), const Color(0xFF6FC3A0)]
+                            : [
+                                const Color(0xFF2C8C68),
+                                const Color(0xFF8FD9BD)
+                              ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.account_balance,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  ),
                 ],
               ),
             ),

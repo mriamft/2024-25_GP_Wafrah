@@ -55,7 +55,7 @@ class SavingPlanPage extends StatelessWidget {
 
           // Bottom Navigation Bar
           Positioned(
-            bottom: 0,
+            bottom: 0, // Keep the navigation bar at the bottom
             left: 0,
             right: 0,
             child: Container(
@@ -78,10 +78,12 @@ class SavingPlanPage extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => SettingsPage(
-                              userName: userName,
-                              phoneNumber: phoneNumber,
-                              accounts: accounts)), // Pass accounts here
+                        builder: (context) => SettingsPage(
+                          userName: userName,
+                          phoneNumber: phoneNumber,
+                          accounts: accounts,
+                        ),
+                      ),
                     );
                   }),
                   buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
@@ -89,10 +91,12 @@ class SavingPlanPage extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => TransactionsPage(
-                              userName: userName,
-                              phoneNumber: phoneNumber,
-                              accounts: accounts)), // Pass accounts here
+                        builder: (context) => TransactionsPage(
+                          userName: userName,
+                          phoneNumber: phoneNumber,
+                          accounts: accounts,
+                        ),
+                      ),
                     );
                   }),
                   buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
@@ -100,17 +104,37 @@ class SavingPlanPage extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => HomePage(
-                              userName: userName,
-                              phoneNumber: phoneNumber,
-                              accounts: accounts)), // Pass accounts here
+                        builder: (context) => HomePage(
+                          userName: userName,
+                          phoneNumber: phoneNumber,
+                          accounts: accounts,
+                        ),
+                      ),
                     );
                   }),
-                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
-                      onTap: () {
-                    // Already on Saving Plan page
-                  }),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        bottom: 10, right: 0), // Position adjustments
+                    child: buildBottomNavItem(
+                        Icons.calendar_today, "خطة الإدخار", 3, onTap: () {
+                      // Already on Saving Plan page
+                    }),
+                  ),
                 ],
+              ),
+            ),
+          ),
+
+          // Point under "إعدادات"
+          Positioned(
+            left: 339,
+            top: 785,
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: const BoxDecoration(
+                color: Color(0xFF2C8C68), // Point color
+                shape: BoxShape.circle,
               ),
             ),
           ),
