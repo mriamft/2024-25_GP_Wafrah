@@ -303,7 +303,7 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: isPhoneNumberValid
-                                ? [Color(0xFF60B092), Colors.white]
+                                ? [const Color(0xFF60B092), Colors.white]
                                 : [Colors.red, Colors.red], // Red if invalid
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,

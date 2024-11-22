@@ -283,9 +283,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         keyboardType: TextInputType.phone,
                         onChanged: (value) => validatePhoneNumber(value),
                         textAlign: TextAlign.right,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: '(+966555555555) رقم الجوال',
-                          hintStyle: const TextStyle(
+                          hintStyle: TextStyle(
                             fontFamily: 'GE-SS-Two-Light',
                             fontSize: 14,
                             color: Colors.white,
@@ -304,7 +304,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: isPhoneNumberValid
-                                ? [Color(0xFF60B092), Colors.white]
+                                ? [const Color(0xFF60B092), Colors.white]
                                 : [Colors.red, Colors.red],
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,

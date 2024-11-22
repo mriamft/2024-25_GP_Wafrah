@@ -391,35 +391,29 @@ class _TransactionsPageState extends State<TransactionsPage> {
       amountColor = const Color(0xFF3D3D3D);
     }
 
-    // Map categories to corresponding image paths
-    Map<String, String> categoryImages = {
-      'المطاعم': 'assets/images/مطاعم.png',
-      'التعليم': 'assets/images/تعليم.png',
-      'الصحة': 'assets/images/صحة.png',
-      'تسوق': 'assets/images/تسوق.png',
-      'التسوق': 'assets/images/تسوق.png',
-      'البقالة': 'assets/images/بقالة.png',
-      'النقل': 'assets/images/النقل.png',
-      'السفر': 'assets/images/السفر.png',
-      'الحكومة': 'assets/images/الحكومة.png',
-      'الترفيه': 'assets/images/الترفيه.png',
-      'الاستثمار': 'assets/images/استثمار.png',
-      'ايجار': 'assets/images/ايجار.png',
-      'القروض': 'assets/images/القروض.png',
-      'راتب': 'assets/images/راتب.png',
-      'التحويلات': 'assets/images/تحويلات.png',
-      'أخرى.': 'assets/images/اخرى.png',
+    Map<String, IconData> categoryIcons = {
+      'المطاعم': Icons.restaurant,
+      'التعليم': Icons.school,
+      'الصحة': Icons.local_hospital,
+      'التسوق': Icons.shopping_bag,
+      'البقالة': Icons.local_grocery_store,
+      'النقل': Icons.directions_bus,
+      'السفر': Icons.flight,
+      'الحكومة': Icons.account_balance,
+      'العمل الخيري': Icons.volunteer_activism,
+      'الاستثمار': Icons.trending_up,
+      'الإيجار': Icons.home,
+      'القروض': Icons.money,
+      'الراتب والإيرادات': Icons.account_balance_wallet,
+      'التحويلات': Icons.swap_horiz,
+      'أخرى': Icons.category,
     };
 
-    String? categoryImagePath = categoryImages[category];
-
-    // Define image size
-    const double imageWidth = 35.0; // Adjust width as needed
-    const double imageHeight = 35.0; // Adjust height as needed
+    IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         color: const Color(0xFFD9D9D9),
         borderRadius: BorderRadius.circular(8),
@@ -475,15 +469,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ),
           ),
           const SizedBox(width: 10),
-          categoryImagePath != null
-              ? Image.asset(
-                  categoryImagePath,
-                  width: imageWidth,
-                  height: imageHeight,
-                  fit: BoxFit.contain,
-                )
-              : const Icon(Icons.help_outline,
-                  color: Color(0xFF3D3D3D), size: 24),
+          Icon(categoryIcon, color: const Color(0xFF3D3D3D), size: 24),
         ],
       ),
     );
