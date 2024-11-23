@@ -129,6 +129,7 @@ dependencies:
   fl_chart: ^0.69.0  
   intl: ^0.17.0
   flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.0.13
 
 
 dev_dependencies:
