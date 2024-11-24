@@ -41,22 +41,23 @@ class _HomePageState extends State<HomePage>
   double _minExpense = double.infinity;
   double _maxExpense = double.negativeInfinity;
   int _touchedIndex = -1; // Track the currently touched slice index
-  bool _isPieChartVisible = true; // Tracks pie chart visibility
+  // bool _isPieChartVisible = true; // Tracks pie chart visibility
 
-  int getMappedYear(DateTime date) {
-    if (date.year == 2016) {
-      return 2024;
-    } else if (date.year == 2017) {
-      return 2025;
-    }
-    return date.year; // Default to the actual year if no mapping is needed
+int getMappedYear(DateTime date) {
+  if (date.year == 2016) {
+    return 2024;
+  } else if (date.year == 2017) {
+    return 2025;
   }
+  return date.year; // Default to the actual year if no mapping is needed
+}
+
 
   @override
   @override
   void initState() {
     super.initState();
-    transactionCategories = _calculateTransactionCategories(widget.accounts);
+    //transactionCategories = _calculateCategoryDataForPieChart();
 
     // Log the transaction categories to verify the data
     print('Transaction Categories33: $transactionCategories');
@@ -81,33 +82,7 @@ class _HomePageState extends State<HomePage>
     updateDashboardData(); // Call this to populate the initial chart data
   }
 
-  Map<String, double> _calculateTransactionCategories(
-      List<Map<String, dynamic>> accounts) {
-    Map<String, double> categories = {};
 
-    for (var account in accounts) {
-      print('Account: $account'); // Debug the account data
-      var transactions = account['transactions'] ?? [];
-      for (var transaction in transactions) {
-        print('Transaction: $transaction'); // Debug each transaction
-        String category = transaction['Category'] ??
-            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-            'غير مصنف';
-        double amount = double.tryParse(
-                transaction['Amount']?['Amount']?.toString() ?? '0.0') ??
-            0.0;
-        print('Category: $category, Amount: $amount');
-
-        if (amount > 0.0) {
-          // Ensure we are only adding valid amounts
-          categories[category] = (categories[category] ?? 0.0) + amount;
-        }
-      }
-    }
-
-    print('Calculated Categories: $categories'); // Debug final output
-    return categories;
-  }
 
   @override
   void dispose() {
@@ -119,8 +94,8 @@ class _HomePageState extends State<HomePage>
   void _toggleBalanceVisibility() {
     setState(() {
       _isBalanceVisible = !_isBalanceVisible;
-      _isPieChartVisible =
-          _isBalanceVisible; // Sync pie chart visibility with balance visibility
+      // _isPieChartVisible =
+      //     _isBalanceVisible; // Sync pie chart visibility with balance visibility
     });
   }
 
@@ -148,40 +123,40 @@ class _HomePageState extends State<HomePage>
   List<FlSpot> incomeData = [];
   List<FlSpot> expenseData = [];
 
-  void updateDashboardData() {
-    DateTime now = DateTime.now();
-    DateTime selectedDate = DateTime(
-      getMappedYear(DateTime(2016 - yearOffset)), // Pass DateTime object
-      now.month - monthOffset,
-      now.day,
-    );
-    // Clear and update data based on the new mapped year
-    incomeData.clear();
-    expenseData.clear();
+void updateDashboardData() {
+  DateTime now = DateTime.now();
+  DateTime selectedDate = DateTime(2016, now.month - monthOffset, now.day);
 
-    if (_selectedPeriod == 'سنوي') {
-      _calculateMonthlyData(selectedDate);
-      calculateStatistics('سنوي', selectedDate);
-    } else if (_selectedPeriod == 'شهري') {
-      _calculateWeeklyData(selectedDate);
-      calculateStatistics('شهري', selectedDate);
-    } else if (_selectedPeriod == 'اسبوعي') {
-      int startDay = ((4 - weekOffset) * 7) - 6;
-      int endDay = (4 - weekOffset) * 7;
-      DateTime weeklyDate =
-          DateTime(selectedDate.year, selectedDate.month, startDay);
-      _calculateDailyData(weeklyDate);
-      calculateStatistics('اسبوعي', weeklyDate);
-    }
+  // Clear existing data
+  incomeData.clear();
+  expenseData.clear();
 
-    transactionCategories = _calculateCategoryDataForPieChart();
-    setState(() {});
+  if (_selectedPeriod == 'سنوي') {
+    _calculateMonthlyData(selectedDate); // Ensure this is for 'سنوي'
+    calculateStatistics('سنوي', selectedDate);
+    transactionCategories = _calculateCategoryDataForPieChart('سنوي', selectedDate);
+  } else if (_selectedPeriod == 'شهري') {
+    _calculateWeeklyData(selectedDate); // Confirm this is called for 'شهري'
+    calculateStatistics('شهري', selectedDate);
+    transactionCategories = _calculateCategoryDataForPieChart('شهري', selectedDate);
+  } else if (_selectedPeriod == 'اسبوعي') {
+    int startDay = ((4 - weekOffset) * 7) - 6;
+    int endDay = (4 - weekOffset) * 7;
+    DateTime weeklyDate =
+        DateTime(selectedDate.year, selectedDate.month, startDay);
+    _calculateDailyData(weeklyDate);
+    calculateStatistics('اسبوعي', weeklyDate);
+    transactionCategories = _calculateCategoryDataForPieChart('اسبوعي', weeklyDate);
+
   }
+  setState(() {});
+}
+
 
   void calculateStatistics(String period, DateTime selectedDate) {
     // Define a cutoff date based on the current day and month in 2016
     DateTime now = DateTime.now();
-    DateTime cutoffDate = DateTime(2016, now.month, now.day);
+    DateTime cutoffDate = DateTime(2016, now.month, now.day, now.hour, now.minute, now.second);
 
     // Reset statistics
     _minIncome = double.infinity;
@@ -267,7 +242,7 @@ class _HomePageState extends State<HomePage>
     // Create a cutoff date only for the current month and year in 2016
     DateTime cutoffDate;
     if (currentDate.month == now.month && currentDate.year == 2016) {
-      cutoffDate = DateTime(2016, now.month, now.day);
+      cutoffDate = DateTime(2016, now.month, now.day, now.hour, now.minute, now.second);
     } else {
       // Set a date beyond the month's last day if it's not the current month
       cutoffDate = DateTime(2016, currentDate.month + 1, 0);
@@ -337,7 +312,7 @@ class _HomePageState extends State<HomePage>
     // Define the current date and a cutoff date based on the current month
     DateTime now = DateTime.now();
     DateTime cutoffDate =
-        DateTime(2016, now.month, 1).subtract(const Duration(days: 1));
+        DateTime(2016, now.month, 1, now.hour, now.minute, now.second).subtract(const Duration(days: 1));
 
     // Initialize monthly income and expense maps for each month
     Map<int, double> monthlyIncome = {for (int i = 0; i < 12; i++) i: 0.0};
@@ -399,8 +374,8 @@ class _HomePageState extends State<HomePage>
   void _calculateDailyData(DateTime currentDate) {
     DateTime now = DateTime.now();
     DateTime cutoffDate = (currentDate.month == now.month)
-        ? DateTime(2016, now.month, now.day)
-        : DateTime(2016, currentDate.month + 1, 1)
+        ? DateTime(2016, now.month, now.day, now.hour, now.minute, now.second)
+        : DateTime(2016, currentDate.month + 1, 1, now.hour, now.minute, now.second)
             .subtract(const Duration(days: 1));
 
     int selectedWeek = 4 - (weekOffset % 4);
@@ -686,24 +661,25 @@ class _HomePageState extends State<HomePage>
   }
 
   String getCurrentYear() {
-    int baseYear = 2016 - yearOffset;
-    return getMappedYear(DateTime(baseYear)).toString();
-  }
+  int baseYear = 2016 - yearOffset;
+  return getMappedYear(DateTime(baseYear)).toString();
+}
+
 
   Widget buildYearNavigationButtons() {
-    DateTime now = DateTime.now();
-    int mappedYear = getMappedYear(DateTime(2016 - yearOffset));
-    return Center(
-      child: Text(
-        mappedYear.toString(), // Display mapped year
-        style: TextStyle(
-          fontFamily: 'GE-SS-Two-Light',
-          fontSize: 16,
-          color: Colors.grey[700],
-        ),
+  DateTime now = DateTime.now();
+  int mappedYear = getMappedYear(DateTime(2016 - yearOffset));
+  return Center(
+    child: Text(
+      mappedYear.toString(), // Display mapped year
+      style: TextStyle(
+        fontFamily: 'GE-SS-Two-Light',
+        fontSize: 16,
+        color: Colors.grey[700],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget buildIncomeExpenseGraph() {
     return Padding(
@@ -727,9 +703,7 @@ class _HomePageState extends State<HomePage>
                       interval: 50,
                       getTitlesWidget: (value, meta) {
                         return Text(
-                          _isBalanceVisible
-                              ? value.toInt().toString()
-                              : getMaskedValue(),
+                           value.toInt().toString(),
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 12,
@@ -834,9 +808,8 @@ class _HomePageState extends State<HomePage>
                 ),
                 lineBarsData: [
                   LineChartBarData(
-                    spots: _isBalanceVisible
-                        ? incomeData
-                        : [], // Hide data if balance is hidden
+                    spots: 
+                         incomeData,
                     isCurved: true,
                     color: Colors.green,
                     barWidth: 3,
@@ -844,9 +817,8 @@ class _HomePageState extends State<HomePage>
                         show: true, color: Colors.green.withOpacity(0.4)),
                   ),
                   LineChartBarData(
-                    spots: _isBalanceVisible
-                        ? expenseData
-                        : [], // Hide data if balance is hidden
+                    spots: 
+                        expenseData,
                     isCurved: true,
                     color: Colors.red,
                     barWidth: 3,
@@ -1148,9 +1120,7 @@ class _HomePageState extends State<HomePage>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _isBalanceVisible
-                      ? '${_minIncome.toStringAsFixed(2)} ر.س'
-                      : getMaskedValue(),
+                      '${_minIncome.toStringAsFixed(2)} ر.س',
                   style: TextStyle(
                     fontFamily: 'GE-SS-Two-Light',
                     fontSize: 12,
@@ -1159,9 +1129,7 @@ class _HomePageState extends State<HomePage>
                   textDirection: TextDirection.rtl,
                 ),
                 Text(
-                  _isBalanceVisible
-                      ? '${_minExpense.toStringAsFixed(2)} ر.س'
-                      : getMaskedValue(),
+               '${_minExpense.toStringAsFixed(2)} ر.س',
                   style: TextStyle(
                     fontFamily: 'GE-SS-Two-Light',
                     fontSize: 12,
@@ -1185,9 +1153,7 @@ class _HomePageState extends State<HomePage>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _isBalanceVisible
-                      ? '${_maxIncome.toStringAsFixed(2)} ر.س'
-                      : getMaskedValue(),
+                      '${_maxIncome.toStringAsFixed(2)} ر.س',
                   style: TextStyle(
                     fontFamily: 'GE-SS-Two-Light',
                     fontSize: 12,
@@ -1196,9 +1162,7 @@ class _HomePageState extends State<HomePage>
                   textDirection: TextDirection.rtl,
                 ),
                 Text(
-                  _isBalanceVisible
-                      ? '${_maxExpense.toStringAsFixed(2)} ر.س'
-                      : getMaskedValue(),
+                       '${_maxExpense.toStringAsFixed(2)} ر.س',
                   style: TextStyle(
                     fontFamily: 'GE-SS-Two-Light',
                     fontSize: 12,
@@ -1222,9 +1186,7 @@ class _HomePageState extends State<HomePage>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _isBalanceVisible
-                      ? '${_filteredIncome.toStringAsFixed(2)} ر.س'
-                      : getMaskedValue(),
+                       '${_filteredIncome.toStringAsFixed(2)} ر.س',
                   style: TextStyle(
                     fontFamily: 'GE-SS-Two-Light',
                     fontSize: 12,
@@ -1233,9 +1195,7 @@ class _HomePageState extends State<HomePage>
                   textDirection: TextDirection.rtl,
                 ),
                 Text(
-                  _isBalanceVisible
-                      ? '${_filteredExpense.toStringAsFixed(2)} ر.س'
-                      : getMaskedValue(),
+                      '${_filteredExpense.toStringAsFixed(2)} ر.س',
                   style: TextStyle(
                     fontFamily: 'GE-SS-Two-Light',
                     fontSize: 12,
@@ -1253,10 +1213,26 @@ class _HomePageState extends State<HomePage>
 
 // Pie chart to show transaction categories
   Widget buildPieChart() {
-    if (!_isPieChartVisible) {
+    // if (!_isPieChartVisible) {
+    //   return const Center(
+    //     child: Text(
+    //       'لا توجد عمليات للعرض',
+    //       style: TextStyle(
+    //         fontSize: 14,
+    //         fontFamily: 'GE-SS-Two-Light',
+    //         color: Colors.grey,
+    //       ),
+    //     ),
+    //   );
+    // }
+
+    //Map<String, double> pieChartData = _calculateCategoryDataForPieChart();
+    if (transactionCategories.isEmpty ||
+        transactionCategories.values.every((value) => value == 0)) {
       return const Center(
         child: Text(
-          'لا توجد عمليات للعرض',
+          'لا توجد عمليات صرف للفترة المختارة لعرض تصنيفاتها',
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
             fontFamily: 'GE-SS-Two-Light',
@@ -1266,32 +1242,33 @@ class _HomePageState extends State<HomePage>
       );
     }
 
-    Map<String, double> pieChartData = _calculateCategoryDataForPieChart();
-    if (pieChartData.isEmpty ||
-        pieChartData.values.every((value) => value == 0)) {
-      return const Center(
-        child: Text(
-          'لا توجد عمليات لعرض تصنيفاتها',
-          style: TextStyle(
-            fontSize: 14,
-            fontFamily: 'GE-SS-Two-Light',
-            color: Colors.grey,
-          ),
-        ),
-      );
-    }
-
-    List<Color> colors = generateDynamicGreenShades(pieChartData.length);
-    double total = pieChartData.values.reduce((a, b) => a + b);
+    //List<Color> colors = generateDynamicGreenShades(transactionCategories.length);
+    double total = transactionCategories.values.reduce((a, b) => a + b);
 
     return PieChart(
       PieChartData(
-        sections: pieChartData.entries.map((entry) {
-          final index = pieChartData.keys.toList().indexOf(entry.key);
-          final color = colors[index % colors.length];
+        sections: transactionCategories.entries.map((entry) {
+          final index = transactionCategories.keys.toList().indexOf(entry.key);
+          //final color = colors[index % colors.length];
           final value = entry.value;
           final percentage = (value / total) * 100;
-
+        final color = percentage >= 90
+          ? Colors.red[900]!
+          : percentage >= 80
+              ? Colors.red[800]!
+              : percentage >= 70
+                  ? Colors.red[700]!
+                  : percentage >= 60
+                      ? Colors.red[600]!
+                      : percentage >= 50
+                          ? Colors.red[500]!
+                          : percentage >= 40
+                              ? Colors.red[400]!
+                              : percentage >= 30
+                                  ? Colors.red[300]!
+                                  : percentage >= 20
+                                      ? Colors.red[200]!
+                                      : Colors.red[100]!;
           return PieChartSectionData(
             color: color,
             value: value,
@@ -1329,40 +1306,38 @@ class _HomePageState extends State<HomePage>
 
   Widget buildPieChartWithBorder() {
     return Container(
-      padding: const EdgeInsets.all(50.0), // Space inside the container
-      decoration: BoxDecoration(
-        color: Colors.white, // Background color
-        borderRadius: BorderRadius.circular(12.0), // Rounded corners
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2), // Shadow color
-            spreadRadius: 2,
-            blurRadius: 5,
-          ),
-        ],
+  padding: const EdgeInsets.all(10.0), // Increase padding for more internal space
+  decoration: BoxDecoration(
+    color: Colors.white, // Background color
+    borderRadius: BorderRadius.circular(16.0), // Adjust the corner radius
+    boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.2), // Shadow color
+        spreadRadius: 2,
+        blurRadius: 5,
       ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.end, // Align children to the right
-
-        children: [
-          Text(
-            'تصنيف عمليات الصرف',
-            textDirection: TextDirection.rtl, // Ensures right-to-left alignment
-            style: TextStyle(
-              fontFamily: 'GE-SS-Two-Bold',
-              fontSize: 14,
-              color: Colors.grey[700],
-            ),
-          ),
-          const SizedBox(height: 10), // Space between title and chart
-          SizedBox(
-            height: 200, // Adjust the height as needed
-            child: buildPieChart(), // Call the existing pie chart function
-          ),
-        ],
+    ],
+  ),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.end, // Align children to the right
+    children: [
+      Text(
+        'تصنيف عمليات الصرف',
+        textDirection: TextDirection.rtl, // Ensures right-to-left alignment
+        style: TextStyle(
+          fontFamily: 'GE-SS-Two-Bold',
+          fontSize: 16, // Keep font size consistent
+          color: Colors.grey[700],
+        ),
       ),
-    );
+      const SizedBox(height: 0), // Add space between title and chart
+      SizedBox(
+        height: 285, // Increase the height of the pie chart box
+        child: buildPieChart(), // Call the existing pie chart function
+      ),
+    ],
+  ),
+);
   }
 
   // Badge widget to display category name and percentage outside each slice
@@ -1499,60 +1474,59 @@ class _HomePageState extends State<HomePage>
 
   // Calculate the total income and expense from transactions for a specific month in 2016
   Map<String, double> calculateIncomeAndExpense() {
-    double totalIncome = 0.0;
-    double totalExpense = 0.0;
+  double totalIncome = 0.0;
+  double totalExpense = 0.0;
 
-    // Get today's date
-    DateTime now = DateTime.now();
+  // Get today's date
+  DateTime now = DateTime.now();
 
-    // Map the year to 2016 for analysis
-    int mappedYear = now.year == 2024
-        ? 2016
-        : now.year == 2025
-            ? 2017
-            : now.year;
+  // Map the year to 2016 for analysis
+  int mappedYear = now.year == 2024
+      ? 2016
+      : now.year == 2025
+          ? 2017
+          : now.year;
 
-    // Calculate the start and end dates of the range (start of month to today)
-    DateTime startOfMonth = DateTime(mappedYear, now.month, 1);
-    DateTime today = DateTime(mappedYear, now.month, now.day);
+  // Calculate the start and end dates of the range (start of month to today)
+  DateTime startOfMonth = DateTime(mappedYear, now.month, 1);
+  DateTime today = DateTime(mappedYear, now.month, now.day);
 
-    for (var account in widget.accounts) {
-      var transactions = account['transactions'] ?? [];
-      for (var transaction in transactions) {
-        // Parse the transaction date
-        String? dateStr = transaction['TransactionDateTime'];
-        DateTime transactionDate =
-            DateTime.tryParse(dateStr ?? '') ?? DateTime.now();
+  for (var account in widget.accounts) {
+    var transactions = account['transactions'] ?? [];
+    for (var transaction in transactions) {
+      // Parse the transaction date
+      String? dateStr = transaction['TransactionDateTime'];
+      DateTime transactionDate =
+          DateTime.tryParse(dateStr ?? '') ?? DateTime.now();
 
-        // Filter transactions within the range
-        if (transactionDate
-                .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
-            transactionDate.isBefore(today.add(const Duration(days: 1)))) {
-          // Determine the subtype and amount
-          String subtype =
-              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-                  'غير معروف';
-          String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
-          double amount = double.tryParse(amountStr) ?? 0.0;
+      // Filter transactions within the range
+      if (transactionDate.isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+          transactionDate.isBefore(today.add(const Duration(days: 1)))) {
+        // Determine the subtype and amount
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
+        double amount = double.tryParse(amountStr) ?? 0.0;
 
-          // Classify as income or expense
-          if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
-            totalIncome += amount;
-          } else if ([
-            'MoneyTransfer',
-            'Withdrawal',
-            'Purchase',
-            'DepositReversal',
-            'NotApplicable'
-          ].contains(subtype)) {
-            totalExpense += amount;
-          }
+        // Classify as income or expense
+        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
+          totalIncome += amount;
+        } else if ([
+          'MoneyTransfer',
+          'Withdrawal',
+          'Purchase',
+          'DepositReversal',
+          'NotApplicable'
+        ].contains(subtype)) {
+          totalExpense += amount;
         }
       }
     }
-
-    return {'income': totalIncome, 'expense': totalExpense};
   }
+
+  return {'income': totalIncome, 'expense': totalExpense};
+}
 
   @override
   Widget build(BuildContext context) {
@@ -1694,9 +1668,10 @@ class _HomePageState extends State<HomePage>
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             SettingsPage(
-                                userName: widget.userName,
-                                phoneNumber: widget.phoneNumber,
-                                accounts: widget.accounts),
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts
+                        ),
                         transitionDuration:
                             const Duration(seconds: 0), // Disable transition
                         transitionsBuilder:
@@ -1890,186 +1865,186 @@ class _HomePageState extends State<HomePage>
 
   // First Dashboard Layout
   Widget buildFirstDashboard(double totalIncome, double totalExpense) {
-    Map<String, double> totals = calculateIncomeAndExpense(); // Updated call
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 80), // Additional top padding for centering
+  Map<String, double> totals = calculateIncomeAndExpense(); // Updated call
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 80), // Additional top padding for centering
 
-          Stack(
-            children: [
-              Column(
-                children: [
-                  const Text(
-                    'مجموع أموالك',
-                    style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light',
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'ر.س', // Currency symbol
-                        style: TextStyle(
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        _isBalanceVisible
-                            ? getTotalBalance()
-                            : getMaskedValue(),
-                        style: const TextStyle(
-                          fontFamily: 'GE-SS-Two-Bold',
-                          fontSize: 32,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Positioned(
-                top: -10,
-                right: 0,
-                child: IconButton(
-                  icon: Icon(
-                    _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.grey[800],
-                    size: 24,
-                  ),
-                  onPressed: _toggleBalanceVisibility,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 60),
-
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9F9F9),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
+        Stack(
+          children: [
+            Column(
               children: [
                 const Text(
-                  'تدفقك المالي لهذا الشهر',
+                  'مجموع أموالك',
                   style: TextStyle(
                     fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 12,
+                    fontSize: 16,
                     color: Colors.grey,
                   ),
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 8),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Expense Section
-                    Column(
-                      children: [
-                        const Icon(Icons.arrow_downward,
-                            color: Colors.red, size: 24),
-                        const SizedBox(height: 5),
-                        const Text(
-                          'الصرف',
-                          style: TextStyle(
-                            fontFamily: 'GE-SS-Two-Light',
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            const Text(
-                              'ر.س', // Currency symbol
-                              style: TextStyle(
-                                fontFamily: 'GE-SS-Two-Light',
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              _isBalanceVisible
-                                  ? totals['expense']!.toStringAsFixed(2)
-                                  : getMaskedValue(),
-                              style: const TextStyle(
-                                fontFamily: 'GE-SS-Two-Bold',
-                                fontSize: 18,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    const Text(
+                      'ر.س', // Currency symbol
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
                     ),
-
-                    Container(
-                      width: 1,
-                      height: 50,
-                      color: Colors.grey[300],
-                    ),
-
-                    Column(
-                      children: [
-                        const Icon(Icons.arrow_upward,
-                            color: Colors.green, size: 24),
-                        const SizedBox(height: 5),
-                        const Text(
-                          'الدخل',
-                          style: TextStyle(
-                            fontFamily: 'GE-SS-Two-Light',
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            const Text(
-                              'ر.س', // Currency symbol
-                              style: TextStyle(
-                                fontFamily: 'GE-SS-Two-Light',
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              _isBalanceVisible
-                                  ? totals['income']!.toStringAsFixed(2)
-                                  : getMaskedValue(),
-                              style: const TextStyle(
-                                fontFamily: 'GE-SS-Two-Bold',
-                                fontSize: 18,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    const SizedBox(width: 5),
+                    Text(
+                      _isBalanceVisible
+                          ? getTotalBalance()
+                          : getMaskedValue(),
+                      style: const TextStyle(
+                        fontFamily: 'GE-SS-Two-Bold',
+                        fontSize: 32,
+                        color: Colors.black,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
+            Positioned(
+              top: -10,
+              right: 0,
+              child: IconButton(
+                icon: Icon(
+                  _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey[800],
+                  size: 24,
+                ),
+                onPressed: _toggleBalanceVisibility,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 60),
+
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF9F9F9),
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
-      ),
-    );
-  }
+          child: Column(
+            children: [
+              const Text(
+                'تدفقك المالي لهذا الشهر',
+                style: TextStyle(
+                  fontFamily: 'GE-SS-Two-Light',
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Expense Section
+                  Column(
+                    children: [
+                      const Icon(Icons.arrow_downward,
+                          color: Colors.red, size: 24),
+                      const SizedBox(height: 5),
+                      const Text(
+                        'الصرف',
+                        style: TextStyle(
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const Text(
+                            'ر.س', // Currency symbol
+                            style: TextStyle(
+                              fontFamily: 'GE-SS-Two-Light',
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            _isBalanceVisible
+                                ? totals['expense']!.toStringAsFixed(2)
+                                : getMaskedValue(),
+                            style: const TextStyle(
+                              fontFamily: 'GE-SS-Two-Bold',
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  Container(
+                    width: 1,
+                    height: 50,
+                    color: Colors.grey[300],
+                  ),
+
+                  Column(
+                    children: [
+                      const Icon(Icons.arrow_upward,
+                          color: Colors.green, size: 24),
+                      const SizedBox(height: 5),
+                      const Text(
+                        'الدخل',
+                        style: TextStyle(
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const Text(
+                            'ر.س', // Currency symbol
+                            style: TextStyle(
+                              fontFamily: 'GE-SS-Two-Light',
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            _isBalanceVisible
+                                ? totals['income']!.toStringAsFixed(2)
+                                : getMaskedValue(),
+                            style: const TextStyle(
+                              fontFamily: 'GE-SS-Two-Bold',
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   // Second Dashboard Layout
 // Second Dashboard Layout
@@ -2085,12 +2060,7 @@ class _HomePageState extends State<HomePage>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 buildTimePeriodSelector(),
-                IconButton(
-                  icon: Icon(_isBalanceVisible
-                      ? Icons.visibility
-                      : Icons.visibility_off),
-                  onPressed: _toggleBalanceVisibility,
-                ),
+    const SizedBox(),
               ],
             ),
             if (_selectedPeriod == 'اسبوعي') buildWeekNavigationButtons(),
@@ -2188,42 +2158,61 @@ class _HomePageState extends State<HomePage>
   }
 
 // Method to calculate category data for the pie chart
-  Map<String, double> _calculateCategoryDataForPieChart() {
-    print('Accounts: ${widget.accounts}');
+Map<String, double> _calculateCategoryDataForPieChart(String period, DateTime selectedDate) {
+  // Define a cutoff date based on the current day and month in 2016
+  DateTime now = DateTime.now();
+  DateTime cutoffDate = DateTime(2016, now.month, now.day, now.hour, now.minute, now.second);
 
-    // Step 1: Filter transactions based on the selected period
-    List<Map<String, dynamic>> filteredTransactions =
-        _filterTransactionsByPeriod(widget.accounts);
+  // Aggregate by category
+  Map<String, double> categoryTotals = {};
 
-    // Step 2: Further filter transactions by the required subtypes
-    filteredTransactions = filteredTransactions.where((transaction) {
-      String subtype =
-          transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
-      return ['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal']
-          .contains(subtype);
-    }).toList();
+  for (var account in widget.accounts) {
+    var transactions = account['transactions'] ?? [];
+    for (var transaction in transactions) {
+      String dateStr = transaction['TransactionDateTime'] ?? '';
+      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
 
-    // Debugging: Check filtered transactions
-    print('Filtered Transactions: $filteredTransactions');
+      // Skip transactions beyond the cutoff date
+      if (transactionDate.isAfter(cutoffDate)) {
+        continue;
+      }
 
-    // Step 3: Aggregate by category
-    Map<String, double> categoryTotals = {};
-    for (var transaction in filteredTransactions) {
-      String category = transaction['Category'] ??
-          transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-          'غير مصنف';
-      double amount =
-          double.tryParse(transaction['Amount']?['Amount'] ?? '0.0') ?? 0.0;
+      // Determine if the transaction falls within the selected period
+      bool includeTransaction = false;
+      if (period == 'اسبوعي' &&
+          transactionDate.year == 2016 &&
+          transactionDate.month == selectedDate.month &&
+          _getWeekOfMonth(transactionDate.day) == _getWeekOfMonth(selectedDate.day)) {
+        includeTransaction = true;
+      } else if (period == 'شهري' &&
+          transactionDate.year == 2016 &&
+          transactionDate.month == selectedDate.month) {
+        includeTransaction = true;
+      } else if (period == 'سنوي' && transactionDate.year == 2016) {
+        includeTransaction = true;
+      }
 
-      // Add the amount to the corresponding category only if amount is positive
-      if (amount > 0.0) {
-        categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
+      if (includeTransaction) {
+        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+        // Consider only expense-related subtypes
+        if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal'].contains(subtype)) {
+          String category = transaction['Category'] ??
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+              'غير مصنف';
+          double amount = double.tryParse(transaction['Amount']?['Amount'] ?? '0.0') ?? 0.0;
+DateTime? transactionDate = transaction['TransactionDateTime'] != null
+    ? DateTime.tryParse(transaction['TransactionDateTime'])
+    : null;
+    print('Category Totals: $category amount: $amount date: $transactionDate');
+          if (amount > 0.0) {
+            categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
+          }
+        }
       }
     }
-
-    // Debugging: Check category totals
-    print('Category Totals: $categoryTotals');
-
-    return categoryTotals;
   }
+
+  return categoryTotals;
+}
+
 }
