@@ -94,7 +94,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     List<String> ibans = widget.accounts
-            ?.where((account) =>
+            .where((account) =>
                 account.containsKey('IBAN') && account['IBAN'] != null)
             .map((account) => account['IBAN'].toString())
             .toList() ??
