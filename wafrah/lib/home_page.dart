@@ -57,7 +57,7 @@ int getMappedYear(DateTime date) {
   @override
   void initState() {
     super.initState();
-    transactionCategories = _calculateTransactionCategories(widget.accounts);
+    //transactionCategories = _calculateCategoryDataForPieChart();
 
     // Log the transaction categories to verify the data
     print('Transaction Categories33: $transactionCategories');
@@ -82,33 +82,7 @@ int getMappedYear(DateTime date) {
     updateDashboardData(); // Call this to populate the initial chart data
   }
 
-  Map<String, double> _calculateTransactionCategories(
-      List<Map<String, dynamic>> accounts) {
-    Map<String, double> categories = {};
 
-    for (var account in accounts) {
-      print('Account: $account'); // Debug the account data
-      var transactions = account['transactions'] ?? [];
-      for (var transaction in transactions) {
-        print('Transaction: $transaction'); // Debug each transaction
-        String category = transaction['Category'] ??
-            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-            'غير مصنف';
-        double amount = double.tryParse(
-                transaction['Amount']?['Amount']?.toString() ?? '0.0') ??
-            0.0;
-        print('Category: $category, Amount: $amount');
-
-        if (amount > 0.0) {
-          // Ensure we are only adding valid amounts
-          categories[category] = (categories[category] ?? 0.0) + amount;
-        }
-      }
-    }
-
-    print('Calculated Categories: $categories'); // Debug final output
-    return categories;
-  }
 
   @override
   void dispose() {
@@ -160,9 +134,11 @@ void updateDashboardData() {
   if (_selectedPeriod == 'سنوي') {
     _calculateMonthlyData(selectedDate); // Ensure this is for 'سنوي'
     calculateStatistics('سنوي', selectedDate);
+    transactionCategories = _calculateCategoryDataForPieChart('سنوي', selectedDate);
   } else if (_selectedPeriod == 'شهري') {
     _calculateWeeklyData(selectedDate); // Confirm this is called for 'شهري'
     calculateStatistics('شهري', selectedDate);
+    transactionCategories = _calculateCategoryDataForPieChart('شهري', selectedDate);
   } else if (_selectedPeriod == 'اسبوعي') {
     int startDay = ((4 - weekOffset) * 7) - 6;
     int endDay = (4 - weekOffset) * 7;
@@ -170,8 +146,9 @@ void updateDashboardData() {
         DateTime(selectedDate.year, selectedDate.month, startDay);
     _calculateDailyData(weeklyDate);
     calculateStatistics('اسبوعي', weeklyDate);
+    transactionCategories = _calculateCategoryDataForPieChart('اسبوعي', weeklyDate);
+
   }
-  transactionCategories = _calculateCategoryDataForPieChart();
   setState(() {});
 }
 
@@ -179,7 +156,7 @@ void updateDashboardData() {
   void calculateStatistics(String period, DateTime selectedDate) {
     // Define a cutoff date based on the current day and month in 2016
     DateTime now = DateTime.now();
-    DateTime cutoffDate = DateTime(2016, now.month, now.day);
+    DateTime cutoffDate = DateTime(2016, now.month, now.day, now.hour, now.minute, now.second);
 
     // Reset statistics
     _minIncome = double.infinity;
@@ -265,7 +242,7 @@ void updateDashboardData() {
     // Create a cutoff date only for the current month and year in 2016
     DateTime cutoffDate;
     if (currentDate.month == now.month && currentDate.year == 2016) {
-      cutoffDate = DateTime(2016, now.month, now.day);
+      cutoffDate = DateTime(2016, now.month, now.day, now.hour, now.minute, now.second);
     } else {
       // Set a date beyond the month's last day if it's not the current month
       cutoffDate = DateTime(2016, currentDate.month + 1, 0);
@@ -335,7 +312,7 @@ void updateDashboardData() {
     // Define the current date and a cutoff date based on the current month
     DateTime now = DateTime.now();
     DateTime cutoffDate =
-        DateTime(2016, now.month, 1).subtract(const Duration(days: 1));
+        DateTime(2016, now.month, 1, now.hour, now.minute, now.second).subtract(const Duration(days: 1));
 
     // Initialize monthly income and expense maps for each month
     Map<int, double> monthlyIncome = {for (int i = 0; i < 12; i++) i: 0.0};
@@ -397,8 +374,8 @@ void updateDashboardData() {
   void _calculateDailyData(DateTime currentDate) {
     DateTime now = DateTime.now();
     DateTime cutoffDate = (currentDate.month == now.month)
-        ? DateTime(2016, now.month, now.day)
-        : DateTime(2016, currentDate.month + 1, 1)
+        ? DateTime(2016, now.month, now.day, now.hour, now.minute, now.second)
+        : DateTime(2016, currentDate.month + 1, 1, now.hour, now.minute, now.second)
             .subtract(const Duration(days: 1));
 
     int selectedWeek = 4 - (weekOffset % 4);
@@ -1249,12 +1226,13 @@ void updateDashboardData() {
     //   );
     // }
 
-    Map<String, double> pieChartData = _calculateCategoryDataForPieChart();
-    if (pieChartData.isEmpty ||
-        pieChartData.values.every((value) => value == 0)) {
+    //Map<String, double> pieChartData = _calculateCategoryDataForPieChart();
+    if (transactionCategories.isEmpty ||
+        transactionCategories.values.every((value) => value == 0)) {
       return const Center(
         child: Text(
-          'لا توجد عمليات لعرض تصنيفاتها',
+          'لا توجد عمليات صرف للفترة المختارة لعرض تصنيفاتها',
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
             fontFamily: 'GE-SS-Two-Light',
@@ -1264,17 +1242,33 @@ void updateDashboardData() {
       );
     }
 
-    List<Color> colors = generateDynamicGreenShades(pieChartData.length);
-    double total = pieChartData.values.reduce((a, b) => a + b);
+    //List<Color> colors = generateDynamicGreenShades(transactionCategories.length);
+    double total = transactionCategories.values.reduce((a, b) => a + b);
 
     return PieChart(
       PieChartData(
-        sections: pieChartData.entries.map((entry) {
-          final index = pieChartData.keys.toList().indexOf(entry.key);
-          final color = colors[index % colors.length];
+        sections: transactionCategories.entries.map((entry) {
+          final index = transactionCategories.keys.toList().indexOf(entry.key);
+          //final color = colors[index % colors.length];
           final value = entry.value;
           final percentage = (value / total) * 100;
-
+        final color = percentage >= 90
+          ? Colors.red[900]!
+          : percentage >= 80
+              ? Colors.red[800]!
+              : percentage >= 70
+                  ? Colors.red[700]!
+                  : percentage >= 60
+                      ? Colors.red[600]!
+                      : percentage >= 50
+                          ? Colors.red[500]!
+                          : percentage >= 40
+                              ? Colors.red[400]!
+                              : percentage >= 30
+                                  ? Colors.red[300]!
+                                  : percentage >= 20
+                                      ? Colors.red[200]!
+                                      : Colors.red[100]!;
           return PieChartSectionData(
             color: color,
             value: value,
@@ -1312,40 +1306,38 @@ void updateDashboardData() {
 
   Widget buildPieChartWithBorder() {
     return Container(
-      padding: const EdgeInsets.all(50.0), // Space inside the container
-      decoration: BoxDecoration(
-        color: Colors.white, // Background color
-        borderRadius: BorderRadius.circular(12.0), // Rounded corners
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2), // Shadow color
-            spreadRadius: 2,
-            blurRadius: 5,
-          ),
-        ],
+  padding: const EdgeInsets.all(10.0), // Increase padding for more internal space
+  decoration: BoxDecoration(
+    color: Colors.white, // Background color
+    borderRadius: BorderRadius.circular(16.0), // Adjust the corner radius
+    boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.2), // Shadow color
+        spreadRadius: 2,
+        blurRadius: 5,
       ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.end, // Align children to the right
-
-        children: [
-          Text(
-            'تصنيف عمليات الصرف',
-            textDirection: TextDirection.rtl, // Ensures right-to-left alignment
-            style: TextStyle(
-              fontFamily: 'GE-SS-Two-Bold',
-              fontSize: 14,
-              color: Colors.grey[700],
-            ),
-          ),
-          const SizedBox(height: 10), // Space between title and chart
-          SizedBox(
-            height: 200, // Adjust the height as needed
-            child: buildPieChart(), // Call the existing pie chart function
-          ),
-        ],
+    ],
+  ),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.end, // Align children to the right
+    children: [
+      Text(
+        'تصنيف عمليات الصرف',
+        textDirection: TextDirection.rtl, // Ensures right-to-left alignment
+        style: TextStyle(
+          fontFamily: 'GE-SS-Two-Bold',
+          fontSize: 16, // Keep font size consistent
+          color: Colors.grey[700],
+        ),
       ),
-    );
+      const SizedBox(height: 0), // Add space between title and chart
+      SizedBox(
+        height: 285, // Increase the height of the pie chart box
+        child: buildPieChart(), // Call the existing pie chart function
+      ),
+    ],
+  ),
+);
   }
 
   // Badge widget to display category name and percentage outside each slice
@@ -2166,42 +2158,61 @@ void updateDashboardData() {
   }
 
 // Method to calculate category data for the pie chart
-  Map<String, double> _calculateCategoryDataForPieChart() {
-    print('Accounts: ${widget.accounts}');
+Map<String, double> _calculateCategoryDataForPieChart(String period, DateTime selectedDate) {
+  // Define a cutoff date based on the current day and month in 2016
+  DateTime now = DateTime.now();
+  DateTime cutoffDate = DateTime(2016, now.month, now.day, now.hour, now.minute, now.second);
 
-    // Step 1: Filter transactions based on the selected period
-    List<Map<String, dynamic>> filteredTransactions =
-        _filterTransactionsByPeriod(widget.accounts);
+  // Aggregate by category
+  Map<String, double> categoryTotals = {};
 
-    // Step 2: Further filter transactions by the required subtypes
-    filteredTransactions = filteredTransactions.where((transaction) {
-      String subtype =
-          transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
-      return ['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal']
-          .contains(subtype);
-    }).toList();
+  for (var account in widget.accounts) {
+    var transactions = account['transactions'] ?? [];
+    for (var transaction in transactions) {
+      String dateStr = transaction['TransactionDateTime'] ?? '';
+      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
 
-    // Debugging: Check filtered transactions
-    print('Filtered Transactions: $filteredTransactions');
+      // Skip transactions beyond the cutoff date
+      if (transactionDate.isAfter(cutoffDate)) {
+        continue;
+      }
 
-    // Step 3: Aggregate by category
-    Map<String, double> categoryTotals = {};
-    for (var transaction in filteredTransactions) {
-      String category = transaction['Category'] ??
-          transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-          'غير مصنف';
-      double amount =
-          double.tryParse(transaction['Amount']?['Amount'] ?? '0.0') ?? 0.0;
+      // Determine if the transaction falls within the selected period
+      bool includeTransaction = false;
+      if (period == 'اسبوعي' &&
+          transactionDate.year == 2016 &&
+          transactionDate.month == selectedDate.month &&
+          _getWeekOfMonth(transactionDate.day) == _getWeekOfMonth(selectedDate.day)) {
+        includeTransaction = true;
+      } else if (period == 'شهري' &&
+          transactionDate.year == 2016 &&
+          transactionDate.month == selectedDate.month) {
+        includeTransaction = true;
+      } else if (period == 'سنوي' && transactionDate.year == 2016) {
+        includeTransaction = true;
+      }
 
-      // Add the amount to the corresponding category only if amount is positive
-      if (amount > 0.0) {
-        categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
+      if (includeTransaction) {
+        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+        // Consider only expense-related subtypes
+        if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal'].contains(subtype)) {
+          String category = transaction['Category'] ??
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+              'غير مصنف';
+          double amount = double.tryParse(transaction['Amount']?['Amount'] ?? '0.0') ?? 0.0;
+DateTime? transactionDate = transaction['TransactionDateTime'] != null
+    ? DateTime.tryParse(transaction['TransactionDateTime'])
+    : null;
+    print('Category Totals: $category amount: $amount date: $transactionDate');
+          if (amount > 0.0) {
+            categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
+          }
+        }
       }
     }
-
-    // Debugging: Check category totals
-    print('Category Totals: $categoryTotals');
-
-    return categoryTotals;
   }
+
+  return categoryTotals;
+}
+
 }

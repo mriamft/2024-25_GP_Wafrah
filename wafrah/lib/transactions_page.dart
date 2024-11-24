@@ -399,7 +399,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       'البقالة': Icons.local_grocery_store,
       'النقل': Icons.directions_bus,
       'السفر': Icons.flight,
-      'الحكومة': Icons.account_balance,
+      'المدفوعات الحكومية': Icons.account_balance,
       'العمل الخيري': Icons.volunteer_activism,
       'الاستثمار': Icons.trending_up,
       'الإيجار': Icons.home,
