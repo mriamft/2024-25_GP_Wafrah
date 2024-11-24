@@ -6,8 +6,7 @@ import 'package:uni_links/uni_links.dart';
 import 'dart:async';
 import 'banks_page.dart'; // Import the BanksPage file
 import 'storage_service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
+
 
 class AccLinkPage extends StatefulWidget {
   final String userName; // Accept userName from previous page
@@ -180,8 +179,9 @@ class _AccLinkPageState extends State<AccLinkPage> {
         });
       }
 
-      // Save accounts locally using secure storage
-      await _saveAccountDataLocally(accountsWithBalances);
+      // Save accounts locally using StorageService
+    await widget._storageService.saveAccountDataLocally(
+        widget.phoneNumber, accountsWithBalances);
 
       if (mounted) {
         setState(() {
@@ -195,33 +195,8 @@ class _AccLinkPageState extends State<AccLinkPage> {
     }
   }
 
-// Method to save account data locally
-  Future<void> _saveAccountDataLocally(
-      List<Map<String, dynamic>> accounts) async {
-    try {
-      const storage = FlutterSecureStorage();
-      String accountsJson =
-          jsonEncode(accounts); // Convert accounts to JSON string
-      await storage.write(
-          key: 'user_accounts', value: accountsJson); // Save JSON string
-    } catch (e) {
-      print('Error saving accounts locally: $e');
-    }
-  }
 
-// Method to load account data locally
-  Future<List<Map<String, dynamic>>> _loadAccountDataLocally() async {
-    try {
-      const storage = FlutterSecureStorage();
-      String? accountsJson = await storage.read(key: 'user_accounts');
-      if (accountsJson != null) {
-        return List<Map<String, dynamic>>.from(jsonDecode(accountsJson));
-      }
-    } catch (e) {
-      print('Error loading accounts locally: $e');
-    }
-    return [];
-  }
+
 
   // Redirect to BanksPage with Accounts
   void _redirectToBanksPage() {

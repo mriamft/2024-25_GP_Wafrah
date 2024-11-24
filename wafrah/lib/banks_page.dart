@@ -4,8 +4,7 @@ import 'transactions_page.dart';
 import 'home_page.dart';
 import 'saving_plan_page.dart';
 import 'settings_page.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
+import 'storage_service.dart';
 
 class BanksPage extends StatefulWidget {
   final String userName;
@@ -24,7 +23,7 @@ class BanksPage extends StatefulWidget {
 }
 
 class _BanksPageState extends State<BanksPage> {
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final StorageService _storageService = StorageService(); 
   List<Map<String, dynamic>> _accounts = [];
   bool _isCirclePressed = false; // Add this line
 
@@ -40,20 +39,19 @@ class _BanksPageState extends State<BanksPage> {
         _accounts = widget.accounts;
       });
     } else {
-      final loadedAccounts = await _loadAccountsLocally();
+      final loadedAccounts = await _loadAccountsLocally(widget.phoneNumber);
       setState(() {
         _accounts = loadedAccounts;
       });
     }
   }
-
-  Future<List<Map<String, dynamic>>> _loadAccountsLocally() async {
-    String? accountsJson = await _storage.read(key: 'user_accounts');
-    if (accountsJson != null) {
-      return List<Map<String, dynamic>>.from(jsonDecode(accountsJson));
-    }
-    return [];
+Future<void> _saveAccountsLocally(List<Map<String, dynamic>> accounts) async {
+  await _storageService.saveAccountDataLocally(widget.phoneNumber, accounts);
+}
+Future<List<Map<String, dynamic>>> _loadAccountsLocally(String phoneNumber) async {
+    return await _storageService.loadAccountDataLocally(phoneNumber);
   }
+  
 
   Map<String, double> calculateTransactionCategories(
       List<Map<String, dynamic>> accounts) {

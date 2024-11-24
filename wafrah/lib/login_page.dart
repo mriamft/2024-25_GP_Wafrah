@@ -8,6 +8,7 @@ import 'package:wafrah/signup_page.dart' as signup;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:wafrah/storage_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -76,48 +77,53 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // Handle login logic with API call
-  Future<void> handleLogin() async {
-    String phoneNumber = phoneNumberController.text.trim();
-    String password = passwordController.text.trim();
+ Future<void> handleLogin() async {
+  String phoneNumber = phoneNumberController.text.trim();
+  String password = passwordController.text.trim();
 
-    if (phoneNumber.isEmpty || password.isEmpty) {
-      showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
-      return;
-    }
+  if (phoneNumber.isEmpty || password.isEmpty) {
+    showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
+    return;
+  }
 
-    try {
-      // Send request to the server to validate login
-      final url = Uri.parse('https://6888-2-89-25-133.ngrok-free.app/login');
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({'phoneNumber': phoneNumber, 'password': password}),
-      );
+  try {
+    final url = Uri.parse('https://c9c8-2001-16a2-cbea-e400-5427-dc1c-d49-9c28.ngrok-free.app/login');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({'phoneNumber': phoneNumber, 'password': password}),
+    );
 
-      if (response.statusCode == 200) {
-        final responseBody = json.decode(response.body);
+    if (response.statusCode == 200) {
+      final responseBody = json.decode(response.body);
 
-        if (responseBody['success']) {
-          String userName =
-              responseBody['userName']; // Fetch full name from server
+      if (responseBody['success']) {
+        String userName = responseBody['userName'];
+        List<Map<String, dynamic>> accounts = responseBody['accounts'] ?? [];
 
-          // Send OTP for final verification after login
-          sendOTP(phoneNumber, password, userName);
-        } else {
-          showNotification('رقم الجوال أو رمز المرور غير صحيحين');
-        }
+        // Save accounts locally
+        print('Saving accounts on login: $accounts');
+        await StorageService().loadAccountDataLocally(phoneNumber);
+
+        // Navigate to OTPPage
+        sendOTP(phoneNumber, password, userName);
       } else {
-        showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
+        showNotification('رقم الجوال أو رمز المرور غير صحيحين');
       }
-    } catch (error) {
+    } else {
       showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
     }
+  } catch (error) {
+    showNotification('حدث خطأ ما\nفشل في عملية تسجيل الدخول');
   }
+}
+
+
 
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://6888-2-89-25-133.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://c9c8-2001-16a2-cbea-e400-5427-dc1c-d49-9c28.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
