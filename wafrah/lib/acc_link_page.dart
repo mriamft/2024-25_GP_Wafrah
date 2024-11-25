@@ -11,12 +11,15 @@ import 'storage_service.dart';
 class AccLinkPage extends StatefulWidget {
   final String userName; // Accept userName from previous page
   final String phoneNumber; // Accept phoneNumber from previous page
+  final List<Map<String, dynamic>> accounts;
   final StorageService _storageService = StorageService();
 
   AccLinkPage({
     super.key,
     required this.userName,
     required this.phoneNumber,
+    required this.accounts,
+
   });
 
   @override
@@ -37,6 +40,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
   @override
   void initState() {
     super.initState();
+    _accounts = widget.accounts; 
     _initUniLinks(); // Initialize uni_links listener for deep links
   }
 
@@ -254,7 +258,17 @@ class _AccLinkPageState extends State<AccLinkPage> {
                       setState(() {
                         _arrowColor = const Color(0xFF3D3D3D);
                       });
-                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (context) => BanksPage(
+      userName: widget.userName,
+      phoneNumber: widget.phoneNumber,
+      accounts: _accounts, // Pass the current accounts
+    ),
+  ),
+);
+
                     });
                   },
                   child: Icon(

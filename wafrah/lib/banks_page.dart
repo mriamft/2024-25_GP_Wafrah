@@ -210,24 +210,30 @@ Future<List<Map<String, dynamic>>> _loadAccountsLocally(String phoneNumber) asyn
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.add_circle,
-                    color: Color(0xFF3D3D3D),
-                    size: 30,
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AccLinkPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+IconButton(
+  icon: Icon(
+    Icons.add_circle,
+    color: _accounts.isEmpty
+        ? const Color(0xFF3D3D3D) // Enabled color
+        : Colors.grey, // Disabled color
+    size: 30,
+  ),
+  onPressed: _accounts.isEmpty
+      ? () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AccLinkPage(
+                userName: widget.userName,
+                phoneNumber: widget.phoneNumber,
+                accounts: _accounts, 
+              ),
+            ),
+          );
+        }
+      : null, // Disable button
+),
+
                 const Text(
                   'الحسابات البنكية',
                   style: TextStyle(
@@ -247,22 +253,29 @@ Future<List<Map<String, dynamic>>> _loadAccountsLocally(String phoneNumber) asyn
             child: Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AccLinkPage(
-                        userName: widget.userName,
-                        phoneNumber: widget.phoneNumber,
-                      ),
-                    ),
-                  );
-                },
-                child: const Icon(
-                  Icons.edit,
-                  color: Color(0xFF3D3D3D),
-                ),
+  onPressed: _accounts.isNotEmpty
+      ? () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AccLinkPage(
+                userName: widget.userName,
+                phoneNumber: widget.phoneNumber,
+                accounts: _accounts, // Pass accounts here
+
               ),
+            ),
+          );
+        }
+      : null, // Disable button
+  child: Icon(
+    Icons.edit,
+    color: _accounts.isNotEmpty
+        ? const Color(0xFF3D3D3D) // Enabled color
+        : Colors.grey, // Disabled color
+  ),
+),
+
             ),
           ),
           // Scrollable Accounts List
