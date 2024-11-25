@@ -7,7 +7,6 @@ import 'reset_password_page.dart';
 import 'notification_page.dart';
 import 'support_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'storage_service.dart';
 import 'banks_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -27,7 +26,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-    final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   Color _profileColor = const Color(0xFFD9D9D9);
   Color _resetPasswordColor = const Color(0xFFD9D9D9);
   Color _notificationColor = const Color(0xFFD9D9D9);
@@ -106,86 +105,84 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _onLogout() {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text(
-        'تأكيد تسجيل الخروج',
-        style: TextStyle(
-          fontFamily: 'GE-SS-Two-Bold',
-          color: Color(0xFF3D3D3D),
-        ),
-      ),
-      content: const Text(
-        'هل أنت متأكد أنك تريد تسجيل الخروج؟',
-        style: TextStyle(
-          fontFamily: 'GE-SS-Two-Light',
-          color: Color(0xFF3D3D3D),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop(); // Close the dialog
-          },
-          child: const Text(
-            'إلغاء',
-            style: TextStyle(
-              fontFamily: 'GE-SS-Two-Light',
-              color: Color(0xFF838383),
-            ),
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'تأكيد تسجيل الخروج',
+          style: TextStyle(
+            fontFamily: 'GE-SS-Two-Bold',
+            color: Color(0xFF3D3D3D),
           ),
         ),
-        TextButton(
-          onPressed: () async {
-            // Clear user-specific data from secure storage
-            // await _storage.delete(key: 'user_accounts_${widget.phoneNumber}');
-           //  await _storage.delete(key: 'access_token_${widget.phoneNumber}');
-             //  await StorageService().clearUserData(widget.phoneNumber);
-    // await StorageService().saveAccountDataLocally(widget.phoneNumber, []);
-
-
-            // Clear all global storage if required
-           //  await _storage.deleteAll();
-
-            // Close the dialog
-            Navigator.of(context).pop();
-
-            // Navigate to the login page
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              '/',
-              (route) => false,
-            ); // Replace '/' with the actual login page route
-
-            // Show a success notification
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'لقد تم تسجيل خروجك بنجاح',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                ),
-                backgroundColor: Colors.grey,
-                duration: Duration(seconds: 5),
+        content: const Text(
+          'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+          style: TextStyle(
+            fontFamily: 'GE-SS-Two-Light',
+            color: Color(0xFF3D3D3D),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text(
+              'إلغاء',
+              style: TextStyle(
+                fontFamily: 'GE-SS-Two-Light',
+                color: Color(0xFF838383),
               ),
-            );
-          },
-          child: const Text(
-            'تسجيل الخروج',
-            style: TextStyle(
-              fontFamily: 'GE-SS-Two-Light',
-              color: Colors.red,
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+          TextButton(
+            onPressed: () async {
+              // Clear user-specific data from secure storage
+              // await _storage.delete(key: 'user_accounts_${widget.phoneNumber}');
+              //  await _storage.delete(key: 'access_token_${widget.phoneNumber}');
+              //  await StorageService().clearUserData(widget.phoneNumber);
+              // await StorageService().saveAccountDataLocally(widget.phoneNumber, []);
 
+              // Clear all global storage if required
+              //  await _storage.deleteAll();
+
+              // Close the dialog
+              Navigator.of(context).pop();
+
+              // Navigate to the login page
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/',
+                (route) => false,
+              ); // Replace '/' with the actual login page route
+
+              // Show a success notification
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'لقد تم تسجيل خروجك بنجاح',
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                  backgroundColor: Colors.grey,
+                  duration: Duration(seconds: 5),
+                ),
+              );
+            },
+            child: const Text(
+              'تسجيل الخروج',
+              style: TextStyle(
+                fontFamily: 'GE-SS-Two-Light',
+                color: Colors.red,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

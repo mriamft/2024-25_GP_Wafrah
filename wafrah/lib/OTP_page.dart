@@ -117,49 +117,50 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   Future<void> verifyOTP() async {
-  String otp = getOTP();
-  if (otp.isEmpty || otp.length != 6) {
-    showNotification('يرجى إدخال رمز التحقق المؤلف من 6 أرقام.');
-    return;
-  }
+    String otp = getOTP();
+    if (otp.isEmpty || otp.length != 6) {
+      showNotification('يرجى إدخال رمز التحقق المؤلف من 6 أرقام.');
+      return;
+    }
 
-  final url = Uri.parse('https://c9c8-2001-16a2-cbea-e400-5427-dc1c-d49-9c28.ngrok-free.app/verify-otp');
-  final response = await http.post(
-    url,
-    headers: {"Content-Type": "application/json"},
-    body: json.encode({
-      'phoneNumber': widget.phoneNumber,
-      'otp': otp,
-    }),
-  );
+    final url =
+        Uri.parse('https://459b-94-98-211-77.ngrok-free.app/verify-otp');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'phoneNumber': widget.phoneNumber,
+        'otp': otp,
+      }),
+    );
 
-  if (response.statusCode == 200) {
-    showNotification('تم التحقق بنجاح', color: Colors.grey);
+    if (response.statusCode == 200) {
+      showNotification('تم التحقق بنجاح', color: Colors.grey);
 
-    Timer(const Duration(seconds: 2), () async {
-      if (widget.isForget) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PassConfirmationPage(
-              phoneNumber: widget.phoneNumber,
+      Timer(const Duration(seconds: 2), () async {
+        if (widget.isForget) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PassConfirmationPage(
+                phoneNumber: widget.phoneNumber,
+              ),
             ),
-          ),
-        );
-      } else if (widget.isSignUp) {
-        addUserToDatabase();
-      } else {
-        // Redirect to HomePage with accounts for login
-        await _redirectToHomePage();
-      }
-    });
-  } else {
-    showNotification('رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.');
+          );
+        } else if (widget.isSignUp) {
+          addUserToDatabase();
+        } else {
+          // Redirect to HomePage with accounts for login
+          await _redirectToHomePage();
+        }
+      });
+    } else {
+      showNotification('رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.');
+    }
   }
-}
 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://c9c8-2001-16a2-cbea-e400-5427-dc1c-d49-9c28.ngrok-free.app/adduser');
+    final url = Uri.parse('https://459b-94-98-211-77.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -190,31 +191,32 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   Future<void> _redirectToHomePage() async {
-  List<Map<String, dynamic>> accounts = [];
+    List<Map<String, dynamic>> accounts = [];
 
-  try {
-    accounts = await StorageService().loadAccountDataLocally(widget.phoneNumber);
-    print('Accounts loaded after OTP verification: $accounts');
-  } catch (e) {
-    print('Error loading accounts after OTP verification: $e');
-  }
+    try {
+      accounts =
+          await StorageService().loadAccountDataLocally(widget.phoneNumber);
+      print('Accounts loaded after OTP verification: $accounts');
+    } catch (e) {
+      print('Error loading accounts after OTP verification: $e');
+    }
 
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (context) => HomePage(
-        userName: '${widget.firstName} ${widget.lastName}',
-        phoneNumber: widget.phoneNumber,
-        accounts: accounts,
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(
+          userName: '${widget.firstName} ${widget.lastName}',
+          phoneNumber: widget.phoneNumber,
+          accounts: accounts,
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Future<void> resendOTP() async {
     if (canResend) {
-      final url = Uri.parse('https://c9c8-2001-16a2-cbea-e400-5427-dc1c-d49-9c28.ngrok-free.app/send-otp');
+      final url =
+          Uri.parse('https://459b-94-98-211-77.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

@@ -80,7 +80,7 @@ class GPTService {
 
   /// Method to find the closest category using Levenshtein distance
   String _findClosestCategory(String rawCategory) {
-    int _levenshteinDistance(String a, String b) {
+    int levenshteinDistance(String a, String b) {
       if (a == b) return 0;
       if (a.isEmpty) return b.length;
       if (b.isEmpty) return a.length;
@@ -117,7 +117,7 @@ class GPTService {
     String? closestCategory;
 
     for (String category in predefinedCategories) {
-      int distance = _levenshteinDistance(rawCategory, category);
+      int distance = levenshteinDistance(rawCategory, category);
       if (distance <= threshold) {
         closestCategory = category;
         break; // Stop at the first close match

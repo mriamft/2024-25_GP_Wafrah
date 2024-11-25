@@ -17,13 +17,15 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
 
   bool showErrorNotification = false;
   String errorMessage = '';
-  Color notificationColor = const Color(0xFFC62C2C); // Default error notification color
+  Color notificationColor =
+      const Color(0xFFC62C2C); // Default error notification color
 
   Color _arrowColor = Colors.white; // Default color for the arrow
   Color _buttonColor = Colors.white; // Default color for the button
 
   // Show notification method
-  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
+  void showNotification(String message,
+      {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
       notificationColor = color; // Set notification color dynamically
@@ -45,7 +47,8 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
 
   // Check if phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
-    final url = Uri.parse('https://564d-2001-16a2-c042-93d9-1d19-1bdf-6bd3-c210.ngrok-free.app/checkPhoneNumber');
+    final url =
+        Uri.parse('https://459b-94-98-211-77.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -67,7 +70,8 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
       bool exists = await phoneNumberExists(phoneNumber);
       if (exists) {
         // Send OTP only if the phone number exists
-        final url = Uri.parse('https://564d-2001-16a2-c042-93d9-1d19-1bdf-6bd3-c210.ngrok-free.app/send-otp');
+        final url =
+            Uri.parse('https://459b-94-98-211-77.ngrok-free.app/send-otp');
         final response = await http.post(
           url,
           headers: {"Content-Type": "application/json"},
@@ -90,7 +94,8 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
             ),
           ).then((_) {
             // Show success notification after returning from OTP page
-            showNotification('تم تحديث كلمة المرور بنجاح', color: const Color(0xFF07746A)); // Grey color
+            showNotification('تم تحديث كلمة المرور بنجاح',
+                color: const Color(0xFF07746A)); // Grey color
           });
         } else {
           showNotification('فشل في إرسال رمز التحقق');
