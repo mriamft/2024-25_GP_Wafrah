@@ -4,6 +4,7 @@ import 'transactions_page.dart';
 import 'saving_plan_page.dart';
 import 'banks_page.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   final String userName;
@@ -33,9 +34,9 @@ class _HomePageState extends State<HomePage>
 
   int currentPage = 0; // Track the current dashboard
   final PageController _pageController =
-      PageController(); // Controller for PageView
+  PageController(); // Controller for PageView
   bool _isCirclePressed = false; // Track if the circle button is pressed
-  bool _isBalanceVisible = true; // New variable to toggle visibility
+  bool _isBalanceVisible = true; // Default visibility state
   double _minIncome = double.infinity;
   double _maxIncome = double.negativeInfinity;
   double _minExpense = double.infinity;
@@ -58,6 +59,7 @@ int getMappedYear(DateTime date) {
   void initState() {
     super.initState();
     //transactionCategories = _calculateCategoryDataForPieChart();
+    _loadVisibilityState(); // Load saved visibility state on initialization
 
     // Log the transaction categories to verify the data
     print('Transaction Categories33: $transactionCategories');
@@ -81,6 +83,20 @@ int getMappedYear(DateTime date) {
     // Initialize the dashboard data
     updateDashboardData(); // Call this to populate the initial chart data
   }
+  // Load the saved visibility state from SharedPreferences
+  Future<void> _loadVisibilityState() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isBalanceVisible = prefs.getBool('isBalanceVisible') ?? true; // Default is true
+    });
+  }
+
+  // Save the visibility state to SharedPreferences
+  Future<void> _saveVisibilityState(bool isVisible) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isBalanceVisible', isVisible);
+  }
+
 
 
 
@@ -94,9 +110,9 @@ int getMappedYear(DateTime date) {
   void _toggleBalanceVisibility() {
     setState(() {
       _isBalanceVisible = !_isBalanceVisible;
-      // _isPieChartVisible =
-      //     _isBalanceVisible; // Sync pie chart visibility with balance visibility
     });
+        _saveVisibilityState(_isBalanceVisible); // Save the new state
+
   }
 
   Widget buildTimePeriodSelector() {
@@ -1252,23 +1268,22 @@ void updateDashboardData() {
           //final color = colors[index % colors.length];
           final value = entry.value;
           final percentage = (value / total) * 100;
-        final color = percentage >= 90
-          ? Colors.red[900]!
-          : percentage >= 80
-              ? Colors.red[800]!
-              : percentage >= 70
-                  ? Colors.red[700]!
-                  : percentage >= 60
-                      ? Colors.red[600]!
-                      : percentage >= 50
-                          ? Colors.red[500]!
-                          : percentage >= 40
-                              ? Colors.red[400]!
-                              : percentage >= 30
-                                  ? Colors.red[300]!
-                                  : percentage >= 20
-                                      ? Colors.red[200]!
-                                      : Colors.red[100]!;
+        final color = percentage >= 80
+    ? Colors.red[900]!
+    : percentage >= 60
+        ? Colors.red[800]!
+        : percentage >= 50
+            ? Colors.red[700]!
+            : percentage >= 40
+                ? Colors.red[600]!
+                : percentage >= 30
+                    ? Colors.red[500]!
+                    : percentage >= 20
+                        ? Colors.red[400]!
+                        : percentage >= 10
+                            ? Colors.red[300]!
+                            : Colors.red[200]!;
+
           return PieChartSectionData(
             color: color,
             value: value,
