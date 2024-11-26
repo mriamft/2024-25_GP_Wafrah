@@ -94,7 +94,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     List<String> ibans = widget.accounts
-            .where((account) =>
+            ?.where((account) =>
                 account.containsKey('IBAN') && account['IBAN'] != null)
             .map((account) => account['IBAN'].toString())
             .toList() ??
@@ -404,7 +404,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       'الاستثمار': Icons.trending_up,
       'الإيجار': Icons.home,
       'القروض': Icons.money,
-      'الراتب والإيرادات': Icons.account_balance_wallet,
+      'الراتب': Icons.account_balance_wallet,
       'التحويلات': Icons.swap_horiz,
       'أخرى': Icons.category,
     };
