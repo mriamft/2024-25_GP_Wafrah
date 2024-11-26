@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:wafrah/login_page.dart';
+import 'package:wafrah/info_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -20,7 +21,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
-
+  bool isPasswordMatch = true; // Add this under existing state variables
   bool showErrorNotification = false;
   String errorMessage = '';
   Color notificationColor = const Color(0xFFC62C2C); // Default red color
@@ -42,6 +43,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // State for phone number validation
   bool isPhoneNumberValid = true;
+
+  void validateConfirmPassword(String confirmPassword) {
+    setState(() {
+      isPasswordMatch = passwordController.text == confirmPassword;
+    });
+  }
 
   // Show notification method
   void showNotification(String message,
@@ -227,7 +234,13 @@ class _SignUpPageState extends State<SignUpPage> {
                     onTapDown: (_) => setState(() => _isArrowPressed = true),
                     onTapUp: (_) {
                       setState(() => _isArrowPressed = false);
-                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              InfoPage(), // Replace with your InfoPage widget
+                        ),
+                      );
                     },
                     onTapCancel: () => setState(() => _isArrowPressed = false),
                     child: Icon(
@@ -354,12 +367,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   top: 380,
                   hintText: 'تأكيد رمز المرور',
                   controller: confirmPasswordController,
-                  obscureText:
-                      !_isConfirmPasswordVisible, // Toggle visibility based on state
+                  obscureText: !_isConfirmPasswordVisible,
                   prefixIcon: Padding(
-                    padding: const EdgeInsets.only(
-                        left:
-                            5.0), // Adjust padding to move icon slightly right
+                    padding: const EdgeInsets.only(left: 5.0),
                     child: IconButton(
                       icon: Icon(
                         _isConfirmPasswordVisible
@@ -375,11 +385,28 @@ class _SignUpPageState extends State<SignUpPage> {
                       },
                     ),
                   ),
+                  onChanged: (value) =>
+                      validateConfirmPassword(value), // Add this to validate
                 ),
+                if (!isPasswordMatch)
+                  Positioned(
+                    left: 24,
+                    right: 24,
+                    top: 435, // Adjust position to place under the input bar
+                    child: const Text(
+                      'رمز مرور غير متطابق',
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 12,
+                        color: Colors.red,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
                 Positioned(
                   left: 24,
                   right: 10,
-                  top: 445,
+                  top: 460,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -576,9 +603,12 @@ class _SignUpPageState extends State<SignUpPage> {
           Container(
             width: 313,
             height: 2.95,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF60B092), Colors.white],
+                colors:
+                    controller == confirmPasswordController && !isPasswordMatch
+                        ? [Colors.red, Colors.red]
+                        : [Color(0xFF60B092), Colors.white],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
