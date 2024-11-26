@@ -23,7 +23,7 @@ class BanksPage extends StatefulWidget {
 }
 
 class _BanksPageState extends State<BanksPage> {
-  final StorageService _storageService = StorageService(); 
+  final StorageService _storageService = StorageService();
   List<Map<String, dynamic>> _accounts = [];
   bool _isCirclePressed = false; // Add this line
 
@@ -45,13 +45,15 @@ class _BanksPageState extends State<BanksPage> {
       });
     }
   }
-Future<void> _saveAccountsLocally(List<Map<String, dynamic>> accounts) async {
-  await _storageService.saveAccountDataLocally(widget.phoneNumber, accounts);
-}
-Future<List<Map<String, dynamic>>> _loadAccountsLocally(String phoneNumber) async {
+
+  Future<void> _saveAccountsLocally(List<Map<String, dynamic>> accounts) async {
+    await _storageService.saveAccountDataLocally(widget.phoneNumber, accounts);
+  }
+
+  Future<List<Map<String, dynamic>>> _loadAccountsLocally(
+      String phoneNumber) async {
     return await _storageService.loadAccountDataLocally(phoneNumber);
   }
-  
 
   Map<String, double> calculateTransactionCategories(
       List<Map<String, dynamic>> accounts) {
@@ -210,30 +212,29 @@ Future<List<Map<String, dynamic>>> _loadAccountsLocally(String phoneNumber) asyn
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-IconButton(
-  icon: Icon(
-    Icons.add_circle,
-    color: _accounts.isEmpty
-        ? const Color(0xFF3D3D3D) // Enabled color
-        : Colors.grey, // Disabled color
-    size: 30,
-  ),
-  onPressed: _accounts.isEmpty
-      ? () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AccLinkPage(
-                userName: widget.userName,
-                phoneNumber: widget.phoneNumber,
-                accounts: _accounts, 
-              ),
-            ),
-          );
-        }
-      : null, // Disable button
-),
-
+                IconButton(
+                  icon: Icon(
+                    _accounts.isEmpty
+                        ? Icons.add_circle // Show add icon if no accounts
+                        : Icons.edit, // Show edit icon if there are accounts
+                    color: _accounts.isEmpty
+                        ? const Color(0xFF3D3D3D) // Color for add icon
+                        : const Color(0xFF3D3D3D), // Color for edit icon
+                    size: 25,
+                  ),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AccLinkPage(
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: _accounts,
+                        ),
+                      ),
+                    );
+                  },
+                ),
                 const Text(
                   'الحسابات البنكية',
                   style: TextStyle(
@@ -244,38 +245,6 @@ IconButton(
                   ),
                 ),
               ],
-            ),
-          ),
-          // Edit Button
-          Positioned(
-            top: 240,
-            left: 3,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-  onPressed: _accounts.isNotEmpty
-      ? () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AccLinkPage(
-                userName: widget.userName,
-                phoneNumber: widget.phoneNumber,
-                accounts: _accounts, // Pass accounts here
-
-              ),
-            ),
-          );
-        }
-      : null, // Disable button
-  child: Icon(
-    Icons.edit,
-    color: _accounts.isNotEmpty
-        ? const Color(0xFF3D3D3D) // Enabled color
-        : Colors.grey, // Disabled color
-  ),
-),
-
             ),
           ),
           // Scrollable Accounts List

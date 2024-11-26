@@ -23,12 +23,13 @@ class _LoginPageState extends State<LoginPage> {
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
+  bool _isArrowPressed = false; // Track arrow press state
+
   bool showErrorNotification = false;
   String errorMessage = '';
   Color notificationColor =
       const Color(0xFFC62C2C); // Default notification color
 
-  Color _arrowColor = Colors.white; // Default color for the arrow
   Color _buttonColor = Colors.white; // Default color for the button
   Color _signupColor = Colors.white; // Default color for the signup text
 
@@ -87,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final url = Uri.parse('https://459b-94-98-211-77.ngrok-free.app/login');
+      final url = Uri.parse('https://d181-94-98-211-77.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -121,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://459b-94-98-211-77.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://d181-94-98-211-77.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -166,6 +167,34 @@ class _LoginPageState extends State<LoginPage> {
             child: Stack(
               children: [
                 // Back Arrow Icon
+                Positioned(
+                  top: 60,
+                  right: 15,
+                  child: GestureDetector(
+                    onTapDown: (_) {
+                      setState(() {
+                        _isArrowPressed = true; // Change state on press
+                      });
+                    },
+                    onTapUp: (_) {
+                      setState(() {
+                        _isArrowPressed = false; // Reset state on release
+                      });
+                      Navigator.pop(context); // Navigate back
+                    },
+                    onTapCancel: () {
+                      setState(() {
+                        _isArrowPressed =
+                            false; // Reset state if tap is canceled
+                      });
+                    },
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      color: _isArrowPressed ? Colors.grey : Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ),
                 Positioned(
                   left: (MediaQuery.of(context).size.width - 200) /
                       2, // Center horizontally
@@ -225,35 +254,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
 
-                Positioned(
-                  top: 60,
-                  right: 15,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    onTapDown: (_) {
-                      setState(() {
-                        _arrowColor = Colors.grey;
-                      });
-                    },
-                    onTapUp: (_) {
-                      setState(() {
-                        _arrowColor = Colors.white;
-                      });
-                    },
-                    onTapCancel: () {
-                      setState(() {
-                        _arrowColor = Colors.white;
-                      });
-                    },
-                    child: Icon(
-                      Icons.arrow_forward_ios,
-                      color: _arrowColor,
-                      size: 28,
-                    ),
-                  ),
-                ),
                 Positioned(
                   left: -1, // Adjusted x position
 

@@ -94,7 +94,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     List<String> ibans = widget.accounts
-            ?.where((account) =>
+            .where((account) =>
                 account.containsKey('IBAN') && account['IBAN'] != null)
             .map((account) => account['IBAN'].toString())
             .toList() ??
@@ -513,7 +513,21 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
     String translatedSubtype =
         transactionTypeTranslations[subtype] ?? 'غير معروف';
+
+    // Map the date for year modifications
     String date = dateTime.split('T').first;
+    if (date != 'غير معروف') {
+      DateTime originalDate = DateTime.tryParse(date) ?? DateTime.now();
+      int mappedYear = originalDate.year == 2016
+          ? 2024
+          : originalDate.year == 2017
+              ? 2025
+              : originalDate.year; // Keep the original year for other cases
+
+      DateTime mappedDate =
+          DateTime(mappedYear, originalDate.month, originalDate.day);
+      date = mappedDate.toIso8601String().split('T').first;
+    }
 
     showDialog(
       context: context,

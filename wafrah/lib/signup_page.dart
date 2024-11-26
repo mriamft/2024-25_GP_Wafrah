@@ -88,8 +88,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
-    final url = Uri.parse(
-        'https://c9c8-2001-16a2-cbea-e400-5427-dc1c-d49-9c28.ngrok-free.app/checkPhoneNumber');
+    final url =
+        Uri.parse('https://d181-94-98-211-77.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -120,8 +120,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse(
-        'https://c9c8-2001-16a2-cbea-e400-5427-dc1c-d49-9c28.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://d181-94-98-211-77.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -228,29 +227,6 @@ class _SignUpPageState extends State<SignUpPage> {
             child: Stack(
               children: [
                 Positioned(
-                  top: 60,
-                  right: 15,
-                  child: GestureDetector(
-                    onTapDown: (_) => setState(() => _isArrowPressed = true),
-                    onTapUp: (_) {
-                      setState(() => _isArrowPressed = false);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              InfoPage(), // Replace with your InfoPage widget
-                        ),
-                      );
-                    },
-                    onTapCancel: () => setState(() => _isArrowPressed = false),
-                    child: Icon(
-                      Icons.arrow_forward_ios,
-                      color: _isArrowPressed ? Colors.grey : Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                ),
-                Positioned(
                   left: -1, // Adjusted x position
                   top: -99, // Adjusted y position
                   child: Opacity(
@@ -259,6 +235,23 @@ class _SignUpPageState extends State<SignUpPage> {
                       'assets/images/logo.png',
                       width: 509,
                       height: 470,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 60,
+                  right: 15,
+                  child: GestureDetector(
+                    onTapDown: (_) => setState(() => _isArrowPressed = true),
+                    onTapUp: (_) {
+                      setState(() => _isArrowPressed = false);
+                      Navigator.pop(context); // Navigate to the previous page
+                    },
+                    onTapCancel: () => setState(() => _isArrowPressed = false),
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      color: _isArrowPressed ? Colors.grey : Colors.white,
+                      size: 28,
                     ),
                   ),
                 ),
@@ -389,11 +382,11 @@ class _SignUpPageState extends State<SignUpPage> {
                       validateConfirmPassword(value), // Add this to validate
                 ),
                 if (!isPasswordMatch)
-                  Positioned(
+                  const Positioned(
                     left: 24,
                     right: 24,
                     top: 435, // Adjust position to place under the input bar
-                    child: const Text(
+                    child: Text(
                       'رمز مرور غير متطابق',
                       style: TextStyle(
                         fontFamily: 'GE-SS-Two-Light',
@@ -608,7 +601,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 colors:
                     controller == confirmPasswordController && !isPasswordMatch
                         ? [Colors.red, Colors.red]
-                        : [Color(0xFF60B092), Colors.white],
+                        : [const Color(0xFF60B092), Colors.white],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),

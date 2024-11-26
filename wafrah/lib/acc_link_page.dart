@@ -7,7 +7,6 @@ import 'dart:async';
 import 'banks_page.dart'; // Import the BanksPage file
 import 'storage_service.dart';
 
-
 class AccLinkPage extends StatefulWidget {
   final String userName; // Accept userName from previous page
   final String phoneNumber; // Accept phoneNumber from previous page
@@ -19,7 +18,6 @@ class AccLinkPage extends StatefulWidget {
     required this.userName,
     required this.phoneNumber,
     required this.accounts,
-
   });
 
   @override
@@ -40,7 +38,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
   @override
   void initState() {
     super.initState();
-    _accounts = widget.accounts; 
+    _accounts = widget.accounts;
     _initUniLinks(); // Initialize uni_links listener for deep links
   }
 
@@ -184,8 +182,8 @@ class _AccLinkPageState extends State<AccLinkPage> {
       }
 
       // Save accounts locally using StorageService
-    await widget._storageService.saveAccountDataLocally(
-        widget.phoneNumber, accountsWithBalances);
+      await widget._storageService
+          .saveAccountDataLocally(widget.phoneNumber, accountsWithBalances);
 
       if (mounted) {
         setState(() {
@@ -198,9 +196,6 @@ class _AccLinkPageState extends State<AccLinkPage> {
       _showErrorDialog('Error fetching account details or balance: $e');
     }
   }
-
-
-
 
   // Redirect to BanksPage with Accounts
   void _redirectToBanksPage() {
@@ -259,16 +254,15 @@ class _AccLinkPageState extends State<AccLinkPage> {
                         _arrowColor = const Color(0xFF3D3D3D);
                       });
                       Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (context) => BanksPage(
-      userName: widget.userName,
-      phoneNumber: widget.phoneNumber,
-      accounts: _accounts, // Pass the current accounts
-    ),
-  ),
-);
-
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BanksPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: _accounts, // Pass the current accounts
+                          ),
+                        ),
+                      );
                     });
                   },
                   child: Icon(
@@ -297,7 +291,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
               // Instruction Text 1
               const Positioned(
                 top: 130,
-                left: 28,
+                left: 50,
                 child: Text(
                   'الرجاء قراءة المعلومات التالية قبل أن تكمل إجراءات الربط',
                   style: TextStyle(
@@ -312,7 +306,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
               // Instruction Text 2
               const Positioned(
                 top: 152,
-                left: 49,
+                left: 70,
                 child: SizedBox(
                   width: 300,
                   child: Text(
@@ -330,7 +324,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
               // Instruction Text 3
               const Positioned(
                 top: 260,
-                left: 60,
+                left: 78,
                 child: Text(
                   'سوف نبدأ إجراءات الربط لجميع حساباتك البنكية عن طريق',
                   style: TextStyle(
@@ -344,7 +338,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
               // Bar for bank information
               Positioned(
                 top: 280,
-                left: 21,
+                left: 40,
                 child: Container(
                   width: 330,
                   height: 50,
@@ -371,7 +365,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
 
               // First SAMA Image
               Positioned(
-                left: 315,
+                left: 332,
                 top: 290.5,
                 child: Image.asset(
                   'assets/images/SAMA_logo.png',
@@ -383,7 +377,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
               // Submit Button
               Positioned(
                 bottom: 40,
-                left: 40,
+                left: 55,
                 child: SizedBox(
                   width: 274,
                   height: 47,
