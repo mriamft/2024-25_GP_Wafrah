@@ -138,13 +138,20 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         builder: (context) => AlertDialog(
           title: const Text(
             'تأكيد إعادة تعيين كلمة المرور',
+            textAlign: TextAlign.right, // Align text to the right
             style: TextStyle(
-                fontFamily: 'GE-SS-Two-Bold', color: Color(0xFF3D3D3D)),
+              fontFamily: 'GE-SS-Two-Bold',
+              fontSize: 20,
+              color: Color(0xFF3D3D3D),
+            ),
           ),
           content: const Text(
             'هل أنت متأكد أنك تريد إعادة تعيين كلمة المرور؟',
+            textAlign: TextAlign.right, // Align text to the right
             style: TextStyle(
-                fontFamily: 'GE-SS-Two-Light', color: Color(0xFF3D3D3D)),
+              fontFamily: 'GE-SS-Two-Light',
+              color: Color(0xFF3D3D3D),
+            ),
           ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
@@ -152,7 +159,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('إلغاء',
                   style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light', color: Color(0xFF838383))),
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 18,
+                      color: Color(0xFF838383))),
             ),
             TextButton(
               onPressed: () async {
@@ -161,7 +170,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               },
               child: const Text('تأكيد',
                   style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light', color: Color(0xFF2C8C68))),
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 18,
+                      color: Color(0xFF2C8C68))),
             ),
           ],
         ),

@@ -110,74 +110,86 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context) => AlertDialog(
         title: const Text(
           'تأكيد تسجيل الخروج',
+          textAlign: TextAlign.right, // Align text to the right
           style: TextStyle(
             fontFamily: 'GE-SS-Two-Bold',
+            fontSize: 20,
             color: Color(0xFF3D3D3D),
           ),
         ),
         content: const Text(
           'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+          textAlign: TextAlign.right, // Align text to the right
           style: TextStyle(
             fontFamily: 'GE-SS-Two-Light',
             color: Color(0xFF3D3D3D),
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-            },
-            child: const Text(
-              'إلغاء',
-              style: TextStyle(
-                fontFamily: 'GE-SS-Two-Light',
-                color: Color(0xFF838383),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              // Clear user-specific data from secure storage
-              // await _storage.delete(key: 'user_accounts_${widget.phoneNumber}');
-              //  await _storage.delete(key: 'access_token_${widget.phoneNumber}');
-              //  await StorageService().clearUserData(widget.phoneNumber);
-              // await StorageService().saveAccountDataLocally(widget.phoneNumber, []);
-
-              // Clear all global storage if required
-              //  await _storage.deleteAll();
-
-              // Close the dialog
-              Navigator.of(context).pop();
-
-              // Navigate to the login page
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/',
-                (route) => false,
-              ); // Replace '/' with the actual login page route
-
-              // Show a success notification
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'لقد تم تسجيل خروجك بنجاح',
-                    style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light',
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.center, // Center align the buttons
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'إلغاء',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    color: Color(0xFF838383),
+                    fontSize: 18, // Set font size to 20
                   ),
-                  backgroundColor: Colors.grey,
-                  duration: Duration(seconds: 5),
                 ),
-              );
-            },
-            child: const Text(
-              'تسجيل الخروج',
-              style: TextStyle(
-                fontFamily: 'GE-SS-Two-Light',
-                color: Colors.red,
               ),
-            ),
+              const SizedBox(width: 20), // Add space between the buttons
+              TextButton(
+                onPressed: () async {
+                  // Clear user-specific data from secure storage
+                  // await _storage.delete(key: 'user_accounts_${widget.phoneNumber}');
+                  // await _storage.delete(key: 'access_token_${widget.phoneNumber}');
+                  // await StorageService().clearUserData(widget.phoneNumber);
+                  // await StorageService().saveAccountDataLocally(widget.phoneNumber, []);
+
+                  // Clear all global storage if required
+                  // await _storage.deleteAll();
+
+                  // Close the dialog
+                  Navigator.of(context).pop();
+
+                  // Navigate to the login page
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/',
+                    (route) => false,
+                  ); // Replace '/' with the actual login page route
+
+                  // Show a success notification
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'لقد تم تسجيل خروجك بنجاح',
+                        style: TextStyle(
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                      backgroundColor: Colors.grey,
+                      duration: Duration(seconds: 5),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'تسجيل الخروج',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    color: Colors.red,
+                    fontSize: 18, // Set font size to 20
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

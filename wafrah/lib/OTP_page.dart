@@ -124,7 +124,7 @@ class _OTPPageState extends State<OTPPage> {
     }
 
     final url =
-        Uri.parse('https://d181-94-98-211-77.ngrok-free.app/verify-otp');
+        Uri.parse('https://abcf-94-98-211-77.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -160,7 +160,7 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://d181-94-98-211-77.ngrok-free.app/adduser');
+    final url = Uri.parse('https://abcf-94-98-211-77.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -216,7 +216,7 @@ class _OTPPageState extends State<OTPPage> {
   Future<void> resendOTP() async {
     if (canResend) {
       final url =
-          Uri.parse('https://d181-94-98-211-77.ngrok-free.app/send-otp');
+          Uri.parse('https://abcf-94-98-211-77.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
