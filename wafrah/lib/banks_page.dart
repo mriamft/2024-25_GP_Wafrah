@@ -317,18 +317,17 @@ class _BanksPageState extends State<BanksPage> {
                       ),
                     );
                   }),
-                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomePage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: _accounts,
-                        ),
-                      ),
-                    );
-                  }),
+                  Transform.translate(
+                    offset: Offset(0, -5), // Adjust the offset to move it up
+                    child: buildBottomNavItem(
+                        Icons.account_balance_outlined, "الحسابات", () {
+                      // Do nothing or perform another action if needed
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text("You are already on the Banks page")),
+                      );
+                    }),
+                  ),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", () {
                     Navigator.pushReplacement(
                       context,
@@ -347,8 +346,8 @@ class _BanksPageState extends State<BanksPage> {
           ),
           // Point under "إعدادات"
           Positioned(
-            right: 192,
-            top: 765,
+            right: 144,
+            top: 784,
             child: Container(
               width: 6,
               height: 6,
@@ -408,28 +407,44 @@ class _BanksPageState extends State<BanksPage> {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: _isCirclePressed
-                            ? [const Color(0xFF1A7A5E), const Color(0xFF6FC3A0)]
-                            : [
-                                const Color(0xFF2C8C68),
-                                const Color(0xFF8FD9BD)
-                              ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HomePage(
+                                  userName: widget.userName,
+                                  phoneNumber: widget.phoneNumber,
+                                  accounts: _accounts,
+                                )),
+                      );
+                    },
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: _isCirclePressed
+                              ? [
+                                  const Color(0xFF1A7A5E),
+                                  const Color(0xFF6FC3A0)
+                                ]
+                              : [
+                                  const Color(0xFF2C8C68),
+                                  const Color(0xFF8FD9BD)
+                                ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                        shape: BoxShape.circle,
                       ),
-                      shape: BoxShape.circle,
+                      child: const Icon(
+                        Icons.home,
+                        color: Colors.white,
+                        size: 44,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.account_balance,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
+                  )
                 ],
               ),
             ),

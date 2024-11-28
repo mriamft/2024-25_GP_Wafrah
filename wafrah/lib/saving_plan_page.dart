@@ -99,12 +99,12 @@ class SavingPlanPage extends StatelessWidget {
                       ),
                     );
                   }),
-                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
-                      onTap: () {
+                  buildBottomNavItem(
+                      Icons.account_balance_outlined, "الحسابات", 2, onTap: () {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => HomePage(
+                        builder: (context) => BanksPage(
                           userName: userName,
                           phoneNumber: phoneNumber,
                           accounts: accounts,
@@ -168,15 +168,15 @@ class SavingPlanPage extends StatelessWidget {
                   ),
                   child: IconButton(
                     icon: const Icon(
-                      Icons.account_balance,
+                      Icons.home,
                       color: Colors.white,
-                      size: 40,
+                      size: 44,
                     ),
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => BanksPage(
+                            builder: (context) => HomePage(
                                 userName: userName,
                                 phoneNumber: phoneNumber,
                                 accounts: accounts)), // Pass accounts here

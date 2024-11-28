@@ -220,7 +220,7 @@ class _SettingsPageState extends State<SettingsPage> {
             top: 200,
             right: 19,
             child: Text(
-              'إعدادات الحساب',
+              'الإعدادات',
               style: TextStyle(
                 color: Color(0xFF3D3D3D),
                 fontSize: 13,
@@ -278,11 +278,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       )), // Pass userName
                     );
                   }),
-                  buildBottomNavItem(Icons.home_outlined, "الرئيسية", 2,
+                  buildBottomNavItem(
+                      Icons.account_balance_outlined, "الحسابات", 2,
                       isSelected: false, onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      _createNoTransitionRoute(HomePage(
+                      _createNoTransitionRoute(BanksPage(
                         userName: widget.userName,
                         phoneNumber: widget.phoneNumber,
                         accounts: widget.accounts,
@@ -643,15 +644,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   child: IconButton(
                     icon: const Icon(
-                      Icons.account_balance,
+                      Icons.home,
                       color: Colors.white,
-                      size: 40,
+                      size: 44,
                     ),
                     onPressed: () {
-                      // Navigate to Banks Page without transition and pass userName
+                      // Navigate to Home Page without transition and pass userName
                       Navigator.pushReplacement(
                         context,
-                        _createNoTransitionRoute(BanksPage(
+                        _createNoTransitionRoute(HomePage(
                             userName: widget.userName,
                             phoneNumber: widget.phoneNumber,
                             accounts: widget.accounts)), // Pass userName
