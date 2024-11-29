@@ -46,7 +46,7 @@ class _OTPPageState extends State<OTPPage> {
   Timer? _notificationTimer; // Timer for showNotification timeout
 
   bool canResend = false;
-  int resendTimeLeft = 120; // 2 minutes in seconds
+  int resendTimeLeft = 120; // For the resend function
 
   @override
   void initState() {
@@ -57,9 +57,8 @@ class _OTPPageState extends State<OTPPage> {
   @override
   void dispose() {
     _timer?.cancel(); // Cancel the resend timer
-    _notificationTimer?.cancel(); // Cancel the notification timer if active
+    _notificationTimer?.cancel(); 
 
-    // Dispose text controllers
     otpController1.dispose();
     otpController2.dispose();
     otpController3.dispose();
@@ -70,6 +69,7 @@ class _OTPPageState extends State<OTPPage> {
     super.dispose();
   }
 
+  //Timer for resend the OTP
   void startResendOTPCountdown() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -97,15 +97,14 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   void showNotification(String message, {Color color = Colors.red}) {
-    if (!mounted) return; // Ensure widget is still in the widget tree
-
+    if (!mounted) return; 
+    
     setState(() {
       errorMessage = message;
       notificationColor = color;
       showErrorNotification = true;
     });
 
-    // Cancel any previous notification timer
     _notificationTimer?.cancel();
     _notificationTimer = Timer(const Duration(seconds: 5), () {
       if (mounted) {
@@ -116,6 +115,7 @@ class _OTPPageState extends State<OTPPage> {
     });
   }
 
+  // To verifty the OTP that is sent to the user and in the server
   Future<void> verifyOTP() async {
     String otp = getOTP();
     if (otp.isEmpty || otp.length != 6) {
@@ -124,7 +124,7 @@ class _OTPPageState extends State<OTPPage> {
     }
 
     final url =
-        Uri.parse('https://4246-51-252-185-82.ngrok-free.app/verify-otp');
+        Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -149,6 +149,7 @@ class _OTPPageState extends State<OTPPage> {
             ),
           );
         } else if (widget.isSignUp) {
+          // Add to the database 
           addUserToDatabase();
         } else {
           // Redirect to HomePage with accounts for login
@@ -160,9 +161,10 @@ class _OTPPageState extends State<OTPPage> {
           'حدث خطأ ما\nرمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.');
     }
   }
-
+  
+  // Add the user in the database after 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://4246-51-252-185-82.ngrok-free.app/adduser');
+    final url = Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -193,10 +195,12 @@ class _OTPPageState extends State<OTPPage> {
     }
   }
 
+  // Redirect the user to the home page after verfaction
   Future<void> _redirectToHomePage() async {
     List<Map<String, dynamic>> accounts = [];
 
     try {
+      // Load the accounts from the storage 
       accounts =
           await StorageService().loadAccountDataLocally(widget.phoneNumber);
       print('Accounts loaded after OTP verification: $accounts');
@@ -216,10 +220,11 @@ class _OTPPageState extends State<OTPPage> {
     );
   }
 
+  // Resend the OTP fater 2 minutes
   Future<void> resendOTP() async {
     if (canResend) {
       final url =
-          Uri.parse('https://4246-51-252-185-82.ngrok-free.app/send-otp');
+          Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

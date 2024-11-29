@@ -1,3 +1,4 @@
+//Import nessecry libraries
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:wafrah/config.dart';
@@ -22,31 +23,37 @@ class GPTService {
     "أخرى"
   ];
 
-  /// Method to categorize a transaction
+  /// Method to categorize a transaction using GPT-4
   Future<String> categorizeTransaction(String transactionInfo) async {
     const String url = 'https://api.openai.com/v1/chat/completions';
     const String categories =
-        'التعليم، الترفيه، المدفوعات الحكومية، البقالة، الصحة، القروض، الاستثمار، الإيجار، المطاعم، تسوق، الراتب والإيرادات، التحويلات، النقل، السفر، أخرى';
+        'التعليم، الترفيه، المدفوعات الحكومية،'
+        ' البقالة، الصحة، القروض، الاستثمار، الإيجار، المطاعم، تسوق، الراتب والإيرادات، التحويلات، النقل، السفر، أخرى';
 
+    // A messages for the GPT model, including system and user roles
     final messages = [
       {
+        // System role 
         "role": "system",
         "content":
-            "You are a helpful assistant that categorizes transactions into predefined categories in Arabic. Always respond with one of the exact categories provided."
+            'You are a helpful assistant that categorizes transactions into predefined categories in Arabic. '
+            'Always respond with one of the exact categories provided.'
       },
       {
+        // User role provides - to provides the transaction information- 
         "role": "user",
         "content": '''
-صنف المعاملة التالية إلى إحدى الفئات التالية:
-الفئات: $categories.
+          صنف المعاملة التالية إلى إحدى الفئات التالية:
+          الفئات: $categories.
 
-معلومات المعاملة: $transactionInfo
+          معلومات المعاملة: $transactionInfo
 
-الفئة:
-'''
+          الفئة:
+          '''
       }
     ];
 
+    // HTTP POST request to OpenAI's API
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -55,10 +62,10 @@ class GPTService {
           'Authorization': 'Bearer ${Config.apiKey}',
         },
         body: jsonEncode({
-          'model': 'gpt-4',
+          'model': 'gpt-4o',
           'messages': messages,
           'max_tokens': 10,
-          'temperature': 0.3,
+          'temperature': 0.3, // Specify the temperature to ensures more restrict responses
         }),
       );
 
@@ -78,8 +85,9 @@ class GPTService {
     }
   }
 
-  /// Method to find the closest category using Levenshtein distance
+  /// Method to find the closest category
   String _findClosestCategory(String rawCategory) {
+    // Calculate Levenshtein distance which measures the difference between two strings.
     int levenshteinDistance(String a, String b) {
       if (a == b) return 0;
       if (a.isEmpty) return b.length;
@@ -101,9 +109,9 @@ class GPTService {
         for (int j = 1; j <= b.length; j++) {
           int cost = a[i - 1] == b[j - 1] ? 0 : 1;
           matrix[i][j] = [
-            matrix[i - 1][j] + 1, // Deletion
-            matrix[i][j - 1] + 1, // Insertion
-            matrix[i - 1][j - 1] + cost // Substitution
+            matrix[i - 1][j] + 1, 
+            matrix[i][j - 1] + 1, 
+            matrix[i - 1][j - 1] + cost 
           ].reduce((a, b) => a < b ? a : b);
         }
       }
@@ -111,11 +119,12 @@ class GPTService {
       return matrix[a.length][b.length];
     }
 
-    // Allow small differences
+    // To allow a small differences between the strings
     int threshold = 2;
 
     String? closestCategory;
 
+    // Go through the predefined categories to find the closest match
     for (String category in predefinedCategories) {
       int distance = levenshteinDistance(rawCategory, category);
       if (distance <= threshold) {
