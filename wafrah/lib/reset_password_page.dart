@@ -404,13 +404,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(left: 15.0),
-                      child: Icon(
-                        Icons.error_outline,
-                        color: Colors.white,
-                      ),
-                    ),
                     Expanded(
                       // Wrap the Text widget with Expanded
                       child: Padding(

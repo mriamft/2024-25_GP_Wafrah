@@ -394,17 +394,12 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
                     color: notificationColor,
                     borderRadius: const BorderRadius.all(Radius.circular(10)),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 15.0),
-                        child: Icon(
-                          Icons.error_outline,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Padding(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      // Wrap the Text widget with Expanded
+                      child: Padding(
                         padding: const EdgeInsets.only(right: 15.0),
                         child: Text(
                           errorMessage,
@@ -414,10 +409,13 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
                             fontSize: 14,
                           ),
                           textAlign: TextAlign.right,
+                          overflow: TextOverflow
+                              .ellipsis, // Add this line for overflow handling
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
                 ),
               ),
           ],

@@ -8,7 +8,6 @@ import 'package:wafrah/login_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
-
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -20,15 +19,13 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
-  bool isPasswordMatch = true; // Add this under existing state variables
+  bool isPasswordMatch = true; 
   bool showErrorNotification = false;
   String errorMessage = '';
-  Color notificationColor = const Color(0xFFC62C2C); // Default red color
-
+  Color notificationColor = const Color(0xFFC62C2C); 
   bool _isArrowPressed = false;
   bool _isLoginButtonPressed = false;
   bool _isLoginTextPressed = false;
-
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   Timer? _notificationTimer;
@@ -58,7 +55,6 @@ class _SignUpPageState extends State<SignUpPage> {
       showErrorNotification = true;
     });
 
-    // Cancel any previous timer to prevent multiple timers from stacking
     _notificationTimer?.cancel();
     _notificationTimer = Timer(const Duration(seconds: 10), () {
       if (mounted) {
@@ -71,9 +67,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void dispose() {
-    _notificationTimer?.cancel(); // Safely cancel the timer if active
-
-    // Dispose text controllers to avoid memory leaks
+    _notificationTimer?.cancel(); 
     firstNameController.dispose();
     lastNameController.dispose();
     phoneNumberController.dispose();
@@ -83,12 +77,10 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  // Method to validate password complexity
-
   // Check if the phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url =
-        Uri.parse('https://4246-51-252-185-82.ngrok-free.app/checkPhoneNumber');
+        Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -119,7 +111,7 @@ class _SignUpPageState extends State<SignUpPage> {
   // Method to send OTP to the user
   Future<void> sendOTP(String phoneNumber, String firstName, String lastName,
       String password) async {
-    final url = Uri.parse('https://4246-51-252-185-82.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -136,7 +128,7 @@ class _SignUpPageState extends State<SignUpPage> {
             firstName: firstName,
             lastName: lastName,
             password: password,
-            isSignUp: true, // This indicates a new user sign-up
+            isSignUp: true, 
             isForget: false,
           ),
         ),
@@ -177,28 +169,20 @@ class _SignUpPageState extends State<SignUpPage> {
       showNotification('حدث خطأ ما\nرمز المرور لا يحقق الشروط المذكورة');
       return;
     }
-
-    // If valid, send OTP before adding the user
     sendOTP(phoneNumber, firstName, lastName, password);
   }
 
-  // Updated method to validate password complexity
+  // Method to validate password complexity
   bool validatePasswordInput(String password) {
     bool isValid = false;
-
     setState(() {
       isLengthValid = password.length >= 8;
-
       isNumberValid = password.contains(RegExp(r'\d'));
-
       isLowercaseValid = password.contains(RegExp(r'[a-z]'));
-
       isUppercaseValid = password.contains(RegExp(r'[A-Z]'));
-
       isSymbolValid = password.contains(RegExp(r'[!@#\$&*~]'));
 
       // Check if all conditions are met
-
       isValid = isLengthValid &&
           isNumberValid &&
           isLowercaseValid &&
@@ -226,10 +210,10 @@ class _SignUpPageState extends State<SignUpPage> {
             child: Stack(
               children: [
                 Positioned(
-                  left: -1, // Adjusted x position
-                  top: -99, // Adjusted y position
+                  left: -1, 
+                  top: -99, 
                   child: Opacity(
-                    opacity: 0.05, // 15% opacity
+                    opacity: 0.05, 
                     child: Image.asset(
                       'assets/images/logo.png',
                       width: 509,
@@ -244,7 +228,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     onTapDown: (_) => setState(() => _isArrowPressed = true),
                     onTapUp: (_) {
                       setState(() => _isArrowPressed = false);
-                      Navigator.pop(context); // Navigate to the previous page
+                      Navigator.pop(context); 
                     },
                     onTapCancel: () => setState(() => _isArrowPressed = false),
                     child: Icon(
@@ -338,7 +322,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(
                         left:
-                            5.0), // Adjust padding to move icon slightly right
+                            5.0), 
                     child: IconButton(
                       icon: Icon(
                         _isPasswordVisible
@@ -378,13 +362,13 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   onChanged: (value) =>
-                      validateConfirmPassword(value), // Add this to validate
+                      validateConfirmPassword(value), 
                 ),
                 if (!isPasswordMatch)
                   const Positioned(
                     left: 24,
                     right: 24,
-                    top: 435, // Adjust position to place under the input bar
+                    top: 435, 
                     child: Text(
                       'رمز مرور غير متطابق',
                       style: TextStyle(
@@ -522,29 +506,27 @@ class _SignUpPageState extends State<SignUpPage> {
                 width: 353,
                 height: 57,
                 decoration: BoxDecoration(
-                  color: notificationColor, // Use dynamic color
+                  color: notificationColor, 
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(left: 15.0),
-                      child: Icon(
-                        Icons.error_outline,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 15.0),
-                      child: Text(
-                        errorMessage,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 14,
+                    Expanded(
+                      // Wrap the Text widget with Expanded
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.right,
+                          overflow: TextOverflow
+                              .ellipsis, // Add this line for overflow handling
                         ),
-                        textAlign: TextAlign.right,
                       ),
                     ),
                   ],
@@ -563,7 +545,7 @@ class _SignUpPageState extends State<SignUpPage> {
     TextInputType keyboardType = TextInputType.text,
     bool obscureText = false,
     Function(String)? onChanged,
-    Widget? prefixIcon, // Update this to prefixIcon
+    Widget? prefixIcon, 
   }) {
     return Positioned(
       left: 24,
@@ -577,7 +559,7 @@ class _SignUpPageState extends State<SignUpPage> {
             keyboardType: keyboardType,
             obscureText: obscureText,
             textAlign: TextAlign.right,
-            onChanged: onChanged, // Validate on change
+            onChanged: onChanged,
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: const TextStyle(
@@ -586,7 +568,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 color: Colors.white,
               ),
               border: InputBorder.none,
-              prefixIcon: prefixIcon, // Update this to prefixIcon
+              prefixIcon: prefixIcon, 
             ),
             style: const TextStyle(color: Colors.white),
             cursorColor: Colors.white,
@@ -618,10 +600,10 @@ class _SignUpPageState extends State<SignUpPage> {
       style: TextStyle(
         fontFamily: 'GE-SS-Two-Light',
         fontSize: 9,
-        fontWeight: FontWeight.bold, // Make text bold
+        fontWeight: FontWeight.bold, 
         color: isValid
             ? Colors.white
-            : const Color(0xFFC62C2C), // Change color based on validity
+            : const Color(0xFFC62C2C), 
         height: 1.21,
       ),
     );

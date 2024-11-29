@@ -72,7 +72,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         if (mappedDate.isAfter(today)) {
           continue;
         }
-
+        
         date = mappedDate.toIso8601String().split('T').first;
       }
 
@@ -540,8 +540,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
               : originalDate.year; // Keep the original year for other cases
 
       DateTime mappedDate =
-          DateTime(mappedYear, originalDate.month, originalDate.day);
-      date = mappedDate.toIso8601String().split('T').first;
+            DateTime(mappedYear, originalDate.month, originalDate.day);
+        date = mappedDate.toIso8601String().split('T').first;
+        // Convert to a custom format manually (yyyy-MM-dd)
+String year = mappedDate.year.toString();
+String month = mappedDate.month.toString().padLeft(2, '0'); // Ensure two digits
+String day = mappedDate.day.toString().padLeft(2, '0'); // Ensure two digits
+
+// Combine into the desired format
+date = '$day-$month-$year';
+        
     }
 
     showDialog(

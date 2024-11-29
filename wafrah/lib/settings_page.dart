@@ -14,7 +14,6 @@ class SettingsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final List<Map<String, dynamic>> accounts;
-
   const SettingsPage({
     super.key,
     required this.userName,
@@ -33,20 +32,21 @@ class _SettingsPageState extends State<SettingsPage> {
   Color _notificationColor = const Color(0xFFD9D9D9);
   Color _supportColor = const Color(0xFFD9D9D9);
 
-  // Custom page transition for no transition effect
+  // Custom page transition 
   Route _createNoTransitionRoute(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionDuration: const Duration(seconds: 0), // No transition
+      transitionDuration: const Duration(seconds: 0), 
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return child; // No animation
       },
     );
   }
 
+//Profile Setting
   void _onProfileTap() {
     setState(() {
-      _profileColor = Colors.grey[400]!; // Darker color on press
+      _profileColor = Colors.grey[400]!;
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(ProfilePage(
@@ -54,30 +54,31 @@ class _SettingsPageState extends State<SettingsPage> {
         .then((_) {
       setState(() {
         _profileColor =
-            const Color(0xFFD9D9D9); // Reset color after navigating back
+            const Color(0xFFD9D9D9); 
       });
     });
   }
 
+//Method to handle password reset 
   void _onResetPasswordTap() {
     setState(() {
-      _resetPasswordColor = Colors.grey[400]!; // Darker color on press
+      _resetPasswordColor = Colors.grey[400]!; 
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(ResetPasswordPage(
             userName: widget.userName,
-            phoneNumber: widget.phoneNumber))) // Pass user phone number
+            phoneNumber: widget.phoneNumber))) 
         .then((_) {
       setState(() {
         _resetPasswordColor =
-            const Color(0xFFD9D9D9); // Reset color after navigating back
+            const Color(0xFFD9D9D9); 
       });
     });
   }
 
   void _onNotificationTap() {
     setState(() {
-      _notificationColor = Colors.grey[400]!; // Darker color on press
+      _notificationColor = Colors.grey[400]!;
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(NotificationPage(
@@ -85,14 +86,14 @@ class _SettingsPageState extends State<SettingsPage> {
         .then((_) {
       setState(() {
         _notificationColor =
-            const Color(0xFFD9D9D9); // Reset color after navigating back
+            const Color(0xFFD9D9D9); 
       });
     });
   }
 
   void _onSupportTap() {
     setState(() {
-      _supportColor = Colors.grey[400]!; // Darker color on press
+      _supportColor = Colors.grey[400]!; 
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(SupportPage(
@@ -100,7 +101,7 @@ class _SettingsPageState extends State<SettingsPage> {
         .then((_) {
       setState(() {
         _supportColor =
-            const Color(0xFFD9D9D9); // Reset color after navigating back
+            const Color(0xFFD9D9D9); 
       });
     });
   }
@@ -146,22 +147,22 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(width: 20),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/'); // Navigate to main.dart
+                  Navigator.of(context).pushNamed('/'); 
                   Flushbar(
                     message: 'لقد تم تسجيل خروجك بنجاح',
                     messageText: const Text(
                       'لقد تم تسجيل خروجك بنجاح',
-                      textAlign: TextAlign.right, // Align text to the right
+                      textAlign: TextAlign.right, 
                       style: TextStyle(
                         fontFamily: 'GE-SS-Two-Light',
                         fontSize: 14,
                         color: Colors.white,
                       ),
                     ),
-                    backgroundColor: const Color(0xFF0FBE7C), // Success color
-                    duration: const Duration(seconds: 5), // Show for 5 seconds
+                    backgroundColor: const Color(0xFF0FBE7C), 
+                    duration: const Duration(seconds: 5), 
                     flushbarPosition:
-                        FlushbarPosition.TOP, // Position at the top
+                        FlushbarPosition.TOP, 
                     margin: const EdgeInsets.all(8.0),
                     borderRadius: BorderRadius.circular(8.0),
                   ).show(context);
@@ -170,7 +171,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   'تسجيل الخروج',
                   style: TextStyle(
                     fontFamily:
-                        'GE-SS-Two-Light', // Light font for the body text
+                        'GE-SS-Two-Light', 
                     fontSize: 18,
                     color: Colors.red,
                   ),
@@ -218,7 +219,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           // Bottom Navigation Bar
           Positioned(
-            bottom: 0, // Keep the navigation bar at the bottom
+            bottom: 0, 
             left: 0,
             right: 0,
             child: Container(
@@ -238,7 +239,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(
-                        bottom: 11, right: 0), // Position adjustments
+                        bottom: 11, right: 0),
                     child: buildBottomNavItem(
                       Icons.settings_outlined,
                       "إعدادات",
@@ -249,7 +250,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           _createNoTransitionRoute(SettingsPage(
                             userName: widget.userName,
                             phoneNumber: widget.phoneNumber,
-                          )), // Pass userName
+                          )), 
                         );
                       },
                     ),
@@ -262,7 +263,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         userName: widget.userName,
                         phoneNumber: widget.phoneNumber,
                         accounts: widget.accounts,
-                      )), // Pass userName
+                      )),
                     );
                   }),
                   buildBottomNavItem(
@@ -274,7 +275,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         userName: widget.userName,
                         phoneNumber: widget.phoneNumber,
                         accounts: widget.accounts,
-                      )), // Pass userName
+                      )),
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
@@ -285,7 +286,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         userName: widget.userName,
                         phoneNumber: widget.phoneNumber,
                         accounts: widget.accounts,
-                      )), // Pass userName
+                      )),
                     );
                   }),
                 ],
@@ -293,7 +294,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          // Point under "إعدادات"
           Positioned(
             right: 350,
             top: 785,
@@ -307,7 +307,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          // Setting Item 1: Profile
+          //Profile UI
           Positioned(
             top: 235,
             left: 19,
@@ -322,18 +322,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), // Move arrow to the right
+                    const SizedBox(width: 10), 
                     const Icon(Icons.arrow_back_ios_new,
-                        color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
+                        color: Color(0xFF3D3D3D), size: 15),
                     const SizedBox(width: 10),
                     Expanded(
-                      // Use Expanded to fill remaining space
                       child: Align(
-                        // Align text
                         alignment: Alignment.centerRight * 0.9,
                         child: const Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.end, // Right align texts
+                              CrossAxisAlignment.end, 
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -343,7 +341,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                                 fontFamily:
-                                    'GE-SS-Two-Bold', // Use the same font as the project
+                                    'GE-SS-Two-Bold', 
                               ),
                             ),
                             Text(
@@ -352,7 +350,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 color: Color(0xFF686868),
                                 fontSize: 9,
                                 fontFamily:
-                                    'GE-SS-Two-Light', // Use the same font as the project
+                                    'GE-SS-Two-Light', 
                               ),
                             ),
                           ],
@@ -365,7 +363,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          // Setting Item 2: Reset Password
+          // Reset Password UI
           Positioned(
             top: 300,
             left: 19,
@@ -380,9 +378,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), // Move arrow to the right
+                    const SizedBox(width: 10),
                     const Icon(Icons.arrow_back_ios_new,
-                        color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
+                        color: Color(0xFF3D3D3D), size: 15),
                     const SizedBox(width: 10),
                     Expanded(
                       // Use Expanded to fill remaining space
@@ -391,7 +389,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         alignment: Alignment.centerRight * 0.9,
                         child: const Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.end, // Right align texts
+                              CrossAxisAlignment.end, 
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -401,7 +399,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                                 fontFamily:
-                                    'GE-SS-Two-Bold', // Use the same font as the project
+                                    'GE-SS-Two-Bold', 
                               ),
                             ),
                             Text(
@@ -410,7 +408,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 color: Color(0xFF686868),
                                 fontSize: 9,
                                 fontFamily:
-                                    'GE-SS-Two-Light', // Use the same font as the project
+                                    'GE-SS-Two-Light', 
                               ),
                             ),
                           ],
@@ -423,7 +421,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          // Setting Item 3: Manage Notifications
+          //Manage Notifications UI
           Positioned(
             top: 365,
             left: 19,
@@ -438,18 +436,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), // Move arrow to the right
+                    const SizedBox(width: 10), 
                     const Icon(Icons.arrow_back_ios_new,
-                        color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
+                        color: Color(0xFF3D3D3D), size: 15), 
                     const SizedBox(width: 10),
                     Expanded(
-                      // Use Expanded to fill remaining space
                       child: Align(
-                        // Align text
                         alignment: Alignment.centerRight * 0.9,
                         child: const Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.end, // Right align texts
+                              CrossAxisAlignment.end,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -459,7 +455,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                                 fontFamily:
-                                    'GE-SS-Two-Bold', // Use the same font as the project
+                                    'GE-SS-Two-Bold', 
                               ),
                             ),
                             Text(
@@ -468,7 +464,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 color: Color(0xFF686868),
                                 fontSize: 9,
                                 fontFamily:
-                                    'GE-SS-Two-Light', // Use the same font as the project
+                                    'GE-SS-Two-Light', 
                               ),
                             ),
                           ],
@@ -481,7 +477,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          // Setting Item 4: Contact Support
+          //Contact Support UI
           Positioned(
             top: 430,
             left: 19,
@@ -496,18 +492,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), // Move arrow to the right
+                    const SizedBox(width: 10), 
                     const Icon(Icons.arrow_back_ios_new,
-                        color: Color(0xFF3D3D3D), size: 15), // Smaller arrow
+                        color: Color(0xFF3D3D3D), size: 15), 
                     const SizedBox(width: 10),
                     Expanded(
-                      // Use Expanded to fill remaining space
                       child: Align(
-                        // Align text
                         alignment: Alignment.centerRight * 0.9,
                         child: const Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.end, // Right align texts
+                              CrossAxisAlignment.end, 
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -517,7 +511,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                                 fontFamily:
-                                    'GE-SS-Two-Bold', // Use the same font as the project
+                                    'GE-SS-Two-Bold', 
                               ),
                             ),
                             Text(
@@ -526,7 +520,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 color: Color(0xFF686868),
                                 fontSize: 9,
                                 fontFamily:
-                                    'GE-SS-Two-Light', // Use the same font as the project
+                                    'GE-SS-Two-Light', 
                               ),
                             ),
                           ],
@@ -541,28 +535,28 @@ class _SettingsPageState extends State<SettingsPage> {
 
           // Logout button
           Positioned(
-            bottom: 205, // Adjust position as needed
+            bottom: 205, 
             left: (MediaQuery.of(context).size.width - 194) / 2,
             child: SizedBox(
               width: 194,
               height: 39,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3D3D3D), // Background color
-                  foregroundColor: Colors.white, // Text color
+                  backgroundColor: const Color(0xFF3D3D3D), 
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100), // Rounded corners
+                    borderRadius: BorderRadius.circular(100),
                   ),
-                  shadowColor: Colors.black, // Shadow color
-                  elevation: 5, // Shadow elevation
+                  shadowColor: Colors.black, 
+                  elevation: 5,
                 ),
-                onPressed: _onLogout, // Call logout method
+                onPressed: _onLogout, 
                 child: const Text(
                   'تسجيل الخروج',
                   style: TextStyle(
                     fontSize: 15,
                     fontFamily:
-                        'GE-SS-Two-Light', // Use the same font as the project
+                        'GE-SS-Two-Light', 
                   ),
                 ),
               ),
@@ -571,7 +565,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           // Delete Account button
           Positioned(
-            bottom: 150, // Adjust position as needed
+            bottom: 150, 
             left: (MediaQuery.of(context).size.width - 194) / 2,
             child: SizedBox(
               width: 194,
@@ -580,11 +574,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFF9F9F9),
                   border: Border.all(color: const Color(0xFFDD2C35), width: 1),
-                  borderRadius: BorderRadius.circular(100), // Rounded corners
+                  borderRadius: BorderRadius.circular(100), 
                 ),
                 child: TextButton(
                   onPressed: () {
-                    // Add your deletion logic here
+                    // for upcoming sprints
                   },
                   child: const Text(
                     'حذف الحساب',
@@ -592,7 +586,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Color(0xFFDD2C35),
                       fontSize: 15,
                       fontFamily:
-                          'GE-SS-Two-Light', // Use the same font as the project
+                          'GE-SS-Two-Light',
                     ),
                   ),
                 ),
@@ -600,15 +594,13 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          // Circular Button above the Navigation Bar (F9F9F9 circle + gradient green circle)
           Positioned(
-            bottom: 44, // Adjusted position
+            bottom: 44, 
             left: 0,
             right: 0,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // #F9F9F9 circle without shadow
                 Container(
                   width: 92,
                   height: 90,
@@ -617,7 +609,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     shape: BoxShape.circle,
                   ),
                 ),
-                // Gradient green circle
                 Container(
                   width: 80,
                   height: 80,
@@ -636,7 +627,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       size: 44,
                     ),
                     onPressed: () {
-                      // Navigate to Home Page without transition and pass userName
                       Navigator.pushReplacement(
                         context,
                         _createNoTransitionRoute(HomePage(
@@ -655,7 +645,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // Bottom Navigation Item
+  // Bottom Navigation 
   Widget buildBottomNavItem(IconData icon, String label, int index,
       {bool isSelected = false, required VoidCallback onTap}) {
     return GestureDetector(

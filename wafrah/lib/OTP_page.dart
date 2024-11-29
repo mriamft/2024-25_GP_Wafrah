@@ -124,7 +124,7 @@ class _OTPPageState extends State<OTPPage> {
     }
 
     final url =
-        Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/verify-otp');
+        Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -164,7 +164,7 @@ class _OTPPageState extends State<OTPPage> {
   
   // Add the user in the database after 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/adduser');
+    final url = Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -224,7 +224,7 @@ class _OTPPageState extends State<OTPPage> {
   Future<void> resendOTP() async {
     if (canResend) {
       final url =
-          Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/send-otp');
+          Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -367,27 +367,22 @@ class _OTPPageState extends State<OTPPage> {
               ),
             ),
             if (showErrorNotification)
-              Positioned(
-                top: 23,
-                left: 19,
-                child: Container(
-                  width: 353,
-                  height: 57,
-                  decoration: BoxDecoration(
-                    color: notificationColor,
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 15.0),
-                        child: Icon(
-                          Icons.error_outline,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Padding(
+  Positioned(
+    top: 23,
+    left: 19,
+    child: Container(
+      width: 353,
+      height: 57,
+      decoration: BoxDecoration(
+        color: notificationColor,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      // Wrap the Text widget with Expanded
+                      child: Padding(
                         padding: const EdgeInsets.only(right: 15.0),
                         child: Text(
                           errorMessage,
@@ -397,12 +392,16 @@ class _OTPPageState extends State<OTPPage> {
                             fontSize: 14,
                           ),
                           textAlign: TextAlign.right,
+                          overflow: TextOverflow
+                              .ellipsis, // Add this line for overflow handling
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
+    ),
+  ),
+
           ],
         ),
       ),

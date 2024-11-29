@@ -12,25 +12,24 @@ class SupportPage extends StatefulWidget {
 }
 
 class _SupportPageState extends State<SupportPage> {
-  Color _arrowColor = const Color(0xFF3D3D3D); // Default arrow color
-
+  Color _arrowColor = const Color(0xFF3D3D3D); 
   void _onArrowTap() {
     setState(() {
-      _arrowColor = Colors.grey; // Change color on press
+      _arrowColor = Colors.grey; 
     });
     Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
         _arrowColor =
-            const Color(0xFF3D3D3D); // Reset color after a short delay
+            const Color(0xFF3D3D3D); 
       });
-      Navigator.pop(context); // Navigate back to settings page
+      Navigator.pop(context);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9), // Set background color
+      backgroundColor: const Color(0xFFF9F9F9), 
       body: Stack(
         children: [
           // Back Arrow
@@ -38,10 +37,10 @@ class _SupportPageState extends State<SupportPage> {
             top: 60,
             right: 15,
             child: GestureDetector(
-              onTap: _onArrowTap, // Change this to the new method
+              onTap: _onArrowTap,
               child: Icon(
                 Icons.arrow_forward_ios,
-                color: _arrowColor, // Use the dynamic color
+                color: _arrowColor, 
                 size: 28,
               ),
             ),
@@ -52,7 +51,7 @@ class _SupportPageState extends State<SupportPage> {
             top: 58,
             left: 142,
             child: Text(
-              'التواصل مع الدعم', // Updated to "Support"
+              'التواصل مع الدعم', 
               style: TextStyle(
                 color: Color(0xFF3D3D3D),
                 fontSize: 20,
@@ -65,13 +64,13 @@ class _SupportPageState extends State<SupportPage> {
           // Centered Text
           const Center(
             child: Text(
-              'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', // Displayed text in the center
+              'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', 
               style: TextStyle(
                 fontFamily: 'GE-SS-Two-Bold',
                 fontSize: 20,
                 color: Color(0xFF838383),
               ),
-              textAlign: TextAlign.center, // Center the text
+              textAlign: TextAlign.center, 
             ),
           ),
         ],

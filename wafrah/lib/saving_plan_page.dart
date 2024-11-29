@@ -7,13 +7,13 @@ import 'banks_page.dart';
 class SavingPlanPage extends StatelessWidget {
   final String userName;
   final String phoneNumber;
-  final List<Map<String, dynamic>> accounts; // Add accounts parameter
+  final List<Map<String, dynamic>> accounts; 
 
   const SavingPlanPage({
     super.key,
     required this.userName,
     required this.phoneNumber,
-    this.accounts = const [], // Default to an empty list if not passed
+    this.accounts = const [], 
   });
 
   @override
@@ -22,7 +22,6 @@ class SavingPlanPage extends StatelessWidget {
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
-          // Green square image
           Positioned(
             top: -100,
             left: 0,
@@ -34,8 +33,6 @@ class SavingPlanPage extends StatelessWidget {
               fit: BoxFit.contain,
             ),
           ),
-
-          // Main content area
           const Positioned(
             top: 380,
             left: 19,
@@ -52,10 +49,8 @@ class SavingPlanPage extends StatelessWidget {
               ),
             ),
           ),
-
-          // Bottom Navigation Bar
           Positioned(
-            bottom: 0, // Keep the navigation bar at the bottom
+            bottom: 0, 
             left: 0,
             right: 0,
             child: Container(
@@ -114,18 +109,15 @@ class SavingPlanPage extends StatelessWidget {
                   }),
                   Padding(
                     padding: const EdgeInsets.only(
-                        bottom: 10, right: 0), // Position adjustments
+                        bottom: 10, right: 0), 
                     child: buildBottomNavItem(
                         Icons.calendar_today, "خطة الإدخار", 3, onTap: () {
-                      // Already on Saving Plan page
                     }),
                   ),
                 ],
               ),
             ),
           ),
-
-          // Point under "إعدادات"
           Positioned(
             left: 339,
             top: 785,
@@ -133,13 +125,11 @@ class SavingPlanPage extends StatelessWidget {
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFF2C8C68), // Point color
+                color: Color(0xFF2C8C68), 
                 shape: BoxShape.circle,
               ),
             ),
           ),
-
-          // Circular Button for Banks Page
           Positioned(
             bottom: 44,
             left: 0,
@@ -179,7 +169,7 @@ class SavingPlanPage extends StatelessWidget {
                             builder: (context) => HomePage(
                                 userName: userName,
                                 phoneNumber: phoneNumber,
-                                accounts: accounts)), // Pass accounts here
+                                accounts: accounts)), 
                       );
                     },
                   ),
@@ -192,6 +182,7 @@ class SavingPlanPage extends StatelessWidget {
     );
   }
 
+// Method to build the bottom navigation bar
   Widget buildBottomNavItem(IconData icon, String label, int index,
       {required VoidCallback onTap}) {
     return GestureDetector(

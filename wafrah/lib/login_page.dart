@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:wafrah/OTP_page.dart';
 import 'package:wafrah/forget_pass_page.dart';
+import 'package:wafrah/home_page.dart';
 import 'package:wafrah/signup_page.dart' as signup;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,22 +20,15 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-
-  bool _isArrowPressed = false; // Track arrow press state
-
+  bool _isArrowPressed = false; 
   bool showErrorNotification = false;
   String errorMessage = '';
-  Color notificationColor =
-      const Color(0xFFC62C2C); // Default notification color
-
-  Color _buttonColor = Colors.white; // Default color for the button
-  Color _signupColor = Colors.white; // Default color for the signup text
-
+  Color notificationColor = const Color(0xFFC62C2C); 
+  Color _buttonColor = Colors.white; 
+  Color _signupColor = Colors.white;
   bool _isPasswordVisible = false;
-  Timer? _notificationTimer; // Timer instance
-
+  Timer? _notificationTimer; 
   // State for phone number validation
   bool isPhoneNumberValid = true;
 
@@ -63,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _notificationTimer?.cancel(); // Cancel the Timer if active
+    _notificationTimer?.cancel(); 
     phoneNumberController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -87,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final url = Uri.parse('https://4246-51-252-185-82.ngrok-free.app/login');
+      final url = Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -121,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://4246-51-252-185-82.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -129,6 +123,7 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     if (response.statusCode == 200) {
+
       // Navigate to OTP page after OTP is sent
       Navigator.push(
         context,
@@ -172,19 +167,19 @@ class _LoginPageState extends State<LoginPage> {
                   child: GestureDetector(
                     onTapDown: (_) {
                       setState(() {
-                        _isArrowPressed = true; // Change state on press
+                        _isArrowPressed = true; 
                       });
                     },
                     onTapUp: (_) {
                       setState(() {
-                        _isArrowPressed = false; // Reset state on release
+                        _isArrowPressed = false; 
                       });
-                      Navigator.pop(context); // Navigate back
+                      Navigator.pop(context); 
                     },
                     onTapCancel: () {
                       setState(() {
                         _isArrowPressed =
-                            false; // Reset state if tap is canceled
+                            false; 
                       });
                     },
                     child: Icon(
@@ -194,15 +189,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-
                 Positioned(
-                  left: -1, // Adjusted x position
-
-                  top: -99, // Adjusted y position
-
+                  left: -1, 
+                  top: -99, 
                   child: Opacity(
-                    opacity: 0.05, // 15% opacity
-
+                    opacity: 0.05, 
                     child: Image.asset(
                       'assets/images/logo.png',
                       width: 509,
@@ -210,8 +201,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-
-                // Phone Number Input Field with Gradient Bar
                 Positioned(
                   left: 24,
                   right: 24,
@@ -268,7 +257,6 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 ),
-// Password Input Field with Toggle Visibility (Icon Adjusted Slightly)
                 Positioned(
                   left: 24,
                   right: 24,
@@ -279,7 +267,7 @@ class _LoginPageState extends State<LoginPage> {
                       TextField(
                         controller: passwordController,
                         obscureText:
-                            !_isPasswordVisible, // Toggle visibility based on state
+                            !_isPasswordVisible, 
                         textAlign: TextAlign.right,
                         decoration: InputDecoration(
                           hintText: 'رمز المرور',
@@ -291,7 +279,7 @@ class _LoginPageState extends State<LoginPage> {
                           border: InputBorder.none,
                           prefixIcon: Transform.translate(
                             offset: const Offset(
-                                8, -5), // Move right (8) and up (-5)
+                                8, -5), 
                             child: IconButton(
                               icon: Icon(
                                 _isPasswordVisible
@@ -307,7 +295,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           contentPadding: const EdgeInsets.only(
-                              left: 10), // Adjust content padding if needed
+                              left: 10), 
                         ),
                         style: const TextStyle(color: Colors.white),
                         cursorColor: Colors.white,
@@ -471,29 +459,27 @@ class _LoginPageState extends State<LoginPage> {
                 width: 353,
                 height: 57,
                 decoration: BoxDecoration(
-                  color: notificationColor, // Use dynamic color
+                  color: notificationColor, 
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(left: 15.0),
-                      child: Icon(
-                        Icons.error_outline,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 15.0),
-                      child: Text(
-                        errorMessage,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 14,
+                    Expanded(
+                      // Wrap the Text widget with Expanded
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.right,
+                          overflow: TextOverflow
+                              .ellipsis, // Add this line for overflow handling
                         ),
-                        textAlign: TextAlign.right,
                       ),
                     ),
                   ],
