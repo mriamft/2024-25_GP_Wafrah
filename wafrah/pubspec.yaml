@@ -130,6 +130,9 @@ dependencies:
   intl: ^0.17.0
   flutter_secure_storage: ^9.2.2
   shared_preferences: ^2.0.13
+  another_flushbar: ^1.10.24
+  audioplayers: ^6.1.0 # Or the latest compatible version
+
 
 
 dev_dependencies:
@@ -150,21 +153,9 @@ flutter:
     - assets/images/first_info.png
     - assets/images/second_info.png
     - assets/images/third_info.png
-    - assets/images/السفر.png
-    - assets/images/الحكومة.png
-    - assets/images/الترفيه.png
-    - assets/images/تحويلات.png
-    - assets/images/بقالة.png
-    - assets/images/ايجار.png
-    - assets/images/مطاعم.png
-    - assets/images/صحة.png
-    - assets/images/راتب.png
-    - assets/images/اخرى.png
-    - assets/images/استثمار.png
-    - assets/images/القروض.png
-    - assets/images/النقل.png
-    - assets/images/تسوق.png
-    - assets/images/تعليم.png
+    - assets/images/coins.png
+    - assets/images/greenLogo.png
+    - assets/audio/coin-flip-88793.mp3
     - assets/certs/transport-cert-Wafrah-SoftwareStatement.pem
     - assets/certs/transport-key-Wafrah-SoftwareStatement.key
     - assets/certs/signin-key-Wafrah-SoftwareStatement.key

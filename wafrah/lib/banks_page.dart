@@ -318,12 +318,13 @@ class _BanksPageState extends State<BanksPage> {
                     );
                   }),
                   Transform.translate(
-                    offset: Offset(0, -5), // Adjust the offset to move it up
+                    offset:
+                        const Offset(0, -5), // Adjust the offset to move it up
                     child: buildBottomNavItem(
                         Icons.account_balance_outlined, "الحسابات", () {
                       // Do nothing or perform another action if needed
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                             content: Text("You are already on the Banks page")),
                       );
                     }),

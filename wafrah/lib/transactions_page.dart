@@ -377,6 +377,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             'غير معروف';
     String category = transaction['Category'] ?? 'غير مصنف';
 
+    // Determine the color of the amount
     Color amountColor;
     if (subtype == 'MoneyTransfer' ||
         subtype == 'Withdrawal' ||
@@ -388,14 +389,28 @@ class _TransactionsPageState extends State<TransactionsPage> {
         subtype == 'Refund') {
       amountColor = Colors.green;
     } else {
-      amountColor = const Color(0xFF3D3D3D);
+      // Decide based on the category
+      const redCategories = [
+        'المطاعم',
+        'الصحة',
+        'التسوق',
+        'البقالة',
+        'النقل',
+        'السفر',
+        'المدفوعات الحكومية',
+        'الإيجار',
+        'القروض',
+        'أخرى',
+      ];
+      amountColor =
+          redCategories.contains(category) ? Colors.red : Colors.green;
     }
 
     Map<String, IconData> categoryIcons = {
       'المطاعم': Icons.restaurant,
       'التعليم': Icons.school,
       'الصحة': Icons.local_hospital,
-      'التسوق': Icons.shopping_bag,
+      'تسوق': Icons.shopping_bag,
       'البقالة': Icons.local_grocery_store,
       'النقل': Icons.directions_bus,
       'السفر': Icons.flight,
@@ -406,7 +421,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       'القروض': Icons.money,
       'الراتب': Icons.account_balance_wallet,
       'التحويلات': Icons.swap_horiz,
-      'أخرى': Icons.category,
+      'أخرى': Icons.question_mark,
     };
 
     IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;

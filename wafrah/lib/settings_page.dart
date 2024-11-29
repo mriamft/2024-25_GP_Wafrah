@@ -8,6 +8,7 @@ import 'notification_page.dart';
 import 'support_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'banks_page.dart';
+import 'package:another_flushbar/flushbar.dart';
 
 class SettingsPage extends StatefulWidget {
   final String userName;
@@ -110,7 +111,7 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context) => AlertDialog(
         title: const Text(
           'تأكيد تسجيل الخروج',
-          textAlign: TextAlign.right, // Align text to the right
+          textAlign: TextAlign.right,
           style: TextStyle(
             fontFamily: 'GE-SS-Two-Bold',
             fontSize: 20,
@@ -119,7 +120,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         content: const Text(
           'هل أنت متأكد أنك تريد تسجيل الخروج؟',
-          textAlign: TextAlign.right, // Align text to the right
+          textAlign: TextAlign.right,
           style: TextStyle(
             fontFamily: 'GE-SS-Two-Light',
             color: Color(0xFF3D3D3D),
@@ -127,8 +128,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         actions: [
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment.center, // Center align the buttons
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextButton(
                 onPressed: () {
@@ -139,53 +139,40 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: TextStyle(
                     fontFamily: 'GE-SS-Two-Light',
                     color: Color(0xFF838383),
-                    fontSize: 18, // Set font size to 20
+                    fontSize: 18,
                   ),
                 ),
               ),
-              const SizedBox(width: 20), // Add space between the buttons
+              const SizedBox(width: 20),
               TextButton(
-                onPressed: () async {
-                  // Clear user-specific data from secure storage
-                  // await _storage.delete(key: 'user_accounts_${widget.phoneNumber}');
-                  // await _storage.delete(key: 'access_token_${widget.phoneNumber}');
-                  // await StorageService().clearUserData(widget.phoneNumber);
-                  // await StorageService().saveAccountDataLocally(widget.phoneNumber, []);
-
-                  // Clear all global storage if required
-                  // await _storage.deleteAll();
-
-                  // Close the dialog
-                  Navigator.of(context).pop();
-
-                  // Navigate to the login page
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/',
-                    (route) => false,
-                  ); // Replace '/' with the actual login page route
-
-                  // Show a success notification
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'لقد تم تسجيل خروجك بنجاح',
-                        style: TextStyle(
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/'); // Navigate to main.dart
+                  Flushbar(
+                    message: 'لقد تم تسجيل خروجك بنجاح',
+                    messageText: const Text(
+                      'لقد تم تسجيل خروجك بنجاح',
+                      textAlign: TextAlign.right, // Align text to the right
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 14,
+                        color: Colors.white,
                       ),
-                      backgroundColor: Colors.grey,
-                      duration: Duration(seconds: 5),
                     ),
-                  );
+                    backgroundColor: const Color(0xFF0FBE7C), // Success color
+                    duration: const Duration(seconds: 5), // Show for 5 seconds
+                    flushbarPosition:
+                        FlushbarPosition.TOP, // Position at the top
+                    margin: const EdgeInsets.all(8.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ).show(context);
                 },
                 child: const Text(
                   'تسجيل الخروج',
                   style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
+                    fontFamily:
+                        'GE-SS-Two-Light', // Light font for the body text
+                    fontSize: 18,
                     color: Colors.red,
-                    fontSize: 18, // Set font size to 20
                   ),
                 ),
               ),

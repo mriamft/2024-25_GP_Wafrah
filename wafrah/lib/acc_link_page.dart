@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart'; // Ensure the ApiService is imported
-import 'package:url_launcher/url_launcher.dart'; // Import for URL launching
-import 'gpt_service.dart'; // Import GPT service
-import 'package:uni_links/uni_links.dart';
-import 'dart:async';
-import 'banks_page.dart'; // Import the BanksPage file
-import 'storage_service.dart';
+import 'api_service.dart'; // Import api service file
+import 'package:url_launcher/url_launcher.dart'; // Import URL launcher package
+import 'gpt_service.dart'; // Import gpt service file
+import 'package:uni_links/uni_links.dart'; // Import uni links package
+import 'dart:async'; // Import async
+import 'banks_page.dart'; // Import banks page file
+import 'storage_service.dart'; // Import storage service file
 
 class AccLinkPage extends StatefulWidget {
   final String userName; // Accept userName from previous page
@@ -28,9 +28,9 @@ class _AccLinkPageState extends State<AccLinkPage> {
   Color _arrowColor = const Color(0xFF3D3D3D); // Default arrow color
   final ApiService _apiService = ApiService(); // Initialize ApiService
   final GPTService _gptService = GPTService(); // Initialize GPT service
-  String _accessToken = '';
-  String _authorizationCode = '';
-  String _finalAccessToken = '';
+  String _accessToken = ''; // Initialize access token
+  String _authorizationCode = ''; // Initialize authorization code
+  String _finalAccessToken = ''; // Initialize final access token
   List<Map<String, dynamic>> _accounts = []; // List to store retrieved accounts
   StreamSubscription? _sub; // For uni_links
   bool _isLoading = false; // Loading state
@@ -407,14 +407,36 @@ class _AccLinkPageState extends State<AccLinkPage> {
         ),
 
         // Loading Overlay
+        // Loading Overlay
         if (_isLoading)
-          Container(
-            color: Colors.black.withOpacity(0.5),
-            child: const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Color(0xFF69BA9C),
-                ),
+          Positioned.fill(
+            child: Container(
+              color: Colors.black
+                  .withOpacity(0.5), // Semi-transparent black overlay
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment:
+                    CrossAxisAlignment.center, // Center horizontally
+                children: [
+                  const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF69BA9C),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    _authorizationCode.isEmpty
+                        ? "سيتم نقلك الى البنك" // Message before going to the website
+                        : "يتم الآن إسترجاع بياناتك من البنك", // Message after coming from the website
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'GE-SS-Two-Bold',
+                      decoration: TextDecoration.none, // Remove underline
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),

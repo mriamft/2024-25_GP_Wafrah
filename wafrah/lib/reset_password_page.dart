@@ -86,13 +86,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         !isLowercaseValid ||
         !isUppercaseValid ||
         !isSymbolValid) {
-      showNotification(
-          'رمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص');
+      showNotification('حدث خطأ ما\nرمز المرور لا يحقق الشروط');
       return false;
     }
 
     if (newPassword != confirmPassword) {
-      showNotification("كلمات المرور الجديدة غير متطابقة");
+      showNotification("حدث خطأ ما\nكلمات المرور الجديدة غير متطابقة");
       return false;
     }
 
@@ -106,7 +105,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://d181-94-98-211-77.ngrok-free.app/reset-password'),
+        Uri.parse('https://9b08-94-96-163-36.ngrok-free.app/reset-password'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -124,14 +123,21 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           navigateAfter: true,
         );
       } else {
-        showNotification("فشل تعديل كلمة المرور");
+        showNotification("حدث خطأ ما\nفشل تعديل كلمة المرور");
       }
     } catch (error) {
-      showNotification("خطأ في الاتصال بالخادم");
+      showNotification("حدث خطأ ما\nخطأ في الاتصال بالخادم");
     }
   }
 
   void _showResetConfirmationDialog() {
+    if (_currentPasswordController.text.isEmpty ||
+        _newPasswordController.text.isEmpty ||
+        _confirmPasswordController.text.isEmpty) {
+      showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
+      return;
+    }
+
     if (validatePasswords()) {
       showDialog(
         context: context,
@@ -356,7 +362,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           if (_showNotification)
             Positioned(
               top: 23,
-              left: 4,
+              left: 19,
               child: Container(
                 width: 353,
                 height: 57,
@@ -374,16 +380,21 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         color: Colors.white,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 15.0),
-                      child: Text(
-                        _notificationMessage,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 14,
+                    Expanded(
+                      // Wrap the Text widget with Expanded
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: Text(
+                          _notificationMessage,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.right,
+                          overflow: TextOverflow
+                              .ellipsis, // Add this line for overflow handling
                         ),
-                        textAlign: TextAlign.right,
                       ),
                     ),
                   ],
