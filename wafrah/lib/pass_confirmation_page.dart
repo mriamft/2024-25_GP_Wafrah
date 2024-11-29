@@ -25,7 +25,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
-  // State variables to track password criteria
+  // State variables to track password criteria 
   bool isLengthValid = false;
   bool isNumberValid = false;
   bool isLowercaseValid = false;
@@ -35,28 +35,26 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
   bool isConfirmPasswordMatching = true;
   bool confirmPasswordClicked = false;
 
-  Timer? _notificationTimer; // Timer for managing notification display time
+  Timer? _notificationTimer; 
 
   @override
   void dispose() {
-    _notificationTimer?.cancel(); // Cancel the notification timer if active
+    _notificationTimer?.cancel(); 
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
   }
 
-  // Show notification method with mounted check
+  // Show notification method 
   void showNotification(String message,
       {Color color = const Color(0xFFC62C2C)}) {
     if (mounted) {
-      // Check if widget is still in the widget tree
       setState(() {
         errorMessage = message;
         notificationColor = color;
         showErrorNotification = true;
       });
 
-      // Cancel any existing notification timer
       _notificationTimer?.cancel();
       _notificationTimer = Timer(const Duration(seconds: 5), () {
         if (mounted) {
@@ -68,6 +66,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
     }
   }
 
+  // validate the Password Input if it is satisfy the critira
   void validatePasswordInput(String password) {
     setState(() {
       isLengthValid = password.length >= 8;
@@ -78,6 +77,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
     });
   }
 
+  //Check if the passwords matched
   void validateConfirmPassword(String confirmPassword) {
     setState(() {
       isConfirmPasswordMatching = confirmPassword == passwordController.text;
@@ -92,7 +92,6 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
         isSymbolValid;
   }
 
-  // Handle next button press
   void handleNext() {
     String password = passwordController.text.trim();
     String confirmPassword = confirmPasswordController.text.trim();
@@ -116,6 +115,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
     resetPassword(widget.phoneNumber, password);
   }
 
+  // Update the passowrd in tha database
   Future<void> resetPassword(String phoneNumber, String newPassword) async {
     final url =
         Uri.parse('https://4246-51-252-185-82.ngrok-free.app/forget-password');
@@ -348,7 +348,6 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
               ),
             ),
 
-            // Next Button
             Positioned(
               left: (MediaQuery.of(context).size.width - 308) / 2,
               top: 570,
@@ -382,7 +381,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
               ),
             ),
 
-            // Error Notification
+            // Notification
             if (showErrorNotification)
               Positioned(
                 top: 23,

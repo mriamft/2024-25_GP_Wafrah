@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class StorageService {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  // Save account and transaction data for a specific user identified by phoneNumber
+  // Save account and transaction data for a specific user by phoneNumber, to not be conflict with other users
   Future<void> saveAccountDataLocally(String phoneNumber, List<Map<String, dynamic>> accounts) async {
     String accountsJson = jsonEncode(accounts); // Convert to JSON string
     await _secureStorage.write(key: phoneNumber, value: accountsJson);
@@ -19,12 +19,13 @@ class StorageService {
     return [];
   }
 
-  // Clear data for a specific user identified by phoneNumber
+  // Clear data for a specific user identified by phoneNumber, so if two users are using same device
+  // it doesn't display them all 
   Future<void> clearUserData(String phoneNumber) async {
     await _secureStorage.delete(key: 'user_accounts_$phoneNumber');
   }
 
-  // Clear all stored data (used when logging out globally)
+  // Clear all stored data (used when logging out)
   Future<void> clearAllUserData() async {
     await _secureStorage.deleteAll();
   }

@@ -64,14 +64,12 @@ class _BanksPageState extends State<BanksPage> {
       for (var transaction in transactions) {
         String category = transaction['Category'] ?? 'غير مصنف';
         double amount = double.tryParse(
-                transaction['Amount']?['Amount']?.toString() ?? '0.0') ??
-            0.0;
-
+                transaction['Amount']?['Amount']?.toString() ?? '0.0') ?? 0.0;
         categories[category] = (categories[category] ?? 0.0) + amount;
       }
     }
 
-    print('Transaction Categories: $categories'); // Debugging
+    print('Transaction Categories: $categories'); 
     return categories;
   }
 
@@ -84,10 +82,7 @@ class _BanksPageState extends State<BanksPage> {
     };
 
     String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
-
-    String translatedAccountSubType =
-        accountTypeTranslations[accountSubType] ?? accountSubType;
-
+    String translatedAccountSubType = accountTypeTranslations[accountSubType] ?? accountSubType;
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       width: 340,
@@ -204,7 +199,6 @@ class _BanksPageState extends State<BanksPage> {
               fit: BoxFit.cover,
             ),
           ),
-          // Top Row with Add Button
           Positioned(
             top: 202,
             left: 12,
@@ -215,11 +209,11 @@ class _BanksPageState extends State<BanksPage> {
                 IconButton(
                   icon: Icon(
                     _accounts.isEmpty
-                        ? Icons.add_circle // Show add icon if no accounts
-                        : Icons.edit, // Show edit icon if there are accounts
+                        ? Icons.add_circle 
+                        : Icons.edit, 
                     color: _accounts.isEmpty
-                        ? const Color(0xFF3D3D3D) // Color for add icon
-                        : const Color(0xFF3D3D3D), // Color for edit icon
+                        ? const Color(0xFF3D3D3D) 
+                        : const Color(0xFF3D3D3D), 
                     size: 25,
                   ),
                   onPressed: () {
@@ -247,12 +241,11 @@ class _BanksPageState extends State<BanksPage> {
               ],
             ),
           ),
-          // Scrollable Accounts List
           Positioned(
-            top: 280, // Adjust this value to move the list higher
+            top: 280, 
             left: 12,
             right: 12,
-            bottom: 77, // Space for the bottom navigation bar
+            bottom: 77, 
             child: SingleChildScrollView(
               child: Column(
                 children: _accounts.isNotEmpty
@@ -274,7 +267,6 @@ class _BanksPageState extends State<BanksPage> {
               ),
             ),
           ),
-          // Bottom Navigation Bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -319,7 +311,7 @@ class _BanksPageState extends State<BanksPage> {
                   }),
                   Transform.translate(
                     offset:
-                        const Offset(0, -5), // Adjust the offset to move it up
+                        const Offset(0, -5), 
                     child: buildBottomNavItem(
                         Icons.account_balance_outlined, "الحسابات", () {
                       // Do nothing or perform another action if needed
@@ -345,7 +337,6 @@ class _BanksPageState extends State<BanksPage> {
               ),
             ),
           ),
-          // Point under "إعدادات"
           Positioned(
             right: 144,
             top: 784,
@@ -353,12 +344,11 @@ class _BanksPageState extends State<BanksPage> {
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFF2C8C68), // Point color
+                color: Color(0xFF2C8C68), 
                 shape: BoxShape.circle,
               ),
             ),
           ),
-          // Circular Button above the Navigation Bar
           Positioned(
             bottom: 45,
             left: 0,
@@ -366,12 +356,12 @@ class _BanksPageState extends State<BanksPage> {
             child: GestureDetector(
               onTapDown: (_) {
                 setState(() {
-                  _isCirclePressed = true; // Set the state to pressed
+                  _isCirclePressed = true; 
                 });
               },
               onTapUp: (_) {
                 setState(() {
-                  _isCirclePressed = false; // Reset the state after press
+                  _isCirclePressed = false; 
                 });
                 Navigator.of(context).pushAndRemoveUntil(
                   PageRouteBuilder(
@@ -379,13 +369,13 @@ class _BanksPageState extends State<BanksPage> {
                         BanksPage(
                       userName: widget.userName,
                       phoneNumber: widget.phoneNumber,
-                      accounts: widget.accounts, // Pass accounts
+                      accounts: widget.accounts,
                     ),
                     transitionDuration:
-                        const Duration(seconds: 0), // Disable transition
+                        const Duration(seconds: 0),
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
-                      return child; // No animation
+                      return child; 
                     },
                   ),
                   (route) => false,
@@ -394,7 +384,7 @@ class _BanksPageState extends State<BanksPage> {
               onTapCancel: () {
                 setState(() {
                   _isCirclePressed =
-                      false; // Reset the state if tap is canceled
+                      false; 
                 });
               },
               child: Stack(

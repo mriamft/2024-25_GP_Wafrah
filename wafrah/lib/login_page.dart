@@ -160,35 +160,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
             child: Stack(
               children: [
-                // Back Arrow Icon
-                Positioned(
-                  top: 60,
-                  right: 15,
-                  child: GestureDetector(
-                    onTapDown: (_) {
-                      setState(() {
-                        _isArrowPressed = true; 
-                      });
-                    },
-                    onTapUp: (_) {
-                      setState(() {
-                        _isArrowPressed = false; 
-                      });
-                      Navigator.pop(context); 
-                    },
-                    onTapCancel: () {
-                      setState(() {
-                        _isArrowPressed =
-                            false; 
-                      });
-                    },
-                    child: Icon(
-                      Icons.arrow_forward_ios,
-                      color: _isArrowPressed ? Colors.grey : Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                ),
                 Positioned(
                   left: -1, 
                   top: -99, 

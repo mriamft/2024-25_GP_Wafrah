@@ -99,7 +99,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return true;
   }
 
-  // Reset password method
+  // update the password in the database
   Future<void> _resetPassword() async {
     final String currentPassword = _currentPasswordController.text;
     final String newPassword = _newPasswordController.text;
@@ -187,7 +187,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     }
   }
 
-  // Helper function for criteria text
   Widget _buildCriteriaText(String text, bool isValid) {
     return Text(
       text,
@@ -296,7 +295,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             left: 24,
             child: Column(
               crossAxisAlignment:
-                  CrossAxisAlignment.end, // Align content to the right
+                  CrossAxisAlignment.end, 
               children: [
                 SizedBox(
                   width: 325,
@@ -417,7 +416,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           ),
                           textAlign: TextAlign.right,
                           overflow: TextOverflow
-                              .ellipsis, // Add this line for overflow handling
+                              .ellipsis, 
                         ),
                       ),
                     ),

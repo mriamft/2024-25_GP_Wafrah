@@ -17,17 +17,17 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
   bool showErrorNotification = false;
   String errorMessage = '';
   Color notificationColor =
-      const Color(0xFFC62C2C); // Default error notification color
-  Color _arrowColor = Colors.white; // Default color for the arrow
-  Color _buttonColor = Colors.white; // Default color for the button
-  String phoneErrorMessage = ''; // Error message for phone number validation
+      const Color(0xFFC62C2C); 
+  Color _arrowColor = Colors.white; 
+  Color _buttonColor = Colors.white;
+  String phoneErrorMessage = ''; 
 
   // Show notification method
   void showNotification(String message,
       {Color color = const Color(0xFFC62C2C)}) {
     setState(() {
       errorMessage = message;
-      notificationColor = color; // Set notification color dynamically
+      notificationColor = color; 
       showErrorNotification = true;
     });
 
@@ -98,6 +98,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                 color: const Color(0xFF07746A)); // Grey color
           });
         } else {
+          // Show error notification if something happened
           showNotification('فشل في إرسال رمز التحقق');
         }
       } else {
@@ -105,6 +106,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
         showNotification('رقم الجوال غير مسجل في النظام');
       }
     } else {
+      // Show notification if the phone number is not in a correct format
       phoneErrorMessage = 'الصيغة خاطئة';
       setState(() {});
     }
@@ -242,7 +244,6 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
               ),
             ),
 
-            // Next Button
             Positioned(
               left: (MediaQuery.of(context).size.width - 308) / 2,
               top: 550,
