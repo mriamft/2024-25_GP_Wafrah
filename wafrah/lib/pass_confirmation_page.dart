@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:wafrah/login_page.dart';
-
 import 'dart:async';
-
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
 class PassConfirmationPage extends StatefulWidget {
@@ -19,66 +15,49 @@ class PassConfirmationPage extends StatefulWidget {
 
 class _PassConfirmationPage extends State<PassConfirmationPage> {
   final TextEditingController passwordController = TextEditingController();
-
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
   bool showErrorNotification = false;
-
   String errorMessage = '';
-
   Color notificationColor = const Color(0xFFC62C2C);
 
   bool _isPasswordVisible = false;
-
   bool _isConfirmPasswordVisible = false;
 
-// State variables to track password criteria
-
+  // State variables to track password criteria
   bool isLengthValid = false;
-
   bool isNumberValid = false;
-
   bool isLowercaseValid = false;
-
   bool isUppercaseValid = false;
-
   bool isSymbolValid = false;
+
+  bool isConfirmPasswordMatching = true;
+  bool confirmPasswordClicked = false;
 
   Timer? _notificationTimer; // Timer for managing notification display time
 
   @override
   void dispose() {
     _notificationTimer?.cancel(); // Cancel the notification timer if active
-
     passwordController.dispose();
-
     confirmPasswordController.dispose();
-
     super.dispose();
   }
 
-// Show notification method
-
   // Show notification method with mounted check
-
   void showNotification(String message,
       {Color color = const Color(0xFFC62C2C)}) {
     if (mounted) {
       // Check if widget is still in the widget tree
-
       setState(() {
         errorMessage = message;
-
         notificationColor = color;
-
         showErrorNotification = true;
       });
 
       // Cancel any existing notification timer
-
       _notificationTimer?.cancel();
-
       _notificationTimer = Timer(const Duration(seconds: 5), () {
         if (mounted) {
           setState(() {
@@ -92,14 +71,16 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
   void validatePasswordInput(String password) {
     setState(() {
       isLengthValid = password.length >= 8;
-
       isNumberValid = password.contains(RegExp(r'\d'));
-
       isLowercaseValid = password.contains(RegExp(r'[a-z]'));
-
       isUppercaseValid = password.contains(RegExp(r'[A-Z]'));
-
       isSymbolValid = password.contains(RegExp(r'[!@#\$&*~]'));
+    });
+  }
+
+  void validateConfirmPassword(String confirmPassword) {
+    setState(() {
+      isConfirmPasswordMatching = confirmPassword == passwordController.text;
     });
   }
 
@@ -111,29 +92,24 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
         isSymbolValid;
   }
 
-// Handle next button press
-
+  // Handle next button press
   void handleNext() {
     String password = passwordController.text.trim();
-
     String confirmPassword = confirmPasswordController.text.trim();
 
     if (password.isEmpty || confirmPassword.isEmpty) {
       showNotification('حدث خطأ ما\nلم تقم بملء جميع الحقول');
-
       return;
     }
 
     if (password != confirmPassword) {
       showNotification('حدث خطأ ما\nرمز المرور غير متطابق');
-
       return;
     }
 
     if (!isValidPassword(password)) {
       showNotification(
           'حدث خطأ ما\nرمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص');
-
       return;
     }
 
@@ -142,7 +118,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
 
   Future<void> resetPassword(String phoneNumber, String newPassword) async {
     final url =
-        Uri.parse('https://d097-5-156-56-6.ngrok-free.app/forget-password');
+        Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/forget-password');
 
     final response = await http.post(
       url,
@@ -154,9 +130,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
     if (response.statusCode == 200) {
       showNotification('تم تحديث كلمة السر بنجاح',
           color: const Color(0xFF07746A));
-
       await Future.delayed(const Duration(seconds: 2));
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -175,6 +149,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
     bool obscureText = false,
     Widget? prefixIcon,
     Function(String)? onChanged,
+    Function()? onTap,
   }) {
     return Positioned(
       left: 24,
@@ -187,6 +162,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
             controller: controller,
             obscureText: obscureText,
             onChanged: onChanged,
+            onTap: onTap,
             textAlign: TextAlign.right,
             decoration: InputDecoration(
               hintText: hintText,
@@ -231,8 +207,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
         ),
         child: Stack(
           children: [
-// Back Arrow
-
+            // Back Arrow
             Positioned(
               top: 60,
               right: 15,
@@ -248,10 +223,9 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
               ),
             ),
 
-// Logo Image
-
+            // Logo Image
             Positioned(
-              left: 118,
+              left: 140,
               top: 102,
               child: Image.asset(
                 'assets/images/logo.png',
@@ -260,11 +234,10 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
               ),
             ),
 
-// Title
-
+            // Title
             const Positioned(
               top: 230,
-              left: 75,
+              left: 100,
               child: Text(
                 'تغيير كلمة المرور',
                 style: TextStyle(
@@ -276,8 +249,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
               ),
             ),
 
-// Password Input Fields
-
+            // Password Input Fields
             _buildInputField(
               top: 280,
               hintText: 'رمز المرور',
@@ -294,7 +266,12 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
                   });
                 },
               ),
-              onChanged: validatePasswordInput,
+              onChanged: (value) {
+                validatePasswordInput(value);
+                if (confirmPasswordClicked) {
+                  validateConfirmPassword(confirmPasswordController.text);
+                }
+              },
             ),
 
             _buildInputField(
@@ -315,14 +292,37 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
                   });
                 },
               ),
+              onChanged: validateConfirmPassword,
+              onTap: () {
+                setState(() {
+                  confirmPasswordClicked = true;
+                });
+              },
             ),
 
-// Password Instructions
+            // Confirm Password Mismatch Warning
+            if (confirmPasswordClicked && !isConfirmPasswordMatching)
+              Positioned(
+                left: 24,
+                right: 24,
+                top: 411,
+                child: const Text(
+                  'رمز مرور غير متطابق',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFC62C2C),
+                  ),
+                ),
+              ),
 
+            // Password Instructions
             Positioned(
               left: 24,
               right: 10,
-              top: 420,
+              top: 448,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -348,8 +348,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
               ),
             ),
 
-// Next Button
-
+            // Next Button
             Positioned(
               left: (MediaQuery.of(context).size.width - 308) / 2,
               top: 570,
@@ -383,8 +382,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
               ),
             ),
 
-// Error Notification
-
+            // Error Notification
             if (showErrorNotification)
               Positioned(
                 top: 23,

@@ -14,14 +14,13 @@ class ForgetPassPage extends StatefulWidget {
 
 class _ForgetPassPageState extends State<ForgetPassPage> {
   final TextEditingController phoneNumberController = TextEditingController();
-
   bool showErrorNotification = false;
   String errorMessage = '';
   Color notificationColor =
       const Color(0xFFC62C2C); // Default error notification color
-
   Color _arrowColor = Colors.white; // Default color for the arrow
   Color _buttonColor = Colors.white; // Default color for the button
+  String phoneErrorMessage = ''; // Error message for phone number validation
 
   // Show notification method
   void showNotification(String message,
@@ -41,14 +40,14 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
 
   // Validate phone number format
   bool validatePhoneNumber(String phoneNumber) {
-    final regex = RegExp(r'^\+966[0-9]{9}$');
+    final regex = RegExp(r'^\+9665[0-9]{8}$');
     return regex.hasMatch(phoneNumber);
   }
 
   // Check if phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url =
-        Uri.parse('https://d097-5-156-56-6.ngrok-free.app/checkPhoneNumber');
+        Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -67,11 +66,12 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
   void handleNext() async {
     String phoneNumber = phoneNumberController.text.trim();
     if (validatePhoneNumber(phoneNumber)) {
+      phoneErrorMessage = '';
       bool exists = await phoneNumberExists(phoneNumber);
       if (exists) {
         // Send OTP only if the phone number exists
         final url =
-            Uri.parse('https://d097-5-156-56-6.ngrok-free.app/send-otp');
+            Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/send-otp');
         final response = await http.post(
           url,
           headers: {"Content-Type": "application/json"},
@@ -105,7 +105,8 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
         showNotification('رقم الجوال غير مسجل في النظام');
       }
     } else {
-      showNotification('حدث خطأ ما\nصيغة رقم الجوال غير صحيحة');
+      phoneErrorMessage = 'الصيغة خاطئة';
+      setState(() {});
     }
   }
 
@@ -155,7 +156,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
 
             // Logo Image
             Positioned(
-              left: 118,
+              left: 140,
               top: 102,
               child: Image.asset(
                 'assets/images/logo.png',
@@ -167,7 +168,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
             // Title
             const Positioned(
               top: 263,
-              left: 75,
+              left: 100,
               child: Text(
                 'تغيير كلمة المرور',
                 style: TextStyle(
@@ -205,6 +206,12 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                     ),
                     style: const TextStyle(color: Colors.white),
                     cursorColor: Colors.white,
+                    onChanged: (value) {
+                      setState(() {
+                        phoneErrorMessage =
+                            validatePhoneNumber(value) ? '' : 'الصيغة خاطئة';
+                      });
+                    },
                   ),
                   const SizedBox(height: 5),
                   Container(
@@ -218,6 +225,19 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                       ),
                     ),
                   ),
+                  if (phoneErrorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5.0),
+                      child: Text(
+                        phoneErrorMessage,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
                 ],
               ),
             ),

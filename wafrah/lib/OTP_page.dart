@@ -123,7 +123,8 @@ class _OTPPageState extends State<OTPPage> {
       return;
     }
 
-    final url = Uri.parse('https://d097-5-156-56-6.ngrok-free.app/verify-otp');
+    final url =
+        Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -135,7 +136,7 @@ class _OTPPageState extends State<OTPPage> {
 
     if (response.statusCode == 200) {
       showNotification('نجحت العملية\nتم التحقق بنجاح',
-          color: Color(0xFF0FBE7C));
+          color: const Color(0xFF0FBE7C));
 
       Timer(const Duration(seconds: 2), () async {
         if (widget.isForget) {
@@ -161,7 +162,7 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://d097-5-156-56-6.ngrok-free.app/adduser');
+    final url = Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -217,7 +218,8 @@ class _OTPPageState extends State<OTPPage> {
 
   Future<void> resendOTP() async {
     if (canResend) {
-      final url = Uri.parse('https://d097-5-156-56-6.ngrok-free.app/send-otp');
+      final url =
+          Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
