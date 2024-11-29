@@ -34,6 +34,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
   List<Map<String, dynamic>> _accounts = []; // List to store retrieved accounts
   StreamSubscription? _sub; // For uni_links
   bool _isLoading = false; // Loading state
+  bool _isCategorizing = false; // New state for categorization
 
   @override
   void initState() {
@@ -140,7 +141,6 @@ class _AccLinkPageState extends State<AccLinkPage> {
     try {
       final List<dynamic> accounts =
           await _apiService.getAccountDetails(_finalAccessToken);
-
       List<Map<String, dynamic>> accountsWithBalances = [];
 
       for (var account in accounts) {
@@ -154,13 +154,17 @@ class _AccLinkPageState extends State<AccLinkPage> {
         List<Map<String, dynamic>> transactions = await _apiService
             .getAccountTransactions(_finalAccessToken, accountId);
 
+        // Start Categorization State
+        setState(() {
+          _isCategorizing = true; // Start categorization state
+        });
+
         // Categorize transactions
         List<Map<String, dynamic>> categorizedTransactions = [];
         for (var transaction in transactions) {
           String transactionInfo =
               transaction['TransactionInformation'] ?? 'معلومات غير متوفرة';
-          String category = 'غير مصنف'; // Default category
-
+          String category = 'غير مصنف';
           try {
             category = await _gptService.categorizeTransaction(transactionInfo);
           } catch (e) {
@@ -168,8 +172,8 @@ class _AccLinkPageState extends State<AccLinkPage> {
           }
 
           categorizedTransactions.add({
-            ...transaction, // Include all original transaction data
-            'Category': category, // Add the category
+            ...transaction,
+            'Category': category,
           });
         }
 
@@ -181,7 +185,11 @@ class _AccLinkPageState extends State<AccLinkPage> {
         });
       }
 
-      // Save accounts locally using StorageService
+      // End Categorization State
+      setState(() {
+        _isCategorizing = false; // End categorization state
+      });
+
       await widget._storageService
           .saveAccountDataLocally(widget.phoneNumber, accountsWithBalances);
 
@@ -189,10 +197,13 @@ class _AccLinkPageState extends State<AccLinkPage> {
         setState(() {
           _accounts = accountsWithBalances;
         });
-
         _redirectToBanksPage();
       }
     } catch (e) {
+      // Catch Block for Errors
+      setState(() {
+        _isCategorizing = false; // Ensure state resets on error
+      });
       _showErrorDialog('Error fetching account details or balance: $e');
     }
   }
@@ -408,15 +419,13 @@ class _AccLinkPageState extends State<AccLinkPage> {
 
         // Loading Overlay
         // Loading Overlay
-        if (_isLoading)
+        if (_isLoading || _isCategorizing)
           Positioned.fill(
             child: Container(
-              color: Colors.black
-                  .withOpacity(0.5), // Semi-transparent black overlay
+              color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment:
-                    CrossAxisAlignment.center, // Center horizontally
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
@@ -425,9 +434,11 @@ class _AccLinkPageState extends State<AccLinkPage> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    _authorizationCode.isEmpty
-                        ? "سيتم نقلك الى البنك" // Message before going to the website
-                        : "يتم الآن إسترجاع بياناتك من البنك", // Message after coming from the website
+                    _isCategorizing
+                        ? "يتم الآن تصنيف بياناتك" // Message during categorization
+                        : _authorizationCode.isEmpty
+                            ? "سيتم نقلك الى البنك" // Message before going to the website
+                            : "يتم الآن إسترجاع بياناتك من البنك", // Message after coming from the website
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
