@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage>
   int currentPage = 0;
   final PageController _pageController = PageController();
   bool _isCirclePressed = false;
+  // To track toggle visibility
   bool _isBalanceVisible = true;
   double _minIncome = double.infinity;
   double _maxIncome = double.negativeInfinity;
@@ -1382,16 +1383,21 @@ class _HomePageState extends State<HomePage>
 // Masked display for hidden values
   String getMaskedValue() => '****';
  
-  // Calculate the total balance
+  // Calculate total balance
   String getTotalBalance() {
+    // Initialize sum to zero
     double totalBalance = widget.accounts.fold(0.0, (sum, account) {
+      // For each account, add its balance to the sum
       return sum + double.parse(account['Balance'] ?? '0');
     });
     return totalBalance.toStringAsFixed(2);
   }
+
   Map<String, double> calculateIncomeAndExpense() {
+    // Initialize income and expense to zero
     double totalIncome = 0.0;
     double totalExpense = 0.0;
+    // Get current date
     DateTime now = DateTime.now();
     int mappedYear = now.year == 2024
         ? 2016
@@ -1402,10 +1408,11 @@ class _HomePageState extends State<HomePage>
     DateTime startOfMonth = DateTime(mappedYear, now.month, 1);
     DateTime today = DateTime(mappedYear, now.month, now.day);
  
+    // Loop through accounts
     for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
-        // Parse the transaction date
+        // Parse transaction date
         String? dateStr = transaction['TransactionDateTime'];
         DateTime transactionDate =
             DateTime.tryParse(dateStr ?? '') ?? DateTime.now();
@@ -1420,6 +1427,7 @@ class _HomePageState extends State<HomePage>
           String amountStr = transaction['Amount']?['Amount'] ?? '0.00';
           double amount = double.tryParse(amountStr) ?? 0.0;
  
+          // Group and sum income and expenses
           if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
             totalIncome += amount;
           } else if ([
@@ -1793,8 +1801,8 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(width: 5),
                       Text(
                         _isBalanceVisible
-                            ? getTotalBalance()
-                            : getMaskedValue(),
+                            ? getTotalBalance() // Visible
+                            : getMaskedValue(), // Hidden
                         style: const TextStyle(
                           fontFamily: 'GE-SS-Two-Bold',
                           fontSize: 32,
