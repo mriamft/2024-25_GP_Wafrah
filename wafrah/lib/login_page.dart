@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:wafrah/OTP_page.dart';
 import 'package:wafrah/forget_pass_page.dart';
-import 'package:wafrah/home_page.dart';
 import 'package:wafrah/signup_page.dart' as signup;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -88,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final url = Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/login');
+      final url = Uri.parse('https://4246-51-252-185-82.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -122,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/send-otp');
+    final url = Uri.parse('https://4246-51-252-185-82.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -192,64 +191,6 @@ class _LoginPageState extends State<LoginPage> {
                       Icons.arrow_forward_ios,
                       color: _isArrowPressed ? Colors.grey : Colors.white,
                       size: 28,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: (MediaQuery.of(context).size.width - 200) /
-                      2, // Center horizontally
-                  top: 700, // Position near the bottom
-                  child: GestureDetector(
-                    onTap: () async {
-                      // Fetch accounts from FlutterSecureStorage
-                      List<Map<String, dynamic>> accounts = [];
-                      try {
-                        String? accountsJson =
-                            await _storage.read(key: 'user_accounts');
-                        if (accountsJson != null) {
-                          accounts = List<Map<String, dynamic>>.from(
-                              jsonDecode(accountsJson));
-                        }
-                      } catch (e) {
-                        print('Error loading accounts for Backdoor Login: $e');
-                      }
-
-                      // Navigate to HomePage with loaded accounts
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(
-                            userName: 'Admin', // Use placeholder data
-                            phoneNumber:
-                                '+966543080394', // Placeholder phone number
-                            accounts: accounts, // Pass retrieved accounts
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      width: 200,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: Colors.blue, // Set color for the backdoor button
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.5),
-                            blurRadius: 10,
-                            offset: const Offset(0.4, -5),
-                          ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Backdoor Login',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                 ),

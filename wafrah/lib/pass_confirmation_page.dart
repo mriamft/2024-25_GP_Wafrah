@@ -118,7 +118,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
 
   Future<void> resetPassword(String phoneNumber, String newPassword) async {
     final url =
-        Uri.parse('https://dc77-51-252-185-82.ngrok-free.app/forget-password');
+        Uri.parse('https://4246-51-252-185-82.ngrok-free.app/forget-password');
 
     final response = await http.post(
       url,
@@ -129,7 +129,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
 
     if (response.statusCode == 200) {
       showNotification('تم تحديث كلمة السر بنجاح',
-          color: const Color(0xFF07746A));
+          color: const Color(0xFF0FBE7C));
       await Future.delayed(const Duration(seconds: 2));
       Navigator.pushReplacement(
         context,
@@ -302,11 +302,11 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
 
             // Confirm Password Mismatch Warning
             if (confirmPasswordClicked && !isConfirmPasswordMatching)
-              Positioned(
+              const Positioned(
                 left: 24,
                 right: 24,
                 top: 411,
-                child: const Text(
+                child: Text(
                   'رمز مرور غير متطابق',
                   textAlign: TextAlign.right,
                   style: TextStyle(
