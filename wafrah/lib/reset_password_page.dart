@@ -37,6 +37,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   bool isLowercaseValid = false;
   bool isUppercaseValid = false;
   bool isSymbolValid = false;
+  String confirmPasswordError = '';
 
   // Show notification method
   void showNotification(String message,
@@ -105,7 +106,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://9b08-94-96-163-36.ngrok-free.app/reset-password'),
+        Uri.parse('https://d097-5-156-56-6.ngrok-free.app/reset-password'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -293,36 +294,66 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           Positioned(
             top: 275,
             left: 24,
-            child: SizedBox(
-              width: 325,
-              height: 50,
-              child: TextField(
-                controller: _confirmPasswordController,
-                textAlign: TextAlign.right,
-                obscureText: !_isConfirmPasswordVisible,
-                decoration: InputDecoration(
-                  hintText: 'تأكيد رمز المرور الجديد',
-                  hintStyle: const TextStyle(
-                      color: Color(0xFF888888), fontFamily: 'GE-SS-Two-Light'),
-                  prefixIcon: IconButton(
-                    icon: Icon(
-                      _isConfirmPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: const Color(0xFF3D3D3D),
-                    ),
-                    onPressed: () {
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.end, // Align content to the right
+              children: [
+                SizedBox(
+                  width: 325,
+                  height: 50,
+                  child: TextField(
+                    controller: _confirmPasswordController,
+                    textAlign: TextAlign.right,
+                    obscureText: !_isConfirmPasswordVisible,
+                    onChanged: (value) {
                       setState(() {
-                        _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                        confirmPasswordError =
+                            _newPasswordController.text != value
+                                ? 'رمز المرور غير متطابق'
+                                : '';
                       });
                     },
+                    decoration: InputDecoration(
+                      hintText: 'تأكيد رمز المرور الجديد',
+                      hintStyle: const TextStyle(
+                          color: Color(0xFF888888),
+                          fontFamily: 'GE-SS-Two-Light'),
+                      prefixIcon: IconButton(
+                        icon: Icon(
+                          _isConfirmPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: const Color(0xFF3D3D3D),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isConfirmPasswordVisible =
+                                !_isConfirmPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                if (confirmPasswordError.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 8.0, right: 5.0), // Adjust right padding
+                    child: Text(
+                      confirmPasswordError,
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                        fontFamily: 'GE-SS-Two-Light',
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
           Positioned(
-            top: 350,
+            top: 360,
             right: 24,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
