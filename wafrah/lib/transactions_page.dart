@@ -27,7 +27,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     List<Map<String, dynamic>> allTransactions = [];
 
     for (var account in widget.accounts) {
-      // If a specific IBAN is selected, only add transactions for that account
+      // Filter transactions based on IBAN
       if (selectedIBAN != "الكل" && account['IBAN'] != selectedIBAN) {
         continue;
       }
@@ -50,25 +50,24 @@ class _TransactionsPageState extends State<TransactionsPage> {
     // Get today's date
     DateTime today = DateTime.now();
 
-    // Group transactions by modified date and filter future dates
+    // Group transactions by date
     Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
     for (var transaction in allTransactions) {
       String date =
           transaction['TransactionDateTime']?.split('T').first ?? 'غير معروف';
 
-      // Modify the year mapping
       if (date != 'غير معروف') {
         DateTime originalDate = DateTime.tryParse(date) ?? DateTime.now();
         int mappedYear = originalDate.year == 2016
             ? 2024
             : originalDate.year == 2017
                 ? 2025
-                : originalDate.year; // Keep the original year for other cases
+                : originalDate.year; 
 
         DateTime mappedDate =
             DateTime(mappedYear, originalDate.month, originalDate.day);
 
-        // Skip transactions with dates after today
+        
         if (mappedDate.isAfter(today)) {
           continue;
         }
@@ -82,7 +81,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
       groupedTransactions[date]!.add(transaction);
     }
 
-    // Convert grouped map to a list of maps for easier building
     List<Map<String, dynamic>> result = [];
     groupedTransactions.forEach((date, transactions) {
       result.add({'date': date, 'transactions': transactions});
@@ -137,10 +135,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
             right: 10,
             child: Directionality(
               textDirection:
-                  TextDirection.rtl, // Ensure dropdown aligns correctly
+                  TextDirection.rtl, 
               child: DropdownButton<String>(
                 alignment:
-                    AlignmentDirectional.topEnd, // Align dropdown to the right
+                    AlignmentDirectional.topEnd, 
                 isExpanded: true,
                 value: selectedIBAN,
                 icon: const Icon(Icons.arrow_drop_down),
@@ -148,7 +146,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 elevation: 16,
                 style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
                 dropdownColor:
-                    const Color(0xFFFFFFFF), // Set dropdown background color
+                    const Color(0xFFFFFFFF), 
                 underline: Container(
                   height: 2,
                   color: const Color(0xFF2C8C68),
@@ -236,7 +234,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     },
                   ),
           ),
-          // Bottom Navigation Bar remains the same
+          // BNavigation bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -311,7 +309,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFF2C8C68), // Point color
+                color: Color(0xFF2C8C68), 
                 shape: BoxShape.circle,
               ),
             ),
@@ -377,19 +375,19 @@ class _TransactionsPageState extends State<TransactionsPage> {
             'غير معروف';
     String category = transaction['Category'] ?? 'غير مصنف';
 
-    // Determine the color of the amount
+    // Color transactions
     Color amountColor;
     if (subtype == 'MoneyTransfer' ||
         subtype == 'Withdrawal' ||
         subtype == 'Purchase' ||
         subtype == 'DepositReversal') {
-      amountColor = Colors.red;
+      amountColor = Colors.red; // Outgoing
     } else if (subtype == 'Deposit' ||
         subtype == 'WithdrawalReversal' ||
         subtype == 'Refund') {
-      amountColor = Colors.green;
+      amountColor = Colors.green; // Ingoing
     } else {
-      // Decide based on the category
+      // Based on the category for notApplicable transactions
       const redCategories = [
         'المطاعم',
         'الصحة',
@@ -529,7 +527,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     String translatedSubtype =
         transactionTypeTranslations[subtype] ?? 'غير معروف';
 
-    // Map the date for year modifications
+    
     String date = dateTime.split('T').first;
     if (date != 'غير معروف') {
       DateTime originalDate = DateTime.tryParse(date) ?? DateTime.now();
@@ -537,17 +535,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
           ? 2024
           : originalDate.year == 2017
               ? 2025
-              : originalDate.year; // Keep the original year for other cases
+              : originalDate.year; 
 
       DateTime mappedDate =
             DateTime(mappedYear, originalDate.month, originalDate.day);
         date = mappedDate.toIso8601String().split('T').first;
-        // Convert to a custom format manually (yyyy-MM-dd)
+        
 String year = mappedDate.year.toString();
-String month = mappedDate.month.toString().padLeft(2, '0'); // Ensure two digits
-String day = mappedDate.day.toString().padLeft(2, '0'); // Ensure two digits
-
-// Combine into the desired format
+String month = mappedDate.month.toString().padLeft(2, '0'); 
+String day = mappedDate.day.toString().padLeft(2, '0'); 
 date = '$day-$month-$year';
         
     }
