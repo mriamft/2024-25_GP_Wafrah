@@ -147,16 +147,15 @@ class _SplashScreenState extends State<SplashScreen> {
                             builder: (context) => const InfoPage(),
                           ),
                         );
-                        // Delay resetting the drag value to create a smooth transition
+                        // Drag "ابدأ" for smooth transition
                         Future.delayed(const Duration(milliseconds: 300), () {
                           setState(() {
-                            _dragValue = 0.0; // Reset to initial position
+                            _dragValue = 0.0; 
                           });
                         });
                       } else {
-                        // Reset the position of the circle if the drag did not complete
                         setState(() {
-                          _dragValue = 0.0; // Reset to initial position
+                          _dragValue = 0.0;
                         });
                       }
                     },

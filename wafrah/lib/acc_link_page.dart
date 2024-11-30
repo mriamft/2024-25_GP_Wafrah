@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart'; // Import api service file
-import 'package:url_launcher/url_launcher.dart'; // Import URL launcher package
-import 'gpt_service.dart'; // Import gpt service file
-import 'package:uni_links/uni_links.dart'; // Import uni links package
-import 'dart:async'; // Import async
-import 'banks_page.dart'; // Import banks page file
-import 'storage_service.dart'; // Import storage service file
+import 'api_service.dart';
+import 'package:url_launcher/url_launcher.dart'; 
+import 'gpt_service.dart'; 
+import 'package:uni_links/uni_links.dart'; 
+import 'dart:async'; 
+import 'banks_page.dart'; 
+import 'storage_service.dart';
 
 class AccLinkPage extends StatefulWidget {
-  final String userName; // Accept userName from previous page
-  final String phoneNumber; // Accept phoneNumber from previous page
+  final String userName; 
+  final String phoneNumber; 
   final List<Map<String, dynamic>> accounts;
   final StorageService _storageService = StorageService();
 
@@ -25,22 +25,22 @@ class AccLinkPage extends StatefulWidget {
 }
 
 class _AccLinkPageState extends State<AccLinkPage> {
-  Color _arrowColor = const Color(0xFF3D3D3D); // Default arrow color
-  final ApiService _apiService = ApiService(); // Initialize ApiService
-  final GPTService _gptService = GPTService(); // Initialize GPT service
-  String _accessToken = ''; // Initialize access token
-  String _authorizationCode = ''; // Initialize authorization code
-  String _finalAccessToken = ''; // Initialize final access token
-  List<Map<String, dynamic>> _accounts = []; // List to store retrieved accounts
-  StreamSubscription? _sub; // For uni_links
-  bool _isLoading = false; // Loading state
-  bool _isCategorizing = false; // New state for categorization
+  Color _arrowColor = const Color(0xFF3D3D3D); 
+  final ApiService _apiService = ApiService(); 
+  final GPTService _gptService = GPTService(); 
+  String _accessToken = ''; 
+  String _authorizationCode = ''; 
+  String _finalAccessToken = '';
+  List<Map<String, dynamic>> _accounts = []; // to store retrieved accounts
+  StreamSubscription? _sub; 
+  bool _isLoading = false; 
+  bool _isCategorizing = false;
 
   @override
   void initState() {
     super.initState();
     _accounts = widget.accounts;
-    _initUniLinks(); // Initialize uni_links listener for deep links
+    _initUniLinks(); 
   }
 
   @override
@@ -49,7 +49,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
     super.dispose();
   }
 
-  // UniLinks Initialization
+  // UniLinks Initialization for deep links
   Future<void> _initUniLinks() async {
     _sub = linkStream.listen((String? link) async {
       if (link != null) {
@@ -60,15 +60,15 @@ class _AccLinkPageState extends State<AccLinkPage> {
           if (mounted) {
             setState(() {
               _authorizationCode = code;
-              _isLoading = true; // Show loading when returning from the browser
+              _isLoading = true; // show loading when returning from the browser
             });
           }
 
-          await _exchangeAuthorizationCode(); // Process authorization code
+          await _exchangeAuthorizationCode(); 
 
           if (mounted) {
             setState(() {
-              _isLoading = false; // Stop loading after processing
+              _isLoading = false; 
             });
           }
         }
@@ -81,7 +81,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
   // Main function to handle all steps in order (1 to 9)
   void _startApiProcess() async {
     setState(() {
-      _isLoading = true; // Start loading
+      _isLoading = true;
     });
 
     try {
@@ -110,7 +110,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
       _showErrorDialog('Error during API process: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Stop loading
+        _isLoading = false; 
       });
     }
   }
@@ -129,7 +129,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
         _finalAccessToken = token;
       });
 
-      // Step: Get Account Details (Before fetching transactions)
+      // Step 8: Get Account Details (Before fetching transactions)
       await _getAccountDetails();
     } catch (e) {
       _showErrorDialog('Error exchanging authorization code: $e');
@@ -156,10 +156,9 @@ class _AccLinkPageState extends State<AccLinkPage> {
 
         // Start Categorization State
         setState(() {
-          _isCategorizing = true; // Start categorization state
+          _isCategorizing = true; 
         });
 
-        // Categorize transactions
         List<Map<String, dynamic>> categorizedTransactions = [];
         for (var transaction in transactions) {
           String transactionInfo =
@@ -187,7 +186,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
 
       // End Categorization State
       setState(() {
-        _isCategorizing = false; // End categorization state
+        _isCategorizing = false; 
       });
 
       await widget._storageService
@@ -200,9 +199,8 @@ class _AccLinkPageState extends State<AccLinkPage> {
         _redirectToBanksPage();
       }
     } catch (e) {
-      // Catch Block for Errors
       setState(() {
-        _isCategorizing = false; // Ensure state resets on error
+        _isCategorizing = false; 
       });
       _showErrorDialog('Error fetching account details or balance: $e');
     }
@@ -222,7 +220,6 @@ class _AccLinkPageState extends State<AccLinkPage> {
     );
   }
 
-  // Show Error Dialog
   void _showErrorDialog(String errorMessage) {
     if (!mounted) return;
 
@@ -270,7 +267,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
                           builder: (context) => BanksPage(
                             userName: widget.userName,
                             phoneNumber: widget.phoneNumber,
-                            accounts: _accounts, // Pass the current accounts
+                            accounts: _accounts, 
                           ),
                         ),
                       );
@@ -313,8 +310,6 @@ class _AccLinkPageState extends State<AccLinkPage> {
                   ),
                 ),
               ),
-
-              // Instruction Text 2
               const Positioned(
                 top: 152,
                 left: 70,
@@ -331,8 +326,6 @@ class _AccLinkPageState extends State<AccLinkPage> {
                   ),
                 ),
               ),
-
-              // Instruction Text 3
               const Positioned(
                 top: 260,
                 left: 78,
@@ -373,8 +366,6 @@ class _AccLinkPageState extends State<AccLinkPage> {
                   ),
                 ),
               ),
-
-              // First SAMA Image
               Positioned(
                 left: 332,
                 top: 290.5,
@@ -384,8 +375,6 @@ class _AccLinkPageState extends State<AccLinkPage> {
                   height: 30,
                 ),
               ),
-
-              // Submit Button
               Positioned(
                 bottom: 40,
                 left: 55,
@@ -417,12 +406,10 @@ class _AccLinkPageState extends State<AccLinkPage> {
           ),
         ),
 
-        // Loading Overlay
-        // Loading Overlay
         if (_isLoading || _isCategorizing)
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
+              color: Colors.black.withOpacity(0.5),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -435,15 +422,15 @@ class _AccLinkPageState extends State<AccLinkPage> {
                   const SizedBox(height: 20),
                   Text(
                     _isCategorizing
-                        ? "يتم الآن تصنيف بياناتك" // Message during categorization
+                        ? "يتم الآن تصنيف بياناتك" 
                         : _authorizationCode.isEmpty
-                            ? "سيتم نقلك الى البنك" // Message before going to the website
-                            : "يتم الآن إسترجاع بياناتك من البنك", // Message after coming from the website
+                            ? "سيتم نقلك الى البنك" 
+                            : "يتم الآن إسترجاع بياناتك من البنك", 
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontFamily: 'GE-SS-Two-Bold',
-                      decoration: TextDecoration.none, // Remove underline
+                      decoration: TextDecoration.none, 
                     ),
                     textAlign: TextAlign.center,
                   ),
