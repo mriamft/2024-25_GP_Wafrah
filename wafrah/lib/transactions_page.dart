@@ -62,16 +62,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ? 2024
             : originalDate.year == 2017
                 ? 2025
-                : originalDate.year; 
+                : originalDate.year;
 
         DateTime mappedDate =
             DateTime(mappedYear, originalDate.month, originalDate.day);
 
-        
         if (mappedDate.isAfter(today)) {
           continue;
         }
-        
+
         date = mappedDate.toIso8601String().split('T').first;
       }
 
@@ -134,19 +133,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
             left: 10,
             right: 10,
             child: Directionality(
-              textDirection:
-                  TextDirection.rtl, 
+              textDirection: TextDirection.rtl,
               child: DropdownButton<String>(
-                alignment:
-                    AlignmentDirectional.topEnd, 
+                alignment: AlignmentDirectional.topEnd,
                 isExpanded: true,
                 value: selectedIBAN,
                 icon: const Icon(Icons.arrow_drop_down),
                 iconSize: 24,
                 elevation: 16,
                 style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
-                dropdownColor:
-                    const Color(0xFFFFFFFF), 
+                dropdownColor: const Color(0xFFFFFFFF),
                 underline: Container(
                   height: 2,
                   color: const Color(0xFF2C8C68),
@@ -309,7 +305,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFF2C8C68), 
+                color: Color(0xFF2C8C68),
                 shape: BoxShape.circle,
               ),
             ),
@@ -391,7 +387,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       const redCategories = [
         'المطاعم',
         'الصحة',
-        'التسوق',
+        'تسوق',
         'البقالة',
         'النقل',
         'السفر',
@@ -527,7 +523,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
     String translatedSubtype =
         transactionTypeTranslations[subtype] ?? 'غير معروف';
 
-    
     String date = dateTime.split('T').first;
     if (date != 'غير معروف') {
       DateTime originalDate = DateTime.tryParse(date) ?? DateTime.now();
@@ -535,17 +530,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
           ? 2024
           : originalDate.year == 2017
               ? 2025
-              : originalDate.year; 
+              : originalDate.year;
 
       DateTime mappedDate =
-            DateTime(mappedYear, originalDate.month, originalDate.day);
-        date = mappedDate.toIso8601String().split('T').first;
-        
-String year = mappedDate.year.toString();
-String month = mappedDate.month.toString().padLeft(2, '0'); 
-String day = mappedDate.day.toString().padLeft(2, '0'); 
-date = '$day-$month-$year';
-        
+          DateTime(mappedYear, originalDate.month, originalDate.day);
+      date = mappedDate.toIso8601String().split('T').first;
+
+      String year = mappedDate.year.toString();
+      String month = mappedDate.month.toString().padLeft(2, '0');
+      String day = mappedDate.day.toString().padLeft(2, '0');
+      date = '$day-$month-$year';
     }
 
     showDialog(

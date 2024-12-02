@@ -21,14 +21,14 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  bool _isArrowPressed = false; 
+  final bool _isArrowPressed = false;
   bool showErrorNotification = false;
   String errorMessage = '';
-  Color notificationColor = const Color(0xFFC62C2C); 
-  Color _buttonColor = Colors.white; 
+  Color notificationColor = const Color(0xFFC62C2C);
+  Color _buttonColor = Colors.white;
   Color _signupColor = Colors.white;
   bool _isPasswordVisible = false;
-  Timer? _notificationTimer; 
+  Timer? _notificationTimer;
   // State for phone number validation
   bool isPhoneNumberValid = true;
 
@@ -57,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _notificationTimer?.cancel(); 
+    _notificationTimer?.cancel();
     phoneNumberController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -123,7 +123,6 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     if (response.statusCode == 200) {
-
       // Navigate to OTP page after OTP is sent
       Navigator.push(
         context,
@@ -161,10 +160,10 @@ class _LoginPageState extends State<LoginPage> {
             child: Stack(
               children: [
                 Positioned(
-                  left: -1, 
-                  top: -99, 
+                  left: -1,
+                  top: -99,
                   child: Opacity(
-                    opacity: 0.05, 
+                    opacity: 0.05,
                     child: Image.asset(
                       'assets/images/logo.png',
                       width: 509,
@@ -237,8 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       TextField(
                         controller: passwordController,
-                        obscureText:
-                            !_isPasswordVisible, 
+                        obscureText: !_isPasswordVisible,
                         textAlign: TextAlign.right,
                         decoration: InputDecoration(
                           hintText: 'رمز المرور',
@@ -249,8 +247,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           border: InputBorder.none,
                           prefixIcon: Transform.translate(
-                            offset: const Offset(
-                                8, -5), 
+                            offset: const Offset(8, -5),
                             child: IconButton(
                               icon: Icon(
                                 _isPasswordVisible
@@ -265,8 +262,7 @@ class _LoginPageState extends State<LoginPage> {
                               },
                             ),
                           ),
-                          contentPadding: const EdgeInsets.only(
-                              left: 10), 
+                          contentPadding: const EdgeInsets.only(left: 10),
                         ),
                         style: const TextStyle(color: Colors.white),
                         cursorColor: Colors.white,
@@ -430,7 +426,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: 353,
                 height: 57,
                 decoration: BoxDecoration(
-                  color: notificationColor, 
+                  color: notificationColor,
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Row(
