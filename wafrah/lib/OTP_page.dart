@@ -124,7 +124,7 @@ class _OTPPageState extends State<OTPPage> {
     }
 
     final url =
-        Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/verify-otp');
+        Uri.parse('https://wafrah-07cdef9e1a20.herokuapp.com/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -164,7 +164,7 @@ class _OTPPageState extends State<OTPPage> {
   
   // Add the user in the database after 
   Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/adduser');
+    final url = Uri.parse('https://wafrah-07cdef9e1a20.herokuapp.com/adduser');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -224,7 +224,7 @@ class _OTPPageState extends State<OTPPage> {
   Future<void> resendOTP() async {
     if (canResend) {
       final url =
-          Uri.parse('https://6c69-82-167-83-148.ngrok-free.app/send-otp');
+          Uri.parse('https://wafrah-07cdef9e1a20.herokuapp.com/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
