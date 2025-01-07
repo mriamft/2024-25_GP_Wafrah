@@ -1,7 +1,7 @@
 // Import necessary libraries 
 const express = require('express'); // To create the server
 const mysql = require('mysql2'); // To connect and interact with the MySQL database
-const bcrypt = require('bcrypt'); // To hash the password 
+const bcrypt = require('bcryptjs'); // To hash the password 
 const twilio = require('twilio'); // Twilio SDK to manage OTP functionality
 const app = express();
 require('dotenv').config(); // Load environment variables from .env file
