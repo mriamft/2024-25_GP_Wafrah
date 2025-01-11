@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
+import 'goal_page.dart'; // Import your goal page for navigation
 import 'settings_page.dart';
 import 'transactions_page.dart';
 import 'home_page.dart';
 import 'banks_page.dart';
 
-class SavingPlanPage extends StatelessWidget {
+class SavingPlanPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
-  final List<Map<String, dynamic>> accounts; 
+  final List<Map<String, dynamic>> accounts;
 
   const SavingPlanPage({
     super.key,
     required this.userName,
     required this.phoneNumber,
-    this.accounts = const [], 
+    this.accounts = const [],
   });
+
+  @override
+  _SavingPlanPageState createState() => _SavingPlanPageState();
+}
+
+class _SavingPlanPageState extends State<SavingPlanPage> {
+  bool _isPressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,23 +42,93 @@ class SavingPlanPage extends StatelessWidget {
             ),
           ),
           const Positioned(
-            top: 380,
-            left: 19,
-            right: 19,
-            child: Center(
-              child: Text(
-                'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFF838383),
-                  fontSize: 20,
-                  fontFamily: 'GE-SS-Two-Bold',
+            left: 56,
+            top: 490,
+            child: Text(
+              'خطة إدخار لهدفك',
+              style: TextStyle(
+                color: Color(0xFF3D3D3D),
+                fontSize: 33,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'GE-SS-Two-Bold',
+              ),
+            ),
+          ),
+          const Positioned(
+            left: 39,
+            top: 550,
+            child: Text(
+              'حدد هدفك, والمدة المرغوبة فقط وستحصل على\nخطة إدخار مثالية ',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF3D3D3D),
+                fontSize: 15,
+                fontFamily: 'GE-SS-Two-Light',
+              ),
+            ),
+          ),
+
+          // Updated onTap for the continue button in SavingPlanPage
+          Positioned(
+            left: 61,
+            top: 610,
+            child: GestureDetector(
+              onTapDown: (_) {
+                setState(() {
+                  _isPressed = true;
+                });
+              },
+              onTapUp: (_) {
+                setState(() {
+                  _isPressed = false;
+                });
+              },
+              onTap: () {
+                // Pass userName and phoneNumber to GoalPage
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GoalPage(
+                      userName: widget.userName, // Pass userName
+                      phoneNumber: widget.phoneNumber, // Pass phoneNumber
+                    ),
+                  ),
+                );
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 274,
+                height: 45,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3D3D3D),
+                  borderRadius: BorderRadius.circular(100),
+                  boxShadow: _isPressed
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                ),
+                child: Center(
+                  child: Text(
+                    'استمرار',
+                    style: TextStyle(
+                      color: _isPressed ? Colors.grey[300] : Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'GE-SS-Two-Light',
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
+
+          // Bottom Navigation Bar
           Positioned(
-            bottom: 0, 
+            bottom: 0,
             left: 0,
             right: 0,
             child: Container(
@@ -74,9 +152,9 @@ class SavingPlanPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => SettingsPage(
-                          userName: userName,
-                          phoneNumber: phoneNumber,
-                          accounts: accounts,
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts,
                         ),
                       ),
                     );
@@ -87,9 +165,9 @@ class SavingPlanPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => TransactionsPage(
-                          userName: userName,
-                          phoneNumber: phoneNumber,
-                          accounts: accounts,
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts,
                         ),
                       ),
                     );
@@ -100,24 +178,24 @@ class SavingPlanPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => BanksPage(
-                          userName: userName,
-                          phoneNumber: phoneNumber,
-                          accounts: accounts,
+                          userName: widget.userName,
+                          phoneNumber: widget.phoneNumber,
+                          accounts: widget.accounts,
                         ),
                       ),
                     );
                   }),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        bottom: 10, right: 0), 
+                    padding: const EdgeInsets.only(bottom: 10, right: 0),
                     child: buildBottomNavItem(
-                        Icons.calendar_today, "خطة الإدخار", 3, onTap: () {
-                    }),
+                        Icons.calendar_today, "خطة الإدخار", 3,
+                        onTap: () {}),
                   ),
                 ],
               ),
             ),
           ),
+          // Bottom Circle Indicator
           Positioned(
             left: 339,
             top: 785,
@@ -125,11 +203,12 @@ class SavingPlanPage extends StatelessWidget {
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFF2C8C68), 
+                color: Color(0xFF2C8C68),
                 shape: BoxShape.circle,
               ),
             ),
           ),
+          // Home Button with gradient circle
           Positioned(
             bottom: 44,
             left: 0,
@@ -166,10 +245,11 @@ class SavingPlanPage extends StatelessWidget {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => HomePage(
-                                userName: userName,
-                                phoneNumber: phoneNumber,
-                                accounts: accounts)), 
+                          builder: (context) => HomePage(
+                              userName: widget.userName,
+                              phoneNumber: widget.phoneNumber,
+                              accounts: widget.accounts),
+                        ),
                       );
                     },
                   ),
@@ -182,7 +262,6 @@ class SavingPlanPage extends StatelessWidget {
     );
   }
 
-// Method to build the bottom navigation bar
   Widget buildBottomNavItem(IconData icon, String label, int index,
       {required VoidCallback onTap}) {
     return GestureDetector(

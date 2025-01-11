@@ -160,6 +160,51 @@ class _LoginPageState extends State<LoginPage> {
             child: Stack(
               children: [
                 Positioned(
+                  left: (MediaQuery.of(context).size.width - 200) /
+                      2, // Center horizontally
+                  top: 700, // Position near the bottom
+                  child: GestureDetector(
+                    onTap: () {
+                      // Directly navigate to HomePage, skipping the login and OTP process
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomePage(
+                            userName: 'Admin', // Use placeholder data
+                            phoneNumber:
+                                '+966543080394', // Placeholder phone number
+                            accounts: [], // Adjust if you want specific account data
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 200,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.blue, // Set color for the backdoor button
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 10,
+                            offset: const Offset(0.4, -5),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Backdoor Login',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
                   left: -1,
                   top: -99,
                   child: Opacity(

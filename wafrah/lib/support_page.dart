@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SupportPage extends StatefulWidget {
   final String phoneNumber;
@@ -12,15 +13,14 @@ class SupportPage extends StatefulWidget {
 }
 
 class _SupportPageState extends State<SupportPage> {
-  Color _arrowColor = const Color(0xFF3D3D3D); 
+  Color _arrowColor = const Color(0xFF3D3D3D);
   void _onArrowTap() {
     setState(() {
-      _arrowColor = Colors.grey; 
+      _arrowColor = Colors.grey;
     });
     Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
-        _arrowColor =
-            const Color(0xFF3D3D3D); 
+        _arrowColor = const Color(0xFF3D3D3D);
       });
       Navigator.pop(context);
     });
@@ -29,52 +29,152 @@ class _SupportPageState extends State<SupportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9), 
+      backgroundColor: Color(0xFFF9F9F9),
       body: Stack(
         children: [
-          // Back Arrow
+          Positioned(
+            top: -100,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              'assets/images/green_square2.png',
+              width: MediaQuery.of(context).size.width,
+              height: 289,
+              fit: BoxFit.cover,
+            ),
+          ),
           Positioned(
             top: 60,
             right: 15,
             child: GestureDetector(
-              onTap: _onArrowTap,
+              onTap: () {
+                Navigator.pop(context);
+              },
               child: Icon(
                 Icons.arrow_forward_ios,
-                color: _arrowColor, 
+                color: Colors.white,
                 size: 28,
               ),
             ),
           ),
-
-          // Title
-          const Positioned(
+          Positioned(
             top: 58,
-            left: 142,
+            left: 140,
             child: Text(
-              'التواصل مع الدعم', 
+              'التواصل مع الدعم',
               style: TextStyle(
-                color: Color(0xFF3D3D3D),
+                color: Colors.white,
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
                 fontFamily: 'GE-SS-Two-Bold',
               ),
             ),
           ),
-
-          // Centered Text
-          const Center(
-            child: Text(
-              'هذه الخاصية سوف تتوفر قريبًا \n Next Sprint', 
-              style: TextStyle(
-                fontFamily: 'GE-SS-Two-Bold',
-                fontSize: 20,
-                color: Color(0xFF838383),
+          Positioned(
+            top: 243,
+            left: 121,
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'أهلًا ',
+                    style: TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 35,
+                      fontFamily: 'GE-SS-Two-Bold',
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'عبير',
+                    style: TextStyle(
+                      color: Color(0xFF2C8C68),
+                      fontSize: 35,
+                      fontFamily: 'GE-SS-Two-Bold',
+                    ),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center, 
+            ),
+          ),
+          Positioned(
+            top: 294,
+            left: 20,
+            child: Text(
+              'كيف نقدر نساعدك؟',
+              style: TextStyle(
+                color: Color(0xFF3D3D3D),
+                fontSize: 35,
+                fontFamily: 'GE-SS-Two-Bold',
+              ),
+            ),
+          ),
+          Positioned(
+            top: 417,
+            left: 205,
+            child: Text(
+              'احنا بخدمتك عبر',
+              style: TextStyle(
+                color: Color(0xFF3D3D3D),
+                fontSize: 20,
+                fontFamily: 'GE-SS-Two-Light',
+              ),
+            ),
+          ),
+          Positioned(
+            top: 521,
+            left: 160,
+            child: Text(
+              '.نرد عادةً في أقل من 10 دقائق',
+              style: TextStyle(
+                color: Color(0xFF838383),
+                fontSize: 15,
+                fontFamily: 'GE-SS-Two-Light',
+              ),
+            ),
+          ),
+          Positioned(
+            left: 15,
+            top: 460,
+            child: GestureDetector(
+              onTap: () {
+                launchEmail();
+              },
+              child: Container(
+                width: 332,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Color(0xFFD9D9D9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    'تواصل معنا عبر البريد الالكتروني',
+                    style: TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 20,
+                      fontFamily: 'GE-SS-Two-Light',
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void launchEmail() async {
+    print('Launching email...');
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'WafrahApplication@gmail.com',
+      query: Uri.encodeFull('subject=التواصل مع الدعم'),
+    );
+
+    if (await canLaunch(emailLaunchUri.toString())) {
+      await launch(emailLaunchUri.toString());
+    } else {
+      print('Could not launch $emailLaunchUri');
+    }
   }
 }
