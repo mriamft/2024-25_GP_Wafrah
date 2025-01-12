@@ -248,3 +248,29 @@ app.post('/checkPhoneNumber', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
+// Delete user account
+app.delete('/delete-user', (req, res) => {
+  const { phoneNumber } = req.body;
+
+  // Check if phoneNumber is provided
+  if (!phoneNumber) {
+    return res.status(400).send('Phone number is required');
+  }
+
+  const sql = 'DELETE FROM user WHERE phoneNumber = ?';
+
+  db.query(sql, [phoneNumber], (err, result) => {
+    if (err) {
+      console.error('Database error during user deletion:', err);
+      res.status(500).send('Server error during user deletion');
+      return;
+    }
+
+    if (result.affectedRows > 0) {
+      res.send('User deleted successfully');
+    } else {
+      res.status(404).send('User not found');
+    }
+  });
+});
+

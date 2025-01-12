@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:wafrah/main.dart';
+import 'package:wafrah/storage_service.dart';
 import 'saving_plan_page.dart';
 import 'transactions_page.dart';
 import 'home_page.dart';
@@ -106,6 +110,124 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+void _onDeleteAccount() {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text(
+        'تأكيد حذف الحساب',
+        textAlign: TextAlign.right,
+        style: TextStyle(
+          fontFamily: 'GE-SS-Two-Bold',
+          fontSize: 20,
+          color: Color(0xFF3D3D3D),
+        ),
+      ),
+      content: const Text(
+        'هل أنت متأكد أنك تريد حذف الحساب؟ لن تتمكن من استعادته لاحقًا.',
+        textAlign: TextAlign.right,
+        style: TextStyle(
+          fontFamily: 'GE-SS-Two-Light',
+          fontSize: 16,
+          color: Color(0xFF3D3D3D),
+        ),
+      ),
+      actions: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'إلغاء',
+                style: TextStyle(
+                  fontFamily: 'GE-SS-Two-Light',
+                  color: Color(0xFF838383),
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            const SizedBox(width: 20),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                try {
+                  final response = await http.delete(
+                    Uri.parse('https://0cec-2a00-5400-e052-1180-a40c-8718-f2e0-463e.ngrok-free.app/delete-user'),
+                    headers: {'Content-Type': 'application/json'},
+                    body: jsonEncode({'phoneNumber': widget.phoneNumber}),
+                  );
+
+                  if (response.statusCode == 200) {
+                  // Delete local data for the user from the emulator
+                    final storageService = StorageService();
+                    await storageService.clearUserData(widget.phoneNumber);
+                    
+                    // Navigate to main page before showing Flushbar
+                    navigatorKey.currentState?.pushNamed('/');
+
+                    // Show success message
+                    Flushbar(
+                      message: 'تم حذف الحساب بنجاح',
+                      messageText: const Text(
+                        'تم حذف الحساب بنجاح',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                      backgroundColor: const Color(0xFF0FBE7C),
+                      duration: const Duration(seconds: 5),
+                      flushbarPosition: FlushbarPosition.TOP,
+                      margin: const EdgeInsets.all(8.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ).show(navigatorKey.currentState!.overlay!.context);
+                  } else {
+                    // Show failure message
+                    Flushbar(
+                      message: 'فشل في حذف الحساب. الرجاء المحاولة لاحقًا.',
+                      messageText: const Text(
+                        'فشل في حذف الحساب. الرجاء المحاولة لاحقًا.',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 5),
+                      flushbarPosition: FlushbarPosition.TOP,
+                      margin: const EdgeInsets.all(8.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ).show(navigatorKey.currentState!.overlay!.context);
+                  }
+                } catch (e) {
+                }
+              },
+              child: const Text(
+                'حذف الحساب',
+                style: TextStyle(
+                  fontFamily: 'GE-SS-Two-Light',
+                  fontSize: 18,
+                  color: Color(0xFFDD2C35),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+
+
+
   void _onLogout() {
     showDialog(
       context: context,
@@ -183,6 +305,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -563,36 +686,33 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          // Delete Account button
-          Positioned(
-            bottom: 150, 
-            left: (MediaQuery.of(context).size.width - 194) / 2,
-            child: SizedBox(
-              width: 194,
-              height: 39,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF9F9F9),
-                  border: Border.all(color: const Color(0xFFDD2C35), width: 1),
-                  borderRadius: BorderRadius.circular(100), 
-                ),
-                child: TextButton(
-                  onPressed: () {
-                    // for upcoming sprints
-                  },
-                  child: const Text(
-                    'حذف الحساب',
-                    style: TextStyle(
-                      color: Color(0xFFDD2C35),
-                      fontSize: 15,
-                      fontFamily:
-                          'GE-SS-Two-Light',
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+// Delete Account button
+Positioned(
+  bottom: 150, 
+  left: (MediaQuery.of(context).size.width - 194) / 2,
+  child: SizedBox(
+    width: 194,
+    height: 39,
+    child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFF9F9F9),
+        foregroundColor: const Color(0xFFDD2C35),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(100),
+          side: const BorderSide(color: Color(0xFFDD2C35), width: 1),
+        ),
+      ),
+      onPressed: _onDeleteAccount, // Call the delete account function
+      child: const Text(
+        'حذف الحساب',
+        style: TextStyle(
+          fontSize: 15,
+          fontFamily: 'GE-SS-Two-Light',
+        ),
+      ),
+    ),
+  ),
+),
 
           Positioned(
             bottom: 44, 
@@ -671,3 +791,4 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
+
