@@ -80,10 +80,10 @@ class _GoalPageState extends State<GoalPage> {
               child: Column(
                 children: [
                   const SizedBox(height: 55),
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(left: 68),
                         child: Text(
                           'المدة المرغوبة',
@@ -95,7 +95,7 @@ class _GoalPageState extends State<GoalPage> {
                           ),
                         ),
                       ),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(right: 60),
                         child: Text(
                           'المبلغ المستهدف',
@@ -133,8 +133,8 @@ class _GoalPageState extends State<GoalPage> {
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5),
-                              borderSide: BorderSide(
-                                  color: const Color(0xFFAEAEAE), width: 1),
+                              borderSide: const BorderSide(
+                                  color: Color(0xFFAEAEAE), width: 1),
                             ),
                             filled: true,
                             fillColor: const Color(0xFFF9F9F9),
@@ -162,8 +162,8 @@ class _GoalPageState extends State<GoalPage> {
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5),
-                              borderSide: BorderSide(
-                                  color: const Color(0xFFAEAEAE), width: 1),
+                              borderSide: const BorderSide(
+                                  color: Color(0xFFAEAEAE), width: 1),
                             ),
                             filled: true,
                             fillColor: const Color(0xFFF9F9F9),

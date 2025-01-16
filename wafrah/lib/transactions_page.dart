@@ -364,6 +364,138 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
+  void _showCategorySelection(BuildContext context) {
+    // Define categories and their icons
+    Map<String, IconData> categories = {
+      'المطاعم': Icons.restaurant,
+      'التعليم': Icons.school,
+      'الصحة': Icons.local_hospital,
+      'تسوق': Icons.shopping_bag,
+      'البقالة': Icons.local_grocery_store,
+      'النقل': Icons.directions_bus,
+      'السفر': Icons.flight,
+      'المدفوعات الحكومية': Icons.account_balance,
+      'العمل الخيري': Icons.volunteer_activism,
+      'الاستثمار': Icons.trending_up,
+      'الإيجار': Icons.home,
+      'القروض': Icons.money,
+      'الراتب': Icons.account_balance_wallet,
+      'التحويلات': Icons.swap_horiz,
+    };
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF308C64),
+          title: Stack(
+            children: [
+              const Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'تصنيف العملية',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: -17,
+                top: -18,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Categories centered
+                ...categories.entries.map((entry) {
+                  String category = entry.key;
+                  IconData icon = entry.value;
+
+                  return GestureDetector(
+                    onTap: () {
+                      // Handle category selection
+                      setState(() {
+                        // Change the state if needed to highlight the selected category
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD9D9D9),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center, // Center items
+                        children: [
+                          Text(
+                            category,
+                            style: const TextStyle(
+                              fontFamily: 'GE-SS-Two-Light',
+                              fontSize: 16,
+                              color: Color(0xFF3D3D3D),
+                            ),
+                          ),
+                          const SizedBox(width: 10), // Spacing
+                          Icon(icon,
+                              color:
+                                  const Color(0xFF3D3D3D)), // Icon on the right
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+                const SizedBox(
+                    height: 10), // Additional spacing before the button
+                // Center-aligned button at the bottom
+                Align(
+                  alignment: Alignment.center,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Handle the classification action
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'تصنيف',
+                      style: TextStyle(
+                        color: Color(0xFFD9D9D9),
+                        fontFamily: 'GE-SS-Two-Light',
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF3D3D3D),
+                      minimumSize: const Size(100, 40), // Adjust size if needed
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildTransactionCard(Map<String, dynamic> transaction) {
     String amount = transaction['Amount']?['Amount'] ?? '0.00';
     String subtype =
@@ -383,7 +515,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
         subtype == 'Refund') {
       amountColor = Colors.green; // Ingoing
     } else {
-      // Based on the category for notApplicable transactions
       const redCategories = [
         'المطاعم',
         'الصحة',
@@ -419,6 +550,85 @@ class _TransactionsPageState extends State<TransactionsPage> {
     };
 
     IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
+
+    if (category == 'أخرى') {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFD9D9D9),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 10),
+            const Icon(Icons.arrow_back_ios_new,
+                color: Color(0xFF3D3D3D), size: 15),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'ر.س',
+                        style: TextStyle(
+                          color: amountColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'GE-SS-Two-Light',
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        amount,
+                        style: TextStyle(
+                          color: amountColor,
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'GE-SS-Two-Bold',
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          _showCategorySelection(
+                              context); // Show the category selection dialog
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFADADAD),
+                          minimumSize: const Size(133, 30),
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'هذه العملية لم تصنف',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF404040),
+                            fontFamily: 'GE-SS-Two-Light',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Icon(categoryIcon, color: const Color(0xFF3D3D3D), size: 24),
+          ],
+        ),
+      );
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),

@@ -29,7 +29,7 @@ class _SupportPageState extends State<SupportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9),
+      backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
           Positioned(
@@ -50,14 +50,14 @@ class _SupportPageState extends State<SupportPage> {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Icon(
+              child: const Icon(
                 Icons.arrow_forward_ios,
                 color: Colors.white,
                 size: 28,
               ),
             ),
           ),
-          Positioned(
+          const Positioned(
             top: 58,
             left: 140,
             child: Text(
@@ -73,7 +73,7 @@ class _SupportPageState extends State<SupportPage> {
             top: 243,
             left: 121,
             child: RichText(
-              text: TextSpan(
+              text: const TextSpan(
                 children: [
                   TextSpan(
                     text: 'أهلًا ',
@@ -95,7 +95,7 @@ class _SupportPageState extends State<SupportPage> {
               ),
             ),
           ),
-          Positioned(
+          const Positioned(
             top: 294,
             left: 20,
             child: Text(
@@ -107,7 +107,7 @@ class _SupportPageState extends State<SupportPage> {
               ),
             ),
           ),
-          Positioned(
+          const Positioned(
             top: 417,
             left: 205,
             child: Text(
@@ -119,7 +119,7 @@ class _SupportPageState extends State<SupportPage> {
               ),
             ),
           ),
-          Positioned(
+          const Positioned(
             top: 521,
             left: 160,
             child: Text(
@@ -142,10 +142,10 @@ class _SupportPageState extends State<SupportPage> {
                 width: 332,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Color(0xFFD9D9D9),
+                  color: const Color(0xFFD9D9D9),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text(
                     'تواصل معنا عبر البريد الالكتروني',
                     style: TextStyle(
