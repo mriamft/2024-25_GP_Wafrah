@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async'; // For Timer
 import 'settings_page.dart';
 import 'banks_page.dart';
 import 'saving_plan_page.dart';
@@ -22,6 +23,28 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage> {
   String selectedIBAN = "الكل";
+  String? selectedCategory; // Field to track the selected category
+  bool _showNotification = false;
+  String _notificationMessage = '';
+  Color _notificationColor = Colors.red;
+
+// Show a top notification for 5 seconds
+  void showNotification(String message, {Color color = Colors.red}) {
+    setState(() {
+      _notificationMessage = message;
+      _notificationColor = color;
+      _showNotification = true;
+    });
+
+    // Auto-dismiss after 5 seconds
+    Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          _showNotification = false;
+        });
+      }
+    });
+  }
 
   List<Map<String, dynamic>> getGroupedTransactions() {
     List<Map<String, dynamic>> allTransactions = [];
@@ -359,13 +382,50 @@ class _TransactionsPageState extends State<TransactionsPage> {
               ],
             ),
           ),
+          if (_showNotification)
+            Positioned(
+              top: 23,
+              left: 19,
+              child: Container(
+                width: 353,
+                height: 57,
+                decoration: BoxDecoration(
+                  color: _notificationColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      // Wrap the Text widget with Expanded so text doesn't overflow
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: Text(
+                          _notificationMessage,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.right,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  void _showCategorySelection(BuildContext context) {
-    // Define categories and their icons
+  void _showCategorySelection(
+      BuildContext context, Map<String, dynamic> transaction) {
+    String? dialogSelectedCategory;
+
     Map<String, IconData> categories = {
       'المطاعم': Icons.restaurant,
       'التعليم': Icons.school,
@@ -385,7 +445,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF308C64),
           title: Stack(
@@ -405,91 +465,194 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 left: -17,
                 top: -18,
                 child: IconButton(
-                  icon: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                  ),
+                  icon: const Icon(Icons.close, color: Colors.white),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
             ],
           ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Categories centered
-                ...categories.entries.map((entry) {
-                  String category = entry.key;
-                  IconData icon = entry.value;
+          content: StatefulBuilder(
+            builder: (BuildContext context, setStateDialog) {
+              return Container(
+                // Limit the total height of the dialog
+                constraints: const BoxConstraints(maxHeight: 500),
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Scrollable area with categories
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: categories.entries.map((entry) {
+                            final String category = entry.key;
+                            final IconData icon = entry.value;
 
-                  return GestureDetector(
-                    onTap: () {
-                      // Handle category selection
-                      setState(() {
-                        // Change the state if needed to highlight the selected category
-                      });
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      padding: const EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD9D9D9),
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                            final bool isSelected =
+                                (dialogSelectedCategory == category);
+
+                            return GestureDetector(
+                              onTap: () {
+                                setStateDialog(() {
+                                  dialogSelectedCategory = category;
+                                });
+                              },
+                              child: Container(
+                                margin:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                padding: const EdgeInsets.all(12.0),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? const Color(0xFFA4A4A4)
+                                      : const Color(0xFFD9D9D9),
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      category,
+                                      style: const TextStyle(
+                                        fontFamily: 'GE-SS-Two-Light',
+                                        fontSize: 16,
+                                        color: Color(0xFF3D3D3D),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Icon(icon, color: const Color(0xFF3D3D3D)),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
-                      child: Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.center, // Center items
-                        children: [
-                          Text(
-                            category,
-                            style: const TextStyle(
-                              fontFamily: 'GE-SS-Two-Light',
-                              fontSize: 16,
-                              color: Color(0xFF3D3D3D),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    ElevatedButton(
+                      onPressed: () {
+                        // If user did NOT choose a category => error
+                        if (dialogSelectedCategory == null) {
+                          showNotification(
+                            "حدث خطأ ما\nلم يتم اختيار تصنيف العملية",
+                            color: Colors.red,
+                          );
+                          return;
+                        }
+
+                        // Show confirmation dialog
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text(
+                              'تأكيد التصنيف',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                fontFamily: 'GE-SS-Two-Bold',
+                                fontSize: 20,
+                                color: Color(0xFF3D3D3D),
+                              ),
                             ),
+                            content: Text(
+                              'هل أنت متأكد من تصنيف العملية إلى $dialogSelectedCategory؟',
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(
+                                fontFamily: 'GE-SS-Two-Light',
+                                fontSize: 16,
+                                color: Color(0xFF3D3D3D),
+                              ),
+                            ),
+                            actions: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // "إلغاء" button
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // close confirm
+                                    },
+                                    child: const Text(
+                                      'إلغاء',
+                                      style: TextStyle(
+                                        fontFamily: 'GE-SS-Two-Light',
+                                        color: Color(0xFF838383),
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  // "تصنيف" button
+                                  TextButton(
+                                    onPressed: () async {
+                                      // 1) Update the transaction's category
+                                      setState(() {
+                                        transaction['Category'] =
+                                            dialogSelectedCategory!;
+                                      });
+
+                                      // 2) Save the entire updated 'widget.accounts'
+                                      //    in local storage so other pages also see the new category
+                                      // (Make sure you have StorageService accessible in this page)
+                                      // e.g.:
+                                      // await _storageService.saveAccountDataLocally(widget.phoneNumber, widget.accounts);
+
+                                      // 3) Close both dialogs
+                                      Navigator.pop(context); // confirmation
+                                      Navigator.pop(
+                                          context); // category selection
+
+                                      // 4) Optionally show success
+                                      Future.delayed(
+                                          const Duration(milliseconds: 200),
+                                          () {
+                                        showNotification(
+                                          "تم تصنيف العملية إلى $dialogSelectedCategory بنجاح",
+                                          color: Colors.green,
+                                        );
+                                      });
+                                    },
+                                    child: const Text(
+                                      'تصنيف',
+                                      style: TextStyle(
+                                        fontFamily: 'GE-SS-Two-Light',
+                                        fontSize: 18,
+                                        color: Color(0xFF2C8C68),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 10), // Spacing
-                          Icon(icon,
-                              color:
-                                  const Color(0xFF3D3D3D)), // Icon on the right
-                        ],
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3D3D3D),
+                        minimumSize: const Size(100, 40),
+                      ),
+                      child: const Text(
+                        'تصنيف',
+                        style: TextStyle(
+                          color: Color(0xFFD9D9D9),
+                          fontFamily: 'GE-SS-Two-Light',
+                        ),
                       ),
                     ),
-                  );
-                }).toList(),
-                const SizedBox(
-                    height: 10), // Additional spacing before the button
-                // Center-aligned button at the bottom
-                Align(
-                  alignment: Alignment.center,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Handle the classification action
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'تصنيف',
-                      style: TextStyle(
-                        color: Color(0xFFD9D9D9),
-                        fontFamily: 'GE-SS-Two-Light',
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3D3D3D),
-                      minimumSize: const Size(100, 40), // Adjust size if needed
-                    ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         );
       },
@@ -598,8 +761,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          _showCategorySelection(
-                              context); // Show the category selection dialog
+                          _showCategorySelection(context,
+                              transaction); // Show the category selection dialog
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFADADAD),
