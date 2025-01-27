@@ -6,7 +6,7 @@ import 'package:wafrah/home_page.dart';
 import 'package:wafrah/pass_confirmation_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:wafrah/storage_service.dart';
-
+ 
 class OTPPage extends StatefulWidget {
   final String phoneNumber;
   final String firstName;
@@ -14,7 +14,7 @@ class OTPPage extends StatefulWidget {
   final String password;
   final bool isSignUp;
   final bool isForget;
-
+ 
   const OTPPage({
     super.key,
     required this.phoneNumber,
@@ -24,11 +24,11 @@ class OTPPage extends StatefulWidget {
     required this.isSignUp,
     required this.isForget,
   });
-
+ 
   @override
   _OTPPageState createState() => _OTPPageState();
 }
-
+ 
 class _OTPPageState extends State<OTPPage> {
   final TextEditingController otpController1 = TextEditingController();
   final TextEditingController otpController2 = TextEditingController();
@@ -36,40 +36,40 @@ class _OTPPageState extends State<OTPPage> {
   final TextEditingController otpController4 = TextEditingController();
   final TextEditingController otpController5 = TextEditingController();
   final TextEditingController otpController6 = TextEditingController();
-
+ 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-
+ 
   bool showErrorNotification = false;
   String errorMessage = '';
   Color notificationColor = Colors.red;
   Timer? _timer; // Nullable Timer instance
   Timer? _notificationTimer; // Timer for showNotification timeout
-
+ 
   bool canResend = false;
-  int resendTimeLeft = 120; // For the resend function
-
+  int resendTimeLeft = 120; // 2 minutes in seconds
+ 
   @override
   void initState() {
     super.initState();
     startResendOTPCountdown();
   }
-
+ 
   @override
   void dispose() {
     _timer?.cancel(); // Cancel the resend timer
-    _notificationTimer?.cancel(); 
-
+    _notificationTimer?.cancel(); // Cancel the notification timer if active
+ 
+    // Dispose text controllers
     otpController1.dispose();
     otpController2.dispose();
     otpController3.dispose();
     otpController4.dispose();
     otpController5.dispose();
     otpController6.dispose();
-
+ 
     super.dispose();
   }
-
-  //Timer for resend the OTP
+ 
   void startResendOTPCountdown() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -86,7 +86,7 @@ class _OTPPageState extends State<OTPPage> {
       }
     });
   }
-
+ 
   String getOTP() {
     return otpController1.text +
         otpController2.text +
@@ -95,16 +95,17 @@ class _OTPPageState extends State<OTPPage> {
         otpController5.text +
         otpController6.text;
   }
-
+ 
   void showNotification(String message, {Color color = Colors.red}) {
-    if (!mounted) return; 
-    
+    if (!mounted) return; // Ensure widget is still in the widget tree
+ 
     setState(() {
       errorMessage = message;
       notificationColor = color;
       showErrorNotification = true;
     });
-
+ 
+    // Cancel any previous notification timer
     _notificationTimer?.cancel();
     _notificationTimer = Timer(const Duration(seconds: 5), () {
       if (mounted) {
@@ -114,17 +115,16 @@ class _OTPPageState extends State<OTPPage> {
       }
     });
   }
-
-  // To verifty the OTP that is sent to the user and in the server
+ 
   Future<void> verifyOTP() async {
     String otp = getOTP();
     if (otp.isEmpty || otp.length != 6) {
       showNotification('يرجى إدخال رمز التحقق المؤلف من 6 أرقام.');
       return;
     }
-
+ 
     final url =
-        Uri.parse('https://wafrah-07cdef9e1a20.herokuapp.com/verify-otp');
+        Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -133,7 +133,7 @@ class _OTPPageState extends State<OTPPage> {
         'otp': otp,
       }),
     );
-
+ 
     if (response.statusCode == 200) {
       showNotification('نجحت العملية\nتم التحقق بنجاح',
           color: const Color(0xFF0FBE7C));
@@ -161,53 +161,115 @@ class _OTPPageState extends State<OTPPage> {
           'حدث خطأ ما\nرمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.');
     }
   }
-  
-  // Add the user in the database after 
-  Future<void> addUserToDatabase() async {
-    final url = Uri.parse('https://wafrah-07cdef9e1a20.herokuapp.com/adduser');
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        'userName': '${widget.firstName} ${widget.lastName}',
-        'phoneNumber': widget.phoneNumber,
-        'password': widget.password,
-      }),
-    );
-
-    if (response.statusCode == 200) {
+ 
+Future<void> addUserToDatabase() async {
+  final url = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/adduser');
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({
+      'userName': '${widget.firstName} ${widget.lastName}',
+      'phoneNumber': widget.phoneNumber,
+      'password': widget.password,
+    }),
+  );
+ 
+     if (response.statusCode == 200) {
       showNotification("نجحت العملية\nتم التسجيل بنجاح",
           color: const Color(0xFF0FBE7C));
-
-      Timer(const Duration(seconds: 2), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(
-              userName: '${widget.firstName} ${widget.lastName}',
-              phoneNumber: widget.phoneNumber,
-            ),
-          ),
+ 
+    // Wait for 2 seconds before proceeding to load accounts and redirect
+    Timer(const Duration(seconds: 2), () async {
+      List<Map<String, dynamic>> accounts = [];
+ 
+      try {
+        // First, try to load accounts data from the server
+        final accountsUrl = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/accounts');
+ 
+        final accountsResponse = await http.get(
+          accountsUrl,
+          headers: {"Content-Type": "application/json"},
         );
-      });
-    } else {
-      showNotification('فشل في إضافة المستخدم. يرجى المحاولة مرة أخرى.');
-    }
+ 
+        if (accountsResponse.statusCode == 200) {
+          // Successfully fetched accounts data from the server
+          accounts = List<Map<String, dynamic>>.from(jsonDecode(accountsResponse.body));
+          print('Accounts loaded from server after adding user: $accounts');
+        } else {
+          // Failed to fetch from server, load locally
+          print('Failed to fetch accounts from server, loading from local storage.');
+          accounts = await StorageService().loadAccountDataLocally(widget.phoneNumber);
+        }
+      } catch (e) {
+        // Handle any errors that occur during the server request
+        print('Error retrieving accounts from server: $e');
+        // Fall back to local storage in case of errors
+        try {
+          accounts = await StorageService().loadAccountDataLocally(widget.phoneNumber);
+          print('Accounts loaded from local storage after adding user: $accounts');
+        } catch (e) {
+          print('Error loading accounts after adding user: $e');
+        }
+      }
+ 
+      // Navigate to HomePage with the retrieved account data
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            userName: '${widget.firstName} ${widget.lastName}',
+            phoneNumber: widget.phoneNumber,
+            accounts: accounts,
+          ),
+       ),
+      );
+    });
+  } else {
+    showNotification('فشل في إضافة المستخدم. يرجى المحاولة مرة أخرى.');
   }
-
-  // Redirect the user to the home page after verfaction
-  Future<void> _redirectToHomePage() async {
-    List<Map<String, dynamic>> accounts = [];
-
-    try {
-      // Load the accounts from the storage 
-      accounts =
-          await StorageService().loadAccountDataLocally(widget.phoneNumber);
-      print('Accounts loaded after OTP verification: $accounts');
-    } catch (e) {
-      print('Error loading accounts after OTP verification: $e');
-    }
-
+}
+ 
+Future<void> _redirectToHomePage() async {
+      List<Map<String, dynamic>> accounts = [];
+ 
+      try {
+        // First, try to load accounts data from the server
+        final accountsUrl = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/accounts');
+ 
+        final accountsResponse = await http.get(
+          accountsUrl,
+          headers: {"Content-Type": "application/json"},
+        );
+ 
+        if (accountsResponse.statusCode == 200) {
+try {
+        // First, try to load accounts data from the server
+        final accountsUrl = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/accounts');
+ 
+        final accountsResponse = await http.get(
+          accountsUrl,
+          headers: {"Content-Type": "application/json"},
+        );
+ 
+        if (accountsResponse.statusCode == 200) {
+          // Successfully fetched accounts data from the server
+          accounts = List<Map<String, dynamic>>.from(jsonDecode(accountsResponse.body));
+          print('Accounts loaded from server after adding user: $accounts');
+        } else {
+          // Failed to fetch from server, load locally
+          print('Failed to fetch accounts from server, loading from local storage.');
+        }
+      } catch (e) {
+        // Handle any errors that occur during the server request
+        print('Error retrieving accounts from server: $e');
+ 
+      }
+        }
+      } catch (e) {
+        // Handle any errors that occur during the server request
+        print('Error retrieving accounts from server: $e');
+      }
+ 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -219,18 +281,17 @@ class _OTPPageState extends State<OTPPage> {
       ),
     );
   }
-
-  // Resend the OTP fater 2 minutes
+ 
   Future<void> resendOTP() async {
     if (canResend) {
       final url =
-          Uri.parse('https://wafrah-07cdef9e1a20.herokuapp.com/send-otp');
+          Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: json.encode({'phoneNumber': widget.phoneNumber}),
       );
-
+ 
       if (response.statusCode == 200) {
         setState(() {
           resendTimeLeft = 180;
@@ -243,14 +304,14 @@ class _OTPPageState extends State<OTPPage> {
       }
     }
   }
-
+ 
   String formatPhoneNumber(String phoneNumber) {
     if (phoneNumber.length > 4) {
       return '0${phoneNumber.substring(4)}';
     }
     return phoneNumber;
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -279,7 +340,7 @@ class _OTPPageState extends State<OTPPage> {
               ),
             ),
             Positioned(
-              left: 160,
+              left: 140,
               top: 130,
               child: Image.asset(
                 'assets/images/logo.png',
@@ -407,7 +468,7 @@ class _OTPPageState extends State<OTPPage> {
       ),
     );
   }
-
+ 
   Widget _otpField(TextEditingController controller) {
     return Container(
       width: 40,

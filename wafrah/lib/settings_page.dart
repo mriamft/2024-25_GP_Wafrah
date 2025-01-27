@@ -155,7 +155,7 @@ void _onDeleteAccount() {
                 Navigator.of(context).pop(); // Close the dialog
                 try {
                   final response = await http.delete(
-                    Uri.parse('https://0cec-2a00-5400-e052-1180-a40c-8718-f2e0-463e.ngrok-free.app/delete-user'),
+                    Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/delete-user'),
                     headers: {'Content-Type': 'application/json'},
                     body: jsonEncode({'phoneNumber': widget.phoneNumber}),
                   );

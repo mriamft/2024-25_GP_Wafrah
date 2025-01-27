@@ -81,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final url = Uri.parse('https://wafrah-07cdef9e1a20.herokuapp.com/login');
+      final url = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/login');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -115,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
   // Method to send OTP to the user and navigate to OTPPage
   Future<void> sendOTP(
       String phoneNumber, String password, String fullName) async {
-    final url = Uri.parse('https://wafrah-07cdef9e1a20.herokuapp.com/send-otp');
+    final url = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/send-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
