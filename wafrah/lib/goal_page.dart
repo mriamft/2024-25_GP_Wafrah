@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'saving_plan_page2.dart'; // Import SavingPlanPage2
 
 class GoalPage extends StatefulWidget {
   final String userName;
@@ -192,13 +193,14 @@ class _GoalPageState extends State<GoalPage> {
                 });
               },
               onTap: () {
+                // Navigate to SavingPlanPage2 instead of GoalPage
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => GoalPage(
-                      userName: widget.userName,
+                    builder: (context) => SavingPlanPage2(
+                      userName: widget.userName, // Pass userName
                       phoneNumber: widget.phoneNumber,
-                    ),
+                    ), // Updated route
                   ),
                 );
               },
