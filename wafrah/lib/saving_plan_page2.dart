@@ -196,7 +196,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
             top: 300,
             left: 10,
             right: 10,
-            child: Container(
+            child: SizedBox(
               height: 365, // Set a larger height for the scrollable area
               child: SingleChildScrollView(
                 child: Padding(
@@ -205,12 +205,12 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                   child: Center(
                     // Center the content within the scrollable area
                     child: Wrap(
-                      spacing: 20, // Space between squares
-                      runSpacing: 50, // Space between rows
+                      spacing: 27, // Space between squares
+                      runSpacing: 30, // Space between rows
                       children: List.generate(categories.length, (index) {
-                        return Container(
+                        return SizedBox(
                           width: (MediaQuery.of(context).size.width / 2) -
-                              30, // Half the width minus spacing
+                              40, // Half the width minus spacing
                           child: buildCategorySquare(
                               categories[index], percentages[index]),
                         );
@@ -290,6 +290,18 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               ),
             ),
           ),
+          Positioned(
+            left: 339,
+            top: 785,
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: const BoxDecoration(
+                color: Color(0xFF2C8C68),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
           // Home Button with gradient circle
           Positioned(
             bottom: 44,
@@ -354,15 +366,18 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       loadingColor = const Color(0xFF379874);
     }
 
+    // Check if the category is 'المدفوعات الحكومية'
+    bool isGovPayment = category['label'] == 'المدفوعات الحكومية';
+
     return Container(
       width: 101,
-      height: 101,
+      height: 130,
       decoration: BoxDecoration(
         color: const Color(0xFFD9D9D9),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withOpacity(0.5),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -370,31 +385,85 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       ),
       child: Stack(
         children: [
-          Positioned(
-            top: 10,
-            left: 10,
+          const Positioned(
+            top: 40,
+            left: 112, // Keep this for positioning
             child: Text(
-              "مجموع الحفظ",
-              style: TextStyle(color: const Color(0xFF5F5F5F), fontSize: 10),
+              "مجموع\nالحفظ",
+              textAlign: TextAlign.right, // Align text to the right
+              style: TextStyle(
+                color: Color(0xFF5F5F5F),
+                fontSize: 13,
+                fontFamily: 'GE-SS-Two-Light',
+              ),
             ),
           ),
-          Positioned(
-            top: 5,
-            left: 5,
+          const Positioned(
+            top: 110,
+            left: 104, // Adjusted left for all labels
             child: Text(
               "تم حفظ",
-              style: TextStyle(color: const Color(0xFF5F5F5F), fontSize: 10),
+              style: TextStyle(
+                  color: Color(0xFF5F5F5F),
+                  fontSize: 13,
+                  fontFamily: 'GE-SS-Two-Light'),
             ),
           ),
           Positioned(
-            top: 3,
-            left: 3,
+            top: 78,
+            left: 110, // Adjusted left for all labels
+            child: Row(
+              children: [
+                const Text(
+                  "ريال", // Second part
+                  style: TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 12,
+                      fontFamily: 'GE-SS-Two-Light'),
+                ),
+                const SizedBox(width: 2), // Space between the two words
+                const Text(
+                  "800", // First part
+                  style: TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 13,
+                      fontFamily: 'GE-SS-Two-Bold'),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 109,
+            left: 60, // Adjusted left for all labels
+            child: Row(
+              children: [
+                const Text(
+                  "ريال", // Second part
+                  style: TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 12,
+                      fontFamily: 'GE-SS-Two-Light'),
+                ),
+                const SizedBox(width: 2), // Space between the two words
+                const Text(
+                  "400", // First part
+                  style: TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 13,
+                      fontFamily: 'GE-SS-Two-Bold'),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 6,
+            left: 6,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 SizedBox(
-                  width: 30,
-                  height: 30,
+                  width: 35,
+                  height: 35,
                   child: CircularProgressIndicator(
                     value: percentage / 100,
                     strokeWidth: 3,
@@ -405,19 +474,25 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                 Icon(
                   category['icon'],
                   color: const Color(0xFF2C8C68),
-                  size: 18,
+                  size: 20,
                 ),
               ],
             ),
           ),
+          // Change position based on the category label
           Positioned(
-            bottom: 5,
-            left: 0,
-            right: 0,
+            bottom: isGovPayment
+                ? 56
+                : 70, // Adjust bottom position for 'المدفوعات الحكومية'
+            left: isGovPayment ? 0 : 0, // Adjust left position if needed
+            right: isGovPayment ? 55 : 105,
             child: Center(
               child: Text(
                 category['label'],
-                style: TextStyle(color: const Color(0xFF379874), fontSize: 8),
+                style: const TextStyle(
+                    color: Color(0xFF379874),
+                    fontSize: 10,
+                    fontFamily: 'GE-SS-Two-Bold'),
               ),
             ),
           ),

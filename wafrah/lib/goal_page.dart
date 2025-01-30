@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'saving_plan_page2.dart'; // Import SavingPlanPage2
+import 'success_plan_page.dart'; // Import SuccessPlanPage
 
 class GoalPage extends StatefulWidget {
   final String userName;
@@ -15,7 +15,10 @@ class GoalPage extends StatefulWidget {
 
 class _GoalPageState extends State<GoalPage> {
   Color _arrowColor = const Color(0xFF3D3D3D);
-  final TextEditingController durationController = TextEditingController();
+
+  // Use two controllers for start and end date
+  final TextEditingController startDateController = TextEditingController();
+  final TextEditingController endDateController = TextEditingController();
   final TextEditingController goalController = TextEditingController();
 
   void _onArrowTap() {
@@ -34,7 +37,8 @@ class _GoalPageState extends State<GoalPage> {
 
   @override
   void dispose() {
-    durationController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
     goalController.dispose();
     super.dispose();
   }
@@ -114,24 +118,18 @@ class _GoalPageState extends State<GoalPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      // Duration input bar
+                      // Start Date input bar
                       SizedBox(
-                        width: 86,
+                        width: 130, // Increase the width
                         height: 28,
                         child: TextField(
-                          controller: durationController,
+                          controller: startDateController,
                           textAlign: TextAlign.right,
                           inputFormatters: [
-                            FilteringTextInputFormatter
-                                .digitsOnly, // Only allow numbers
+                            FilteringTextInputFormatter.digitsOnly,
                           ],
                           decoration: InputDecoration(
-                            prefixText: 'سنة ',
-                            prefixStyle: const TextStyle(
-                              color: Color(0xFF878787),
-                              fontFamily: 'GE-SS-Two-Light',
-                              fontSize: 10,
-                            ),
+                            hintText: 'تاريخ البدء',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5),
                               borderSide: const BorderSide(
@@ -143,24 +141,18 @@ class _GoalPageState extends State<GoalPage> {
                           style: const TextStyle(fontSize: 10),
                         ),
                       ),
-                      // Goal input bar
+                      // End Date input bar
                       SizedBox(
-                        width: 86,
+                        width: 130, // Increase the width
                         height: 28,
                         child: TextField(
-                          controller: goalController,
+                          controller: endDateController,
                           textAlign: TextAlign.right,
                           inputFormatters: [
-                            FilteringTextInputFormatter
-                                .digitsOnly, // Only allow numbers
+                            FilteringTextInputFormatter.digitsOnly,
                           ],
                           decoration: InputDecoration(
-                            prefixText: 'ريال ',
-                            prefixStyle: const TextStyle(
-                              color: Color(0xFF878787),
-                              fontFamily: 'GE-SS-Two-Light',
-                              fontSize: 10,
-                            ),
+                            hintText: 'تاريخ الانتهاء',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5),
                               borderSide: const BorderSide(
@@ -193,14 +185,14 @@ class _GoalPageState extends State<GoalPage> {
                 });
               },
               onTap: () {
-                // Navigate to SavingPlanPage2 instead of GoalPage
+                // Navigate to SuccessPlanPage instead of GoalPage
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SavingPlanPage2(
+                    builder: (context) => SuccessPlanPage(
                       userName: widget.userName, // Pass userName
                       phoneNumber: widget.phoneNumber,
-                    ), // Updated route
+                    ),
                   ),
                 );
               },
