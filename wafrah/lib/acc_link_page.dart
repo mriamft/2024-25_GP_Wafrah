@@ -162,7 +162,7 @@ class _AccLinkPageState extends State<AccLinkPage> {
         List<Map<String, dynamic>> categorizedTransactions = [];
         for (var transaction in transactions) {
           String transactionInfo =
-              transaction['TransactionInformation'] ?? 'معلومات غير متوفرة';
+              transaction['MerchantName'] ?? 'معلومات غير متوفرة';
           String category = 'غير مصنف';
           try {
             category = await _gptService.categorizeTransaction(transactionInfo);

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'settings_page.dart';
 import 'banks_page.dart';
@@ -880,7 +881,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     String dateTime = transaction['TransactionDateTime'] ?? 'غير معروف';
     String category = transaction['Category'] ?? 'غير مصنف';
     String transactionInfo =
-        transaction['TransactionInformation'] ?? 'لا توجد معلومات';
+        transaction['MerchantName'] ?? 'لا توجد معلومات';
  
     subtype = subtype.replaceAll('KSAOB.', '').trim();
  
@@ -1018,3 +1019,4 @@ date = '$day-$month-$year';
   }
 }
  
+

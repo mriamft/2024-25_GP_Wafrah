@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'settings_page.dart';
 import 'transactions_page.dart';
 import 'saving_plan_page.dart';
@@ -45,14 +45,7 @@ class _HomePageState extends State<HomePage>
   int _touchedIndex = -1; // Track the currently touched slice index
   // bool _isPieChartVisible = true; // Tracks pie chart visibility
  
-int getMappedYear(DateTime date) {
-  if (date.year == 2016) {
-    return 2024;
-  } else if (date.year == 2017) {
-    return 2025;
-  }
-  return date.year; // Default to the actual year if no mapping is needed
-}
+
  
  
   @override
@@ -153,7 +146,7 @@ int getMappedYear(DateTime date) {
  
 void updateDashboardData() {
   DateTime now = DateTime.now();
-  DateTime selectedDate = DateTime(2016, now.month - monthOffset, now.day);
+  DateTime selectedDate = DateTime(2025, now.month - monthOffset, now.day);
  
   // Clear existing data
   incomeData.clear();
@@ -184,7 +177,7 @@ void updateDashboardData() {
   void calculateStatistics(String period, DateTime selectedDate) {
     // Define a cutoff date based on the current day and month in 2016
     DateTime now = DateTime.now();
-    DateTime cutoffDate = DateTime(2016, now.month, now.day, now.hour, now.minute, now.second);
+    DateTime cutoffDate = DateTime(2025, now.month, now.day, now.hour, now.minute, now.second);
  
     // Reset statistics
     _minIncome = double.infinity;
@@ -209,16 +202,16 @@ void updateDashboardData() {
         }
  
         if (period == 'اسبوعي' &&
-            transactionDate.year == 2016 &&
+            transactionDate.year == 2025 &&
             transactionDate.month == selectedDate.month &&
             _getWeekOfMonth(transactionDate.day) ==
                 _getWeekOfMonth(selectedDate.day)) {
           includeTransaction = true;
         } else if (period == 'شهري' &&
-            transactionDate.year == 2016 &&
+            transactionDate.year == 2025 &&
             transactionDate.month == selectedDate.month) {
           includeTransaction = true;
-        } else if (period == 'سنوي' && transactionDate.year == 2016) {
+        } else if (period == 'سنوي' && transactionDate.year == 2025) {
           includeTransaction = true;
         }
  
@@ -269,11 +262,11 @@ void updateDashboardData() {
  
     // Create a cutoff date only for the current month and year in 2016
     DateTime cutoffDate;
-    if (currentDate.month == now.month && currentDate.year == 2016) {
-      cutoffDate = DateTime(2016, now.month, now.day, now.hour, now.minute, now.second);
+    if (currentDate.month == now.month && currentDate.year == 2025) {
+      cutoffDate = DateTime(2025, now.month, now.day, now.hour, now.minute, now.second);
     } else {
       // Set a date beyond the month's last day if it's not the current month
-      cutoffDate = DateTime(2016, currentDate.month + 1, 0);
+      cutoffDate = DateTime(2025, currentDate.month + 1, 0);
     }
  
     // Initialize weekly income and expense
@@ -287,7 +280,7 @@ void updateDashboardData() {
         DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
  
         // Filter transactions for the correct month and year, and apply cutoff if needed
-        if (transactionDate.year == 2016 &&
+        if (transactionDate.year == 2025 &&
             transactionDate.month == currentDate.month &&
             transactionDate.isBefore(cutoffDate)) {
           int week = ((transactionDate.day - 1) / 7).floor();
@@ -340,7 +333,7 @@ void updateDashboardData() {
     // Define the current date and a cutoff date based on the current month
     DateTime now = DateTime.now();
     DateTime cutoffDate =
-        DateTime(2016, now.month, 1, now.hour, now.minute, now.second).subtract(const Duration(days: 1));
+        DateTime(2025, now.month, 1, now.hour, now.minute, now.second).subtract(const Duration(days: 1));
  
     // Initialize monthly income and expense maps for each month
     Map<int, double> monthlyIncome = {for (int i = 0; i < 12; i++) i: 0.0};
@@ -353,7 +346,7 @@ void updateDashboardData() {
         DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
  
         // Only include transactions within 2016 and up to the cutoff month
-        if (transactionDate.year == 2016 &&
+        if (transactionDate.year == 2025 &&
             transactionDate.isBefore(cutoffDate)) {
           int month = transactionDate.month - 1;
           double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
@@ -402,8 +395,8 @@ void updateDashboardData() {
   void _calculateDailyData(DateTime currentDate) {
     DateTime now = DateTime.now();
     DateTime cutoffDate = (currentDate.month == now.month)
-        ? DateTime(2016, now.month, now.day, now.hour, now.minute, now.second)
-        : DateTime(2016, currentDate.month + 1, 1, now.hour, now.minute, now.second)
+        ? DateTime(2025, now.month, now.day, now.hour, now.minute, now.second)
+        : DateTime(2025, currentDate.month + 1, 1, now.hour, now.minute, now.second)
             .subtract(const Duration(days: 1));
  
     int selectedWeek = 4 - (weekOffset % 4);
@@ -423,7 +416,7 @@ void updateDashboardData() {
         String dateStr = transaction['TransactionDateTime'] ?? '';
         DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
  
-        if (transactionDate.year == 2016 &&
+        if (transactionDate.year == 2025 &&
             transactionDate.month == currentDate.month &&
             transactionDate.day >= startDay &&
             transactionDate.day <= endDay &&
@@ -463,9 +456,9 @@ void updateDashboardData() {
   String getCurrentWeekLabel() {
     int currentWeek = 4 - (weekOffset % 4);
     DateTime currentDate =
-        DateTime(2016, DateTime.now().month - monthOffset, 1);
+        DateTime(2025, DateTime.now().month - monthOffset, 1);
     String monthName = getMonthName(currentDate.month);
-    return '$monthName 2024 - الأسبوع $currentWeek';
+    return '$monthName 2025 - الأسبوع $currentWeek';
   }
  
   Widget buildDailyNavigationButtons() {
@@ -546,7 +539,7 @@ void updateDashboardData() {
  
   Widget buildWeekNavigationButtons() {
     DateTime now = DateTime.now();
-    DateTime selectedDate = DateTime(2016, now.month - monthOffset, 1);
+    DateTime selectedDate = DateTime(2025, now.month - monthOffset, 1);
     bool isCurrentMonth =
         selectedDate.month == now.month && selectedDate.year == now.year;
  
@@ -600,7 +593,7 @@ void updateDashboardData() {
   }
  
   String getCurrentMonthName() {
-    DateTime targetMonth = DateTime(2016, DateTime.now().month - monthOffset);
+    DateTime targetMonth = DateTime(2025, DateTime.now().month - monthOffset);
     List<String> monthNames = [
       'يناير',
       'فبراير',
@@ -688,15 +681,26 @@ void updateDashboardData() {
     return monthNames[month - 1];
   }
  
-  String getCurrentYear() {
+/*
+   String getCurrentYear() {
   int baseYear = 2016 - yearOffset;
   return getMappedYear(DateTime(baseYear)).toString();
 }
- 
- 
+
+ */
+int getMappedYear(DateTime date) {
+  if (date.year == 2025) {
+    return 2025;
+  } else if (date.year == 2025) {
+    return 2025;
+  }
+  return date.year; // Default to the actual year if no mapping is needed
+}
   Widget buildYearNavigationButtons() {
   DateTime now = DateTime.now();
-  int mappedYear = getMappedYear(DateTime(2016 - yearOffset));
+  DateTime modifiedDate = DateTime(now.year);
+
+  int mappedYear = getMappedYear(modifiedDate);
   return Center(
     child: Text(
       mappedYear.toString(), // Display mapped year
@@ -1516,17 +1520,11 @@ void updateDashboardData() {
  
   // Get today's date
   DateTime now = DateTime.now();
- 
-  // Map the year to 2016 for analysis
-  int mappedYear = now.year == 2024
-      ? 2016
-      : now.year == 2025
-          ? 2017
-          : now.year;
+   
  
   // Calculate the start and end dates of the range (start of month to today)
-  DateTime startOfMonth = DateTime(mappedYear, now.month, 1);
-  DateTime today = DateTime(mappedYear, now.month, now.day);
+  DateTime startOfMonth = DateTime(now.year, now.month, 1);
+  DateTime today = DateTime(now.year, now.month, now.day);
  
   for (var account in widget.accounts) {
     var transactions = account['transactions'] ?? [];
@@ -2145,11 +2143,11 @@ void updateDashboardData() {
  
     // Determine the selected date based on the desired period
     if (_selectedPeriod == 'اسبوعي') {
-      selectedDate = DateTime(2016, now.month - monthOffset, now.day);
+      selectedDate = DateTime(2025, now.month - monthOffset, now.day);
     } else if (_selectedPeriod == 'شهري') {
-      selectedDate = DateTime(2016, now.month - monthOffset);
+      selectedDate = DateTime(2025, now.month - monthOffset);
     } else if (_selectedPeriod == 'سنوي') {
-      selectedDate = DateTime(2016);
+      selectedDate = DateTime(2025);
     } else {
       return filteredTransactions; // Return empty if no valid period
     }
@@ -2185,7 +2183,7 @@ void updateDashboardData() {
 Map<String, double> _calculateCategoryDataForPieChart(String period, DateTime selectedDate) {
   // Define a cutoff date based on the current day and month in 2016
   DateTime now = DateTime.now();
-  DateTime cutoffDate = DateTime(2016, now.month, now.day, now.hour, now.minute, now.second);
+  DateTime cutoffDate = DateTime(2025, now.month, now.day, now.hour, now.minute, now.second);
  
   // Aggregate by category
   Map<String, double> categoryTotals = {};
@@ -2204,15 +2202,15 @@ Map<String, double> _calculateCategoryDataForPieChart(String period, DateTime se
       // Determine if the transaction falls within the selected period
       bool includeTransaction = false;
       if (period == 'اسبوعي' &&
-          transactionDate.year == 2016 &&
+          transactionDate.year == 2025 &&
           transactionDate.month == selectedDate.month &&
           _getWeekOfMonth(transactionDate.day) == _getWeekOfMonth(selectedDate.day)) {
         includeTransaction = true;
       } else if (period == 'شهري' &&
-          transactionDate.year == 2016 &&
+          transactionDate.year == 2025 &&
           transactionDate.month == selectedDate.month) {
         includeTransaction = true;
-      } else if (period == 'سنوي' && transactionDate.year == 2016) {
+      } else if (period == 'سنوي' && transactionDate.year == 2025) {
         includeTransaction = true;
       }
  
