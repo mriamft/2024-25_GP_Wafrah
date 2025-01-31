@@ -23,21 +23,21 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
       body: Stack(
         children: [
           // Icon "check_circle_outline_rounded"
-          Positioned(
+          const Positioned(
             left: 126,
             top: 123,
             child: Icon(
               Icons.check_circle_outline_rounded,
               size: 142,
-              color: const Color(0xFF2C8C68),
+              color: Color(0xFF2C8C68),
             ),
           ),
 
           // Text "تم إنشاء الخطة بنجاح"
-          Positioned(
+          const Positioned(
             left: 76,
             top: 279,
-            child: const Text(
+            child: Text(
               "تم إنشاء الخطة بنجاح",
               style: TextStyle(
                 fontSize: 24,
@@ -49,39 +49,39 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
           ),
 
           // Icons "repeat_rounded", "visibility_outlined", and "outlined_flag_rounded"
-          Positioned(
+          const Positioned(
             left: 331,
             top: 372,
             child: Icon(
               Icons.repeat_rounded,
               size: 28,
-              color: const Color(0xFF6C6C6C),
+              color: Color(0xFF6C6C6C),
             ),
           ),
-          Positioned(
+          const Positioned(
             left: 331,
             top: 422,
             child: Icon(
               Icons.visibility_outlined,
               size: 28,
-              color: const Color(0xFF6C6C6C),
+              color: Color(0xFF6C6C6C),
             ),
           ),
-          Positioned(
+          const Positioned(
             left: 331,
             top: 470,
             child: Icon(
               Icons.outlined_flag_rounded,
               size: 28,
-              color: const Color(0xFF6C6C6C),
+              color: Color(0xFF6C6C6C),
             ),
           ),
 
           // Right-aligned Text "فعل الاستقطاع الشهري للمداومة على التقدم نحو هدفك"
-          Positioned(
+          const Positioned(
             left: 47,
             top: 375,
-            child: const Text(
+            child: Text(
               "فعل الاستقطاع الشهري للمداومة على التقدم نحو\nهدفك",
               textAlign: TextAlign.right,
               style: TextStyle(
@@ -93,10 +93,10 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
           ),
 
           // Right-aligned Text "راقب تقدمك في خطة الادخار معنا"
-          Positioned(
+          const Positioned(
             left: 125,
             top: 429,
-            child: const Text(
+            child: Text(
               "راقب تقدمك في خطة الادخار معنا",
               textAlign: TextAlign.right,
               style: TextStyle(
@@ -108,10 +108,10 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
           ),
 
           // Right-aligned Text "سوف نذكرك بشكل دوري, مما يضمن تقدمك الفعال"
-          Positioned(
+          const Positioned(
             left: 38,
             top: 480,
-            child: const Text(
+            child: Text(
               "سوف نذكرك بشكل دوري, مما يضمن تقدمك الفعال",
               textAlign: TextAlign.right,
               style: TextStyle(

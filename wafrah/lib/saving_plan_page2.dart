@@ -409,20 +409,20 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                   fontFamily: 'GE-SS-Two-Light'),
             ),
           ),
-          Positioned(
+          const Positioned(
             top: 78,
             left: 110, // Adjusted left for all labels
             child: Row(
               children: [
-                const Text(
+                Text(
                   "ريال", // Second part
                   style: TextStyle(
                       color: Color(0xFF3D3D3D),
                       fontSize: 12,
                       fontFamily: 'GE-SS-Two-Light'),
                 ),
-                const SizedBox(width: 2), // Space between the two words
-                const Text(
+                SizedBox(width: 2), // Space between the two words
+                Text(
                   "800", // First part
                   style: TextStyle(
                       color: Color(0xFF3D3D3D),
@@ -432,20 +432,20 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               ],
             ),
           ),
-          Positioned(
+          const Positioned(
             top: 109,
             left: 60, // Adjusted left for all labels
             child: Row(
               children: [
-                const Text(
+                Text(
                   "ريال", // Second part
                   style: TextStyle(
                       color: Color(0xFF3D3D3D),
                       fontSize: 12,
                       fontFamily: 'GE-SS-Two-Light'),
                 ),
-                const SizedBox(width: 2), // Space between the two words
-                const Text(
+                SizedBox(width: 2), // Space between the two words
+                Text(
                   "400", // First part
                   style: TextStyle(
                       color: Color(0xFF3D3D3D),

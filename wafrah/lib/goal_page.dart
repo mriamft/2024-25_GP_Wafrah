@@ -17,8 +17,6 @@ class _GoalPageState extends State<GoalPage> {
   Color _arrowColor = const Color(0xFF3D3D3D);
 
   // Use two controllers for start and end date
-  final TextEditingController startDateController = TextEditingController();
-  final TextEditingController endDateController = TextEditingController();
   final TextEditingController goalController = TextEditingController();
 
   void _onArrowTap() {
@@ -37,10 +35,37 @@ class _GoalPageState extends State<GoalPage> {
 
   @override
   void dispose() {
-    startDateController.dispose();
-    endDateController.dispose();
     goalController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(
+      BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: const Color(0xFF2C8C68), // Header color
+            colorScheme: ColorScheme.light(
+                primary: const Color(0xFF2C8C68)), // Selected color
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        controller.text =
+            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      });
+    }
   }
 
   @override
@@ -80,7 +105,7 @@ class _GoalPageState extends State<GoalPage> {
             top: 252,
             child: Container(
               width: 430,
-              height: 183,
+              height: 205,
               color: const Color(0xFFF1F1F1),
               child: Column(
                 children: [
@@ -101,7 +126,7 @@ class _GoalPageState extends State<GoalPage> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.only(right: 60),
+                        padding: EdgeInsets.only(right: 60, top: 1),
                         child: Text(
                           'المبلغ المستهدف',
                           style: TextStyle(
@@ -118,42 +143,65 @@ class _GoalPageState extends State<GoalPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      // Start Date input bar
+                      // Start Date input bar as Date Picker
+                      GestureDetector(
+                        onTap: () =>
+                            _selectDate(context, TextEditingController()),
+                        child: SizedBox(
+                          width: 130,
+                          height: 28,
+                          child: TextField(
+                            onTap: () =>
+                                _selectDate(context, TextEditingController()),
+                            readOnly:
+                                true, // Make it read-only to prevent keyboard
+                            decoration: InputDecoration(
+                              hintText: 'تاريخ البدء',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFFAEAEAE), width: 1),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFFAEAEAE), width: 1),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFFAEAEAE), width: 1),
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFFF9F9F9),
+                            ),
+                            style: const TextStyle(fontSize: 10),
+                          ),
+                        ),
+                      ),
+                      // Goal input bar with "ريال"
                       SizedBox(
-                        width: 130, // Increase the width
+                        width: 130,
                         height: 28,
                         child: TextField(
-                          controller: startDateController,
+                          controller: goalController,
                           textAlign: TextAlign.right,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                           ],
                           decoration: InputDecoration(
-                            hintText: 'تاريخ البدء',
+                            hintText: 'ريال',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5),
                               borderSide: const BorderSide(
                                   color: Color(0xFFAEAEAE), width: 1),
                             ),
-                            filled: true,
-                            fillColor: const Color(0xFFF9F9F9),
-                          ),
-                          style: const TextStyle(fontSize: 10),
-                        ),
-                      ),
-                      // End Date input bar
-                      SizedBox(
-                        width: 130, // Increase the width
-                        height: 28,
-                        child: TextField(
-                          controller: endDateController,
-                          textAlign: TextAlign.right,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          decoration: InputDecoration(
-                            hintText: 'تاريخ الانتهاء',
-                            border: OutlineInputBorder(
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: const BorderSide(
+                                  color: Color(0xFFAEAEAE), width: 1),
+                            ),
+                            enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5),
                               borderSide: const BorderSide(
                                   color: Color(0xFFAEAEAE), width: 1),
@@ -166,7 +214,71 @@ class _GoalPageState extends State<GoalPage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 10),
                 ],
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 338,
+            left: 165,
+            child: Text(
+              'من',
+              style: TextStyle(
+                color: Color(0xFF6C6C6C),
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'GE-SS-Two-Bold',
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 376,
+            left: 165,
+            child: Text(
+              'الى',
+              style: TextStyle(
+                color: Color(0xFF6C6C6C),
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'GE-SS-Two-Bold',
+              ),
+            ),
+          ),
+          // End Date input bar as Date Picker with controlled position
+          Positioned(
+            left: 25, // Adjust this to move left or right
+            top: 372, // Adjust this to move up or down
+            child: GestureDetector(
+              onTap: () => _selectDate(context, TextEditingController()),
+              child: SizedBox(
+                width: 130,
+                height: 28,
+                child: TextField(
+                  onTap: () => _selectDate(context, TextEditingController()),
+                  readOnly: true, // Make it read-only to prevent keyboard
+                  decoration: InputDecoration(
+                    hintText: 'تاريخ الانتهاء',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      borderSide:
+                          const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      borderSide:
+                          const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      borderSide:
+                          const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF9F9F9),
+                  ),
+                  style: const TextStyle(fontSize: 10),
+                ),
               ),
             ),
           ),
