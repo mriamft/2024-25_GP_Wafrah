@@ -256,64 +256,48 @@ void updateDashboardData() {
     setState(() {});
   }
  
-  void _calculateWeeklyData(DateTime currentDate) {
-    // Get the actual current date for comparison
-    DateTime now = DateTime.now();
- 
-    // Create a cutoff date only for the current month and year in 2016
-    DateTime cutoffDate;
-    if (currentDate.month == now.month && currentDate.year == 2025) {
-      cutoffDate = DateTime(2025, now.month, now.day, now.hour, now.minute, now.second);
-    } else {
-      // Set a date beyond the month's last day if it's not the current month
-      cutoffDate = DateTime(2025, currentDate.month + 1, 0);
-    }
- 
-    // Initialize weekly income and expense
-    Map<int, double> weeklyIncome = {for (int i = 0; i < 4; i++) i: 0.0};
-    Map<int, double> weeklyExpense = {for (int i = 0; i < 4; i++) i: 0.0};
- 
-    for (var account in widget.accounts) {
-      var transactions = account['transactions'] ?? [];
-      for (var transaction in transactions) {
-        String dateStr = transaction['TransactionDateTime'] ?? '';
-        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
- 
-        // Filter transactions for the correct month and year, and apply cutoff if needed
-        if (transactionDate.year == 2025 &&
-            transactionDate.month == currentDate.month &&
-            transactionDate.isBefore(cutoffDate)) {
-          int week = ((transactionDate.day - 1) / 7).floor();
-           double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
- 
-          String type =
-              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
- 
-          if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
-            weeklyIncome[week] = (weeklyIncome[week] ?? 0.0) + amount;
-          } else if ([
-            'MoneyTransfer',
-            'Withdrawal',
-            'Purchase',
-            'DepositReversal',
-            'NotApplicable'
-          ].contains(type)) {
-            weeklyExpense[week] = (weeklyExpense[week] ?? 0.0) + amount;
-          }
+void _calculateWeeklyData(DateTime currentDate) {
+  DateTime now = DateTime.now();
+  DateTime cutoffDate = currentDate.month == now.month && currentDate.year == now.year
+      ? DateTime(currentDate.year, currentDate.month, now.day)
+      : DateTime(currentDate.year, currentDate.month + 1, 0);
+
+  Map<int, double> weeklyIncome = {};
+  Map<int, double> weeklyExpense = {};
+
+  for (var account in widget.accounts) {
+    var transactions = account['transactions'] ?? [];
+    for (var transaction in transactions) {
+      String dateStr = transaction['TransactionDateTime'] ?? '';
+      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+
+      // Ensure the transaction date falls within the weekly period
+      if (transactionDate.year == currentDate.year &&
+          transactionDate.month == currentDate.month &&
+          transactionDate.isBefore(cutoffDate)) {
+        int week = ((transactionDate.day - 1) / 7).floor();
+        double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+
+        String type = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+
+        if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
+          weeklyIncome[week] = (weeklyIncome[week] ?? 0.0) + amount;
+        } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(type)) {
+          weeklyExpense[week] = (weeklyExpense[week] ?? 0.0) + amount;
         }
       }
     }
- 
-    // Update chart data with calculated values
-    incomeData.clear();
-    expenseData.clear();
-    for (int i = 0; i < 4; i++) {
-      incomeData.add(FlSpot(i.toDouble(), weeklyIncome[i] ?? 0.0));
-      expenseData.add(FlSpot(i.toDouble(), weeklyExpense[i] ?? 0.0));
-    }
- 
-    setState(() {});
   }
+
+  // Assign data to FlSpots for the line chart
+  incomeData = List.generate(4, (i) => FlSpot(i.toDouble(), weeklyIncome[i] ?? 0.0));
+  expenseData = List.generate(4, (i) => FlSpot(i.toDouble(), weeklyExpense[i] ?? 0.0));
+
+  print('Weekly Income Data: $weeklyIncome');
+  print('Weekly Expense Data: $weeklyExpense');
+}
+
+
  
 // Helper function to get week number in a month
   int _getWeekOfMonth(int day) {
@@ -329,64 +313,49 @@ void updateDashboardData() {
   }
  
 // Monthly data calculation for the 'سنوي' view (for completeness)
-  void _calculateMonthlyData(DateTime currentDate) {
-    // Define the current date and a cutoff date based on the current month
-    DateTime now = DateTime.now();
-    DateTime cutoffDate =
-        DateTime(2025, now.month, 1, now.hour, now.minute, now.second).subtract(const Duration(days: 1));
- 
-    // Initialize monthly income and expense maps for each month
-    Map<int, double> monthlyIncome = {for (int i = 0; i < 12; i++) i: 0.0};
-    Map<int, double> monthlyExpense = {for (int i = 0; i < 12; i++) i: 0.0};
- 
-    for (var account in widget.accounts) {
-      var transactions = account['transactions'] ?? [];
-      for (var transaction in transactions) {
-        String dateStr = transaction['TransactionDateTime'] ?? '';
-        DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
- 
-        // Only include transactions within 2016 and up to the cutoff month
-        if (transactionDate.year == 2025 &&
-            transactionDate.isBefore(cutoffDate)) {
-          int month = transactionDate.month - 1;
+void _calculateMonthlyData(DateTime currentDate) {
+  // Get today's date for truncation
+  DateTime now = DateTime.now();
+  DateTime cutoffDate = DateTime(now.year, now.month, now.day);
+
+  Map<int, double> monthlyIncome = {};
+  Map<int, double> monthlyExpense = {};
+
+  for (var account in widget.accounts) {
+    var transactions = account['transactions'] ?? [];
+    for (var transaction in transactions) {
+      String dateStr = transaction['TransactionDateTime'] ?? '';
+      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+
+      // Only include transactions up to the current date
+      if (transactionDate.isBefore(cutoffDate) || transactionDate.isAtSameMomentAs(cutoffDate)) {
+        if (transactionDate.year == currentDate.year) {
+          int month = transactionDate.month - 1; // Month index starts from 0
           double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
- 
-          String type =
-              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
- 
+
+          String type = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+
           if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
             monthlyIncome[month] = (monthlyIncome[month] ?? 0.0) + amount;
-          } else if ([
-            'MoneyTransfer',
-            'Withdrawal',
-            'Purchase',
-            'DepositReversal',
-            'NotApplicable'
-          ].contains(type)) {
+          } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(type)) {
             monthlyExpense[month] = (monthlyExpense[month] ?? 0.0) + amount;
           }
         }
       }
     }
- 
-    incomeData.clear();
-    expenseData.clear();
- 
-    // Populate FlSpot data up to the current month, set remaining months to zero
-    for (int i = 0; i < 12; i++) {
-      if (i < now.month - 1) {
-        // months before the current month
-        incomeData.add(FlSpot(i.toDouble(), monthlyIncome[i] ?? 0.0));
-        expenseData.add(FlSpot(i.toDouble(), monthlyExpense[i] ?? 0.0));
-      } else {
-        // current and future months
-        incomeData.add(FlSpot(i.toDouble(), 0.0));
-        expenseData.add(FlSpot(i.toDouble(), 0.0));
-      }
-    }
- 
-    setState(() {});
   }
+
+  // Populate the graph data
+  incomeData = List.generate(12, (i) => FlSpot(i.toDouble(), monthlyIncome[i] ?? 0.0));
+  expenseData = List.generate(12, (i) => FlSpot(i.toDouble(), monthlyExpense[i] ?? 0.0));
+
+  // Trim months beyond today's month
+  int currentMonthIndex = now.month - 1;
+  incomeData = incomeData.where((spot) => spot.x <= currentMonthIndex.toDouble()).toList();
+  expenseData = expenseData.where((spot) => spot.x <= currentMonthIndex.toDouble()).toList();
+
+  setState(() {});
+}
  
   int weekOffset = 0;
   int monthOffset = 0;
@@ -712,207 +681,213 @@ int getMappedYear(DateTime date) {
     ),
   );
 }
- 
-  Widget buildIncomeExpenseGraph() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width * 0.95,
-            height: 250, // Keep height at 250 as required
-            padding: const EdgeInsets.all(8.0),
-            child: LineChart(
-              LineChartData(
-                minY: 0,
-                maxY: 400,
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 25,
-                      interval: 50,
-                      getTitlesWidget: (value, meta) {
+Widget buildIncomeExpenseGraph() {
+  // Determine the highest value between income and expense
+  double maxIncome = incomeData.isNotEmpty
+      ? incomeData.map((e) => e.y).reduce((a, b) => a > b ? a : b)
+      : 0.0;
+  double maxExpense = expenseData.isNotEmpty
+      ? expenseData.map((e) => e.y).reduce((a, b) => a > b ? a : b)
+      : 0.0;
+
+  // Get the highest value for scaling the y-axis
+  double highestValue = maxIncome > maxExpense ? maxIncome : maxExpense;
+
+  // Round the highest value to the nearest multiple of 100 or 1000
+  double maxY = highestValue <= 1000
+      ? (highestValue / 100).ceil() * 100
+      : (highestValue / 1000).ceil() * 1000;
+
+  // Calculate interval for the y-axis
+  double interval = maxY <= 1000 ? 100 : 1000;
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+    child: Column(
+      children: [
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.95,
+          height: 300,
+          child: LineChart(
+            LineChartData(
+              minY: 0,
+              maxY: maxY, // Ensure scaling is correct
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 40,
+                    interval: interval, // Use calculated interval
+                    getTitlesWidget: (value, _) {
+                      return Text(
+                        value.toInt().toString(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'GE-SS-Two-Light',
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 35,
+                    interval: 1,
+                    getTitlesWidget: (value, _) {
+                      List<String> labels;
+
+                      // Determine labels for x-axis based on the period
+                      switch (_selectedPeriod) {
+                        case 'اسبوعي':
+                          labels = [
+                            'السبت',
+                            'الأحد',
+                            'الاثنين',
+                            'الثلاثاء',
+                            'الأربعاء',
+                            'الخميس',
+                            'الجمعة'
+                          ];
+                          break;
+                        case 'شهري':
+                          labels = [
+                            '1 الأسبوع',
+                            '2 الأسبوع',
+                            '3 الأسبوع',
+                            '4 الأسبوع'
+                          ];
+                          break;
+                        case 'سنوي':
+                          labels = [
+                            'يناير',
+                            'فبراير',
+                            'مارس',
+                            'أبريل',
+                            'مايو',
+                            'يونيو',
+                            'يوليو',
+                            'أغسطس',
+                            'سبتمبر',
+                            'أكتوبر',
+                            'نوفمبر',
+                            'ديسمبر'
+                          ];
+                          break;
+                        default:
+                          labels = [];
+                      }
+
+                      // Fetch the appropriate label for the x-axis value
+                      final index = value.toInt();
+                      if (index >= 0 && index < labels.length) {
                         return Text(
-                           value.toInt().toString(),
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
+                          labels[index],
+                          style: const TextStyle(
+                            fontSize: 10,
                             fontFamily: 'GE-SS-Two-Light',
+                            color: Colors.grey,
                           ),
                         );
-                      },
-                    ),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 35,
-                      interval: 1,
-                      getTitlesWidget: (value, _) {
-                        List<String> labels;
- 
-                        // Determine the labels based on the selected period
-                        switch (_selectedPeriod) {
-                          case 'اسبوعي':
-                            labels = [
-                              'السبت',
-                              'الأحد',
-                              'الاثنين',
-                              'الثلاثاء',
-                              'الأربعاء',
-                              'الخميس',
-                              'الجمعة'
-                            ];
-                            break;
-                          case 'شهري':
-                            labels = [
-                              '1 الأسبوع',
-                              '2 الأسبوع',
-                              '3 الأسبوع',
-                              '4 الأسبوع'
-                            ];
-                            break;
-                          case 'سنوي':
-                            labels = [
-                              'يناير',
-                              'فبراير',
-                              'مارس',
-                              'أبريل',
-                              'مايو',
-                              'يونيو',
-                              'يوليو',
-                              'أغسطس',
-                              'سبتمبر',
-                              'أكتوبر',
-                              'نوفمبر',
-                              'ديسمبر'
-                            ];
-                            break;
-                          default:
-                            labels = [];
-                        }
- 
-                        // Display the appropriate label based on the index
-                        final index = value.toInt();
-                        if (index >= 0 && index < labels.length) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 6.0),
-                            child: Transform.rotate(
-                              angle: _selectedPeriod == 'سنوي'
-                                  ? -0.4
-                                  : 0.0, // Rotate for 'سنوي' only
-                              child: Text(
-                                labels[index],
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontFamily: 'GE-SS-Two-Light',
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ),
-                  rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                ),
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: true,
-                  drawHorizontalLine: true,
-                  verticalInterval: 1,
-                  horizontalInterval: 50,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: Colors.grey.withOpacity(0.2),
-                    strokeWidth: 1,
-                  ),
-                  getDrawingVerticalLine: (value) => FlLine(
-                    color: Colors.grey.withOpacity(0.2),
-                    strokeWidth: 1,
+                      }
+                      return const SizedBox.shrink();
+                    },
                   ),
                 ),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots:
-                         incomeData,
-                    isCurved: true,
-                    color: Colors.green,
-                    barWidth: 3,
-                    belowBarData: BarAreaData(
-                        show: true, color: Colors.green.withOpacity(0.4)),
-                  ),
-                  LineChartBarData(
-                    spots:
-                        expenseData,
-                    isCurved: true,
-                    color: Colors.red,
-                    barWidth: 3,
-                    belowBarData: BarAreaData(
-                        show: true, color: Colors.red.withOpacity(0.3)),
-                  ),
-                ],
+                rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false)),
+                topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false)),
               ),
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: true,
+                drawHorizontalLine: true,
+                verticalInterval: 1,
+                horizontalInterval: interval,
+                getDrawingHorizontalLine: (value) => FlLine(
+                  color: Colors.grey.withOpacity(0.2),
+                  strokeWidth: 1,
+                ),
+                getDrawingVerticalLine: (value) => FlLine(
+                  color: Colors.grey.withOpacity(0.2),
+                  strokeWidth: 1,
+                ),
+              ),
+              lineBarsData: [
+                LineChartBarData(
+                  spots: incomeData,
+                  isCurved: true,
+                  color: Colors.green,
+                  barWidth: 3,
+                  belowBarData: BarAreaData(
+                    show: true,
+                    color: Colors.green.withOpacity(0.4),
+                  ),
+                ),
+                LineChartBarData(
+                  spots: expenseData,
+                  isCurved: true,
+                  color: Colors.red,
+                  barWidth: 3,
+                  belowBarData: BarAreaData(
+                    show: true,
+                    color: Colors.red.withOpacity(0.3),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8), // Space between chart and legend
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Legend for Income
-              Row(
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    color: Colors.green,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  color: Colors.green,
+                ),
+                const SizedBox(width: 5),
+                const Text(
+                  'الدخل',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'GE-SS-Two-Light',
+                    color: Colors.grey,
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    'الدخل',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'GE-SS-Two-Light',
-                      color: Colors.grey[800],
-                    ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 20),
+            Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  color: Colors.red,
+                ),
+                const SizedBox(width: 5),
+                const Text(
+                  'الصرف',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'GE-SS-Two-Light',
+                    color: Colors.grey,
                   ),
-                ],
-              ),
-              const SizedBox(width: 20), // Space between legends
-              // Legend for Expense
-              Row(
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    'الصرف',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'GE-SS-Two-Light',
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-    print('Income Data for Graph: $incomeData');
-  print('Expense Data for Graph: $expenseData');
- 
-  }
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
  
   List<FlSpot> _generateIncomeData() {
     List<FlSpot> incomeSpots = [];
@@ -2106,7 +2081,7 @@ int getMappedYear(DateTime date) {
                     ],
                   ),
                   child: SizedBox(
-                    height: 290,
+                    height: 350,
                     child: buildIncomeExpenseGraph(),
                   ),
                 ),

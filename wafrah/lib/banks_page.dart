@@ -73,78 +73,58 @@ class _BanksPageState extends State<BanksPage> {
     return categories;
   }
 
-  Widget _buildAccountCard(Map<String, dynamic> account) {
-    Map<String, String> accountTypeTranslations = {
-      'CurrentAccount': 'الحساب الجاري',
-      'SavingsAccount': 'حساب التوفير',
-      'CheckingAccount': 'حساب الشيكات',
-      'CreditAccount': 'حساب الائتمان',
-    };
+Widget _buildAccountCard(Map<String, dynamic> account) {
+  Map<String, String> accountTypeTranslations = {
+    'CurrentAccount': 'الحساب الجاري',
+    'SavingsAccount': 'حساب التوفير',
+    'CheckingAccount': 'حساب الشيكات',
+    'CreditAccount': 'حساب الائتمان',
+  };
 
-    String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
-    String translatedAccountSubType = accountTypeTranslations[accountSubType] ?? accountSubType;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      width: 340,
-      height: 50,
-      decoration: BoxDecoration(
-        color: const Color(0xFFD9D9D9),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Text(
-                  'ر.س',
-                  style: TextStyle(
-                    color: Color(0xFF5F5F5F),
-                    fontSize: 16,
-                    fontFamily: 'GE-SS-Two-Light',
-                  ),
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  account['Balance'] ?? '0',
-                  style: const TextStyle(
-                    color: Color(0xFF313131),
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'GE-SS-Two-Bold',
-                  ),
-                  textAlign: TextAlign.right,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+  String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
+  String translatedAccountSubType =
+      accountTypeTranslations[accountSubType] ?? accountSubType;
+
+  return Container(
+    margin: const EdgeInsets.only(bottom: 20),
+    width: 340,
+    height: 50,
+    decoration: BoxDecoration(
+      color: const Color(0xFFD9D9D9),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      children: [
+        // SAMA logo on the right
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Image.asset(
+            'assets/images/SAMA_logo.png',
+            width: 30,
+            height: 30,
+            fit: BoxFit.contain,
           ),
-          const SizedBox(width: 10),
-          Column(
+        ),
+        // Middle section for account details
+        Expanded(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: Text(
-                  translatedAccountSubType,
-                  style: const TextStyle(
-                    color: Color(0xFF3D3D3D),
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'GE-SS-Two-Bold',
-                  ),
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                translatedAccountSubType,
+                style: const TextStyle(
+                  color: Color(0xFF3D3D3D),
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'GE-SS-Two-Bold',
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
                       account['IBAN'] ?? 'رقم الايبان',
                       style: const TextStyle(
                         color: Color(0xFF5F5F5F),
@@ -152,35 +132,61 @@ class _BanksPageState extends State<BanksPage> {
                         fontFamily: 'GE-SS-Two-Light',
                       ),
                       overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
                     ),
-                    const SizedBox(width: 5),
-                    const Text(
-                      'رقم الآيبان',
-                      style: TextStyle(
-                        color: Color(0xFF3D3D3D),
-                        fontSize: 13,
-                        fontFamily: 'GE-SS-Two-Bold',
-                      ),
+                  ),
+                  const SizedBox(width: 5),
+                  const Text(
+                    'رقم الآيبان',
+                    style: TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 13,
+                      fontFamily: 'GE-SS-Two-Bold',
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(width: 10),
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: Image.asset(
-              'assets/images/SAMA_logo.png',
-              width: 30,
-              height: 30,
-              fit: BoxFit.contain,
-            ),
+        ),
+        // Left section for balance
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    account['Balance']?.toString() ?? '0',
+                    style: const TextStyle(
+                      color: Color(0xFF313131),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'GE-SS-Two-Bold',
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(width: 5),
+                  const Text(
+                    'ر.س',
+                    style: TextStyle(
+                      color: Color(0xFF5F5F5F),
+                      fontSize: 16,
+                      fontFamily: 'GE-SS-Two-Light',
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
