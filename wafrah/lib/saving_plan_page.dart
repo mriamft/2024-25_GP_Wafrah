@@ -90,7 +90,8 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
                   MaterialPageRoute(
                     builder: (context) => GoalPage(
                       userName: widget.userName, // Pass userName
-                      phoneNumber: widget.phoneNumber, // Pass phoneNumber
+                      phoneNumber: widget.phoneNumber,
+                      accounts: widget.accounts, // Pass phoneNumber
                     ),
                   ),
                 );

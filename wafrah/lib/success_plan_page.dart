@@ -5,9 +5,10 @@ import 'saving_plan_page2.dart'; // Import SavingPlanPage2
 class SuccessPlanPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
+  final Map<String, dynamic> resultData;
 
   const SuccessPlanPage(
-      {super.key, required this.userName, required this.phoneNumber});
+      {super.key, required this.userName, required this.phoneNumber, required this.resultData,});
 
   @override
   _SuccessPlanPageState createState() => _SuccessPlanPageState();
@@ -145,6 +146,7 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
                     builder: (context) => SavingPlanPage2(
                       userName: widget.userName, // Pass userName
                       phoneNumber: widget.phoneNumber,
+                      resultData: widget.resultData,
                     ), // Updated route
                   ),
                 );

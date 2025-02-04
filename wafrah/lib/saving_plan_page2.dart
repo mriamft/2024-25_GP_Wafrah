@@ -8,12 +8,14 @@ class SavingPlanPage2 extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final List<Map<String, dynamic>> accounts;
+  final Map<String, dynamic> resultData;
 
   const SavingPlanPage2({
     super.key,
     required this.userName,
     required this.phoneNumber,
     this.accounts = const [],
+    required this.resultData,
   });
 
   @override
@@ -24,35 +26,30 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   int _currentMonthIndex = 0; // Track the selected month
   int _startIndex = 0; // Track the first visible month index
 
-  List<String> months = [
-    'الشهر الأول',
-    'الشهر الثاني',
-    'الشهر الثالث',
-    'الشهر الرابع',
-    'الشهر الخامس',
-    'الشهر السادس'
-  ];
+  List<String> months = []; // Dynamically generated months
+  List<Map<String, dynamic>> savingsPlan = []; // Savings plan for all months
 
-  // Define categories and their corresponding icons
-  final List<Map<String, dynamic>> categories = [
-    {'label': 'المطاعم', 'icon': Icons.restaurant},
-    {'label': 'التعليم', 'icon': Icons.school},
-    {'label': 'الصحة', 'icon': Icons.local_hospital},
-    {'label': 'تسوق', 'icon': Icons.shopping_bag},
-    {'label': 'البقالة', 'icon': Icons.local_grocery_store},
-    {'label': 'النقل', 'icon': Icons.directions_bus},
-    {'label': 'السفر', 'icon': Icons.flight},
-    {'label': 'المدفوعات الحكومية', 'icon': Icons.account_balance},
-    {'label': 'الترفيه', 'icon': Icons.gamepad_rounded},
-    {'label': 'الاستثمار', 'icon': Icons.trending_up},
-    {'label': 'الإيجار', 'icon': Icons.home},
-    {'label': 'القروض', 'icon': Icons.money},
-    {'label': 'الراتب', 'icon': Icons.account_balance_wallet},
-    {'label': 'التحويلات', 'icon': Icons.swap_horiz},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    generateMonths(widget.resultData['DurationMonths']);
+    generateSavingsPlan(widget.resultData['MonthlySavingsPlan']);
+  }
 
-  final List<double> percentages = List.generate(
-      14, (index) => (index + 1) * 5.0); // Dummy percentages for demonstration
+  void generateMonths(int durationMonths) {
+    // Dynamically create month labels based on duration
+    months = List.generate(durationMonths, (index) => "الشهر ${index + 1}");
+  }
+
+  void generateSavingsPlan(Map<String, dynamic> monthlySavingsPlan) {
+    // Generate the savings plan based on Python result
+    savingsPlan = monthlySavingsPlan.entries
+        .map((entry) => {
+              'category': entry.key,
+              'monthlySavings': entry.value,
+            })
+        .toList();
+  }
 
   void _onArrowTap(bool isLeftArrow) {
     setState(() {
@@ -66,7 +63,8 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> visibleMonths = months.sublist(_startIndex, _startIndex + 2);
+    List<String> visibleMonths = months.sublist(
+        _startIndex, (_startIndex + 2).clamp(0, months.length));
     bool isLeftArrowEnabled = _startIndex < months.length - 2;
     bool isRightArrowEnabled = _startIndex > 0;
 
@@ -175,24 +173,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
             ),
           ),
           Positioned(
-            top: 195,
-            left: 19,
-            child: GestureDetector(
-              onTap: () {
-                // Handle trash icon tap if necessary
-              },
-              child: const Icon(
-                Icons.delete_outline_outlined,
-                color: Color.fromARGB(255, 239, 44, 54),
-                size: 28,
-              ),
-            ),
-          ),
-          // Fixed height container for the scrollable squares
-          // Fixed height container for the scrollable squares
-// Fixed height container for the scrollable squares
-          // Fixed height container for the scrollable squares
-          Positioned(
             top: 300,
             left: 10,
             right: 10,
@@ -200,21 +180,20 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               height: 365, // Set a larger height for the scrollable area
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 20), // Add vertical padding
+                  padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Center(
-                    // Center the content within the scrollable area
                     child: Wrap(
                       spacing: 27, // Space between squares
                       runSpacing: 30, // Space between rows
-                      children: List.generate(categories.length, (index) {
+                      children: savingsPlan.map((saving) {
                         return SizedBox(
-                          width: (MediaQuery.of(context).size.width / 2) -
-                              40, // Half the width minus spacing
+                          width: (MediaQuery.of(context).size.width / 2) - 40,
                           child: buildCategorySquare(
-                              categories[index], percentages[index]),
+                            saving['category'],
+                            saving['monthlySavings'],
+                          ),
                         );
-                      }),
+                      }).toList(),
                     ),
                   ),
                 ),
@@ -283,72 +262,10 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10, right: 0),
                     child: buildBottomNavItem(
-                        Icons.calendar_today, "خطة الإدخار", 3,
-                        onTap: () {}),
+                        Icons.calendar_today, "خطة الإدخار", 3, onTap: () {}),
                   ),
                 ],
               ),
-            ),
-          ),
-          Positioned(
-            left: 339,
-            top: 785,
-            child: Container(
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                color: Color(0xFF2C8C68),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          // Home Button with gradient circle
-          Positioned(
-            bottom: 44,
-            left: 0,
-            right: 0,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 92,
-                  height: 90,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF9F9F9),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.home,
-                      color: Colors.white,
-                      size: 44,
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(
-                              userName: widget.userName,
-                              phoneNumber: widget.phoneNumber,
-                              accounts: widget.accounts),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
             ),
           ),
         ],
@@ -356,19 +273,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     );
   }
 
-  Widget buildCategorySquare(Map<String, dynamic> category, double percentage) {
-    Color loadingColor;
-    if (percentage <= 25) {
-      loadingColor = Colors.red;
-    } else if (percentage <= 75) {
-      loadingColor = Colors.lightGreen;
-    } else {
-      loadingColor = const Color(0xFF379874);
-    }
-
-    // Check if the category is 'المدفوعات الحكومية'
-    bool isGovPayment = category['label'] == 'المدفوعات الحكومية';
-
+  Widget buildCategorySquare(String category, dynamic monthlySavings) {
     return Container(
       width: 101,
       height: 130,
@@ -385,114 +290,27 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       ),
       child: Stack(
         children: [
-          const Positioned(
+          Positioned(
             top: 40,
-            left: 112, // Keep this for positioning
+            left: 10,
             child: Text(
-              "مجموع\nالحفظ",
-              textAlign: TextAlign.right, // Align text to the right
-              style: TextStyle(
-                color: Color(0xFF5F5F5F),
+              category,
+              style: const TextStyle(
                 fontSize: 13,
                 fontFamily: 'GE-SS-Two-Light',
+                color: Color(0xFF3D3D3D),
               ),
             ),
           ),
-          const Positioned(
-            top: 110,
-            left: 104, // Adjusted left for all labels
+          Positioned(
+            top: 80,
+            left: 10,
             child: Text(
-              "تم حفظ",
-              style: TextStyle(
-                  color: Color(0xFF5F5F5F),
-                  fontSize: 13,
-                  fontFamily: 'GE-SS-Two-Light'),
-            ),
-          ),
-          const Positioned(
-            top: 78,
-            left: 110, // Adjusted left for all labels
-            child: Row(
-              children: [
-                Text(
-                  "ريال", // Second part
-                  style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 12,
-                      fontFamily: 'GE-SS-Two-Light'),
-                ),
-                SizedBox(width: 2), // Space between the two words
-                Text(
-                  "800", // First part
-                  style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 13,
-                      fontFamily: 'GE-SS-Two-Bold'),
-                ),
-              ],
-            ),
-          ),
-          const Positioned(
-            top: 109,
-            left: 60, // Adjusted left for all labels
-            child: Row(
-              children: [
-                Text(
-                  "ريال", // Second part
-                  style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 12,
-                      fontFamily: 'GE-SS-Two-Light'),
-                ),
-                SizedBox(width: 2), // Space between the two words
-                Text(
-                  "400", // First part
-                  style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 13,
-                      fontFamily: 'GE-SS-Two-Bold'),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 6,
-            left: 6,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 35,
-                  height: 35,
-                  child: CircularProgressIndicator(
-                    value: percentage / 100,
-                    strokeWidth: 3,
-                    backgroundColor: Colors.white,
-                    valueColor: AlwaysStoppedAnimation<Color>(loadingColor),
-                  ),
-                ),
-                Icon(
-                  category['icon'],
-                  color: const Color(0xFF2C8C68),
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-          // Change position based on the category label
-          Positioned(
-            bottom: isGovPayment
-                ? 56
-                : 70, // Adjust bottom position for 'المدفوعات الحكومية'
-            left: isGovPayment ? 0 : 0, // Adjust left position if needed
-            right: isGovPayment ? 55 : 105,
-            child: Center(
-              child: Text(
-                category['label'],
-                style: const TextStyle(
-                    color: Color(0xFF379874),
-                    fontSize: 10,
-                    fontFamily: 'GE-SS-Two-Bold'),
+              "مجموع الادخار: ${monthlySavings.toStringAsFixed(2)} ريال",
+              style: const TextStyle(
+                fontSize: 12,
+                fontFamily: 'GE-SS-Two-Light',
+                color: Color(0xFF3D3D3D),
               ),
             ),
           ),
