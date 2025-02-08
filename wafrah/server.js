@@ -16,11 +16,11 @@ const client = twilio(accountSid, authToken);
 
 // Database connection to AWS RDS MySQL
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-  port: process.env.DB_PORT,
+  host: 'wafrahdb.cf6kyks0q11n.eu-north-1.rds.amazonaws.com',
+  user: 'admin',
+  password: 'Wafrah_GP_1',
+  database: 'Wafrah',
+  port: 3306,
 });
 
  

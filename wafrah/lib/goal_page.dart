@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:wafrah/saving_dis_page.dart';
 import 'success_plan_page.dart'; // Import SuccessPlanPage
 
 class GoalPage extends StatefulWidget {
@@ -90,9 +91,10 @@ class _GoalPageState extends State<GoalPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SuccessPlanPage(
+        builder: (context) => SavingDisPage(
           userName: widget.userName,
           phoneNumber: widget.phoneNumber,
+          accounts: widget.accounts,
           resultData: data['data'], // Pass Python result
         ),
       ),

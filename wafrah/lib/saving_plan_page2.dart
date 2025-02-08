@@ -3,13 +3,13 @@ import 'settings_page.dart';
 import 'transactions_page.dart';
 import 'home_page.dart';
 import 'banks_page.dart';
-
+ 
 class SavingPlanPage2 extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final List<Map<String, dynamic>> accounts;
   final Map<String, dynamic> resultData;
-
+ 
   const SavingPlanPage2({
     super.key,
     required this.userName,
@@ -17,57 +17,81 @@ class SavingPlanPage2 extends StatefulWidget {
     this.accounts = const [],
     required this.resultData,
   });
-
+ 
   @override
   _SavingPlanPage2State createState() => _SavingPlanPage2State();
 }
-
+ 
 class _SavingPlanPage2State extends State<SavingPlanPage2> {
   int _currentMonthIndex = 0; // Track the selected month
-  int _startIndex = 0; // Track the first visible month index
-
   List<String> months = []; // Dynamically generated months
   List<Map<String, dynamic>> savingsPlan = []; // Savings plan for all months
-
+  Map<String, double> categoryTotalSavings = {}; // Store total savings per category
+ 
   @override
   void initState() {
     super.initState();
     generateMonths(widget.resultData['DurationMonths']);
     generateSavingsPlan(widget.resultData['MonthlySavingsPlan']);
   }
-
+ 
   void generateMonths(int durationMonths) {
     // Dynamically create month labels based on duration
     months = List.generate(durationMonths, (index) => "الشهر ${index + 1}");
+    months.add("الخطة كامله"); // Add option for the complete plan
   }
-
-  void generateSavingsPlan(Map<String, dynamic> monthlySavingsPlan) {
-    // Generate the savings plan based on Python result
-    savingsPlan = monthlySavingsPlan.entries
-        .map((entry) => {
-              'category': entry.key,
-              'monthlySavings': entry.value,
-            })
-        .toList();
+ 
+void generateSavingsPlan(Map<String, dynamic> monthlySavingsPlan) {
+  // Generate the savings plan based on the provided data
+  savingsPlan = monthlySavingsPlan.entries
+      .map((entry) => {
+            'category': entry.key,
+            'monthlySavings': entry.value,
+          })
+      .toList();
+ 
+  // Calculate the total savings for each category across all months
+  categoryTotalSavings.clear(); // Clear any previous totals
+  savingsPlan.forEach((saving) {
+    String category = saving['category'];
+    double savings = saving['monthlySavings'] ?? 0.0;
+ 
+    if (!categoryTotalSavings.containsKey(category)) {
+      categoryTotalSavings[category] = 0.0;
+    }
+ 
+    // Add the monthly savings for each category
+    categoryTotalSavings[category] = categoryTotalSavings[category]! + savings;
+ 
+  });
+    print('Total savings per category: $categoryTotalSavings');
+ 
+}
+List<Widget> buildCategorySquares() {
+  if (categoryTotalSavings.isEmpty) {
+    return [Center(child: Text('لا توجد بيانات'))];
   }
-
-  void _onArrowTap(bool isLeftArrow) {
+ 
+  return categoryTotalSavings.entries.map((entry) {
+    // Check if we're on the "الخطة كامله" option
+    return SizedBox(
+      width: (MediaQuery.of(context).size.width / 2) - 40,
+      child: buildCategorySquare(
+        entry.key,  // Category name
+        entry.value, // Total savings across all months
+      ),
+    );
+  }).toList(); // Wrapping the mapped widgets in a list
+}
+ 
+  void _onMonthChanged(String? newMonth) {
     setState(() {
-      if (isLeftArrow) {
-        _startIndex = (_startIndex + 1).clamp(0, months.length - 2);
-      } else {
-        _startIndex = (_startIndex - 1).clamp(0, months.length - 2);
-      }
+      _currentMonthIndex = months.indexOf(newMonth!);
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
-    List<String> visibleMonths = months.sublist(
-        _startIndex, (_startIndex + 2).clamp(0, months.length));
-    bool isLeftArrowEnabled = _startIndex < months.length - 2;
-    bool isRightArrowEnabled = _startIndex > 0;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
@@ -106,69 +130,43 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                 color: const Color(0xFFD9D9D9),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed:
-                        isLeftArrowEnabled ? () => _onArrowTap(true) : null,
-                    color: isLeftArrowEnabled
-                        ? const Color(0xFF777777)
-                        : const Color(0xFFCBCBCB),
-                    iconSize: 20,
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: months[_currentMonthIndex],
+                  icon: const Icon(Icons.arrow_drop_down),
+                  iconSize: 24,
+                  elevation: 16,
+                  style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
+                  dropdownColor: const Color(0xFFFFFFFF),
+                  underline: Container(
+                    height: 2,
+                    color: const Color(0xFF2C8C68),
                   ),
-                  ...List.generate(visibleMonths.length, (index) {
-                    int monthIndex =
-                        _startIndex + (visibleMonths.length - 1 - index);
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _currentMonthIndex = monthIndex;
-                        });
-                      },
+                  onChanged: _onMonthChanged,
+                  items: months.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
                       child: Container(
-                        width: 134,
-                        height: 38,
-                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: monthIndex == _currentMonthIndex
-                                ? const Color(0xFF379874)
-                                : const Color(0xFFB9B6B6),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                          color: monthIndex == _currentMonthIndex
-                              ? const Color(0xFF379874)
-                              : const Color(0xFFD9D9D9),
-                        ),
-                        child: Center(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 12.0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
                           child: Text(
-                            visibleMonths[visibleMonths.length - 1 - index],
-                            style: TextStyle(
-                              color: monthIndex == _currentMonthIndex
-                                  ? Colors.white
-                                  : const Color(0xFF3D3D3D),
-                              fontWeight: monthIndex == _currentMonthIndex
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                            value,
+                            style: const TextStyle(
                               fontFamily: 'GE-SS-Two-Light',
+                              fontSize: 16,
+                              color: Color.fromARGB(133, 0, 0, 0),
+                              fontWeight: FontWeight.normal,
                             ),
                           ),
                         ),
                       ),
                     );
-                  }),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios),
-                    onPressed:
-                        isRightArrowEnabled ? () => _onArrowTap(false) : null,
-                    color: isRightArrowEnabled
-                        ? const Color(0xFF777777)
-                        : const Color(0xFFCBCBCB),
-                    iconSize: 20,
-                  ),
-                ],
+                  }).toList(),
+                ),
               ),
             ),
           ),
@@ -185,15 +183,17 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                     child: Wrap(
                       spacing: 27, // Space between squares
                       runSpacing: 30, // Space between rows
-                      children: savingsPlan.map((saving) {
-                        return SizedBox(
-                          width: (MediaQuery.of(context).size.width / 2) - 40,
-                          child: buildCategorySquare(
-                            saving['category'],
-                            saving['monthlySavings'],
-                          ),
-                        );
-                      }).toList(),
+                      children: _currentMonthIndex == months.length - 1
+                          ? buildCategorySquares() // Show all categories with total
+                          : savingsPlan.map((saving) {
+                              return SizedBox(
+                                width: (MediaQuery.of(context).size.width / 2) - 40,
+                                child: buildCategorySquare(
+                                  saving['category'],
+                                  saving['monthlySavings'],
+                                ),
+                              );
+                            }).toList(),
                     ),
                   ),
                 ),
@@ -272,53 +272,86 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       ),
     );
   }
-
-  Widget buildCategorySquare(String category, dynamic monthlySavings) {
-    return Container(
-      width: 101,
-      height: 130,
-      decoration: BoxDecoration(
-        color: const Color(0xFFD9D9D9),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.5),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 40,
-            left: 10,
-            child: Text(
-              category,
-              style: const TextStyle(
-                fontSize: 13,
-                fontFamily: 'GE-SS-Two-Light',
-                color: Color(0xFF3D3D3D),
-              ),
+Widget buildCategorySquare(String category, dynamic monthlySavings) {
+  Map<String, IconData> categoryIcons = {
+    'المطاعم': Icons.restaurant,
+    'التعليم': Icons.school,
+    'الصحة': Icons.local_hospital,
+    'تسوق': Icons.shopping_bag,
+    'البقالة': Icons.local_grocery_store,
+    'النقل': Icons.directions_bus,
+    'السفر': Icons.flight,
+    'المدفوعات الحكومية': Icons.account_balance,
+    'الترفيه': Icons.gamepad_rounded,
+    'الاستثمار': Icons.trending_up,
+    'الإيجار': Icons.home,
+    'القروض': Icons.money,
+    'الراتب': Icons.account_balance_wallet,
+    'التحويلات': Icons.swap_horiz,
+    'الخطة كامله': Icons.check_circle,  // Special icon for the complete plan
+  };
+ 
+  IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
+ 
+  // Show total savings for "الخطة كامله"
+  double displaySavings = category == "الخطة كامله"
+      ? categoryTotalSavings.values.fold(0, (prev, curr) => prev + curr) // Use the total savings for "الخطة كامله"
+      : monthlySavings;
+ 
+  return Container(
+    width: 101,
+    height: 130,
+    decoration: BoxDecoration(
+      color: const Color(0xFFD9D9D9),
+      borderRadius: BorderRadius.circular(8),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.5),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Stack(
+      children: [
+        Positioned(
+          top: 40,
+          left: 10,
+          child: Text(
+            category,
+            style: const TextStyle(
+              fontSize: 13,
+              fontFamily: 'GE-SS-Two-Light',
+              color: Color(0xFF3D3D3D),
             ),
           ),
-          Positioned(
-            top: 80,
-            left: 10,
-            child: Text(
-              "مجموع الادخار: ${monthlySavings.toStringAsFixed(2)} ريال",
-              style: const TextStyle(
-                fontSize: 12,
-                fontFamily: 'GE-SS-Two-Light',
-                color: Color(0xFF3D3D3D),
-              ),
+        ),
+        Positioned(
+          top: 80,
+          left: 10,
+          child: Text(
+            "مجموع الادخار: ${displaySavings.toStringAsFixed(2)} ريال",
+            style: const TextStyle(
+              fontSize: 12,
+              fontFamily: 'GE-SS-Two-Light',
+              color: Color(0xFF3D3D3D),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
+        ),
+        Positioned(
+          top: 6,
+          left: 6,
+          child: Icon(
+            categoryIcon,
+            color: const Color(0xFF2C8C68),
+            size: 24,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+ 
   Widget buildBottomNavItem(IconData icon, String label, int index,
       {required VoidCallback onTap}) {
     return GestureDetector(

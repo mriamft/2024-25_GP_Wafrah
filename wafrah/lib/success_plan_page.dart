@@ -6,9 +6,11 @@ class SuccessPlanPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final Map<String, dynamic> resultData;
+  final List<Map<String, dynamic>> accounts; // List of accounts with transactions
 
   const SuccessPlanPage(
-      {super.key, required this.userName, required this.phoneNumber, required this.resultData,});
+      {super.key, required this.userName, required this.phoneNumber, required this.accounts, 
+      required this.resultData,});
 
   @override
   _SuccessPlanPageState createState() => _SuccessPlanPageState();
@@ -146,6 +148,7 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
                     builder: (context) => SavingPlanPage2(
                       userName: widget.userName, // Pass userName
                       phoneNumber: widget.phoneNumber,
+                      accounts: widget.accounts,
                       resultData: widget.resultData,
                     ), // Updated route
                   ),
