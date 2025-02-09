@@ -8,7 +8,7 @@ import 'success_plan_page.dart'; // Import SuccessPlanPage
 class GoalPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
-  final List<Map<String, dynamic>> accounts; // List of accounts with transactions
+  final List<Map<String, dynamic>> accounts;
 
   const GoalPage({
     super.key,
@@ -24,104 +24,124 @@ class GoalPage extends StatefulWidget {
 class _GoalPageState extends State<GoalPage> {
   Color _arrowColor = const Color(0xFF3D3D3D);
   final TextEditingController goalController = TextEditingController();
+  final TextEditingController startDateController = TextEditingController();
   final TextEditingController durationController = TextEditingController();
+  final TextEditingController endDateController = TextEditingController();
 
   bool isLoading = false;
-  String outputMessage = ""; // Stores the output from Python
+  String outputMessage = "";
+  String selectedOption = "duration"; // Default selection
 
   @override
   void dispose() {
     goalController.dispose();
+    startDateController.dispose();
     durationController.dispose();
+    endDateController.dispose();
     super.dispose();
   }
 
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: const Color(0xFF2C8C68),
+            colorScheme: ColorScheme.light(primary: const Color(0xFF2C8C68)),
+            buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      });
+    }
+  }
+
   Future<void> _runFlaskAPI() async {
-  setState(() {
-    isLoading = true;
-    outputMessage = ""; // Clear old results
-  });
+    setState(() {
+      isLoading = true;
+      outputMessage = "";
+    });
 
-  try {
-    final url = Uri.parse("https://flask-app.ngrok.io/run-script");
+    try {
+      double durationInMonths = 0;
+      if (selectedOption == "duration") {
+        durationInMonths = double.parse(durationController.text);
+      } else if (selectedOption == "end_date") {
+        final startDate = DateTime.parse(startDateController.text);
+        final endDate = DateTime.parse(endDateController.text);
+        durationInMonths = (endDate.difference(startDate).inDays / 30).ceilToDouble();
+      }
 
-    // Prepare the transactions list
-    List<Map<String, dynamic>> transactions = [];
-    for (var account in widget.accounts) {
-      if (account.containsKey('transactions')) {
-        for (var transaction in account['transactions']) {
-          transactions.add({
-            "TransactionId": transaction["TransactionId"],
-            "Date": transaction["TransactionDateTime"],
-            "TransactionType": transaction["SubTransactionType"],
-            "TransactionInformation": transaction["TransactionInformation"],
-            "Amount": transaction["Amount"],
-            "Category": transaction["Category"]
-          });
+      final url = Uri.parse("https://flask-app.ngrok.io/run-script");
+      List<Map<String, dynamic>> transactions = [];
+      for (var account in widget.accounts) {
+        if (account.containsKey('transactions')) {
+          for (var transaction in account['transactions']) {
+            transactions.add({
+              "TransactionId": transaction["TransactionId"],
+              "Date": transaction["TransactionDateTime"],
+              "TransactionType": transaction["SubTransactionType"],
+              "TransactionInformation": transaction["TransactionInformation"],
+              "Amount": transaction["Amount"],
+              "Category": transaction["Category"]
+            });
+          }
         }
       }
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "goal": double.parse(goalController.text),
+          "duration_months": durationInMonths,
+          "transactions": transactions,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SavingDisPage(
+                userName: widget.userName,
+                phoneNumber: widget.phoneNumber,
+                accounts: widget.accounts,
+                resultData: data['data'],
+              ),
+            ),
+          );
+        } else {
+          setState(() {
+            outputMessage = "⚠️ API Error: ${data['message'] ?? 'Unknown error occurred.'}";
+          });
+        }
+      } else {
+        setState(() {
+          outputMessage = "⚠️ Server Error: HTTP ${response.statusCode}";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        outputMessage = "⚠️ Failed to connect to the server: $e";
+      });
     }
-
-    // Check data before sending
-    print("Sending to Flask: ${jsonEncode({
-      "goal": double.parse(goalController.text),
-      "duration_months": int.parse(durationController.text),
-      "transactions": transactions,
-    })}");
-
-    // Send data to Flask API
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "goal": double.parse(goalController.text),
-        "duration_months": int.parse(durationController.text),
-        "transactions": transactions,
-      }),
-    );
-
-    print("Response Status: ${response.statusCode}");
-    print("Response Body: ${response.body}");
-
-    if (response.statusCode == 200) {
-  final data = jsonDecode(response.body);
-
-  if (data['success'] == true && data['data'] != null) {
-    // Navigate to the success page
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SavingDisPage(
-          userName: widget.userName,
-          phoneNumber: widget.phoneNumber,
-          accounts: widget.accounts,
-          resultData: data['data'], // Pass Python result
-        ),
-      ),
-    );
-  } else {
     setState(() {
-      outputMessage = "⚠️ API Error: ${data['message'] ?? 'Unknown error occurred.'}";
+      isLoading = false;
     });
   }
-} else {
-  setState(() {
-    outputMessage = "⚠️ Server Error: HTTP ${response.statusCode}";
-  });
-}
-
-  } catch (e) {
-    print("Connection Error: $e");
-    setState(() {
-      outputMessage = "⚠️ Failed to connect to the server: $e";
-    });
-  }
-
-  setState(() {
-    isLoading = false;
-  });
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -165,51 +185,144 @@ class _GoalPageState extends State<GoalPage> {
             ),
           ),
           Positioned(
-            left: -18,
+            left: 1,
             top: 252,
             child: Container(
               width: 430,
-              height: 205,
-              color: const Color(0xFFF1F1F1),
+              height: 320,
+              color: const Color(0xFFF9F9F9),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const SizedBox(height: 55),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      SizedBox(
-                        width: 130,
-                        height: 28,
-                        child: TextField(
-                          controller: durationController,
-                          textAlign: TextAlign.right,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: 'المدة (أشهر)',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                  const SizedBox(height: 30),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 30.0),
+                    child: Text(
+                      'المدة المرغوبة أو تاريخ الانتهاء',
+                      style: TextStyle(
+                        color: Color(0xFF3D3D3D),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'GE-SS-Two-Bold',
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 50.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: 130,
+                          height: 28,
+                          child: TextField(
+                            controller: goalController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.left,
+                            decoration: InputDecoration(
+                              hintText: 'ريال',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 130,
-                        height: 28,
-                        child: TextField(
-                          controller: goalController,
-                          textAlign: TextAlign.right,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: 'المبلغ المستهدف',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                        SizedBox(
+                          width: 130,
+                          height: 28,
+                          child: TextField(
+                            controller: startDateController,
+                            readOnly: true,
+                            textAlign: TextAlign.right,
+                            onTap: () => _selectDate(context, startDateController),
+                            decoration: InputDecoration(
+                              hintText: 'تاريخ البدء',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            const Text("المدة (أشهر)",
+                                style: TextStyle(fontSize: 12, fontFamily: 'GE-SS-Two-Bold')),
+                            Radio<String>(
+                              value: "duration",
+                              groupValue: selectedOption,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedOption = value!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          width: 130,
+                          height: 28,
+                          child: TextField(
+                            controller: durationController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.right,
+                            decoration: InputDecoration(
+                              hintText: 'المدة (أشهر)',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            const Text("تاريخ النهاية",
+                                style: TextStyle(fontSize: 12, fontFamily: 'GE-SS-Two-Bold')),
+                            Radio<String>(
+                              value: "end_date",
+                              groupValue: selectedOption,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedOption = value!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          width: 130,
+                          height: 28,
+                          child: TextField(
+                            controller: endDateController,
+                            readOnly: true,
+                            textAlign: TextAlign.right,
+                            onTap: () => _selectDate(context, endDateController),
+                            decoration: InputDecoration(
+                              hintText: 'تاريخ النهاية',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

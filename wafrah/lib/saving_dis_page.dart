@@ -47,16 +47,22 @@ class _SavingDisPageState extends State<SavingDisPage> {
   // Normalized CategorySavings
   late Map<String, double> categorySavings;
 
-  @override
+late Map<String, int> initialDiscretionaryRatios; // Store initial ratios
+late Map<String, double> initialCategorySavings; // Store initial savings
+late final Map<String, TextEditingController> controllers = {
+  for (var category in allCategories)
+    category: TextEditingController(
+      text: ((widget.resultData['discretionaryRatios']?[category] ?? 0) as int).toString(),
+    ),
+};
+
 @override
 void initState() {
   super.initState();
 
   // Extract discretionaryRatios and CategorySavings from resultData
-  Map<String, dynamic> rawRatios =
-      widget.resultData['discretionaryRatios'] ?? {};
-  Map<String, dynamic> rawSavings =
-      widget.resultData['CategorySavings'] ?? {};
+  Map<String, dynamic> rawRatios = widget.resultData['discretionaryRatios'] ?? {};
+  Map<String, dynamic> rawSavings = widget.resultData['CategorySavings'] ?? {};
 
   // Ensure all categories exist, setting missing ones to 0
   discretionaryRatios = {
@@ -68,6 +74,10 @@ void initState() {
     for (var category in allCategories)
       category: (rawSavings[category] ?? 0.0).toDouble(), // Convert to double
   };
+
+  // Store initial values for resetting later
+  initialDiscretionaryRatios = Map.from(discretionaryRatios);
+  initialCategorySavings = Map.from(categorySavings);
 }
 
 
@@ -103,9 +113,12 @@ void _updateCategoryPercentage(String category, double value) {
 
 void _resetCategoryDistribution() {
   setState(() {
-    discretionaryRatios.updateAll((key, value) => 0);
+    // Reset to the initial values
+    discretionaryRatios = Map.from(initialDiscretionaryRatios);
+    categorySavings = Map.from(initialCategorySavings);
   });
 }
+
 
 
   @override
@@ -207,137 +220,130 @@ children: discretionaryRatios.keys.map((category) {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Stack(
-                        children: [
-                          Positioned(
-                            left: 260,
-                            top: 19,
-                            child: SizedBox(
-                              width: 80,
-                              child: Text(
-                                category == 'المدفوعات الحكومية'
-                                    ? 'المدفوعات\nالحكومية'
-                                    : category,
-                                style: const TextStyle(
-                                  color: Color(0xFF3D3D3D),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'GE-SS-Two-Bold',
-                                ),
-                                textAlign: TextAlign.right,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 130,
-                            top: 26,
-                            child: SizedBox(
-                              width: 160,
-                              height: 4,
-                              child: Transform(
-                                alignment: Alignment.center,
-                                transform: Matrix4.rotationY(3.14),
-                                child:Slider(
+children: [
+  Positioned(
+    left: 260,
+    top: 19,
+    child: SizedBox(
+      width: 80,
+      child: Text(
+        category == 'المدفوعات الحكومية'
+            ? 'المدفوعات\nالحكومية'
+            : category,
+        style: const TextStyle(
+          color: Color(0xFF3D3D3D),
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'GE-SS-Two-Bold',
+        ),
+        textAlign: TextAlign.right,
+      ),
+    ),
+  ),
+  Positioned(
+    left: 130,
+    top: 26,
+    child: SizedBox(
+      width: 160,
+      height: 4,
+      child: Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.rotationY(3.14),
+        child: Slider(
   value: discretionaryRatios[category]!.toDouble(),
   min: 0,
   max: 100,
   divisions: 100,
   onChanged: (newValue) {
-    _updateCategoryPercentage(category, newValue);
+    setState(() {
+      _updateCategoryPercentage(category, newValue);
+      controllers[category]!.text = newValue.toInt().toString(); // Sync text
+    });
   },
   activeColor: const Color(0xFF2C8C68),
   inactiveColor: const Color(0xFF838383),
 ),
 
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 95,
-                            top: 4,
-                            child: Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: const Color(0xFF8D8D8D)),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 22, // Adjust width as needed
-                                    height:
-                                        34, // Increase height for better visibility
-                                    child: TextField(
-                                      keyboardType: TextInputType.number,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 17,
-                                        fontFamily:
-                                            'GE-SS-Two-Light', // Set the desired font size
-                                        color: Color(
-                                            0xFF3D3D3D), // Optional: set text color
-                                      ),
-                                      decoration: const InputDecoration(
-                                        border: InputBorder.none,
-                                      ),
-                                      onChanged: (value) {
-                                        double? newValue =
-                                            double.tryParse(value);
-                                        if (newValue != null &&
-                                            newValue >= 0 &&
-                                            newValue <= 100) {
-                                          _updateCategoryPercentage(
-                                              category, newValue);
-                                        }
-                                      },
-controller: TextEditingController(
-  text: discretionaryRatios[category]!.toString(),
-),
-
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-Positioned(
-  left: 131,
-  top: 31,
-  child: Text(
-    '${discretionaryRatios[category]}%', // Display discretionaryRatios percentage
-    style: const TextStyle(
-      color: Color(0xFF3D3D3D),
-      fontSize: 13,
+      ),
     ),
   ),
+  Positioned(
+    left: 95,
+    top: 4,
+    child: Container(
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFF8D8D8D)),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Row(
+        children: [
+SizedBox(
+  width: 22,
+  height: 34,
+  child: TextField(
+  keyboardType: TextInputType.number,
+  textAlign: TextAlign.center,
+  style: const TextStyle(
+    fontSize: 14,
+    fontFamily: 'GE-SS-Two-Light',
+    color: Color(0xFF3D3D3D),
+  ),
+  decoration: const InputDecoration(
+    border: InputBorder.none,
+  ),
+  controller: TextEditingController(
+    text: '${discretionaryRatios[category]}%', // Display the percentage with %
+  ),
+  onChanged: (value) {
+    // Remove the % sign before parsing
+    String sanitizedValue = value.replaceAll('%', '').trim();
+    double? newValue = double.tryParse(sanitizedValue);
+
+    if (newValue != null && newValue >= 0 && newValue <= 100) {
+      setState(() {
+        // Update the ratio and synchronize other components
+        discretionaryRatios[category] = newValue.toInt();
+        double totalSavingsGoal = widget.resultData["SavingsGoal"]?.toDouble() ?? 0.0;
+        categorySavings[category] = (totalSavingsGoal * (newValue / 100)).toDouble();
+      });
+    }
+  },
 ),
 
-Positioned(
-  left: 24,
-  top: 16,
-  child: Text(
-    categorySavings[category]!.toStringAsFixed(0), // Display category savings
-    style: const TextStyle(
-      color: Color(0xFF3D3D3D),
-      fontSize: 17,
-      fontFamily: 'GE-SS-Two-Bold',
+
+),
+
+        ],
+      ),
     ),
   ),
-),
+  Positioned(
+    left: 24,
+    top: 16,
+    child: Text(
+      categorySavings[category]!.toStringAsFixed(0), // Display category savings
+      style: const TextStyle(
+        color: Color(0xFF3D3D3D),
+        fontSize: 17,
+        fontFamily: 'GE-SS-Two-Bold',
+      ),
+    ),
+  ),
+  const Positioned(
+    left: 3,
+    top: 19,
+    child: Text(
+      'ريال',
+      style: TextStyle(
+        color: Color(0xFF3D3D3D),
+        fontSize: 11,
+        fontFamily: 'GE-SS-Two-Light',
+      ),
+    ),
+  ),
+],
 
-                          const Positioned(
-                            left: 3,
-                            top: 19,
-                            child: Text(
-                              'ريال',
-                              style: TextStyle(
-                                color: Color(0xFF3D3D3D),
-                                fontSize: 11,
-                                fontFamily: 'GE-SS-Two-Light',
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   );
@@ -347,19 +353,23 @@ Positioned(
           ),
 
           // Warning message
-          if (!isTotalValid)
-            Positioned(
-              left: 250,
-              top: 670,
-              child: Text(
-                'مجموع النسب ليس %100',
-                style: TextStyle(
-                  color: const Color(0xFFDD2C35),
-                  fontSize: 11,
-                  fontFamily: 'GE-SS-Two-Light',
-                ),
-              ),
-            ),
+if (!isTotalValid)
+  Positioned(
+    left: 123,
+    top: 670,
+    child: Text(
+      'مجموع النسب لا يساوي ١٠٠%! نسبتك الحالية هي ${totalPercentage.toInt()}%',
+      style: const TextStyle(
+        color: Color(0xFFDD2C35),
+        fontSize: 11,
+        fontFamily: 'GE-SS-Two-Light',
+      ),
+      textAlign: TextAlign.right, // Proper alignment for Arabic
+      textDirection: TextDirection.rtl, // Ensure RTL text flow
+    ),
+  ),
+
+
 
           Positioned(
             left: 61,
