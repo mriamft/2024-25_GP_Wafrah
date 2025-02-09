@@ -156,6 +156,7 @@ flutter:
     - assets/images/third_info.png
     - assets/images/coins.png
     - assets/images/greenLogo.png
+    - assets/images/Saving_image.png
     - assets/audio/coin-flip-88793.mp3
     - assets/certs/transport-cert-Wafrah-SoftwareStatement.pem
     - assets/certs/transport-key-Wafrah-SoftwareStatement.key

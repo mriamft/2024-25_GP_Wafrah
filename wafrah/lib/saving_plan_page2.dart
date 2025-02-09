@@ -35,38 +35,21 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     generateSavingsPlan(widget.resultData['MonthlySavingsPlan']);
   }
  
-  void generateMonths(int durationMonths) {
-    // Dynamically create month labels based on duration
-    months = List.generate(durationMonths, (index) => "الشهر ${index + 1}");
-    months.add("الخطة كامله"); // Add option for the complete plan
-  }
+  void generateMonths(dynamic durationMonths) {
+  int monthsCount = (durationMonths is int) ? durationMonths : durationMonths.toInt();
+  months = List.generate(monthsCount, (index) => "الشهر ${index + 1}");
+  months.add("الخطة كامله"); // Add option for the complete plan
+
+}
+
  
 void generateSavingsPlan(Map<String, dynamic> monthlySavingsPlan) {
-  // Generate the savings plan based on the provided data
-  savingsPlan = monthlySavingsPlan.entries
-      .map((entry) => {
-            'category': entry.key,
-            'monthlySavings': entry.value,
-          })
-      .toList();
- 
-  // Calculate the total savings for each category across all months
-  categoryTotalSavings.clear(); // Clear any previous totals
-  savingsPlan.forEach((saving) {
-    String category = saving['category'];
-    double savings = saving['monthlySavings'] ?? 0.0;
- 
-    if (!categoryTotalSavings.containsKey(category)) {
-      categoryTotalSavings[category] = 0.0;
-    }
- 
-    // Add the monthly savings for each category
-    categoryTotalSavings[category] = categoryTotalSavings[category]! + savings;
- 
-  });
-    print('Total savings per category: $categoryTotalSavings');
- 
+  savingsPlan = monthlySavingsPlan.entries.map((entry) => {
+    'category': entry.key,
+    'monthlySavings': (entry.value as num).toDouble(), // Ensure it's a double
+  }).toList();
 }
+
 List<Widget> buildCategorySquares() {
   if (categoryTotalSavings.isEmpty) {
     return [Center(child: Text('لا توجد بيانات'))];

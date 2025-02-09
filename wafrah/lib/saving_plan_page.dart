@@ -41,6 +41,23 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
               fit: BoxFit.contain,
             ),
           ),
+          Positioned(
+  left: 80, // Adjust as needed
+  top: 140, // Adjust as needed
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.start,
+    children: [
+      Image.asset(
+       'assets/images/Saving_image.png', // Use the appropriate image path
+        width: 240,
+        height: 400,
+      ),
+ SizedBox(width: 8),
+
+    ],
+  ),
+),
+
           const Positioned(
             left: 56,
             top: 490,

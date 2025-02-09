@@ -184,24 +184,111 @@ class _GoalPageState extends State<GoalPage> {
               ),
             ),
           ),
+                    const Positioned(
+                      
+            left: 28,
+            top: 152,
+            child: Text(
+              ' لإنشاء خطة ادخار، يجب تحديد المبلغ الذي ترغب في ادخاره، المدة الزمنية • \n'
+'  التي ستقوم فيها بالادخار \n'
+              '.يمكنك اختيار تحديد تاريخ الانتهاء أو تحديد المدة بالأشهر• \n'
+              '  .في حالة اختيار تاريخ الانتهاء، سيتم تقريب أي جزء من الشهر إلى شهر كامل• \n',
+              style: TextStyle(
+                color: Color(0xFF3D3D3D),
+                fontSize: 10,
+                fontFamily: 'GE-SS-Two-Light',
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
           Positioned(
-            left: 1,
+            left: -18,
             top: 252,
             child: Container(
               width: 430,
-              height: 320,
+              height: 400,
               color: const Color(0xFFF9F9F9),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   const SizedBox(height: 30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 45.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text(
+                              'الهدف',
+                              style: TextStyle(
+                                color: Color(0xFF3D3D3D),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'GE-SS-Two-Bold',
+                              ),
+                            ),
+                            SizedBox(
+                              width: 150,
+                              height: 28,
+                              child: TextField(
+                                controller: goalController,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.right,
+                                decoration: InputDecoration(
+                                  hintText: 'ريال',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                    borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text(
+                              'تاريخ البداية',
+                              style: TextStyle(
+                                color: Color(0xFF3D3D3D),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'GE-SS-Two-Bold',
+                              ),
+                            ),
+                            SizedBox(
+                              width: 150,
+                              height: 28,
+                              child: TextField(
+                                controller: startDateController,
+                                readOnly: true,
+                                textAlign: TextAlign.right,
+                                onTap: () => _selectDate(context, startDateController),
+                                decoration: InputDecoration(
+                                  hintText: 'تاريخ البدء',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                    borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   const Padding(
-                    padding: EdgeInsets.only(right: 30.0),
+                    padding: EdgeInsets.only(right: 45.0),
                     child: Text(
-                      'المدة المرغوبة أو تاريخ الانتهاء',
+                      'المدة المرغوبة',
                       style: TextStyle(
                         color: Color(0xFF3D3D3D),
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'GE-SS-Two-Bold',
                       ),
@@ -211,56 +298,19 @@ class _GoalPageState extends State<GoalPage> {
                   const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.only(right: 50.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          width: 130,
-                          height: 28,
-                          child: TextField(
-                            controller: goalController,
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.left,
-                            decoration: InputDecoration(
-                              hintText: 'ريال',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5),
-                                borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 130,
-                          height: 28,
-                          child: TextField(
-                            controller: startDateController,
-                            readOnly: true,
-                            textAlign: TextAlign.right,
-                            onTap: () => _selectDate(context, startDateController),
-                            decoration: InputDecoration(
-                              hintText: 'تاريخ البدء',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5),
-                                borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            const Text("المدة (أشهر)",
-                                style: TextStyle(fontSize: 12, fontFamily: 'GE-SS-Two-Bold')),
+                            const Text(
+                              'المدة بالأشهر',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'GE-SS-Two-Bold',
+                              ),
+                            ),
                             Radio<String>(
                               value: "duration",
                               groupValue: selectedOption,
@@ -273,14 +323,15 @@ class _GoalPageState extends State<GoalPage> {
                           ],
                         ),
                         SizedBox(
-                          width: 130,
+                          width: 150,
                           height: 28,
                           child: TextField(
                             controller: durationController,
+                            enabled: selectedOption == "duration",
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.right,
                             decoration: InputDecoration(
-                              hintText: 'المدة (أشهر)',
+                              hintText: 'أشهر',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
                                 borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
@@ -288,11 +339,17 @@ class _GoalPageState extends State<GoalPage> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            const Text("تاريخ النهاية",
-                                style: TextStyle(fontSize: 12, fontFamily: 'GE-SS-Two-Bold')),
+                            const Text(
+                              'تاريخ النهاية',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'GE-SS-Two-Bold',
+                              ),
+                            ),
                             Radio<String>(
                               value: "end_date",
                               groupValue: selectedOption,
@@ -305,13 +362,16 @@ class _GoalPageState extends State<GoalPage> {
                           ],
                         ),
                         SizedBox(
-                          width: 130,
+                          width: 150,
                           height: 28,
                           child: TextField(
                             controller: endDateController,
+                            enabled: selectedOption == "end_date",
                             readOnly: true,
                             textAlign: TextAlign.right,
-                            onTap: () => _selectDate(context, endDateController),
+                            onTap: selectedOption == "end_date"
+                                ? () => _selectDate(context, endDateController)
+                                : null,
                             decoration: InputDecoration(
                               hintText: 'تاريخ النهاية',
                               border: OutlineInputBorder(
