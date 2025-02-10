@@ -158,9 +158,9 @@ flutter:
     - assets/images/greenLogo.png
     - assets/images/Saving_image.png
     - assets/audio/coin-flip-88793.mp3
-    - assets/certs/transport-cert-Wafrah-SoftwareStatement (1).pem
-    - assets/certs/transport-key-Wafrah-SoftwareStatement (1).key
-    - assets/certs/signin-key-Wafrah-SoftwareStatement (1).key
+    - assets/certs/transport-cert-Wafrah-SoftwareStatement.pem
+    - assets/certs/transport-key-Wafrah-SoftwareStatement.key
+    - assets/certs/signin-key-Wafrah-SoftwareStatement.key
     
 
   # Fonts section
