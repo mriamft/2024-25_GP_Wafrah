@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'saving_plan_page2.dart'; // Import SavingPlanPage2
 
 class SuccessPlanPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final Map<String, dynamic> resultData;
-  final List<Map<String, dynamic>> accounts; // List of accounts with transactions
+  final List<Map<String, dynamic>>
+      accounts; // List of accounts with transactions
 
-  const SuccessPlanPage(
-      {super.key, required this.userName, required this.phoneNumber, required this.accounts, 
-      required this.resultData,});
+  const SuccessPlanPage({
+    super.key,
+    required this.userName,
+    required this.phoneNumber,
+    required this.accounts,
+    required this.resultData,
+  });
 
   @override
   _SuccessPlanPageState createState() => _SuccessPlanPageState();

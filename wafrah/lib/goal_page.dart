@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:wafrah/saving_dis_page.dart';
-import 'success_plan_page.dart'; // Import SuccessPlanPage
+import 'package:wafrah/user_pattern_page.dart';
+// Import SuccessPlanPage
 
 class GoalPage extends StatefulWidget {
   final String userName;
@@ -41,7 +40,8 @@ class _GoalPageState extends State<GoalPage> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+  Future<void> _selectDate(
+      BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -51,8 +51,9 @@ class _GoalPageState extends State<GoalPage> {
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: const Color(0xFF2C8C68),
-            colorScheme: ColorScheme.light(primary: const Color(0xFF2C8C68)),
-            buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+            colorScheme: const ColorScheme.light(primary: Color(0xFF2C8C68)),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
           ),
           child: child!,
         );
@@ -61,7 +62,8 @@ class _GoalPageState extends State<GoalPage> {
 
     if (picked != null) {
       setState(() {
-        controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+        controller.text =
+            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
       });
     }
   }
@@ -79,7 +81,8 @@ class _GoalPageState extends State<GoalPage> {
       } else if (selectedOption == "end_date") {
         final startDate = DateTime.parse(startDateController.text);
         final endDate = DateTime.parse(endDateController.text);
-        durationInMonths = (endDate.difference(startDate).inDays / 30).ceilToDouble();
+        durationInMonths =
+            (endDate.difference(startDate).inDays / 30).ceilToDouble();
       }
 
       final url = Uri.parse("https://flask-app.ngrok.io/run-script");
@@ -115,7 +118,7 @@ class _GoalPageState extends State<GoalPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => SavingDisPage(
+              builder: (context) => UserPatternPage(
                 userName: widget.userName,
                 phoneNumber: widget.phoneNumber,
                 accounts: widget.accounts,
@@ -125,7 +128,8 @@ class _GoalPageState extends State<GoalPage> {
           );
         } else {
           setState(() {
-            outputMessage = "⚠️ API Error: ${data['message'] ?? 'Unknown error occurred.'}";
+            outputMessage =
+                "⚠️ API Error: ${data['message'] ?? 'Unknown error occurred.'}";
           });
         }
       } else {
@@ -184,13 +188,12 @@ class _GoalPageState extends State<GoalPage> {
               ),
             ),
           ),
-                    const Positioned(
-                      
+          const Positioned(
             left: 28,
             top: 152,
             child: Text(
               ' لإنشاء خطة ادخار، يجب تحديد المبلغ الذي ترغب في ادخاره، المدة الزمنية • \n'
-'  التي ستقوم فيها بالادخار \n'
+              '  التي ستقوم فيها بالادخار \n'
               '.يمكنك اختيار تحديد تاريخ الانتهاء أو تحديد المدة بالأشهر• \n'
               '  .في حالة اختيار تاريخ الانتهاء، سيتم تقريب أي جزء من الشهر إلى شهر كامل• \n',
               style: TextStyle(
@@ -240,7 +243,8 @@ class _GoalPageState extends State<GoalPage> {
                                   hintText: 'ريال',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5),
-                                    borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFFAEAEAE), width: 1),
                                   ),
                                 ),
                               ),
@@ -266,12 +270,14 @@ class _GoalPageState extends State<GoalPage> {
                                 controller: startDateController,
                                 readOnly: true,
                                 textAlign: TextAlign.right,
-                                onTap: () => _selectDate(context, startDateController),
+                                onTap: () =>
+                                    _selectDate(context, startDateController),
                                 decoration: InputDecoration(
                                   hintText: 'تاريخ البدء',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5),
-                                    borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFFAEAEAE), width: 1),
                                   ),
                                 ),
                               ),
@@ -334,7 +340,8 @@ class _GoalPageState extends State<GoalPage> {
                               hintText: 'أشهر',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
-                                borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFFAEAEAE), width: 1),
                               ),
                             ),
                           ),
@@ -376,7 +383,8 @@ class _GoalPageState extends State<GoalPage> {
                               hintText: 'تاريخ النهاية',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
-                                borderSide: const BorderSide(color: Color(0xFFAEAEAE), width: 1),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFFAEAEAE), width: 1),
                               ),
                             ),
                           ),
@@ -406,7 +414,10 @@ class _GoalPageState extends State<GoalPage> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'استمرار',
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'GE-SS-Two-Light'),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontFamily: 'GE-SS-Two-Light'),
                         ),
                 ),
               ),
