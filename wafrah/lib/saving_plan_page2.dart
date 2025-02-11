@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'settings_page.dart';
 import 'transactions_page.dart';
 import 'banks_page.dart';
+import 'home_page.dart';
 
 class SavingPlanPage2 extends StatefulWidget {
   final String userName;
@@ -29,51 +30,111 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       {}; // Store total savings per category
 
   @override
-  void initState() {
-    super.initState();
-    generateMonths(widget.resultData['DurationMonths']);
-    generateSavingsPlan(widget.resultData['MonthlySavingsPlan']);
-  }
+@override
+void initState() {
+  super.initState();
+  generateMonths(widget.resultData['DurationMonths']);
 
-  void generateMonths(dynamic durationMonths) {
-    int monthsCount =
-        (durationMonths is int) ? durationMonths : durationMonths.toInt();
-    months = List.generate(monthsCount, (index) => "الشهر ${index + 1}");
-    months.add("الخطة كامله"); // Add option for the complete plan
-  }
+  _currentMonthIndex = 0; // Ensure "الخطة كاملة" is selected by default
 
-  void generateSavingsPlan(Map<String, dynamic> monthlySavingsPlan) {
-    savingsPlan = monthlySavingsPlan.entries
-        .map((entry) => {
-              'category': entry.key,
-              'monthlySavings':
-                  (entry.value as num).toDouble(), // Ensure it's a double
-            })
+  // Initialize categoryTotalSavings before calling generateSavingsPlan()
+  categoryTotalSavings = Map<String, double>.from(
+    widget.resultData['CategorySavings']
+        .map((key, value) => MapEntry(key, (value as num).toDouble()))
+  );
+
+  // Call generateSavingsPlan after categoryTotalSavings is initialized
+  setState(() {
+    generateSavingsPlan();
+  });
+}
+
+
+
+ void generateMonths(dynamic durationMonths) {
+  int monthsCount =
+      (durationMonths is int) ? durationMonths : durationMonths.toInt();
+
+  months.clear();
+  months.add("الخطة كاملة"); // Full Plan at index 0
+  months.addAll(List.generate(monthsCount, (index) => "الشهر ${index + 1}"));
+}
+
+
+
+
+
+
+void generateSavingsPlan() {
+  print("Generating Savings for Month: $_currentMonthIndex");
+
+  int totalMonths = months.length - 1; // Exclude "الخطة كاملة"
+
+  if (_currentMonthIndex == 0) {
+    // Full Plan (index 0)
+    savingsPlan = categoryTotalSavings.entries
+        .where((entry) => entry.value > 0) // Remove zero-value categories
+        .map((entry) {
+      return {
+        'category': entry.key,
+        'monthlySavings': entry.value, // Full savings
+      };
+    }).toList();
+  } else {
+    // Regular Month (from 1 to last index)
+    savingsPlan = categoryTotalSavings.entries
+        .map((entry) {
+          double monthlySavings = entry.value / totalMonths;
+          return {
+            'category': entry.key,
+            'monthlySavings': (_currentMonthIndex == totalMonths)
+                ? monthlySavings // Show savings for the last month
+                : monthlySavings, // Show savings per selected month
+          };
+        })
+        .where((entry) => (entry['monthlySavings'] as num) > 0)
         .toList();
   }
 
-  List<Widget> buildCategorySquares() {
-    if (categoryTotalSavings.isEmpty) {
-      return [const Center(child: Text('لا توجد بيانات'))];
+  print("Final Computed Savings for $_currentMonthIndex: $savingsPlan");
+}
+
+
+
+List<Widget> buildCategorySquares() {
+  return savingsPlan
+      .where((saving) => saving['monthlySavings'] > 0) // Hide zero-value categories
+      .map((saving) {
+        return SizedBox(
+          width: (MediaQuery.of(context).size.width / 2) - 40,
+          child: buildCategorySquare(
+            saving['category'],
+            saving['monthlySavings'], // Show savings per selected month
+          ),
+        );
+      }).toList();
+}
+
+
+
+
+ void _onMonthChanged(String? newMonth) {
+  setState(() {
+    int newIndex = months.indexOf(newMonth!);
+
+    if (newIndex >= 0 && newIndex < months.length) {
+      _currentMonthIndex = newIndex;
+      generateSavingsPlan(); // Refresh data
+    } else {
+      print(" Error: Selected month index out of range");
     }
+  });
+}
 
-    return categoryTotalSavings.entries.map((entry) {
-      // Check if we're on the "الخطة كامله" option
-      return SizedBox(
-        width: (MediaQuery.of(context).size.width / 2) - 40,
-        child: buildCategorySquare(
-          entry.key, // Category name
-          entry.value, // Total savings across all months
-        ),
-      );
-    }).toList(); // Wrapping the mapped widgets in a list
-  }
 
-  void _onMonthChanged(String? newMonth) {
-    setState(() {
-      _currentMonthIndex = months.indexOf(newMonth!);
-    });
-  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -187,6 +248,59 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               ),
             ),
           ),
+          // Home Button with gradient circle
+Positioned(
+  bottom: 82, // Adjust this to move the home button up
+  left: 0,
+  right: 0,
+  child: Stack(
+    alignment: Alignment.center,
+    children: [
+      // Outer Circle (White background to blend)
+      Container(
+        width: 80, // Increase to prevent clipping
+        height: 80,
+        decoration: const BoxDecoration(
+          color: Color(0xFFF9F9F9), // Matches the navbar background
+          shape: BoxShape.circle,
+        ),
+      ),
+      // Inner Circle (Green Gradient Home Button)
+      Container(
+        width: 90, // Increase size
+        height: 90, // Increase size
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          icon: const Icon(
+            Icons.home,
+            color: Colors.white,
+            size: 44,
+          ),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(
+                  userName: widget.userName,
+                  phoneNumber: widget.phoneNumber,
+                  accounts: widget.accounts,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    ],
+  ),
+),
+
           // Bottom Navigation Bar
           Positioned(
             bottom: 0,
@@ -309,11 +423,13 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
           Positioned(
             top: 40,
             left: 10,
+            right: 10,
             child: Text(
               category,
+              textAlign: TextAlign.right,
               style: const TextStyle(
                 fontSize: 13,
-                fontFamily: 'GE-SS-Two-Light',
+                fontFamily: 'GE-SS-Two-Bold',
                 color: Color(0xFF3D3D3D),
               ),
             ),
@@ -321,8 +437,10 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
           Positioned(
             top: 80,
             left: 10,
+            right: 10,
             child: Text(
-              "مجموع الادخار: ${displaySavings.toStringAsFixed(2)} ريال",
+              "المبلغ المطلوب\n ادخاره: ${displaySavings.toStringAsFixed(2)} ريال",
+              textAlign: TextAlign.right,
               style: const TextStyle(
                 fontSize: 12,
                 fontFamily: 'GE-SS-Two-Light',
