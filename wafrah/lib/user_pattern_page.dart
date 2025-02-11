@@ -14,12 +14,12 @@ class UserPatternPage extends StatefulWidget {
   final Map<String, dynamic> resultData;
 
   const UserPatternPage({
-    Key? key,
+    super.key,
     required this.userName,
     required this.phoneNumber,
     this.accounts = const [],
     required this.resultData,
-  }) : super(key: key);
+  });
 
   @override
   _UserPatternPageState createState() => _UserPatternPageState();
@@ -92,15 +92,15 @@ class _UserPatternPageState extends State<UserPatternPage> {
                   ),
                 ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       'مجموع الصرف لفترة x أشهر',
                       style: TextStyle(
-                        color: const Color(0xFF535353),
+                        color: Color(0xFF535353),
                         fontSize: 11,
                         fontFamily: 'GE-SS-Two-Light',
                       ),
@@ -112,16 +112,16 @@ class _UserPatternPageState extends State<UserPatternPage> {
                         Text(
                           'ريال',
                           style: TextStyle(
-                            color: const Color(0xFF3D3D3D),
+                            color: Color(0xFF3D3D3D),
                             fontSize: 11,
                             fontFamily: 'GE-SS-Two-Light',
                           ),
                         ),
-                        const SizedBox(width: 5),
+                        SizedBox(width: 5),
                         Text(
                           '5000',
                           style: TextStyle(
-                            color: const Color(0xFF3D3D3D),
+                            color: Color(0xFF3D3D3D),
                             fontSize: 32,
                             fontFamily: 'GE-SS-Two-Bold',
                           ),
