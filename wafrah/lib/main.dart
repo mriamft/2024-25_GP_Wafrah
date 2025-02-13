@@ -158,7 +158,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         // Drag "ابدأ" for smooth transition
                         Future.delayed(const Duration(milliseconds: 300), () {
                           setState(() {
-                            _dragValue = 0.0; 
+                            _dragValue = 0.0;
                           });
                         });
                       } else {
