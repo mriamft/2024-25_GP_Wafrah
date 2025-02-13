@@ -190,7 +190,7 @@ class _GoalPageState extends State<GoalPage> {
           ),
           const Positioned(
             left: 28,
-            top: 152,
+            top: 130,
             child: Text(
               ' لإنشاء خطة ادخار، يجب تحديد المبلغ الذي ترغب في ادخاره، المدة الزمنية • \n'
               '  التي ستقوم فيها بالادخار \n'
