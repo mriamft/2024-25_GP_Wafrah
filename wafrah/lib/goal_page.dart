@@ -69,83 +69,109 @@ class _GoalPageState extends State<GoalPage> {
   }
 
   Future<void> _runFlaskAPI() async {
-    setState(() {
-      isLoading = true;
-      outputMessage = "";
-    });
+  setState(() {
+    isLoading = true;
+    outputMessage = "";
+  });
 
-    try {
-      double durationInMonths = 0;
-      if (selectedOption == "duration") {
-        durationInMonths = double.parse(durationController.text);
-      } else if (selectedOption == "end_date") {
-        final startDate = DateTime.parse(startDateController.text);
-        final endDate = DateTime.parse(endDateController.text);
-        durationInMonths =
-            (endDate.difference(startDate).inDays / 30).ceilToDouble();
-      }
+  try {
+    double durationInMonths = 0;
+    if (selectedOption == "duration") {
+      durationInMonths = double.parse(durationController.text);
+    } else if (selectedOption == "end_date") {
+      final startDate = DateTime.parse(startDateController.text);
+      final endDate = DateTime.parse(endDateController.text);
+      durationInMonths = (endDate.difference(startDate).inDays / 30).ceilToDouble();
+    }
 
-      final url = Uri.parse("https://flask-app.ngrok.io/run-script");
-      List<Map<String, dynamic>> transactions = [];
-      for (var account in widget.accounts) {
-        if (account.containsKey('transactions')) {
-          for (var transaction in account['transactions']) {
-            transactions.add({
-              "TransactionId": transaction["TransactionId"],
-              "Date": transaction["TransactionDateTime"],
-              "TransactionType": transaction["SubTransactionType"],
-              "TransactionInformation": transaction["TransactionInformation"],
-              "Amount": transaction["Amount"],
-              "Category": transaction["Category"]
-            });
-          }
-        }
-      }
+    final goal = double.parse(goalController.text);
+    final startDate = startDateController.text;
 
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "goal": double.parse(goalController.text),
-          "duration_months": durationInMonths,
-          "transactions": transactions,
-        }),
-      );
+    final savingsUrl = Uri.parse("https://flask-app.ngrok.io/run-script");
+    final spendingUrl = Uri.parse("https://flask-app.ngrok.io/category-spending-summary");
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => UserPatternPage(
-                userName: widget.userName,
-                phoneNumber: widget.phoneNumber,
-                accounts: widget.accounts,
-                resultData: data['data'],
-              ),
-            ),
-          );
-        } else {
-          setState(() {
-            outputMessage =
-                "⚠️ API Error: ${data['message'] ?? 'Unknown error occurred.'}";
+    List<Map<String, dynamic>> transactions = [];
+    for (var account in widget.accounts) {
+      if (account.containsKey('transactions')) {
+        for (var transaction in account['transactions']) {
+          transactions.add({
+            "TransactionId": transaction["TransactionId"],
+            "Date": transaction["TransactionDateTime"],
+            "TransactionType": transaction["SubTransactionType"],
+            "TransactionInformation": transaction["TransactionInformation"],
+            "Amount": transaction["Amount"],
+            "Category": transaction["Category"]
           });
         }
-      } else {
-        setState(() {
-          outputMessage = "⚠️ Server Error: HTTP ${response.statusCode}";
-        });
       }
-    } catch (e) {
-      setState(() {
-        outputMessage = "⚠️ Failed to connect to the server: $e";
-      });
     }
+
+    // Step 1: Call the savings API
+    final savingsResponse = await http.post(
+      savingsUrl,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "goal": goal,
+        "duration_months": durationInMonths,
+        "transactions": transactions,
+      }),
+    );
+
+    if (savingsResponse.statusCode != 200) {
+      throw "⚠️ Server Error: ${savingsResponse.statusCode}";
+    }
+
+    final savingsData = jsonDecode(savingsResponse.body);
+    if (savingsData['success'] != true || savingsData['data'] == null) {
+      throw "⚠️ API Error: ${savingsData['message'] ?? 'Unknown error occurred.'}";
+    }
+
+    // Step 2: Call the spending summary API
+    final spendingResponse = await http.post(
+      spendingUrl,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "start_date": startDate,
+        "duration_months": durationInMonths,
+        "transactions": transactions,
+      }),
+    );
+
+    if (spendingResponse.statusCode != 200) {
+      throw "⚠️ Server Error: ${spendingResponse.statusCode}";
+    }
+
+    final spendingData = jsonDecode(spendingResponse.body);
+    if (spendingData['success'] != true || spendingData['data'] == null) {
+      throw "⚠️ API Error: ${spendingData['message'] ?? 'Unknown error occurred.'}";
+    }
+
+    // Step 3: Navigate to UserPatternPage with both results
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserPatternPage(
+          userName: widget.userName,
+          phoneNumber: widget.phoneNumber,
+          accounts: widget.accounts,
+          resultData: savingsData['data'], // Savings plan data
+          spendingData: spendingData['data'], // Spending summary data
+          durationMonths: durationInMonths.toInt(),
+        ),
+      ),
+    );
+
+  } catch (e) {
     setState(() {
-      isLoading = false;
+      outputMessage = "⚠️ Failed to connect to the server: $e";
     });
   }
+
+  setState(() {
+    isLoading = false;
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {

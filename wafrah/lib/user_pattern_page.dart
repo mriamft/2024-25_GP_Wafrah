@@ -9,6 +9,8 @@ class UserPatternPage extends StatefulWidget {
   final String phoneNumber;
   final List<Map<String, dynamic>> accounts;
   final Map<String, dynamic> resultData;
+final Map<String, dynamic> spendingData;
+final int durationMonths;
 
   const UserPatternPage({
     super.key,
@@ -16,7 +18,11 @@ class UserPatternPage extends StatefulWidget {
     required this.phoneNumber,
     this.accounts = const [],
     required this.resultData,
+    required this.spendingData,
+    required this.durationMonths,
   });
+ 
+
 
   @override
   _UserPatternPageState createState() => _UserPatternPageState();
@@ -25,9 +31,47 @@ class UserPatternPage extends StatefulWidget {
 class _UserPatternPageState extends State<UserPatternPage> {
   Color _arrowColor = const Color(0xFF3D3D3D);
   bool _isPressed = false;
+   IconData _getCategoryIcon(String category) {
+  switch (category) {
+    case 'المطاعم':
+      return Icons.restaurant;
+    case 'التعليم':
+      return Icons.school;
+    case 'الصحة':
+      return Icons.local_hospital;
+    case 'تسوق':
+      return Icons.shopping_bag;
+    case 'البقالة':
+      return Icons.local_grocery_store;
+    case 'النقل':
+      return Icons.directions_bus;
+    case 'السفر':
+      return Icons.flight;
+    case 'المدفوعات الحكومية':
+      return Icons.account_balance;
+    case 'الترفيه':
+      return Icons.gamepad_rounded;
+    case 'الاستثمار':
+      return Icons.trending_up;
+    case 'الإيجار':
+      return Icons.home;
+    case 'القروض':
+      return Icons.money;
+    case 'التحويلات':
+      return Icons.swap_horiz;
+    default:
+      return Icons.help_outline; // Default icon if category is missing
+  }
+}
 
   @override
   Widget build(BuildContext context) {
+    double totalSpending = widget.spendingData['CategorySpending'] != null
+    ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
+        .entries
+        .where((entry) => entry.key != 'الراتب') // ✅ Exclude income category
+        .fold(0.0, (sum, entry) => sum + (entry.value as double))
+    : 0.0;
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
@@ -89,13 +133,13 @@ class _UserPatternPageState extends State<UserPatternPage> {
                   ),
                 ],
               ),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'مجموع الصرف لفترة x أشهر',
+                        'مجموع الصرف لفترة ${widget.durationMonths} أشهر',
                       style: TextStyle(
                         color: Color(0xFF535353),
                         fontSize: 11,
@@ -116,7 +160,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
                         ),
                         SizedBox(width: 5),
                         Text(
-                          '5000',
+                          totalSpending.toStringAsFixed(2),
                           style: TextStyle(
                             color: Color(0xFF3D3D3D),
                             fontSize: 32,
@@ -235,103 +279,39 @@ class _UserPatternPageState extends State<UserPatternPage> {
 
   /// Builds the list of “circle” widgets based on your categories.
   List<Widget> _buildCategoryCircles() {
-    // Replace with your real data as needed.
-    final categories = [
-      {
-        'title': 'المطاعم',
-        'icon': Icons.restaurant,
-        'amount': '2500',
-        'percentage': '10%'
-      },
-      {
-        'title': 'التعليم',
-        'icon': Icons.school,
-        'amount': '2000',
-        'percentage': '8%'
-      },
-      {
-        'title': 'الصحة',
-        'icon': Icons.local_hospital,
-        'amount': '1200',
-        'percentage': '50%'
-      },
-      {
-        'title': 'تسوق',
-        'icon': Icons.shopping_bag,
-        'amount': '2500',
-        'percentage': '10%'
-      },
-      {
-        'title': 'البقالة',
-        'icon': Icons.local_grocery_store,
-        'amount': '800',
-        'percentage': '3%'
-      },
-      {
-        'title': 'النقل',
-        'icon': Icons.directions_bus,
-        'amount': '1500',
-        'percentage': '6%'
-      },
-      {
-        'title': 'السفر',
-        'icon': Icons.flight,
-        'amount': '3000',
-        'percentage': '12%'
-      },
-      {
-        'title': 'المدفوعات الحكومية',
-        'icon': Icons.account_balance,
-        'amount': '2000',
-        'percentage': '8%'
-      },
-      {
-        'title': 'الترفيه',
-        'icon': Icons.gamepad_rounded,
-        'amount': '1000',
-        'percentage': '4%'
-      },
-      {
-        'title': 'الاستثمار',
-        'icon': Icons.trending_up,
-        'amount': '4000',
-        'percentage': '16%'
-      },
-      {
-        'title': 'الإيجار',
-        'icon': Icons.home,
-        'amount': '5000',
-        'percentage': '20%'
-      },
-      {
-        'title': 'القروض',
-        'icon': Icons.money,
-        'amount': '1500',
-        'percentage': '6%'
-      },
-      {
-        'title': 'الراتب',
-        'icon': Icons.account_balance_wallet,
-        'amount': '800',
-        'percentage': '3%'
-      },
-      {
-        'title': 'التحويلات',
-        'icon': Icons.swap_horiz,
-        'amount': '1200',
-        'percentage': '100%'
-      },
-    ];
+  // Compute total spending excluding "الراتب"
+  double totalSpending = widget.spendingData['CategorySpending'] != null
+      ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
+          .entries
+          .where((entry) => entry.key != 'الراتب')
+          .fold(0.0, (sum, entry) => sum + (entry.value as double))
+      : 0.0;
 
-    return categories.map((cat) {
-      return _buildCategoryCircleItem(
-        icon: cat['icon'] as IconData,
-        label: cat['title'] as String,
-        amount: cat['amount'] as String,
-        percentage: cat['percentage'] as String,
-      );
-    }).toList();
-  }
+  final categories = widget.spendingData['CategorySpending'] != null
+      ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
+          .entries
+          .where((entry) => entry.key != 'الراتب') // ✅ Exclude "الراتب"
+          .map((entry) => {
+                'title': entry.key,
+                'icon': _getCategoryIcon(entry.key), // ✅ Assign correct icon
+                'amount': entry.value.toStringAsFixed(2),
+                'percentage': totalSpending > 0
+                    ? ((entry.value / totalSpending) * 100).toStringAsFixed(1) + '%'
+                    : '0.0%' // Avoid division by zero
+              })
+          .toList()
+      : [];
+
+  return categories.map((cat) {
+    return _buildCategoryCircleItem(
+      icon: cat['icon'] as IconData,
+      label: cat['title'] as String,
+      amount: cat['amount'] as String,
+      percentage: cat['percentage'] as String,
+    );
+  }).toList();
+}
+
 
   /// Builds a single circular widget (with the arc, icon, spending, etc.)
   /// The percentage text is placed at the end of the circular arc, **outside** the circle.
