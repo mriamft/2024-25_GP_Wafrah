@@ -6,7 +6,10 @@ import 'banks_page.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
- 
+import 'goal_page.dart'; // Import your goal page for navigation
+import 'saving_plan_page2.dart';
+import 'secure_storage_helper.dart'; // Import the secure storage helper
+
 class HomePage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
@@ -95,7 +98,38 @@ class _HomePageState extends State<HomePage>
       _isBalanceVisible = prefs.getBool('isBalanceVisible') ?? true; // Default is true
     });
   }
- 
+   void navigateToSavingPlan() async {
+    // Check if there is a saved plan
+    var savedPlan = await loadPlanFromSecureStorage();
+
+    // If saved plan exists, navigate to SavingPlanPage2
+    if (savedPlan != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SavingPlanPage2(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+            resultData: savedPlan,  // Pass saved plan data to the next page
+          ),
+        ),
+      );
+    } else {
+      // If no saved plan exists, navigate to GoalPage to create a new plan
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SavingPlanPage(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+          ),
+        ),
+      );
+    }
+  }
+
   // Save the visibility state to SharedPreferences
   Future<void> _saveVisibilityState(bool isVisible) async {
     final prefs = await SharedPreferences.getInstance();
@@ -1723,25 +1757,7 @@ Widget buildIncomeExpenseGraph() {
                   }),
  
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
-                      onTap: () {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            SavingPlanPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts,
-                        ),
-                        transitionDuration:
-                            const Duration(seconds: 0),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return child;
-                        },
-                      ),
-                      (route) => false,
-                    );
-                  }),
+                      onTap: navigateToSavingPlan), 
                 ],
               ),
             ),

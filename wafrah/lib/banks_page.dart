@@ -5,6 +5,9 @@ import 'home_page.dart';
 import 'saving_plan_page.dart';
 import 'settings_page.dart';
 import 'storage_service.dart';
+ import 'goal_page.dart'; // Import your goal page for navigation
+import 'saving_plan_page2.dart';
+import 'secure_storage_helper.dart'; // Import the secure storage helper
 
 class BanksPage extends StatefulWidget {
   final String userName;
@@ -71,6 +74,37 @@ class _BanksPageState extends State<BanksPage> {
 
     print('Transaction Categories: $categories'); 
     return categories;
+  }
+  void navigateToSavingPlan() async {
+    // Check if there is a saved plan
+    var savedPlan = await loadPlanFromSecureStorage();
+
+    // If saved plan exists, navigate to SavingPlanPage2
+    if (savedPlan != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SavingPlanPage2(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+            resultData: savedPlan,  // Pass saved plan data to the next page
+          ),
+        ),
+      );
+    } else {
+      // If no saved plan exists, navigate to GoalPage to create a new plan
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SavingPlanPage(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+          ),
+        ),
+      );
+    }
   }
 
 Widget _buildAccountCard(Map<String, dynamic> account) {
@@ -327,18 +361,7 @@ Widget _buildAccountCard(Map<String, dynamic> account) {
                       );
                     }),
                   ),
-                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SavingPlanPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: _accounts,
-                        ),
-                      ),
-                    );
-                  }),
+                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", navigateToSavingPlan), 
                 ],
               ),
             ),

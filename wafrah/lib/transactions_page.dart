@@ -4,7 +4,10 @@ import 'banks_page.dart';
 import 'dart:async'; 
 import 'saving_plan_page.dart';
 import 'home_page.dart';
- 
+ import 'goal_page.dart'; // Import your goal page for navigation
+import 'saving_plan_page2.dart';
+import 'secure_storage_helper.dart'; // Import the secure storage helper
+
 class TransactionsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
@@ -309,17 +312,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
-                      onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SavingPlanPage(
-                                userName: widget.userName,
-                                phoneNumber: widget.phoneNumber,
-                                accounts: widget.accounts,
-                              )),
-                    );
-                  }),
+                      onTap: navigateToSavingPlan), 
                 ],
               ),
             ),
@@ -862,7 +855,38 @@ class _TransactionsPageState extends State<TransactionsPage> {
       ),
     );
   }
- 
+   void navigateToSavingPlan() async {
+    // Check if there is a saved plan
+    var savedPlan = await loadPlanFromSecureStorage();
+
+    // If saved plan exists, navigate to SavingPlanPage2
+    if (savedPlan != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SavingPlanPage2(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+            resultData: savedPlan,  // Pass saved plan data to the next page
+          ),
+        ),
+      );
+    } else {
+      // If no saved plan exists, navigate to GoalPage to create a new plan
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SavingPlanPage(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+          ),
+        ),
+      );
+    }
+  }
+
   void _showTransactionDetails(
       BuildContext context, Map<String, dynamic> transaction) {
     String accountIban = 'غير معروف';

@@ -4,6 +4,9 @@ import 'settings_page.dart';
 import 'transactions_page.dart';
 import 'home_page.dart';
 import 'banks_page.dart';
+import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'saving_plan_page2.dart';
+
 
 class SavingPlanPage extends StatefulWidget {
   final String userName;
@@ -22,8 +25,63 @@ class SavingPlanPage extends StatefulWidget {
 }
 
 class _SavingPlanPageState extends State<SavingPlanPage> {
-  bool _isPressed = false;
 
+  bool _isPressed = false;
+  bool _isPlanSaved = false;  
+  // Define the function to check and navigate to SavingPlanPage2 or GoalPage
+  void navigateToSavingPlan() async {
+    // Check if there is a saved plan
+    var savedPlan = await loadPlanFromSecureStorage();
+
+    // If saved plan exists, navigate to SavingPlanPage2
+    if (savedPlan != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SavingPlanPage2(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+            resultData: savedPlan,  // Pass saved plan data to the next page
+          ),
+        ),
+      );
+    } else {
+      // If no saved plan exists, navigate to GoalPage or any other page to create a plan
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GoalPage(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+          ),
+        ),
+      );
+    }
+  }
+
+
+  // Function to save the plan and update state
+  Future<void> _savePlan(Map<String, dynamic> planData) async {
+    await savePlanToSecureStorage(planData); // Save the plan securely
+    setState(() {
+      _isPlanSaved = true; // Mark the plan as saved
+    });
+
+    // Navigate to SavingPlanPage2 after saving
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SavingPlanPage2(
+          userName: widget.userName,
+          phoneNumber: widget.phoneNumber,
+          accounts: widget.accounts,
+          resultData: planData,  // Pass the saved plan data
+        ),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,17 +158,7 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
                 });
               },
               onTap: () {
-                // Pass userName and phoneNumber to GoalPage
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => GoalPage(
-                      userName: widget.userName, // Pass userName
-                      phoneNumber: widget.phoneNumber,
-                      accounts: widget.accounts, // Pass phoneNumber
-                    ),
-                  ),
-                );
+                navigateToSavingPlan(); // Call the function to check and navigate
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
