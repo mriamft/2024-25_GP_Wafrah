@@ -379,7 +379,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
               value: progressValue,
               backgroundColor: Colors.transparent,
               valueColor:
-                  const AlwaysStoppedAnimation<Color>(Color(0xFF2C8C68)),
+                  const AlwaysStoppedAnimation<Color>(Color(0xFFEB5757)),
               strokeWidth: 5,
             ),
           ),
@@ -388,12 +388,12 @@ class _UserPatternPageState extends State<UserPatternPage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: const Color(0xFF2C8C68), size: 25),
+              Icon(icon, color: const Color(0xFFEB5757), size: 25),
               const SizedBox(height: 5),
               Text(
                 label,
                 style: const TextStyle(
-                  color: Color(0xFF2C8C68),
+                  color: Color(0xFFEB5757),
                   fontFamily: 'GE-SS-Two-Light',
                   fontSize: 13,
                 ),

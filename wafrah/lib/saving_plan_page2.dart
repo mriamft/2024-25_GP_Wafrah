@@ -321,20 +321,20 @@ Future<void> _deletePlanFromStorage() async {
 
   Widget buildDeleteButton() {
     return Positioned(
-      top: 50, // Adjust the position as needed
-      right: 20,
+      top: 190, // Adjust the position as needed
+      right: 310,
       child: GestureDetector(
         onTap: deletePlan,
         child: Container(
           width: 45,
           height: 45,
           decoration: BoxDecoration(
-            color: Color(0xFF2C8C68), // Green color
+            color: Color(0xFFF5F5F5), // Green color
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.delete,
-            color: Colors.white,
+             color: Color(0xFFEB5757),
             size: 30,
           ),
         ),

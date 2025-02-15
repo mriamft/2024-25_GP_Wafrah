@@ -171,13 +171,12 @@ class _SavingDisPageState extends State<SavingDisPage> {
             ),
           ),
           const Positioned(
-            left: 28,
+            left: 63,
             top: 152,
             child: Text(
               ' :اذا كنت تريد تعديل هذا التوزيع \n'
-              '. قم بسحب المؤشر إلى اليمين أو اليسار لتعديل النسبة المئوية لكل فئة • \n'
-              '. تأكد من أن إجمالي النسب يصل إلى 100% لتحقيق توزيع متوازن • \n'
-              ' عند الانتهاء، اضغط على زر "حفظ" لتأكيد اختياراتك، أو زر "إعادة تعيين" للعودة إلى • \n.القيم الافتراضية',
+              '. قم بسحب المؤشر إلى اليمين أو اليسار لتعديل النسبة المئوية لكل فئة  \n'
+               ,
               style: TextStyle(
                 color: Color(0xFF3D3D3D),
                 fontSize: 10,
@@ -369,8 +368,8 @@ class _SavingDisPageState extends State<SavingDisPage> {
           // Warning message
           if (!isTotalValid)
             Positioned(
-              left: 123,
-              top: 670,
+              left: 122,
+            top: 245,
               child: Text(
                 'مجموع النسب لا يساوي ١٠٠%! نسبتك الحالية هي ${totalPercentage.toInt()}%',
                 style: const TextStyle(
