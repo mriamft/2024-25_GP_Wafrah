@@ -295,19 +295,28 @@ class _UserPatternPageState extends State<UserPatternPage> {
       : 0.0;
 
   final categories = widget.spendingData['CategorySpending'] != null
-      ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
-          .entries
-          .where((entry) => entry.key != 'الراتب') // ✅ Exclude "الراتب"
-          .map((entry) => {
-                'title': entry.key,
-                'icon': _getCategoryIcon(entry.key), // ✅ Assign correct icon
-                'amount': entry.value.toStringAsFixed(2),
-                'percentage': totalSpending > 0
-                    ? ((entry.value / totalSpending) * 100).toStringAsFixed(1) + '%'
-                    : '0.0%' // Avoid division by zero
-              })
-          .toList()
-      : [];
+    ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
+        .entries
+        .where((entry) => entry.key != 'الراتب') // ✅ Exclude "الراتب"
+        .map((entry) => {
+              'title': entry.key,
+              'icon': _getCategoryIcon(entry.key),
+              'amount': entry.value.toStringAsFixed(2),
+              'percentage': totalSpending > 0
+                  ? ((entry.value / totalSpending) * 100)
+                  : 0.0 // Avoid division by zero
+            })
+        .toList()
+    : [];
+
+// ✅ Sort by percentage descending order
+categories.sort((a, b) => (b['percentage'] as double).compareTo(a['percentage'] as double));
+
+// ✅ Convert percentage to string with '%' after sorting
+for (var cat in categories) {
+  cat['percentage'] = '${cat['percentage'].toStringAsFixed(1)}%';
+}
+
 
   return categories.map((cat) {
     return _buildCategoryCircleItem(
