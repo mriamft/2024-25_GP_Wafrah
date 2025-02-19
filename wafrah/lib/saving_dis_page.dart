@@ -5,8 +5,8 @@ class SavingDisPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final Map<String, dynamic> resultData; // Declare it as a class-level field
-  final List<Map<String, dynamic>>
-      accounts; // List of accounts with transactions
+  final List<Map<String, dynamic>> accounts; // List of accounts with transactions
+  final String startDate;
 
   const SavingDisPage({
     super.key,
@@ -14,6 +14,7 @@ class SavingDisPage extends StatefulWidget {
     required this.phoneNumber,
     this.accounts = const [],
     required this.resultData, // Include it as a parameter in the constructor
+    required this.startDate,
   });
 
   @override
@@ -80,6 +81,8 @@ class _SavingDisPageState extends State<SavingDisPage> {
         category: (rawSavings[category] ?? 0.0).toDouble(), // Convert to double
     };
 
+print("Saving dis");
+print(widget.startDate);
     // Store initial values for resetting later
     initialDiscretionaryRatios = Map.from(discretionaryRatios);
     initialCategorySavings = Map.from(categorySavings);
@@ -407,9 +410,9 @@ class _SavingDisPageState extends State<SavingDisPage> {
                       Map.from(discretionaryRatios);
                   updatedResultData['CategorySavings'] =
                       Map.from(categorySavings);
-                  print(
-                      "Updated resultData before navigation: $updatedResultData");
-
+                  updatedResultData['DurationMonths'] = widget.resultData['DurationMonths'];
+                  updatedResultData["startDate"] = widget.startDate;
+                  print("Updated resultData before navigation: $updatedResultData");
                   Navigator.push(
                     context,
                     MaterialPageRoute(

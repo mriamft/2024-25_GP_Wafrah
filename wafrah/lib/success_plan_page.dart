@@ -5,8 +5,7 @@ class SuccessPlanPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final Map<String, dynamic> resultData;
-  final List<Map<String, dynamic>>
-      accounts; // List of accounts with transactions
+  final List<Map<String, dynamic>> accounts; // List of accounts with transactions
 
   const SuccessPlanPage({
     super.key,
@@ -21,8 +20,14 @@ class SuccessPlanPage extends StatefulWidget {
 }
 
 class _SuccessPlanPageState extends State<SuccessPlanPage> {
-  bool _isPressed = false;
+    @override
+  void initState() {
+    super.initState();
+print("Success" );
+print( widget.resultData);
 
+  }
+  bool _isPressed = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -11,6 +11,7 @@ class UserPatternPage extends StatefulWidget {
   final Map<String, dynamic> resultData;
 final Map<String, dynamic> spendingData;
 final int durationMonths;
+final String startDate;
 
   const UserPatternPage({
     super.key,
@@ -19,16 +20,21 @@ final int durationMonths;
     this.accounts = const [],
     required this.resultData,
     required this.spendingData,
+    required this.startDate,
     required this.durationMonths,
   });
- 
-
 
   @override
   _UserPatternPageState createState() => _UserPatternPageState();
 }
 
 class _UserPatternPageState extends State<UserPatternPage> {
+  @override
+  void initState() {
+    super.initState();
+    print("resultData: ${widget.resultData}"); // ✅ Print resultData in console
+  }
+
   Color _arrowColor = const Color(0xFF3D3D3D);
   bool _isPressed = false;
    IconData _getCategoryIcon(String category) {
@@ -237,6 +243,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
                       userName: widget.userName,
                       phoneNumber: widget.phoneNumber,
                       accounts: widget.accounts,
+                      startDate : widget.startDate,
                       resultData: widget.resultData,
                     ),
                   ),

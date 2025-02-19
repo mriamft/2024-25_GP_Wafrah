@@ -114,6 +114,7 @@ class _GoalPageState extends State<GoalPage> {
         "goal": goal,
         "duration_months": durationInMonths,
         "transactions": transactions,
+        "start_date": startDate,
       }),
     );
 
@@ -145,7 +146,8 @@ class _GoalPageState extends State<GoalPage> {
     if (spendingData['success'] != true || spendingData['data'] == null) {
       throw "⚠️ API Error: ${spendingData['message'] ?? 'Unknown error occurred.'}";
     }
-
+    print("result" + startDate);
+    //savingsData["startDate"] = startDate;
     // Step 3: Navigate to UserPatternPage with both results
     Navigator.push(
       context,
@@ -156,6 +158,7 @@ class _GoalPageState extends State<GoalPage> {
           accounts: widget.accounts,
           resultData: savingsData['data'], // Savings plan data
           spendingData: spendingData['data'], // Spending summary data
+          startDate : startDate,
           durationMonths: durationInMonths.toInt(),
         ),
       ),
