@@ -148,6 +148,7 @@ void generateSavingsPlan() {
     'CategorySavings': categoryTotalSavings,
     'MonthlySavingsPlan': savingsPlan,
     'SavingsGoal': widget.resultData['SavingsGoal'],
+    'startDate' : widget.resultData['startDate'],
     'discretionaryRatios': widget.resultData['discretionaryRatios'],
   };
 
@@ -380,7 +381,7 @@ Future<void> _deletePlanFromStorage() async {
               width: 380,
               height: 38,
               decoration: BoxDecoration(
-                color: const Color(0xFFD9D9D9),
+                color: const Color(0xFFF9F9F9),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Directionality(
@@ -429,7 +430,7 @@ Future<void> _deletePlanFromStorage() async {
             left: 10,
             right: 10,
             child: SizedBox(
-              height: 365, // Set a larger height for the scrollable area
+              height: 450, // Set a larger height for the scrollable area
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
@@ -455,58 +456,7 @@ Future<void> _deletePlanFromStorage() async {
               ),
             ),
           ),
-          // Home Button with gradient circle
-Positioned(
-  bottom: 82, // Adjust this to move the home button up
-  left: 0,
-  right: 0,
-  child: Stack(
-    alignment: Alignment.center,
-    children: [
-      // Outer Circle (White background to blend)
-      Container(
-        width: 80, // Increase to prevent clipping
-        height: 80,
-        decoration: const BoxDecoration(
-          color: Color(0xFFF9F9F9), // Matches the navbar background
-          shape: BoxShape.circle,
-        ),
-      ),
-      // Inner Circle (Green Gradient Home Button)
-      Container(
-        width: 90, // Increase size
-        height: 90, // Increase size
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-          shape: BoxShape.circle,
-        ),
-        child: IconButton(
-          icon: const Icon(
-            Icons.home,
-            color: Colors.white,
-            size: 44,
-          ),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomePage(
-                  userName: widget.userName,
-                  phoneNumber: widget.phoneNumber,
-                  accounts: widget.accounts,
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    ],
-  ),
-),
+
 
           // Bottom Navigation Bar
           Positioned(
@@ -577,6 +527,58 @@ Positioned(
               ),
             ),
           ),
+          Positioned(
+  bottom: 40, // Adjust this to move the home button up
+  left: 0,
+  right: 0,
+  child: Stack(
+    alignment: Alignment.center,
+    children: [
+      // Outer Circle (White background to blend)
+      Container(
+        width: 80, // Increase to prevent clipping
+        height: 80,
+        decoration: const BoxDecoration(
+          color: Color(0xFFF9F9F9), // Matches the navbar background
+          shape: BoxShape.circle,
+        ),
+      ),
+      // Inner Circle (Green Gradient Home Button)
+      Container(
+        width: 80, // Increase size
+        height: 80, // Increase size
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF2C8C68), Color(0xFF8FD9BD)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          icon: const Icon(
+            Icons.home,
+            color: Colors.white,
+            size: 44,
+          ),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(
+                  userName: widget.userName,
+                  phoneNumber: widget.phoneNumber,
+                  accounts: widget.accounts,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    ],
+  ),
+),
+
         ],
       ),
     );
