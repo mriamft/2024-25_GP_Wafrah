@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'settings_page.dart';
 import 'banks_page.dart';
-import 'dart:async'; 
+import 'dart:async';
 import 'saving_plan_page.dart';
 import 'home_page.dart';
- import 'goal_page.dart'; // Import your goal page for navigation
+// Import your goal page for navigation
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
 
@@ -12,18 +12,18 @@ class TransactionsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final List<Map<String, dynamic>> accounts;
- 
+
   const TransactionsPage({
     super.key,
     required this.userName,
     required this.phoneNumber,
     this.accounts = const [],
   });
- 
+
   @override
   _TransactionsPageState createState() => _TransactionsPageState();
 }
- 
+
 class _TransactionsPageState extends State<TransactionsPage> {
   String selectedIBAN = "الكل";
   String? selectedCategory; // Field to track the selected category
@@ -48,22 +48,22 @@ class _TransactionsPageState extends State<TransactionsPage> {
       }
     });
   }
-   
+
   List<Map<String, dynamic>> getGroupedTransactions() {
     List<Map<String, dynamic>> allTransactions = [];
- 
+
     for (var account in widget.accounts) {
       // Filter transactions based on IBAN
       if (selectedIBAN != "الكل" && account['IBAN'] != selectedIBAN) {
         continue;
       }
- 
+
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
         allTransactions.add(transaction);
       }
     }
- 
+
     // Sort transactions by date
     allTransactions.sort((a, b) {
       String dateA = a['TransactionDateTime'] ?? '';
@@ -72,16 +72,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
       DateTime dateTimeB = DateTime.tryParse(dateB) ?? DateTime.now();
       return dateTimeB.compareTo(dateTimeA);
     });
- 
+
     // Get today's date
     DateTime today = DateTime.now();
- 
+
     // Group transactions by date
     Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
     for (var transaction in allTransactions) {
       String date =
           transaction['TransactionDateTime']?.split('T').first ?? 'غير معروف';
- 
+
       if (date != 'غير معروف') {
         DateTime originalDate = DateTime.tryParse(date) ?? DateTime.now();
         int mappedYear = originalDate.year == 2016
@@ -89,32 +89,31 @@ class _TransactionsPageState extends State<TransactionsPage> {
             : originalDate.year == 2017
                 ? 2025
                 : originalDate.year;
- 
+
         DateTime mappedDate =
             DateTime(mappedYear, originalDate.month, originalDate.day);
- 
-       
+
         if (mappedDate.isAfter(today)) {
           continue;
         }
-       
+
         date = mappedDate.toIso8601String().split('T').first;
       }
- 
+
       if (!groupedTransactions.containsKey(date)) {
         groupedTransactions[date] = [];
       }
       groupedTransactions[date]!.add(transaction);
     }
- 
+
     List<Map<String, dynamic>> result = [];
     groupedTransactions.forEach((date, transactions) {
       result.add({'date': date, 'transactions': transactions});
     });
- 
+
     return result;
   }
- 
+
   @override
   Widget build(BuildContext context) {
     List<String> ibans = widget.accounts
@@ -123,9 +122,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
             .map((account) => account['IBAN'].toString())
             .toList() ??
         [];
- 
+
     List<Map<String, dynamic>> groupedTransactions = getGroupedTransactions();
- 
+
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
@@ -160,19 +159,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
             left: 10,
             right: 10,
             child: Directionality(
-              textDirection:
-                  TextDirection.rtl,
+              textDirection: TextDirection.rtl,
               child: DropdownButton<String>(
-                alignment:
-                    AlignmentDirectional.topEnd,
+                alignment: AlignmentDirectional.topEnd,
                 isExpanded: true,
                 value: selectedIBAN,
                 icon: const Icon(Icons.arrow_drop_down),
                 iconSize: 24,
                 elevation: 16,
                 style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
-                dropdownColor:
-                    const Color(0xFFFFFFFF),
+                dropdownColor: const Color(0xFFFFFFFF),
                 underline: Container(
                   height: 2,
                   color: const Color(0xFF2C8C68),
@@ -207,7 +203,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               ),
             ),
           ),
- 
+
           Positioned(
             top: 300,
             left: 10,
@@ -312,12 +308,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
-                      onTap: navigateToSavingPlan), 
+                      onTap: navigateToSavingPlan),
                 ],
               ),
             ),
           ),
- 
+
           Positioned(
             right: 246,
             top: 785,
@@ -376,49 +372,49 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     },
                   ),
                 ),
-          if (_showNotification)
-            Positioned(
-              top: 23,
-              left: 19,
-              child: Container(
-                width: 353,
-                height: 57,
-                decoration: BoxDecoration(
-                  color: _notificationColor,
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      // Wrap the Text widget with Expanded so text doesn't overflow
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 15.0),
-                        child: Text(
-                          _notificationMessage,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'GE-SS-Two-Light',
-                            fontSize: 14,
+                if (_showNotification)
+                  Positioned(
+                    top: 23,
+                    left: 19,
+                    child: Container(
+                      width: 353,
+                      height: 57,
+                      decoration: BoxDecoration(
+                        color: _notificationColor,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            // Wrap the Text widget with Expanded so text doesn't overflow
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 15.0),
+                              child: Text(
+                                _notificationMessage,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'GE-SS-Two-Light',
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.right,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 3,
+                              ),
+                            ),
                           ),
-                          textAlign: TextAlign.right,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 3,
-                        ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+              ],
             ),
-        ],
-      ),
           ),
         ],
       ),
     );
   }
- 
 
   void _showCategorySelection(
       BuildContext context, Map<String, dynamic> transaction) {
@@ -659,12 +655,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget _buildTransactionCard(Map<String, dynamic> transaction) {
     String amount = transaction['Amount'] ?? '0.00';
- 
+
     String subtype =
         transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
             'غير معروف';
     String category = transaction['Category'] ?? 'غير مصنف';
- 
+
     // Color transactions
     Color amountColor;
     if (subtype == 'MoneyTransfer' ||
@@ -693,7 +689,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       amountColor =
           redCategories.contains(category) ? Colors.red : Colors.green;
     }
- 
+
     Map<String, IconData> categoryIcons = {
       'المطاعم': Icons.restaurant,
       'التعليم': Icons.school,
@@ -711,10 +707,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
       'التحويلات': Icons.swap_horiz,
       'أخرى': Icons.question_mark,
     };
- 
+
     IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
- 
-     if (category == 'أخرى') {
+
+    if (category == 'أخرى') {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         padding: const EdgeInsets.all(12.0),
@@ -855,7 +851,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
       ),
     );
   }
-   void navigateToSavingPlan() async {
+
+  void navigateToSavingPlan() async {
     // Check if there is a saved plan
     var savedPlan = await loadPlanFromSecureStorage();
 
@@ -868,7 +865,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
-            resultData: savedPlan,  // Pass saved plan data to the next page
+            resultData: savedPlan, // Pass saved plan data to the next page
           ),
         ),
       );
@@ -897,17 +894,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
         break;
       }
     }
- 
+
     String amount = transaction['Amount'] ?? '0.00';
- 
+
     String subtype = transaction['SubTransactionType'] ?? 'غير معروف';
     String dateTime = transaction['TransactionDateTime'] ?? 'غير معروف';
     String category = transaction['Category'] ?? 'غير مصنف';
     String transactionInfo =
         transaction['TransactionInformation'] ?? 'لا توجد معلومات';
- 
+
     subtype = subtype.replaceAll('KSAOB.', '').trim();
- 
+
     Map<String, String> transactionTypeTranslations = {
       'MoneyTransfer': 'تحويل مالي',
       'WithdrawalReversal': 'سحب عكسي',
@@ -919,15 +916,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
       'DepositReversal': 'إيداع عكسي',
       'Reversal': 'عملية عكسية',
     };
- 
+
     if (!transactionTypeTranslations.containsKey(subtype)) {
       debugPrint('Missing SubTransactionType: $subtype');
     }
- 
+
     String translatedSubtype =
         transactionTypeTranslations[subtype] ?? 'غير معروف';
- 
-   
+
     String date = dateTime.split('T').first;
     if (date != 'غير معروف') {
       DateTime originalDate = DateTime.tryParse(date) ?? DateTime.now();
@@ -936,18 +932,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
           : originalDate.year == 2017
               ? 2025
               : originalDate.year;
- 
+
       DateTime mappedDate =
-            DateTime(mappedYear, originalDate.month, originalDate.day);
-        date = mappedDate.toIso8601String().split('T').first;
-       
-String year = mappedDate.year.toString();
-String month = mappedDate.month.toString().padLeft(2, '0');
-String day = mappedDate.day.toString().padLeft(2, '0');
-date = '$day-$month-$year';
-       
+          DateTime(mappedYear, originalDate.month, originalDate.day);
+      date = mappedDate.toIso8601String().split('T').first;
+
+      String year = mappedDate.year.toString();
+      String month = mappedDate.month.toString().padLeft(2, '0');
+      String day = mappedDate.day.toString().padLeft(2, '0');
+      date = '$day-$month-$year';
     }
- 
+
     showDialog(
       context: context,
       builder: (context) {
@@ -1019,7 +1014,7 @@ date = '$day-$month-$year';
       },
     );
   }
- 
+
   Widget buildBottomNavItem(IconData icon, String label, int index,
       {required VoidCallback onTap}) {
     return GestureDetector(

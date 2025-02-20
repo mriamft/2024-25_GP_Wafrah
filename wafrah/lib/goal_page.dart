@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:wafrah/user_pattern_page.dart';
-// Import SuccessPlanPage
+import 'dart:async';
+import 'package:flutter/services.dart';
 
 class GoalPage extends StatefulWidget {
   final String userName;
@@ -31,8 +32,31 @@ class _GoalPageState extends State<GoalPage> {
   String outputMessage = "";
   String selectedOption = "duration"; // Default selection
 
+  Color _notificationColor = const Color(0xFFC62C2C);
+  Timer? _notificationTimer;
+  bool _showNotification = false;
+  String _notificationMessage = '';
+  // Show notification method
+  void showNotification(String message, {Color color = Colors.red}) {
+    setState(() {
+      _notificationMessage =
+          "حدث خطأ ما \nهدفك غير منطقي للفترة المحددة، حاول اختيار هدف آخر"; // Fixed message
+      _notificationColor = color;
+      _showNotification = true;
+    });
+
+    Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          _showNotification = false;
+        });
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _notificationTimer?.cancel();
     goalController.dispose();
     startDateController.dispose();
     durationController.dispose();
@@ -45,7 +69,7 @@ class _GoalPageState extends State<GoalPage> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
+      firstDate: DateTime.now(), // Prevents selecting past dates
       lastDate: DateTime(2101),
       builder: (BuildContext context, Widget? child) {
         return Theme(
@@ -68,113 +92,154 @@ class _GoalPageState extends State<GoalPage> {
     }
   }
 
-  Future<void> _runFlaskAPI() async {
-  setState(() {
-    isLoading = true;
-    outputMessage = "";
-  });
+  bool _isFormValid() {
+    final isGoalFilled = goalController.text.isNotEmpty;
+    final isStartDateFilled = startDateController.text.isNotEmpty;
+    final isDurationFilled = durationController.text.isNotEmpty;
+    final isEndDateFilled = endDateController.text.isNotEmpty;
 
-  try {
-    double durationInMonths = 0;
-    if (selectedOption == "duration") {
-      durationInMonths = double.parse(durationController.text);
-    } else if (selectedOption == "end_date") {
-      final startDate = DateTime.parse(startDateController.text);
-      final endDate = DateTime.parse(endDateController.text);
-      durationInMonths = (endDate.difference(startDate).inDays / 30).ceilToDouble();
-    }
+    return isGoalFilled && (isDurationFilled || isEndDateFilled);
+  }
 
-    final goal = double.parse(goalController.text);
-    final startDate = startDateController.text;
-
-    final savingsUrl = Uri.parse("https://flask-app.ngrok.io/run-script");
-    final spendingUrl = Uri.parse("https://flask-app.ngrok.io/category-spending-summary");
-
-    List<Map<String, dynamic>> transactions = [];
-    for (var account in widget.accounts) {
-      if (account.containsKey('transactions')) {
-        for (var transaction in account['transactions']) {
-          transactions.add({
-            "TransactionId": transaction["TransactionId"],
-            "Date": transaction["TransactionDateTime"],
-            "TransactionType": transaction["SubTransactionType"],
-            "TransactionInformation": transaction["TransactionInformation"],
-            "Amount": transaction["Amount"],
-            "Category": transaction["Category"]
-          });
-        }
-      }
-    }
-
-    // Step 1: Call the savings API
-    final savingsResponse = await http.post(
-      savingsUrl,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "goal": goal,
-        "duration_months": durationInMonths,
-        "transactions": transactions,
-        "start_date": startDate,
-      }),
-    );
-
-    if (savingsResponse.statusCode != 200) {
-      throw "⚠️ Server Error: ${savingsResponse.statusCode}";
-    }
-
-    final savingsData = jsonDecode(savingsResponse.body);
-    if (savingsData['success'] != true || savingsData['data'] == null) {
-      throw "⚠️ API Error: ${savingsData['message'] ?? 'Unknown error occurred.'}";
-    }
-
-    // Step 2: Call the spending summary API
-    final spendingResponse = await http.post(
-      spendingUrl,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "start_date": startDate,
-        "duration_months": durationInMonths,
-        "transactions": transactions,
-      }),
-    );
-
-    if (spendingResponse.statusCode != 200) {
-      throw "⚠️ Server Error: ${spendingResponse.statusCode}";
-    }
-
-    final spendingData = jsonDecode(spendingResponse.body);
-    if (spendingData['success'] != true || spendingData['data'] == null) {
-      throw "⚠️ API Error: ${spendingData['message'] ?? 'Unknown error occurred.'}";
-    }
-    print("result" + startDate);
-    //savingsData["startDate"] = startDate;
-    // Step 3: Navigate to UserPatternPage with both results
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UserPatternPage(
-          userName: widget.userName,
-          phoneNumber: widget.phoneNumber,
-          accounts: widget.accounts,
-          resultData: savingsData['data'], // Savings plan data
-          spendingData: spendingData['data'], // Spending summary data
-          startDate : startDate,
-          durationMonths: durationInMonths.toInt(),
-        ),
-      ),
-    );
-
-  } catch (e) {
+  void _onDurationChanged(String value) {
     setState(() {
-      outputMessage = "⚠️ Failed to connect to the server: $e";
+      durationController.text = value;
+      if (value.isNotEmpty) {
+        endDateController.clear(); // Clear end date if duration is filled
+      }
     });
   }
 
-  setState(() {
-    isLoading = false;
-  });
-}
+  void _onEndDateChanged(String value) {
+    setState(() {
+      endDateController.text = value;
+      if (value.isNotEmpty) {
+        durationController.clear(); // Clear duration if end date is filled
+      }
+    });
+  }
 
+  Future<void> _runFlaskAPI() async {
+    setState(() {
+      isLoading = true;
+      outputMessage = "";
+    });
+
+    try {
+      double durationInMonths = 0;
+      if (durationController.text.isNotEmpty) {
+        durationInMonths = double.parse(durationController.text);
+      } else if (endDateController.text.isNotEmpty) {
+        final startDate = DateTime.parse(startDateController.text);
+        final endDate = DateTime.parse(endDateController.text);
+        durationInMonths =
+            (endDate.difference(startDate).inDays / 30).ceilToDouble();
+      }
+
+      final goal = double.parse(goalController.text);
+      final startDate = startDateController.text;
+
+      final savingsUrl = Uri.parse("https://flask-app.ngrok.io/run-script");
+
+      List<Map<String, dynamic>> transactions = [];
+      for (var account in widget.accounts) {
+        if (account.containsKey('transactions')) {
+          for (var transaction in account['transactions']) {
+            transactions.add({
+              "TransactionId": transaction["TransactionId"],
+              "Date": transaction["TransactionDateTime"],
+              "TransactionType": transaction["SubTransactionType"],
+              "TransactionInformation": transaction["TransactionInformation"],
+              "Amount": transaction["Amount"],
+              "Category": transaction["Category"]
+            });
+          }
+        }
+      }
+
+      // Call the savings API
+      final savingsResponse = await http.post(
+        savingsUrl,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "goal": goal,
+          "duration_months": durationInMonths,
+          "transactions": transactions,
+          "start_date": startDate,
+        }),
+      );
+
+      // ✅ Print response for debugging
+      print("🔹 Savings API Response: ${savingsResponse.body}");
+
+      if (savingsResponse.statusCode != 200) {
+        throw "⚠️ Server Error: ${savingsResponse.statusCode}";
+      }
+
+      final savingsData = jsonDecode(savingsResponse.body);
+
+      // ✅ Check if API returned success: false
+      if (savingsData.containsKey('success') &&
+          savingsData['success'] == false) {
+        showNotification(
+            "حدث خطأ ما \nهدفك غير منطقي للفترة المحددة، حاول اختيار هدف آخر");
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
+      // Proceed only if savings plan is valid
+      final spendingUrl =
+          Uri.parse("https://flask-app.ngrok.io/category-spending-summary");
+
+      final spendingResponse = await http.post(
+        spendingUrl,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "start_date": startDate,
+          "duration_months": durationInMonths,
+          "transactions": transactions,
+        }),
+      );
+
+      if (spendingResponse.statusCode != 200) {
+        throw "⚠️ Server Error: ${spendingResponse.statusCode}";
+      }
+
+      final spendingData = jsonDecode(spendingResponse.body);
+      if (spendingData.containsKey('success') &&
+          spendingData['success'] == false) {
+        showNotification("⚠️ حدث خطأ أثناء استرجاع بيانات الإنفاق.");
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
+      // Navigate to UserPatternPage if both responses are valid
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UserPatternPage(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+            resultData: savingsData['data'],
+            spendingData: spendingData['data'],
+            startDate: startDate,
+            durationMonths: durationInMonths.toInt(),
+          ),
+        ),
+      );
+    } catch (e) {
+      showNotification("⚠️ فشل الاتصال بالخادم: $e");
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -218,13 +283,13 @@ class _GoalPageState extends State<GoalPage> {
             ),
           ),
           const Positioned(
-            left: 28,
+            left: 55,
             top: 130,
             child: Text(
               ' لإنشاء خطة ادخار، يجب تحديد المبلغ الذي ترغب في ادخاره، المدة الزمنية • \n'
               '  التي ستقوم فيها بالادخار \n'
-              '.يمكنك اختيار تحديد تاريخ الانتهاء أو تحديد المدة بالأشهر• \n'
-              '  .في حالة اختيار تاريخ الانتهاء، سيتم تقريب أي جزء من الشهر إلى شهر كامل• \n',
+              '.يمكنك اختيار تحديد تاريخ الانتهاء أو تحديد المدة بالأشهر • \n'
+              '  .في حالة اختيار تاريخ الانتهاء، سيتم تقريب أي جزء من الشهر إلى شهر كامل • \n',
               style: TextStyle(
                 color: Color(0xFF3D3D3D),
                 fontSize: 10,
@@ -252,28 +317,57 @@ class _GoalPageState extends State<GoalPage> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            const Text(
-                              'الهدف',
-                              style: TextStyle(
-                                color: Color(0xFF3D3D3D),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'GE-SS-Two-Bold',
-                              ),
+                            Row(
+                              children: [
+                                const Text(
+                                  '*',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                const Text(
+                                  'الهدف',
+                                  style: TextStyle(
+                                    color: Color(0xFF3D3D3D),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'GE-SS-Two-Bold',
+                                  ),
+                                ),
+                              ],
                             ),
                             SizedBox(
                               width: 150,
                               height: 28,
                               child: TextField(
+                                style: const TextStyle(
+                                  fontFamily: 'GE-SS-Two-Light',
+                                ),
                                 controller: goalController,
                                 keyboardType: TextInputType.number,
                                 textAlign: TextAlign.right,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter
+                                      .digitsOnly, // Only allow digits
+                                ],
                                 decoration: InputDecoration(
                                   hintText: 'ريال',
+                                  hintStyle: const TextStyle(
+                                    fontFamily: 'GE-SS-Two-Light',
+                                    height: 0.8,
+                                    color: Color(0xFFAEAEAE),
+                                  ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5),
                                     borderSide: const BorderSide(
-                                        color: Color(0xFFAEAEAE), width: 1),
+                                        color: Color(0xFF2C8C68), width: 1),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFF2C8C68), width: 2),
                                   ),
                                 ),
                               ),
@@ -283,19 +377,35 @@ class _GoalPageState extends State<GoalPage> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            const Text(
-                              'تاريخ البداية',
-                              style: TextStyle(
-                                color: Color(0xFF3D3D3D),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'GE-SS-Two-Bold',
-                              ),
+                            Row(
+                              children: [
+                                const Text(
+                                  '*',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                const Text(
+                                  'تاريخ البداية',
+                                  style: TextStyle(
+                                    color: Color(0xFF3D3D3D),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'GE-SS-Two-Bold',
+                                  ),
+                                ),
+                              ],
                             ),
                             SizedBox(
                               width: 150,
                               height: 28,
                               child: TextField(
+                                style: const TextStyle(
+                                  fontFamily:
+                                      'GE-SS-Two-Light', // Set input font family
+                                ),
                                 controller: startDateController,
                                 readOnly: true,
                                 textAlign: TextAlign.right,
@@ -303,10 +413,25 @@ class _GoalPageState extends State<GoalPage> {
                                     _selectDate(context, startDateController),
                                 decoration: InputDecoration(
                                   hintText: 'تاريخ البدء',
+                                  hintStyle: const TextStyle(
+                                    fontFamily:
+                                        'GE-SS-Two-Light', // Set hint font family
+                                    height:
+                                        0.8, // Adjust height to move hint down
+                                    color: Color(
+                                        0xFFAEAEAE), // Optional: hint color
+                                  ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5),
                                     borderSide: const BorderSide(
-                                        color: Color(0xFFAEAEAE), width: 1),
+                                        color: Color(0xFF2C8C68),
+                                        width: 1), // Changed to #2C8C68
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFF2C8C68),
+                                        width: 2), // Changed to #2C8C68
                                   ),
                                 ),
                               ),
@@ -342,16 +467,19 @@ class _GoalPageState extends State<GoalPage> {
                             const Text(
                               'المدة بالأشهر',
                               style: TextStyle(
-                                fontSize: 12,
-                                fontFamily: 'GE-SS-Two-Bold',
+                                fontSize: 14,
+                                fontFamily: 'GE-SS-Two-Light',
                               ),
                             ),
                             Radio<String>(
                               value: "duration",
                               groupValue: selectedOption,
+                              activeColor: const Color(
+                                  0xFF2C8C68), // Circular button color
                               onChanged: (value) {
                                 setState(() {
                                   selectedOption = value!;
+                                  endDateController.clear(); // Clear end date
                                 });
                               },
                             ),
@@ -361,16 +489,34 @@ class _GoalPageState extends State<GoalPage> {
                           width: 150,
                           height: 28,
                           child: TextField(
+                            style: const TextStyle(
+                              fontFamily: 'GE-SS-Two-Light',
+                            ),
                             controller: durationController,
                             enabled: selectedOption == "duration",
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.right,
+                            inputFormatters: [
+                              FilteringTextInputFormatter
+                                  .digitsOnly, // Only allow digits
+                            ],
+                            onChanged: _onDurationChanged,
                             decoration: InputDecoration(
                               hintText: 'أشهر',
+                              hintStyle: const TextStyle(
+                                fontFamily: 'GE-SS-Two-Light',
+                                height: 0.8,
+                                color: Color(0xFFAEAEAE),
+                              ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
                                 borderSide: const BorderSide(
-                                    color: Color(0xFFAEAEAE), width: 1),
+                                    color: Color(0xFF2C8C68), width: 1),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFF2C8C68), width: 2),
                               ),
                             ),
                           ),
@@ -382,16 +528,19 @@ class _GoalPageState extends State<GoalPage> {
                             const Text(
                               'تاريخ النهاية',
                               style: TextStyle(
-                                fontSize: 12,
-                                fontFamily: 'GE-SS-Two-Bold',
+                                fontSize: 14,
+                                fontFamily: 'GE-SS-Two-Light',
                               ),
                             ),
                             Radio<String>(
                               value: "end_date",
                               groupValue: selectedOption,
+                              activeColor: const Color(
+                                  0xFF2C8C68), // Circular button color
                               onChanged: (value) {
                                 setState(() {
                                   selectedOption = value!;
+                                  durationController.clear(); // Clear duration
                                 });
                               },
                             ),
@@ -401,6 +550,10 @@ class _GoalPageState extends State<GoalPage> {
                           width: 150,
                           height: 28,
                           child: TextField(
+                            style: const TextStyle(
+                              fontFamily:
+                                  'GE-SS-Two-Light', // Set input font family
+                            ),
                             controller: endDateController,
                             enabled: selectedOption == "end_date",
                             readOnly: true,
@@ -408,13 +561,49 @@ class _GoalPageState extends State<GoalPage> {
                             onTap: selectedOption == "end_date"
                                 ? () => _selectDate(context, endDateController)
                                 : null,
+                            onChanged: _onEndDateChanged,
                             decoration: InputDecoration(
                               hintText: 'تاريخ النهاية',
+                              hintStyle: const TextStyle(
+                                fontFamily:
+                                    'GE-SS-Two-Light', // Set hint font family
+                                height: 0.8, // Adjust height to move hint down
+                                color:
+                                    Color(0xFFAEAEAE), // Optional: hint color
+                              ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
                                 borderSide: const BorderSide(
-                                    color: Color(0xFFAEAEAE), width: 1),
+                                    color: Color(0xFF2C8C68),
+                                    width: 1), // Changed to #2C8C68
                               ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFF2C8C68),
+                                    width: 2), // Changed to #2C8C68
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 280.0), // Adjust the padding to move left
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Visibility(
+                          visible: !_isFormValid(),
+                          child: const Text(
+                            'لم تقم بملء جميع الحقول',
+                            style: TextStyle(
+                              color: Color(0xFFDD2C35),
+                              fontSize: 10,
+                              fontFamily: 'GE-SS-Two-Light',
                             ),
                           ),
                         ),
@@ -425,33 +614,105 @@ class _GoalPageState extends State<GoalPage> {
               ),
             ),
           ),
+          const Positioned(
+            top: 350,
+            left: 260,
+            child: Text(
+              '*',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 14,
+              ),
+            ),
+          ),
           Positioned(
             left: 61,
-            top: 710,
+            bottom: 40, // Adjust position if needed
             child: GestureDetector(
-              onTap: isLoading ? null : _runFlaskAPI,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+              onTap: _isFormValid() && !isLoading ? _runFlaskAPI : null,
+              child: Container(
                 width: 274,
                 height: 45,
                 decoration: BoxDecoration(
-                  color: isLoading ? Colors.grey : const Color(0xFF3D3D3D),
+                  color: _isFormValid()
+                      ? const Color(0xFF3D3D3D)
+                      : const Color(0xFF6D6D6D),
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Center(
-                  child: isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'استمرار',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'GE-SS-Two-Light'),
-                        ),
+                  child: const Text(
+                    'استمرار',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'GE-SS-Two-Light'),
+                  ),
                 ),
               ),
             ),
           ),
+          // Loading overlay
+          if (isLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(
+                            0xFF69BA9C), // Match the color used in AccLinkPage
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "يتم الآن معالجة البيانات", // Loading message
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'GE-SS-Two-Bold',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (_showNotification)
+            Positioned(
+              top: 23,
+              left: 19,
+              child: Container(
+                width: 353,
+                height: 57,
+                decoration: BoxDecoration(
+                  color: _notificationColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: Text(
+                          _notificationMessage,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.right,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );

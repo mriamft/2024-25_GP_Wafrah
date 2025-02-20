@@ -5,7 +5,7 @@ import 'home_page.dart';
 import 'saving_plan_page.dart';
 import 'settings_page.dart';
 import 'storage_service.dart';
- import 'goal_page.dart'; // Import your goal page for navigation
+// Import your goal page for navigation
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
 
@@ -67,14 +67,16 @@ class _BanksPageState extends State<BanksPage> {
       for (var transaction in transactions) {
         String category = transaction['Category'] ?? 'غير مصنف';
         double amount = double.tryParse(
-                transaction['Amount']?['Amount']?.toString() ?? '0.0') ?? 0.0;
+                transaction['Amount']?['Amount']?.toString() ?? '0.0') ??
+            0.0;
         categories[category] = (categories[category] ?? 0.0) + amount;
       }
     }
 
-    print('Transaction Categories: $categories'); 
+    print('Transaction Categories: $categories');
     return categories;
   }
+
   void navigateToSavingPlan() async {
     // Check if there is a saved plan
     var savedPlan = await loadPlanFromSecureStorage();
@@ -88,7 +90,7 @@ class _BanksPageState extends State<BanksPage> {
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
-            resultData: savedPlan,  // Pass saved plan data to the next page
+            resultData: savedPlan, // Pass saved plan data to the next page
           ),
         ),
       );
@@ -107,120 +109,119 @@ class _BanksPageState extends State<BanksPage> {
     }
   }
 
-Widget _buildAccountCard(Map<String, dynamic> account) {
-  Map<String, String> accountTypeTranslations = {
-    'CurrentAccount': 'الحساب الجاري',
-    'SavingsAccount': 'حساب التوفير',
-    'CheckingAccount': 'حساب الشيكات',
-    'CreditAccount': 'حساب الائتمان',
-  };
+  Widget _buildAccountCard(Map<String, dynamic> account) {
+    Map<String, String> accountTypeTranslations = {
+      'CurrentAccount': 'الحساب الجاري',
+      'SavingsAccount': 'حساب التوفير',
+      'CheckingAccount': 'حساب الشيكات',
+      'CreditAccount': 'حساب الائتمان',
+    };
 
-  String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
-  String translatedAccountSubType =
-      accountTypeTranslations[accountSubType] ?? accountSubType;
+    String accountSubType = account['AccountSubType'] ?? 'نوع الحساب';
+    String translatedAccountSubType =
+        accountTypeTranslations[accountSubType] ?? accountSubType;
 
-  return Container(
-    margin: const EdgeInsets.only(bottom: 20),
-    width: 340,
-    height: 50,
-    decoration: BoxDecoration(
-      color: const Color(0xFFD9D9D9),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Row(
-      children: [
-        // SAMA logo on the right
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Image.asset(
-            'assets/images/SAMA_logo.png',
-            width: 30,
-            height: 30,
-            fit: BoxFit.contain,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      width: 340,
+      height: 50,
+      decoration: BoxDecoration(
+        color: const Color(0xFFD9D9D9),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          // SAMA logo on the right
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Image.asset(
+              'assets/images/SAMA_logo.png',
+              width: 30,
+              height: 30,
+              fit: BoxFit.contain,
+            ),
           ),
-        ),
-        // Middle section for account details
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                translatedAccountSubType,
-                style: const TextStyle(
-                  color: Color(0xFF3D3D3D),
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'GE-SS-Two-Bold',
+          // Middle section for account details
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  translatedAccountSubType,
+                  style: const TextStyle(
+                    color: Color(0xFF3D3D3D),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'GE-SS-Two-Bold',
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      account['IBAN'] ?? 'رقم الايبان',
-                      style: const TextStyle(
-                        color: Color(0xFF5F5F5F),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        account['IBAN'] ?? 'رقم الايبان',
+                        style: const TextStyle(
+                          color: Color(0xFF5F5F5F),
+                          fontSize: 13,
+                          fontFamily: 'GE-SS-Two-Light',
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    const Text(
+                      'رقم الآيبان',
+                      style: TextStyle(
+                        color: Color(0xFF3D3D3D),
                         fontSize: 13,
-                        fontFamily: 'GE-SS-Two-Light',
+                        fontFamily: 'GE-SS-Two-Bold',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Left section for balance
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      account['Balance']?.toString() ?? '0',
+                      style: const TextStyle(
+                        color: Color(0xFF313131),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'GE-SS-Two-Bold',
                       ),
                       overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.right,
                     ),
-                  ),
-                  const SizedBox(width: 5),
-                  const Text(
-                    'رقم الآيبان',
-                    style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 13,
-                      fontFamily: 'GE-SS-Two-Bold',
+                    const SizedBox(width: 5),
+                    const Text(
+                      'ر.س',
+                      style: TextStyle(
+                        color: Color(0xFF5F5F5F),
+                        fontSize: 16,
+                        fontFamily: 'GE-SS-Two-Light',
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        // Left section for balance
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    account['Balance']?.toString() ?? '0',
-                    style: const TextStyle(
-                      color: Color(0xFF313131),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'GE-SS-Two-Bold',
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(width: 5),
-                  const Text(
-                    'ر.س',
-                    style: TextStyle(
-                      color: Color(0xFF5F5F5F),
-                      fontSize: 16,
-                      fontFamily: 'GE-SS-Two-Light',
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -248,12 +249,10 @@ Widget _buildAccountCard(Map<String, dynamic> account) {
               children: [
                 IconButton(
                   icon: Icon(
-                    _accounts.isEmpty
-                        ? Icons.add_circle 
-                        : Icons.edit, 
+                    _accounts.isEmpty ? Icons.add_circle : Icons.edit,
                     color: _accounts.isEmpty
-                        ? const Color(0xFF3D3D3D) 
-                        : const Color(0xFF3D3D3D), 
+                        ? const Color(0xFF3D3D3D)
+                        : const Color(0xFF3D3D3D),
                     size: 25,
                   ),
                   onPressed: () {
@@ -282,10 +281,10 @@ Widget _buildAccountCard(Map<String, dynamic> account) {
             ),
           ),
           Positioned(
-            top: 280, 
+            top: 280,
             left: 12,
             right: 12,
-            bottom: 77, 
+            bottom: 77,
             child: SingleChildScrollView(
               child: Column(
                 children: _accounts.isNotEmpty
@@ -350,8 +349,7 @@ Widget _buildAccountCard(Map<String, dynamic> account) {
                     );
                   }),
                   Transform.translate(
-                    offset:
-                        const Offset(0, -5), 
+                    offset: const Offset(0, -5),
                     child: buildBottomNavItem(
                         Icons.account_balance_outlined, "الحسابات", () {
                       // Do nothing or perform another action if needed
@@ -361,7 +359,8 @@ Widget _buildAccountCard(Map<String, dynamic> account) {
                       );
                     }),
                   ),
-                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", navigateToSavingPlan), 
+                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار",
+                      navigateToSavingPlan),
                 ],
               ),
             ),
@@ -373,7 +372,7 @@ Widget _buildAccountCard(Map<String, dynamic> account) {
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFF2C8C68), 
+                color: Color(0xFF2C8C68),
                 shape: BoxShape.circle,
               ),
             ),
@@ -385,12 +384,12 @@ Widget _buildAccountCard(Map<String, dynamic> account) {
             child: GestureDetector(
               onTapDown: (_) {
                 setState(() {
-                  _isCirclePressed = true; 
+                  _isCirclePressed = true;
                 });
               },
               onTapUp: (_) {
                 setState(() {
-                  _isCirclePressed = false; 
+                  _isCirclePressed = false;
                 });
                 Navigator.of(context).pushAndRemoveUntil(
                   PageRouteBuilder(
@@ -400,11 +399,10 @@ Widget _buildAccountCard(Map<String, dynamic> account) {
                       phoneNumber: widget.phoneNumber,
                       accounts: widget.accounts,
                     ),
-                    transitionDuration:
-                        const Duration(seconds: 0),
+                    transitionDuration: const Duration(seconds: 0),
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
-                      return child; 
+                      return child;
                     },
                   ),
                   (route) => false,
@@ -412,8 +410,7 @@ Widget _buildAccountCard(Map<String, dynamic> account) {
               },
               onTapCancel: () {
                 setState(() {
-                  _isCirclePressed =
-                      false; 
+                  _isCirclePressed = false;
                 });
               },
               child: Stack(

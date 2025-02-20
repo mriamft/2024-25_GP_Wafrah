@@ -13,7 +13,7 @@ import 'support_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'banks_page.dart';
 import 'package:another_flushbar/flushbar.dart';
- import 'goal_page.dart'; // Import your goal page for navigation
+// Import your goal page for navigation
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
 
@@ -39,11 +39,11 @@ class _SettingsPageState extends State<SettingsPage> {
   Color _notificationColor = const Color(0xFFD9D9D9);
   Color _supportColor = const Color(0xFFD9D9D9);
 
-  // Custom page transition 
+  // Custom page transition
   Route _createNoTransitionRoute(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionDuration: const Duration(seconds: 0), 
+      transitionDuration: const Duration(seconds: 0),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return child; // No animation
       },
@@ -60,25 +60,22 @@ class _SettingsPageState extends State<SettingsPage> {
             userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
-        _profileColor =
-            const Color(0xFFD9D9D9); 
+        _profileColor = const Color(0xFFD9D9D9);
       });
     });
   }
 
-//Method to handle password reset 
+//Method to handle password reset
   void _onResetPasswordTap() {
     setState(() {
-      _resetPasswordColor = Colors.grey[400]!; 
+      _resetPasswordColor = Colors.grey[400]!;
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(ResetPasswordPage(
-            userName: widget.userName,
-            phoneNumber: widget.phoneNumber))) 
+            userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
-        _resetPasswordColor =
-            const Color(0xFFD9D9D9); 
+        _resetPasswordColor = const Color(0xFFD9D9D9);
       });
     });
   }
@@ -92,11 +89,11 @@ class _SettingsPageState extends State<SettingsPage> {
             userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
-        _notificationColor =
-            const Color(0xFFD9D9D9); 
+        _notificationColor = const Color(0xFFD9D9D9);
       });
     });
   }
+
   void navigateToSavingPlan() async {
     // Check if there is a saved plan
     var savedPlan = await loadPlanFromSecureStorage();
@@ -110,7 +107,7 @@ class _SettingsPageState extends State<SettingsPage> {
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
-            resultData: savedPlan,  // Pass saved plan data to the next page
+            resultData: savedPlan, // Pass saved plan data to the next page
           ),
         ),
       );
@@ -131,136 +128,132 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _onSupportTap() {
     setState(() {
-      _supportColor = Colors.grey[400]!; 
+      _supportColor = Colors.grey[400]!;
     });
     Navigator.of(context)
         .push(_createNoTransitionRoute(SupportPage(
             userName: widget.userName, phoneNumber: widget.phoneNumber)))
         .then((_) {
       setState(() {
-        _supportColor =
-            const Color(0xFFD9D9D9); 
+        _supportColor = const Color(0xFFD9D9D9);
       });
     });
   }
 
-void _onDeleteAccount() {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text(
-        'تأكيد حذف الحساب',
-        textAlign: TextAlign.right,
-        style: TextStyle(
-          fontFamily: 'GE-SS-Two-Bold',
-          fontSize: 20,
-          color: Color(0xFF3D3D3D),
+  void _onDeleteAccount() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'تأكيد حذف الحساب',
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontFamily: 'GE-SS-Two-Bold',
+            fontSize: 20,
+            color: Color(0xFF3D3D3D),
+          ),
         ),
-      ),
-      content: const Text(
-        'هل أنت متأكد أنك تريد حذف الحساب؟ لن تتمكن من استعادته لاحقًا.',
-        textAlign: TextAlign.right,
-        style: TextStyle(
-          fontFamily: 'GE-SS-Two-Light',
-          fontSize: 16,
-          color: Color(0xFF3D3D3D),
+        content: const Text(
+          'هل أنت متأكد أنك تريد حذف الحساب؟ لن تتمكن من استعادته لاحقًا.',
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontFamily: 'GE-SS-Two-Light',
+            fontSize: 16,
+            color: Color(0xFF3D3D3D),
+          ),
         ),
-      ),
-      actions: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'إلغاء',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  color: Color(0xFF838383),
-                  fontSize: 18,
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'إلغاء',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    color: Color(0xFF838383),
+                    fontSize: 18,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 20),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop(); // Close the dialog
-                try {
-                  final response = await http.delete(
-                    Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/delete-user'),
-                    headers: {'Content-Type': 'application/json'},
-                    body: jsonEncode({'phoneNumber': widget.phoneNumber}),
-                  );
+              const SizedBox(width: 20),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop(); // Close the dialog
+                  try {
+                    final response = await http.delete(
+                      Uri.parse(
+                          'https://c2f7-82-167-113-9.ngrok-free.app/delete-user'),
+                      headers: {'Content-Type': 'application/json'},
+                      body: jsonEncode({'phoneNumber': widget.phoneNumber}),
+                    );
 
-                  if (response.statusCode == 200) {
-                  // Delete local data for the user from the emulator
-                    final storageService = StorageService();
-                    await storageService.clearUserData(widget.phoneNumber);
-                    
-                    // Navigate to main page before showing Flushbar
-                    navigatorKey.currentState?.pushNamed('/');
+                    if (response.statusCode == 200) {
+                      // Delete local data for the user from the emulator
+                      final storageService = StorageService();
+                      await storageService.clearUserData(widget.phoneNumber);
 
-                    // Show success message
-                    Flushbar(
-                      message: 'تم حذف الحساب بنجاح',
-                      messageText: const Text(
-                        'تم حذف الحساب بنجاح',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 14,
-                          color: Colors.white,
+                      // Navigate to main page before showing Flushbar
+                      navigatorKey.currentState?.pushNamed('/');
+
+                      // Show success message
+                      Flushbar(
+                        message: 'تم حذف الحساب بنجاح',
+                        messageText: const Text(
+                          'تم حذف الحساب بنجاح',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      backgroundColor: const Color(0xFF0FBE7C),
-                      duration: const Duration(seconds: 5),
-                      flushbarPosition: FlushbarPosition.TOP,
-                      margin: const EdgeInsets.all(8.0),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ).show(navigatorKey.currentState!.overlay!.context);
-                  } else {
-                    // Show failure message
-                    Flushbar(
-                      message: 'فشل في حذف الحساب. الرجاء المحاولة لاحقًا.',
-                      messageText: const Text(
-                        'فشل في حذف الحساب. الرجاء المحاولة لاحقًا.',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 14,
-                          color: Colors.white,
+                        backgroundColor: const Color(0xFF0FBE7C),
+                        duration: const Duration(seconds: 5),
+                        flushbarPosition: FlushbarPosition.TOP,
+                        margin: const EdgeInsets.all(8.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ).show(navigatorKey.currentState!.overlay!.context);
+                    } else {
+                      // Show failure message
+                      Flushbar(
+                        message: 'فشل في حذف الحساب. الرجاء المحاولة لاحقًا.',
+                        messageText: const Text(
+                          'فشل في حذف الحساب. الرجاء المحاولة لاحقًا.',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      backgroundColor: Colors.red,
-                      duration: const Duration(seconds: 5),
-                      flushbarPosition: FlushbarPosition.TOP,
-                      margin: const EdgeInsets.all(8.0),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ).show(navigatorKey.currentState!.overlay!.context);
-                  }
-                } catch (e) {
-                }
-              },
-              child: const Text(
-                'حذف الحساب',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 18,
-                  color: Color(0xFFDD2C35),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 5),
+                        flushbarPosition: FlushbarPosition.TOP,
+                        margin: const EdgeInsets.all(8.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ).show(navigatorKey.currentState!.overlay!.context);
+                    }
+                  } catch (e) {}
+                },
+                child: const Text(
+                  'حذف الحساب',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 18,
+                    color: Color(0xFFDD2C35),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-
-
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   void _onLogout() {
     showDialog(
@@ -303,22 +296,21 @@ void _onDeleteAccount() {
               const SizedBox(width: 20),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/'); 
+                  Navigator.of(context).pushNamed('/');
                   Flushbar(
                     message: 'لقد تم تسجيل خروجك بنجاح',
                     messageText: const Text(
                       'لقد تم تسجيل خروجك بنجاح',
-                      textAlign: TextAlign.right, 
+                      textAlign: TextAlign.right,
                       style: TextStyle(
                         fontFamily: 'GE-SS-Two-Light',
                         fontSize: 14,
                         color: Colors.white,
                       ),
                     ),
-                    backgroundColor: const Color(0xFF0FBE7C), 
-                    duration: const Duration(seconds: 5), 
-                    flushbarPosition:
-                        FlushbarPosition.TOP, 
+                    backgroundColor: const Color(0xFF0FBE7C),
+                    duration: const Duration(seconds: 5),
+                    flushbarPosition: FlushbarPosition.TOP,
                     margin: const EdgeInsets.all(8.0),
                     borderRadius: BorderRadius.circular(8.0),
                   ).show(context);
@@ -326,8 +318,7 @@ void _onDeleteAccount() {
                 child: const Text(
                   'تسجيل الخروج',
                   style: TextStyle(
-                    fontFamily:
-                        'GE-SS-Two-Light', 
+                    fontFamily: 'GE-SS-Two-Light',
                     fontSize: 18,
                     color: Colors.red,
                   ),
@@ -339,7 +330,6 @@ void _onDeleteAccount() {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -376,7 +366,7 @@ void _onDeleteAccount() {
 
           // Bottom Navigation Bar
           Positioned(
-            bottom: 0, 
+            bottom: 0,
             left: 0,
             right: 0,
             child: Container(
@@ -395,8 +385,7 @@ void _onDeleteAccount() {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(
-                        bottom: 11, right: 0),
+                    padding: const EdgeInsets.only(bottom: 11, right: 0),
                     child: buildBottomNavItem(
                       Icons.settings_outlined,
                       "إعدادات",
@@ -407,7 +396,7 @@ void _onDeleteAccount() {
                           _createNoTransitionRoute(SettingsPage(
                             userName: widget.userName,
                             phoneNumber: widget.phoneNumber,
-                          )), 
+                          )),
                         );
                       },
                     ),
@@ -436,7 +425,7 @@ void _onDeleteAccount() {
                     );
                   }),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
-                      onTap: navigateToSavingPlan), 
+                      onTap: navigateToSavingPlan),
                 ],
               ),
             ),
@@ -470,7 +459,7 @@ void _onDeleteAccount() {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), 
+                    const SizedBox(width: 10),
                     const Icon(Icons.arrow_back_ios_new,
                         color: Color(0xFF3D3D3D), size: 15),
                     const SizedBox(width: 10),
@@ -478,8 +467,7 @@ void _onDeleteAccount() {
                       child: Align(
                         alignment: Alignment.centerRight * 0.9,
                         child: const Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.end, 
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -488,8 +476,7 @@ void _onDeleteAccount() {
                                 color: Color(0xFF3D3D3D),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                fontFamily:
-                                    'GE-SS-Two-Bold', 
+                                fontFamily: 'GE-SS-Two-Bold',
                               ),
                             ),
                             Text(
@@ -497,8 +484,7 @@ void _onDeleteAccount() {
                               style: TextStyle(
                                 color: Color(0xFF686868),
                                 fontSize: 9,
-                                fontFamily:
-                                    'GE-SS-Two-Light', 
+                                fontFamily: 'GE-SS-Two-Light',
                               ),
                             ),
                           ],
@@ -536,8 +522,7 @@ void _onDeleteAccount() {
                         // Align text
                         alignment: Alignment.centerRight * 0.9,
                         child: const Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.end, 
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -546,8 +531,7 @@ void _onDeleteAccount() {
                                 color: Color(0xFF3D3D3D),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                fontFamily:
-                                    'GE-SS-Two-Bold', 
+                                fontFamily: 'GE-SS-Two-Bold',
                               ),
                             ),
                             Text(
@@ -555,8 +539,7 @@ void _onDeleteAccount() {
                               style: TextStyle(
                                 color: Color(0xFF686868),
                                 fontSize: 9,
-                                fontFamily:
-                                    'GE-SS-Two-Light', 
+                                fontFamily: 'GE-SS-Two-Light',
                               ),
                             ),
                           ],
@@ -584,16 +567,15 @@ void _onDeleteAccount() {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), 
+                    const SizedBox(width: 10),
                     const Icon(Icons.arrow_back_ios_new,
-                        color: Color(0xFF3D3D3D), size: 15), 
+                        color: Color(0xFF3D3D3D), size: 15),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Align(
                         alignment: Alignment.centerRight * 0.9,
                         child: const Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -602,8 +584,7 @@ void _onDeleteAccount() {
                                 color: Color(0xFF3D3D3D),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                fontFamily:
-                                    'GE-SS-Two-Bold', 
+                                fontFamily: 'GE-SS-Two-Bold',
                               ),
                             ),
                             Text(
@@ -611,8 +592,7 @@ void _onDeleteAccount() {
                               style: TextStyle(
                                 color: Color(0xFF686868),
                                 fontSize: 9,
-                                fontFamily:
-                                    'GE-SS-Two-Light', 
+                                fontFamily: 'GE-SS-Two-Light',
                               ),
                             ),
                           ],
@@ -640,16 +620,15 @@ void _onDeleteAccount() {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 10), 
+                    const SizedBox(width: 10),
                     const Icon(Icons.arrow_back_ios_new,
-                        color: Color(0xFF3D3D3D), size: 15), 
+                        color: Color(0xFF3D3D3D), size: 15),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Align(
                         alignment: Alignment.centerRight * 0.9,
                         child: const Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.end, 
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -658,8 +637,7 @@ void _onDeleteAccount() {
                                 color: Color(0xFF3D3D3D),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                fontFamily:
-                                    'GE-SS-Two-Bold', 
+                                fontFamily: 'GE-SS-Two-Bold',
                               ),
                             ),
                             Text(
@@ -667,8 +645,7 @@ void _onDeleteAccount() {
                               style: TextStyle(
                                 color: Color(0xFF686868),
                                 fontSize: 9,
-                                fontFamily:
-                                    'GE-SS-Two-Light', 
+                                fontFamily: 'GE-SS-Two-Light',
                               ),
                             ),
                           ],
@@ -683,28 +660,27 @@ void _onDeleteAccount() {
 
           // Logout button
           Positioned(
-            bottom: 205, 
+            bottom: 205,
             left: (MediaQuery.of(context).size.width - 194) / 2,
             child: SizedBox(
               width: 194,
               height: 39,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3D3D3D), 
+                  backgroundColor: const Color(0xFF3D3D3D),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(100),
                   ),
-                  shadowColor: Colors.black, 
+                  shadowColor: Colors.black,
                   elevation: 5,
                 ),
-                onPressed: _onLogout, 
+                onPressed: _onLogout,
                 child: const Text(
                   'تسجيل الخروج',
                   style: TextStyle(
                     fontSize: 15,
-                    fontFamily:
-                        'GE-SS-Two-Light', 
+                    fontFamily: 'GE-SS-Two-Light',
                   ),
                 ),
               ),
@@ -712,35 +688,35 @@ void _onDeleteAccount() {
           ),
 
 // Delete Account button
-Positioned(
-  bottom: 150, 
-  left: (MediaQuery.of(context).size.width - 194) / 2,
-  child: SizedBox(
-    width: 194,
-    height: 39,
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFF9F9F9),
-        foregroundColor: const Color(0xFFDD2C35),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(100),
-          side: const BorderSide(color: Color(0xFFDD2C35), width: 1),
-        ),
-      ),
-      onPressed: _onDeleteAccount, // Call the delete account function
-      child: const Text(
-        'حذف الحساب',
-        style: TextStyle(
-          fontSize: 15,
-          fontFamily: 'GE-SS-Two-Light',
-        ),
-      ),
-    ),
-  ),
-),
+          Positioned(
+            bottom: 150,
+            left: (MediaQuery.of(context).size.width - 194) / 2,
+            child: SizedBox(
+              width: 194,
+              height: 39,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF9F9F9),
+                  foregroundColor: const Color(0xFFDD2C35),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100),
+                    side: const BorderSide(color: Color(0xFFDD2C35), width: 1),
+                  ),
+                ),
+                onPressed: _onDeleteAccount, // Call the delete account function
+                child: const Text(
+                  'حذف الحساب',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontFamily: 'GE-SS-Two-Light',
+                  ),
+                ),
+              ),
+            ),
+          ),
 
           Positioned(
-            bottom: 44, 
+            bottom: 44,
             left: 0,
             right: 0,
             child: Stack(
@@ -790,7 +766,7 @@ Positioned(
     );
   }
 
-  // Bottom Navigation 
+  // Bottom Navigation
   Widget buildBottomNavItem(IconData icon, String label, int index,
       {bool isSelected = false, required VoidCallback onTap}) {
     return GestureDetector(
@@ -816,4 +792,3 @@ Positioned(
     );
   }
 }
-

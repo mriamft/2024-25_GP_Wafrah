@@ -9,9 +9,9 @@ class UserPatternPage extends StatefulWidget {
   final String phoneNumber;
   final List<Map<String, dynamic>> accounts;
   final Map<String, dynamic> resultData;
-final Map<String, dynamic> spendingData;
-final int durationMonths;
-final String startDate;
+  final Map<String, dynamic> spendingData;
+  final int durationMonths;
+  final String startDate;
 
   const UserPatternPage({
     super.key,
@@ -37,38 +37,38 @@ class _UserPatternPageState extends State<UserPatternPage> {
 
   Color _arrowColor = const Color(0xFF3D3D3D);
   bool _isPressed = false;
-   IconData _getCategoryIcon(String category) {
-  switch (category) {
-    case 'المطاعم':
-      return Icons.restaurant;
-    case 'التعليم':
-      return Icons.school;
-    case 'الصحة':
-      return Icons.local_hospital;
-    case 'تسوق':
-      return Icons.shopping_bag;
-    case 'البقالة':
-      return Icons.local_grocery_store;
-    case 'النقل':
-      return Icons.directions_bus;
-    case 'السفر':
-      return Icons.flight;
-    case 'المدفوعات الحكومية':
-      return Icons.account_balance;
-    case 'الترفيه':
-      return Icons.gamepad_rounded;
-    case 'الاستثمار':
-      return Icons.trending_up;
-    case 'الإيجار':
-      return Icons.home;
-    case 'القروض':
-      return Icons.money;
-    case 'التحويلات':
-      return Icons.swap_horiz;
-    default:
-      return Icons.help_outline; // Default icon if category is missing
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'المطاعم':
+        return Icons.restaurant;
+      case 'التعليم':
+        return Icons.school;
+      case 'الصحة':
+        return Icons.local_hospital;
+      case 'تسوق':
+        return Icons.shopping_bag;
+      case 'البقالة':
+        return Icons.local_grocery_store;
+      case 'النقل':
+        return Icons.directions_bus;
+      case 'السفر':
+        return Icons.flight;
+      case 'المدفوعات الحكومية':
+        return Icons.account_balance;
+      case 'الترفيه':
+        return Icons.gamepad_rounded;
+      case 'الاستثمار':
+        return Icons.trending_up;
+      case 'الإيجار':
+        return Icons.home;
+      case 'القروض':
+        return Icons.money;
+      case 'التحويلات':
+        return Icons.swap_horiz;
+      default:
+        return Icons.help_outline; // Default icon if category is missing
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -138,13 +138,13 @@ class _UserPatternPageState extends State<UserPatternPage> {
                 ],
               ),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                        'مجموع الصرف لفترة ${widget.durationMonths} أشهر',
-                      style: TextStyle(
+                      'مجموع الصرف لفترة ${widget.durationMonths} أشهر',
+                      style: const TextStyle(
                         color: Color(0xFF535353),
                         fontSize: 11,
                         fontFamily: 'GE-SS-Two-Light',
@@ -154,7 +154,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'ريال',
                           style: TextStyle(
                             color: Color(0xFF3D3D3D),
@@ -162,10 +162,10 @@ class _UserPatternPageState extends State<UserPatternPage> {
                             fontFamily: 'GE-SS-Two-Light',
                           ),
                         ),
-                        SizedBox(width: 5),
+                        const SizedBox(width: 5),
                         Text(
                           totalSpending.toStringAsFixed(2),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Color(0xFF3D3D3D),
                             fontSize: 32,
                             fontFamily: 'GE-SS-Two-Bold',
@@ -179,64 +179,64 @@ class _UserPatternPageState extends State<UserPatternPage> {
             ),
           ),
 // Total Income Rectangle
-Positioned(
-  left: 83,
-  top: 280, // ✅ Adjust position below the spending rectangle
-  child: Container(
-    width: 228,
-    height: 68,
-    decoration: BoxDecoration(
-      color: const Color(0xFFD9D9D9),
-      borderRadius: BorderRadius.circular(8),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.3),
-          blurRadius: 8,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'مجموع الدخل لفترة ${widget.durationMonths} أشهر',
-            style: TextStyle(
-              color: Color(0xFF535353),
-              fontSize: 11,
-              fontFamily: 'GE-SS-Two-Light',
+          Positioned(
+            left: 83,
+            top: 280, // ✅ Adjust position below the spending rectangle
+            child: Container(
+              width: 228,
+              height: 68,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD9D9D9),
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'مجموع الدخل لفترة ${widget.durationMonths} أشهر',
+                      style: const TextStyle(
+                        color: Color(0xFF535353),
+                        fontSize: 11,
+                        fontFamily: 'GE-SS-Two-Light',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'ريال',
+                          style: TextStyle(
+                            color: Color(0xFF3D3D3D),
+                            fontSize: 11,
+                            fontFamily: 'GE-SS-Two-Light',
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          totalIncome.toStringAsFixed(2),
+                          style: const TextStyle(
+                            color: Color(0xFF3D3D3D),
+                            fontSize: 32,
+                            fontFamily: 'GE-SS-Two-Bold',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'ريال',
-                style: TextStyle(
-                  color: Color(0xFF3D3D3D),
-                  fontSize: 11,
-                  fontFamily: 'GE-SS-Two-Light',
-                ),
-              ),
-              SizedBox(width: 5),
-              Text(
-                totalIncome.toStringAsFixed(2),
-                style: TextStyle(
-                  color: Color(0xFF3D3D3D),
-                  fontSize: 32,
-                  fontFamily: 'GE-SS-Two-Bold',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  ),
-),
 
           // Explanation text at the top
           const Positioned(
@@ -300,7 +300,7 @@ Positioned(
                       userName: widget.userName,
                       phoneNumber: widget.phoneNumber,
                       accounts: widget.accounts,
-                      startDate : widget.startDate,
+                      startDate: widget.startDate,
                       resultData: widget.resultData,
                     ),
                   ),
@@ -343,70 +343,77 @@ Positioned(
 
   /// Builds the list of “circle” widgets based on your categories.
   List<Widget> _buildCategoryCircles() {
-  // Compute total spending excluding "الراتب"
-  double totalSpending = widget.spendingData['TotalSpending'] ?? 0.0;
+    // Compute total spending excluding "الراتب"
+    double totalSpending = widget.spendingData['TotalSpending'] ?? 0.0;
 
 // Fetch precomputed category percentages from Python API
-List<Map<String, dynamic>> categories = widget.spendingData['CategorySpending'] != null
-    ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
-        .entries
-        .map((entry) => {
-              'title': entry.key,
-              'icon': _getCategoryIcon(entry.key),
-              'percentage': widget.spendingData['CategoryPercentages']?[entry.key] != null
-                  ? double.parse(widget.spendingData['CategoryPercentages']![entry.key]!.toStringAsFixed(1))
-                  : 0.0 // ✅ Use precomputed percentage from Python
-            })
-        .toList()
-    : [];
+    List<Map<String, dynamic>> categories =
+        widget.spendingData['CategorySpending'] != null
+            ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
+                .entries
+                .map((entry) => {
+                      'title': entry.key,
+                      'icon': _getCategoryIcon(entry.key),
+                      'percentage': widget.spendingData['CategoryPercentages']
+                                  ?[entry.key] !=
+                              null
+                          ? double.parse(widget
+                              .spendingData['CategoryPercentages']![entry.key]!
+                              .toStringAsFixed(1))
+                          : 0.0 // ✅ Use precomputed percentage from Python
+                    })
+                .toList()
+            : [];
 
 // ✅ Ensure spending amounts match total spending
-double totalCalculatedSpending = 0.0;
-double largestAmount = 0.0;
-String? largestCategory;
+    double totalCalculatedSpending = 0.0;
+    double largestAmount = 0.0;
+    String? largestCategory;
 
 // Convert percentages to amounts & track the largest category
-for (var cat in categories) {
-  double calculatedAmount = (cat['percentage'] / 100) * totalSpending;
-  cat['amount'] = calculatedAmount.toStringAsFixed(2);
-  
-  totalCalculatedSpending += calculatedAmount;
+    for (var cat in categories) {
+      double calculatedAmount = (cat['percentage'] / 100) * totalSpending;
+      cat['amount'] = calculatedAmount.toStringAsFixed(2);
 
-  if (calculatedAmount > largestAmount) {
-    largestAmount = calculatedAmount;
-    largestCategory = cat['title'];
-  }
-}
+      totalCalculatedSpending += calculatedAmount;
+
+      if (calculatedAmount > largestAmount) {
+        largestAmount = calculatedAmount;
+        largestCategory = cat['title'];
+      }
+    }
 
 // ✅ Adjust the largest category to absorb rounding error
-double roundingDifference = totalSpending - totalCalculatedSpending;
-if (largestCategory != null) {
-  for (var cat in categories) {
-    if (cat['title'] == largestCategory) {
-      cat['amount'] = (double.parse(cat['amount']) + roundingDifference).toStringAsFixed(2);
-      break;
+    double roundingDifference = totalSpending - totalCalculatedSpending;
+    if (largestCategory != null) {
+      for (var cat in categories) {
+        if (cat['title'] == largestCategory) {
+          cat['amount'] = (double.parse(cat['amount']) + roundingDifference)
+              .toStringAsFixed(2);
+          break;
+        }
+      }
     }
-  }
-}
 
 // ✅ Sort by percentage descending order
-categories.sort((a, b) => (b['percentage'] as double).compareTo(a['percentage'] as double));
-
+    categories.sort((a, b) =>
+        (b['percentage'] as double).compareTo(a['percentage'] as double));
 
 // ✅ Convert percentage to string with '%' after sorting
-for (var cat in categories) {
-  cat['percentage'] = '${(cat['percentage'] as double).toStringAsFixed(1)}%';
-}
+    for (var cat in categories) {
+      cat['percentage'] =
+          '${(cat['percentage'] as double).toStringAsFixed(1)}%';
+    }
 
-  return categories.map((cat) {
-    return _buildCategoryCircleItem(
-      icon: cat['icon'] as IconData,
-      label: cat['title'] as String,
-      amount: cat['amount'] as String,
-      percentage: cat['percentage'] as String,
-    );
-  }).toList();
-}
+    return categories.map((cat) {
+      return _buildCategoryCircleItem(
+        icon: cat['icon'] as IconData,
+        label: cat['title'] as String,
+        amount: cat['amount'] as String,
+        percentage: cat['percentage'] as String,
+      );
+    }).toList();
+  }
 
   /// Builds a single circular widget (with the arc, icon, spending, etc.)
   /// The percentage text is placed at the end of the circular arc, **outside** the circle.
@@ -538,5 +545,3 @@ for (var cat in categories) {
     );
   }
 }
-
-
