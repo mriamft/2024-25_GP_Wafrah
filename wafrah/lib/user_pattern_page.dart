@@ -72,12 +72,10 @@ class _UserPatternPageState extends State<UserPatternPage> {
 
   @override
   Widget build(BuildContext context) {
-    double totalSpending = widget.spendingData['CategorySpending'] != null
-    ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
-        .entries
-        .where((entry) => entry.key != 'الراتب') // ✅ Exclude income category
-        .fold(0.0, (sum, entry) => sum + (entry.value as double))
-    : 0.0;
+    double totalIncome = widget.spendingData['TotalIncome'] ?? 0.0;
+
+    double totalSpending = widget.spendingData['TotalSpending'] ?? 0.0;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
@@ -109,9 +107,9 @@ class _UserPatternPageState extends State<UserPatternPage> {
           // Page Title
           const Positioned(
             top: 58,
-            left: 110,
+            left: 65,
             child: Text(
-              'نمط الإنفاق الخاص بك',
+              'نمط الإنفاق والدخل الخاص بك',
               style: TextStyle(
                 color: Color(0xFF3D3D3D),
                 fontSize: 20,
@@ -180,13 +178,72 @@ class _UserPatternPageState extends State<UserPatternPage> {
               ),
             ),
           ),
+// Total Income Rectangle
+Positioned(
+  left: 83,
+  top: 280, // ✅ Adjust position below the spending rectangle
+  child: Container(
+    width: 228,
+    height: 68,
+    decoration: BoxDecoration(
+      color: const Color(0xFFD9D9D9),
+      borderRadius: BorderRadius.circular(8),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.3),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'مجموع الدخل لفترة ${widget.durationMonths} أشهر',
+            style: TextStyle(
+              color: Color(0xFF535353),
+              fontSize: 11,
+              fontFamily: 'GE-SS-Two-Light',
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'ريال',
+                style: TextStyle(
+                  color: Color(0xFF3D3D3D),
+                  fontSize: 11,
+                  fontFamily: 'GE-SS-Two-Light',
+                ),
+              ),
+              SizedBox(width: 5),
+              Text(
+                totalIncome.toStringAsFixed(2),
+                style: TextStyle(
+                  color: Color(0xFF3D3D3D),
+                  fontSize: 32,
+                  fontFamily: 'GE-SS-Two-Bold',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  ),
+),
 
           // Explanation text at the top
           const Positioned(
-            left: 28,
+            left: 30,
             top: 114,
             child: Text(
-              'هذا النمط يعتمد على إنفاقك في نفس الفترة الزمنية للسنوات \nالسابقة',
+              'هذا النمط يعتمد على إنفاقك ودخلك في نفس الفترة الزمنية  \nللسنوات السابقة',
               style: TextStyle(
                 color: Color(0xFF3D3D3D),
                 fontSize: 12,
@@ -199,7 +256,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
 
           // Scrollable Category Circles
           Positioned(
-            top: 300,
+            top: 360,
             left: 20,
             right: 20,
             child: Container(
@@ -287,36 +344,59 @@ class _UserPatternPageState extends State<UserPatternPage> {
   /// Builds the list of “circle” widgets based on your categories.
   List<Widget> _buildCategoryCircles() {
   // Compute total spending excluding "الراتب"
-  double totalSpending = widget.spendingData['CategorySpending'] != null
-      ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
-          .entries
-          .where((entry) => entry.key != 'الراتب')
-          .fold(0.0, (sum, entry) => sum + (entry.value as double))
-      : 0.0;
+  double totalSpending = widget.spendingData['TotalSpending'] ?? 0.0;
 
-  final categories = widget.spendingData['CategorySpending'] != null
+// Fetch precomputed category percentages from Python API
+List<Map<String, dynamic>> categories = widget.spendingData['CategorySpending'] != null
     ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
         .entries
-        .where((entry) => entry.key != 'الراتب') // ✅ Exclude "الراتب"
         .map((entry) => {
               'title': entry.key,
               'icon': _getCategoryIcon(entry.key),
-              'amount': entry.value.toStringAsFixed(2),
-              'percentage': totalSpending > 0
-                  ? ((entry.value / totalSpending) * 100)
-                  : 0.0 // Avoid division by zero
+              'percentage': widget.spendingData['CategoryPercentages']?[entry.key] != null
+                  ? double.parse(widget.spendingData['CategoryPercentages']![entry.key]!.toStringAsFixed(1))
+                  : 0.0 // ✅ Use precomputed percentage from Python
             })
         .toList()
     : [];
 
+// ✅ Ensure spending amounts match total spending
+double totalCalculatedSpending = 0.0;
+double largestAmount = 0.0;
+String? largestCategory;
+
+// Convert percentages to amounts & track the largest category
+for (var cat in categories) {
+  double calculatedAmount = (cat['percentage'] / 100) * totalSpending;
+  cat['amount'] = calculatedAmount.toStringAsFixed(2);
+  
+  totalCalculatedSpending += calculatedAmount;
+
+  if (calculatedAmount > largestAmount) {
+    largestAmount = calculatedAmount;
+    largestCategory = cat['title'];
+  }
+}
+
+// ✅ Adjust the largest category to absorb rounding error
+double roundingDifference = totalSpending - totalCalculatedSpending;
+if (largestCategory != null) {
+  for (var cat in categories) {
+    if (cat['title'] == largestCategory) {
+      cat['amount'] = (double.parse(cat['amount']) + roundingDifference).toStringAsFixed(2);
+      break;
+    }
+  }
+}
+
 // ✅ Sort by percentage descending order
 categories.sort((a, b) => (b['percentage'] as double).compareTo(a['percentage'] as double));
 
+
 // ✅ Convert percentage to string with '%' after sorting
 for (var cat in categories) {
-  cat['percentage'] = '${cat['percentage'].toStringAsFixed(1)}%';
+  cat['percentage'] = '${(cat['percentage'] as double).toStringAsFixed(1)}%';
 }
-
 
   return categories.map((cat) {
     return _buildCategoryCircleItem(
@@ -327,7 +407,6 @@ for (var cat in categories) {
     );
   }).toList();
 }
-
 
   /// Builds a single circular widget (with the arc, icon, spending, etc.)
   /// The percentage text is placed at the end of the circular arc, **outside** the circle.
@@ -459,3 +538,5 @@ for (var cat in categories) {
     );
   }
 }
+
+
