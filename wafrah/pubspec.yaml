@@ -173,3 +173,7 @@ flutter:
     - family: GE-SS-Two-Light
       fonts:
         - asset: assets/fonts/GE_SS_Two_Light.otf
+        
+    - family: CustomIcons
+      fonts:
+        - asset: assets/fonts/fontello.ttf

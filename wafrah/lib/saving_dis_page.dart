@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'success_plan_page.dart'; // Import SuccessPlanPage
+import 'custom_icons.dart';
 
 class SavingDisPage extends StatefulWidget {
   final String userName;
@@ -350,17 +351,15 @@ print(widget.startDate);
                             ),
                           ),
                           const Positioned(
-                            left: 3,
-                            top: 19,
-                            child: Text(
-                              'ريال',
-                              style: TextStyle(
-                                color: Color(0xFF3D3D3D),
-                                fontSize: 11,
-                                fontFamily: 'GE-SS-Two-Light',
-                              ),
-                            ),
-                          ),
+  left: 3,
+  top: 19,
+  child: Icon(
+    CustomIcons.riyal, // Riyal symbol
+    size: 14, // Adjust size if needed
+    color: Color(0xFF3D3D3D),
+  ),
+),
+
                         ],
                       ),
                     ),

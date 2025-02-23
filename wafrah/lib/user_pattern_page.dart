@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Adjust this import based on where your SavingDisPage file is located:
 import 'package:wafrah/saving_dis_page.dart';
+import 'custom_icons.dart';
 
 class UserPatternPage extends StatefulWidget {
   final String userName;
@@ -151,28 +152,25 @@ class _UserPatternPageState extends State<UserPatternPage> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'ريال',
-                          style: TextStyle(
-                            color: Color(0xFF3D3D3D),
-                            fontSize: 11,
-                            fontFamily: 'GE-SS-Two-Light',
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          totalSpending.toStringAsFixed(2),
-                          style: const TextStyle(
-                            color: Color(0xFF3D3D3D),
-                            fontSize: 32,
-                            fontFamily: 'GE-SS-Two-Bold',
-                          ),
-                        ),
-                      ],
-                    ),
+                   Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    Icon(
+      CustomIcons.riyal, // Riyal symbol
+      size: 14, // Adjust size as needed
+      color: Color(0xFF3D3D3D),
+    ),
+    const SizedBox(width: 5),
+    Text(
+      totalSpending.toStringAsFixed(2),
+      style: const TextStyle(
+        color: Color(0xFF3D3D3D),
+        fontSize: 32,
+        fontFamily: 'GE-SS-Two-Bold',
+      ),
+    ),
+  ],
+),
                   ],
                 ),
               ),
@@ -210,28 +208,25 @@ class _UserPatternPageState extends State<UserPatternPage> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'ريال',
-                          style: TextStyle(
-                            color: Color(0xFF3D3D3D),
-                            fontSize: 11,
-                            fontFamily: 'GE-SS-Two-Light',
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          totalIncome.toStringAsFixed(2),
-                          style: const TextStyle(
-                            color: Color(0xFF3D3D3D),
-                            fontSize: 32,
-                            fontFamily: 'GE-SS-Two-Bold',
-                          ),
-                        ),
-                      ],
-                    ),
+                   Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    Icon(
+      CustomIcons.riyal, // Riyal symbol
+      size: 14, // Adjust size as needed
+      color: Color(0xFF3D3D3D),
+    ),
+    const SizedBox(width: 5),
+    Text(
+      totalIncome.toStringAsFixed(2),
+      style: const TextStyle(
+        color: Color(0xFF3D3D3D),
+        fontSize: 32,
+        fontFamily: 'GE-SS-Two-Bold',
+      ),
+    ),
+  ],
+),
                   ],
                 ),
               ),
@@ -502,27 +497,25 @@ class _UserPatternPageState extends State<UserPatternPage> {
               ),
               const SizedBox(height: 5),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'ريال',
-                    style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 11,
-                      fontFamily: 'GE-SS-Two-Light',
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    amount,
-                    style: const TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 20,
-                      fontFamily: 'GE-SS-Two-Bold',
-                    ),
-                  ),
-                ],
-              ),
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    Icon(
+      CustomIcons.riyal, // Riyal symbol
+      size: 14, // Adjust size if needed
+      color: Color(0xFF3D3D3D),
+    ),
+    const SizedBox(width: 5), // Space between icon and amount
+    Text(
+      amount,
+      style: const TextStyle(
+        color: Color(0xFF3D3D3D),
+        fontSize: 20,
+        fontFamily: 'GE-SS-Two-Bold',
+      ),
+    ),
+  ],
+),
+
             ],
           ),
 

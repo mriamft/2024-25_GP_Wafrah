@@ -9,6 +9,7 @@ import 'dart:convert';
 // Import your goal page for navigation
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'custom_icons.dart';
 
 class HomePage extends StatefulWidget {
   final String userName;
@@ -1172,123 +1173,188 @@ class _HomePageState extends State<HomePage>
 
 //static part
   Widget buildStatisticsSummary() {
-    // Calculated values based on the selected period
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 239, 239, 239),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // Minimum Column
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'الحد الأدنى',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Bold',
-                    fontSize: 12,
-                    color: Colors.grey[800],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${_minIncome.toStringAsFixed(2)} ر.س',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 12,
-                    color: Colors.green[700],
-                  ),
-                  textDirection: TextDirection.rtl,
-                ),
-                Text(
-                  '${_minExpense.toStringAsFixed(2)} ر.س',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 12,
-                    color: Colors.red[700],
-                  ),
-                  textDirection: TextDirection.rtl,
-                ),
-              ],
-            ),
-            // Maximum Column
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'الحد الأعلى',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Bold',
-                    fontSize: 12,
-                    color: Colors.grey[800],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${_maxIncome.toStringAsFixed(2)} ر.س',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 12,
-                    color: Colors.green[700],
-                  ),
-                  textDirection: TextDirection.rtl,
-                ),
-                Text(
-                  '${_maxExpense.toStringAsFixed(2)} ر.س',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 12,
-                    color: Colors.red[700],
-                  ),
-                  textDirection: TextDirection.rtl,
-                ),
-              ],
-            ),
-            // Average Column
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'المتوسط',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Bold',
-                    fontSize: 12,
-                    color: Colors.grey[800],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${_filteredIncome.toStringAsFixed(2)} ر.س',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 12,
-                    color: Colors.green[700],
-                  ),
-                  textDirection: TextDirection.rtl,
-                ),
-                Text(
-                  '${_filteredExpense.toStringAsFixed(2)} ر.س',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 12,
-                    color: Colors.red[700],
-                  ),
-                  textDirection: TextDirection.rtl,
-                ),
-              ],
-            ),
-          ],
-        ),
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+    child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 239, 239, 239),
+        borderRadius: BorderRadius.circular(8.0),
       ),
-    );
-  }
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // Minimum Column
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'الحد الأدنى',
+                style: TextStyle(
+                  fontFamily: 'GE-SS-Two-Bold',
+                  fontSize: 12,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    CustomIcons.riyal,
+                    size: 14,
+                    color: Colors.green[700],
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    _minIncome.toStringAsFixed(2),
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 12,
+                      color: Colors.green[700],
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    CustomIcons.riyal,
+                    size: 14,
+                    color: Colors.red[700],
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    _minExpense.toStringAsFixed(2),
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 12,
+                      color: Colors.red[700],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Maximum Column
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'الحد الأعلى',
+                style: TextStyle(
+                  fontFamily: 'GE-SS-Two-Bold',
+                  fontSize: 12,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    CustomIcons.riyal,
+                    size: 14,
+                    color: Colors.green[700],
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    _maxIncome.toStringAsFixed(2),
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 12,
+                      color: Colors.green[700],
+                    ),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    CustomIcons.riyal,
+                    size: 14,
+                    color: Colors.red[700],
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    _maxExpense.toStringAsFixed(2),
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 12,
+                      color: Colors.red[700],
+                    ),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Average Column
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'المتوسط',
+                style: TextStyle(
+                  fontFamily: 'GE-SS-Two-Bold',
+                  fontSize: 12,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    CustomIcons.riyal,
+                    size: 14,
+                    color: Colors.green[700],
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    _filteredIncome.toStringAsFixed(2),
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 12,
+                      color: Colors.green[700],
+                    ),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    CustomIcons.riyal,
+                    size: 14,
+                    color: Colors.red[700],
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    _filteredExpense.toStringAsFixed(2),
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 12,
+                      color: Colors.red[700],
+                    ),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 
 // Pie chart to show transaction categories
   Widget buildPieChart() {
@@ -1919,14 +1985,12 @@ class _HomePageState extends State<HomePage>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'ر.س', // Currency symbol
-                        style: TextStyle(
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
-                      ),
+                      const Icon(
+  CustomIcons.riyal,
+  size: 18,
+  color: Colors.black,
+),
+
                       const SizedBox(width: 5),
                       Text(
                         _isBalanceVisible
@@ -1997,14 +2061,12 @@ class _HomePageState extends State<HomePage>
                         const SizedBox(height: 5),
                         Row(
                           children: [
-                            const Text(
-                              'ر.س', // Currency symbol
-                              style: TextStyle(
-                                fontFamily: 'GE-SS-Two-Light',
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ),
+                            const Icon(
+  CustomIcons.riyal,
+  size: 14,
+  color: Colors.black,
+),
+
                             const SizedBox(width: 5),
                             Text(
                               _isBalanceVisible
@@ -2043,14 +2105,12 @@ class _HomePageState extends State<HomePage>
                         const SizedBox(height: 5),
                         Row(
                           children: [
-                            const Text(
-                              'ر.س', // Currency symbol
-                              style: TextStyle(
-                                fontFamily: 'GE-SS-Two-Light',
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ),
+                            const Icon(
+  CustomIcons.riyal,
+  size: 14,
+  color: Colors.black,
+),
+
                             const SizedBox(width: 5),
                             Text(
                               _isBalanceVisible

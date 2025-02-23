@@ -8,6 +8,7 @@ import 'storage_service.dart';
 // Import your goal page for navigation
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'custom_icons.dart';
 
 class BanksPage extends StatefulWidget {
   final String userName;
@@ -122,106 +123,105 @@ class _BanksPageState extends State<BanksPage> {
         accountTypeTranslations[accountSubType] ?? accountSubType;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      width: 340,
-      height: 50,
-      decoration: BoxDecoration(
-        color: const Color(0xFFD9D9D9),
-        borderRadius: BorderRadius.circular(8),
+    margin: const EdgeInsets.only(bottom: 20),
+    width: 340,
+    height: 50,
+    decoration: BoxDecoration(
+      color: const Color(0xFFD9D9D9),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween, // ✅ Ensures spacing between items
+      children: [
+        // Left section for monetary amount
+Padding(
+  padding: const EdgeInsets.only(left: 12.0),
+  child: Row(
+    children: [
+      Icon(
+        CustomIcons.riyal, // Use the new Riyal symbol
+        size: 18, // Adjust size as needed
+        color: Color(0xFF5F5F5F),
       ),
-      child: Row(
+      const SizedBox(width: 5), // Spacing between icon and amount
+      Text(
+        account['Balance']?.toString() ?? '0',
+        style: const TextStyle(
+          color: Color(0xFF313131),
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'GE-SS-Two-Bold',
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
+    ],
+  ),
+),
+
+    // Middle section for account details
+Expanded(
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.end, // ✅ Ensures right alignment
+    children: [
+      Text(
+        translatedAccountSubType,
+        style: const TextStyle(
+          color: Color(0xFF3D3D3D),
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'GE-SS-Two-Bold',
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
+
+      const SizedBox(height: 8), // ✅ Adds space above the IBAN to prevent overlap
+
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end, // ✅ Ensures text alignment
         children: [
-          // SAMA logo on the right
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Image.asset(
-              'assets/images/SAMA_logo.png',
-              width: 30,
-              height: 30,
-              fit: BoxFit.contain,
+          Expanded( // ✅ Allows the IBAN to take available space
+            child: Text(
+              account['IBAN'] ?? 'رقم الايبان',
+              style: const TextStyle(
+                color: Color(0xFF5F5F5F),
+                fontSize: 13,
+                fontFamily: 'GE-SS-Two-Light',
+              ),
+              textAlign: TextAlign.right,
+              softWrap: false, // Prevents automatic wrapping
+              overflow: TextOverflow.visible, // ✅ Ensures full IBAN is shown
             ),
           ),
-          // Middle section for account details
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  translatedAccountSubType,
-                  style: const TextStyle(
-                    color: Color(0xFF3D3D3D),
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'GE-SS-Two-Bold',
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        account['IBAN'] ?? 'رقم الايبان',
-                        style: const TextStyle(
-                          color: Color(0xFF5F5F5F),
-                          fontSize: 13,
-                          fontFamily: 'GE-SS-Two-Light',
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    const Text(
-                      'رقم الآيبان',
-                      style: TextStyle(
-                        color: Color(0xFF3D3D3D),
-                        fontSize: 13,
-                        fontFamily: 'GE-SS-Two-Bold',
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Left section for balance
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      account['Balance']?.toString() ?? '0',
-                      style: const TextStyle(
-                        color: Color(0xFF313131),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'GE-SS-Two-Bold',
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(width: 5),
-                    const Text(
-                      'ر.س',
-                      style: TextStyle(
-                        color: Color(0xFF5F5F5F),
-                        fontSize: 16,
-                        fontFamily: 'GE-SS-Two-Light',
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          const SizedBox(width: 5),
+          const Text(
+            'رقم الآيبان',
+            style: TextStyle(
+              color: Color(0xFF3D3D3D),
+              fontSize: 13,
+              fontFamily: 'GE-SS-Two-Bold',
             ),
           ),
         ],
       ),
-    );
-  }
+    ],
+  ),
+),
+
+        // Right section for SAMA logo
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Image.asset(
+            'assets/images/SAMA_logo.png',
+            width: 30,
+            height: 30,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {

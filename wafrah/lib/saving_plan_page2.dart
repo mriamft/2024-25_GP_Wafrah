@@ -8,6 +8,9 @@ import 'home_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // For secure storage
 import 'dart:convert'; // For JSON encoding and decoding
 import 'package:intl/intl.dart'; // For date formatting
+import 'custom_icons.dart';
+import 'dart:ui' as ui;
+
 
 class SavingPlanPage2 extends StatefulWidget {
   final String userName;
@@ -927,9 +930,9 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
 
   // Get the original progress without modification
   double originalProgress = wap['progress']?[category] ?? 0.0;
-  
+
   // Apply the 100% cap after storing the original value
-  double progress = originalProgress > 100 ? 100 : originalProgress; 
+  double progress = originalProgress > 100 ? 100 : originalProgress;
 
   // Determine color based on progress
   Color progressColor;
@@ -1028,30 +1031,42 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
 
         // Category Name
         Positioned(
-          top: 50,
-          right: 10,
-          child: Text(
-            category,
-            textAlign: TextAlign.right,
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: 'GE-SS-Two-Bold',
-              color: Color(0xFF3D3D3D),
-            ),
-          ),
-        ),
-
-        // Savings Amount
-        Positioned(
           top: 80,
           right: 10,
-          child: Text(
-            "المبلغ المطلوب\n ادخاره: ${monthlySavings.toStringAsFixed(2)} ريال",
-            textAlign: TextAlign.right,
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'GE-SS-Two-Light',
-              color: Color(0xFF3D3D3D),
+          child: Directionality(
+            textDirection: ui.TextDirection.rtl, // Ensure proper Arabic text alignment
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, // Align text properly
+              children: [
+                const Text(
+                  "المبلغ المطلوب ادخاره:",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'GE-SS-Two-Light',
+                    color: Color(0xFF3D3D3D),
+                  ),
+                ),
+                const SizedBox(height: 2), // Add spacing between text and amount
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      monthlySavings.toStringAsFixed(2), // Amount text first
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'GE-SS-Two-Light',
+                        color: Color(0xFF3D3D3D),
+                      ),
+                    ),
+                    const SizedBox(width: 3), // Space between amount and icon
+                    Icon(
+                      CustomIcons.riyal, // Riyal symbol
+                      size: 14,
+                      color: Color(0xFF3D3D3D),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -1059,6 +1074,8 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
     ),
   );
 }
+
+
 
 
   Widget buildBottomNavItem(IconData icon, String label, int index,

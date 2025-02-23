@@ -7,6 +7,7 @@ import 'home_page.dart';
 // Import your goal page for navigation
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'custom_icons.dart';
 
 class TransactionsPage extends StatefulWidget {
   final String userName;
@@ -731,15 +732,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'ر.س',
-                        style: TextStyle(
-                          color: amountColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'GE-SS-Two-Light',
-                        ),
-                      ),
+                     Icon(
+      CustomIcons.riyal, // Riyal icon instead of text
+      size: 14,
+      color: amountColor,
+    ),
                       const SizedBox(width: 4),
                       Text(
                         amount,
@@ -808,15 +805,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'ر.س',
-                      style: TextStyle(
-                        color: amountColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'GE-SS-Two-Light',
-                      ),
-                    ),
+                    Icon(
+      CustomIcons.riyal, // Riyal icon instead of text
+      size: 14,
+      color: amountColor,
+    ),
                     const SizedBox(width: 4),
                     Text(
                       amount,
@@ -978,11 +971,27 @@ class _TransactionsPageState extends State<TransactionsPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('المبلغ: $amount ر.س ',
-                  style: const TextStyle(
-                      fontFamily: 'GE-SS-Two-Bold',
-                      fontSize: 15,
-                      color: Colors.white)),
+            Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    Icon(
+      CustomIcons.riyal,  // Riyal symbol
+      size: 16,
+      color: Colors.white,
+    ),
+    const SizedBox(width: 4), // Space between the symbol and amount
+    Text(
+      'المبلغ: $amount',
+      style: const TextStyle(
+        fontFamily: 'GE-SS-Two-Bold',
+        fontSize: 15,
+        color: Colors.white,
+      ),
+    ),
+  ],
+),
+
+
               Text('النوع: $translatedSubtype',
                   style: const TextStyle(
                       fontFamily: 'GE-SS-Two-Bold',
@@ -1003,8 +1012,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       fontFamily: 'GE-SS-Two-Bold',
                       fontSize: 15,
                       color: Colors.white)),
-              Text('رقم الإيبان: $accountIban',
-                  style: const TextStyle(
+              Text(':رقم الآيبان \n $accountIban',
+              textAlign: TextAlign.right,
+                      style: const TextStyle(
                       fontFamily: 'GE-SS-Two-Bold',
                       fontSize: 15,
                       color: Colors.white)),
