@@ -451,8 +451,14 @@ Map<String, dynamic> trackSavingsProgress() {
     double totalSavingAmount = savingPerMonth * totalMonths;
 
     // Corrected Total Savings Progress Formula
-    double totalSavingsProgress = ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0)) - 
+    double totalSavingsProgress;
+
+        if (lastYearSpending[category] == 0 && currentSpending[category] == 0) {
+      totalSavingsProgress = savingPerMonth * remainingMonths;  
+    } else {
+       totalSavingsProgress = ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0)) - 
         ((totalSavingAmount / totalMonths) * remainingMonths);
+    }
 
     // Updated Progress Percentage Formula
     double progressPercentageValue = (totalSavingAmount == 0) ? 0 : (totalSavingsProgress / totalSavingAmount) * 100;
@@ -596,7 +602,7 @@ Map<String, dynamic> MonthlytrackSavingsProgress() {
     }
 
     if (lastYearValue == 0 && currentYearValue == 0) {
-      savingsProgress = savingPerDay * daysFactor;  
+      savingsProgress = savingPerDay * remainingDays;  
       if (category == 'السفر'){ print("Case: No spending in both years");
       print("savingPerDay: $savingPerDay");
       print("daysFactor: $daysFactor");
@@ -624,7 +630,6 @@ Map<String, dynamic> MonthlytrackSavingsProgress() {
     'currentYearSpending': currentSpending
   };
 }
-
 
   Future<void> _deletePlanFromStorage() async {
     try {
