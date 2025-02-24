@@ -140,7 +140,7 @@ Padding(
     children: [
       Icon(
         CustomIcons.riyal, // Use the new Riyal symbol
-        size: 18, // Adjust size as needed
+        size: 14, // Adjust size as needed
         color: Color(0xFF5F5F5F),
       ),
       const SizedBox(width: 5), // Spacing between icon and amount

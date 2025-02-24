@@ -976,7 +976,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   children: [
     Icon(
       CustomIcons.riyal,  // Riyal symbol
-      size: 16,
+      size: 13,
       color: Colors.white,
     ),
     const SizedBox(width: 4), // Space between the symbol and amount

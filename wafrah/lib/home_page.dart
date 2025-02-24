@@ -1202,7 +1202,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Icon(
                     CustomIcons.riyal,
-                    size: 14,
+                    size: 11,
                     color: Colors.green[700],
                   ),
                   const SizedBox(width: 3),
@@ -1221,7 +1221,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Icon(
                     CustomIcons.riyal,
-                    size: 14,
+                    size: 11,
                     color: Colors.red[700],
                   ),
                   const SizedBox(width: 3),
@@ -1256,7 +1256,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Icon(
                     CustomIcons.riyal,
-                    size: 14,
+                    size: 11,
                     color: Colors.green[700],
                   ),
                   const SizedBox(width: 3),
@@ -1276,7 +1276,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Icon(
                     CustomIcons.riyal,
-                    size: 14,
+                    size: 11,
                     color: Colors.red[700],
                   ),
                   const SizedBox(width: 3),
@@ -1312,7 +1312,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Icon(
                     CustomIcons.riyal,
-                    size: 14,
+                    size: 11,
                     color: Colors.green[700],
                   ),
                   const SizedBox(width: 3),
@@ -1332,7 +1332,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Icon(
                     CustomIcons.riyal,
-                    size: 14,
+                    size: 11,
                     color: Colors.red[700],
                   ),
                   const SizedBox(width: 3),
@@ -1987,7 +1987,7 @@ class _HomePageState extends State<HomePage>
                     children: [
                       const Icon(
   CustomIcons.riyal,
-  size: 18,
+  size: 23,
   color: Colors.black,
 ),
 

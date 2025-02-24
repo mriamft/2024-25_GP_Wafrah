@@ -1036,6 +1036,19 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
 
         // Category Name
         Positioned(
+          top: 50,
+          right: 10,
+          child: Text(
+            category,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              fontSize: 13,
+              fontFamily: 'GE-SS-Two-Bold',
+              color: Color(0xFF3D3D3D),
+            ),
+          ),
+        ),
+        Positioned(
           top: 80,
           right: 10,
           child: Directionality(
