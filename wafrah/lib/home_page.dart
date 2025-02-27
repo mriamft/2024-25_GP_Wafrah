@@ -353,6 +353,259 @@ class _HomePageState extends State<HomePage>
       return 4;
     }
   }
+  Widget buildCategoryLineChart() {
+  List<FlSpot> generateSpotsForCategory(String category) {
+  List<FlSpot> spots = [];
+  Map<int, double> categoryData = {};
+
+  DateTime now = DateTime.now();
+  DateTime selectedDate = DateTime(2025, now.month - monthOffset, now.day);
+
+  for (var account in widget.accounts) {
+    var transactions = account['transactions'] ?? [];
+    for (var transaction in transactions) {
+      String dateStr = transaction['TransactionDateTime'] ?? '';
+      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+      double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+      String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+      String transactionCategory = transaction['Category'] ?? subtype;
+
+      // Exclude "راتب" category
+      if (transactionCategory == "راتب") {
+        continue;
+      }
+
+      // Ensure the transaction belongs to the selected category
+      if (transactionCategory != category) {
+        continue;
+      }
+
+      int index = -1;
+
+     if (_selectedPeriod == 'اسبوعي') {
+    int startDay = ((4 - weekOffset) * 7) - 6;
+    int endDay = (4 - weekOffset) * 7;
+    DateTime weekStart = DateTime(selectedDate.year, selectedDate.month, startDay);
+    DateTime weekEnd = DateTime(selectedDate.year, selectedDate.month, endDay);
+
+    if (transactionDate.isAfter(weekStart.subtract(const Duration(days: 1))) &&
+        transactionDate.isBefore(weekEnd.add(const Duration(days: 1)))) {
+      index = (transactionDate.weekday % 7);  // Fix: Ensure full week is displayed
+    }
+
+      } else if (_selectedPeriod == 'شهري') {
+        // Filter transactions within the selected month
+        if (transactionDate.year == selectedDate.year &&
+            transactionDate.month == selectedDate.month) {
+          index = _getWeekOfMonth(transactionDate.day) - 1;  // Week-based indexing
+        }
+      } else if (_selectedPeriod == 'سنوي') {
+        // Filter transactions up to the current month
+        if (transactionDate.year == selectedDate.year &&
+            transactionDate.month <= now.month) {
+          index = transactionDate.month - 1;
+        }
+      }
+
+      if (index >= 0) {
+        // Correct accumulation: Sum the amounts per index
+        categoryData[index] = (categoryData[index] ?? 0.0) + amount;
+      }
+    }
+  }
+
+  // Ensure missing indexes are zero
+  int maxIndex = _selectedPeriod == 'اسبوعي'
+      ? 7
+      : _selectedPeriod == 'شهري'
+          ? 4
+          : now.month; // Ensure month stops at current
+
+  for (int i = 0; i < maxIndex; i++) {
+    spots.add(FlSpot(i.toDouble(), categoryData[i] ?? 0.0));
+  }
+
+  return spots;
+}
+
+  List<String> xAxisLabels;
+if (_selectedPeriod == 'اسبوعي') {
+  int todayIndex = DateTime.now().weekday - 1;
+  xAxisLabels = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+} else if (_selectedPeriod == 'شهري') {
+  int currentWeek = _getWeekOfMonth(DateTime.now().day);
+  xAxisLabels = ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'].sublist(0, currentWeek);
+} else {
+  int currentMonth = DateTime.now().month;
+  xAxisLabels = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'].sublist(0, currentMonth);
+}
+
+
+  Map<String, Color> categoryColors = {
+    "التعليم": Colors.blue,
+    "الترفيه": Colors.purple,
+    "المدفوعات الحكومية": Colors.orange,
+    "البقالة": Colors.green,
+    "الصحة": Colors.red,
+    "القروض": Colors.brown,
+    "الاستثمار": Colors.indigo,
+    "الإيجار": Colors.teal,
+    "المطاعم": Colors.pink,
+    "تسوق": Colors.amber,
+    "التحويلات": Colors.cyan,
+    "النقل": Colors.deepPurple,
+    "السفر": Colors.deepOrange,
+    "أخرى": Colors.grey
+  };
+
+  return Column(
+    children: [
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Align(
+  alignment: Alignment.centerRight,
+  child: Text(
+    'توزيع الصرف حسب الفئة',
+    textAlign: TextAlign.right,
+    style: TextStyle(
+                fontFamily: 'GE-SS-Two-Bold',
+                fontSize: 14,
+                color: Colors.grey[700],
+              ),
+  ),
+            ),
+
+          
+              
+             
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 300,
+              child: LineChart(
+                LineChartData(
+                  minY: 0,
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 40,
+                        getTitlesWidget: (value, _) {
+                          return Text(
+                            value.toInt().toString(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontFamily: 'GE-SS-Two-Light',
+                              color: Colors.grey,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 35,
+                        interval: 1,
+                        getTitlesWidget: (value, _) {
+                          int index = value.toInt();
+                          if (index >= 0 && index < xAxisLabels.length) {
+                            return Text(
+                              xAxisLabels[index],
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontFamily: 'GE-SS-Two-Light',
+                                color: Colors.grey,
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: true,
+                    drawHorizontalLine: true,
+                    verticalInterval: 1,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: Colors.grey.withOpacity(0.2),
+                      strokeWidth: 1,
+                    ),
+                    getDrawingVerticalLine: (value) => FlLine(
+                      color: Colors.grey.withOpacity(0.2),
+                      strokeWidth: 1,
+                    ),
+                  ),
+                  lineBarsData: categoryColors.entries.map((entry) {
+                    return LineChartBarData(
+                      spots: generateSpotsForCategory(entry.key),
+                      isCurved: true,
+                      color: entry.value,
+                      barWidth: 3,
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: entry.value.withOpacity(0.4),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 10,
+              children: categoryColors.entries.map((entry) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      color: entry.value,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      entry.key,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'GE-SS-Two-Light',
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
 
 // Monthly data calculation for the 'سنوي' view (for completeness)
   void _calculateMonthlyData(DateTime currentDate) {
@@ -2195,7 +2448,9 @@ class _HomePageState extends State<HomePage>
             const SizedBox(height: 10),
             buildStatisticsSummary(),
             const SizedBox(height: 10),
-            buildPieChartWithBorder(), // Updated pie chart with border
+            buildPieChartWithBorder(),
+            const SizedBox(height: 10),
+buildCategoryLineChart(), 
           ],
         ),
       ),
