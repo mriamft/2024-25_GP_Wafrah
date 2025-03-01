@@ -353,85 +353,71 @@ class _HomePageState extends State<HomePage>
       return 4;
     }
   }
+  int _getTimeIndex(DateTime transactionDate) {
+  if (_selectedPeriod == 'اسبوعي') {
+    return transactionDate.weekday - 1; // Saturday = 0, Friday = 6
+  } else if (_selectedPeriod == 'شهري') {
+    return _getWeekOfMonth(transactionDate.day) - 1; // 0-based index for weeks
+  } else if (_selectedPeriod == 'سنوي') {
+    return transactionDate.month - 1; // 0-based index for months
+  }
+  return -1; // Out of range
+}
+
+  
   Widget buildCategoryLineChart() {
   List<FlSpot> generateSpotsForCategory(String category) {
   List<FlSpot> spots = [];
-  Map<int, double> categoryData = {};
 
-  DateTime now = DateTime.now();
-  DateTime selectedDate = DateTime(2025, now.month - monthOffset, now.day);
+  if (expenseData.isEmpty) return [];
 
+  // Initialize list to store category expenses at each time step
+  List<double> categoryExpenseAtEachTime = List.filled(expenseData.length, 0.0);
+  List<double> totalExpenseAtEachTime = List.filled(expenseData.length, 0.0);
+
+  // Step 1: Collect all expenses per time step
   for (var account in widget.accounts) {
     var transactions = account['transactions'] ?? [];
     for (var transaction in transactions) {
       String dateStr = transaction['TransactionDateTime'] ?? '';
       DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
-      double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
-      String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
-      String transactionCategory = transaction['Category'] ?? subtype;
 
-      // Exclude "راتب" category
-      if (transactionCategory == "راتب") {
-        continue;
-      }
+      double amount =
+          double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+      String transactionCategory =
+          transaction['Category'] ?? 'غير مصنف'; // Default category
 
-      // Ensure the transaction belongs to the selected category
-      if (transactionCategory != category) {
-        continue;
-      }
-
-      int index = -1;
-
-     if (_selectedPeriod == 'اسبوعي') {
-    int startDay = ((4 - weekOffset) * 7) - 6;
-    int endDay = (4 - weekOffset) * 7;
-    DateTime weekStart = DateTime(selectedDate.year, selectedDate.month, startDay);
-    DateTime weekEnd = DateTime(selectedDate.year, selectedDate.month, endDay);
-
-    if (transactionDate.isAfter(weekStart.subtract(const Duration(days: 1))) &&
-        transactionDate.isBefore(weekEnd.add(const Duration(days: 1)))) {
-      index = (transactionDate.weekday % 7);  // Fix: Ensure full week is displayed
-    }
-
-      } else if (_selectedPeriod == 'شهري') {
-        // Filter transactions within the selected month
-        if (transactionDate.year == selectedDate.year &&
-            transactionDate.month == selectedDate.month) {
-          index = _getWeekOfMonth(transactionDate.day) - 1;  // Week-based indexing
+      // Find the time index for this transaction
+      int timeIndex = _getTimeIndex(transactionDate);
+      if (timeIndex >= 0 && timeIndex < categoryExpenseAtEachTime.length) {
+        totalExpenseAtEachTime[timeIndex] += amount; // Track total expenses at this time step
+        if (transactionCategory == category) {
+          categoryExpenseAtEachTime[timeIndex] += amount; // Assign category expenses
         }
-      } else if (_selectedPeriod == 'سنوي') {
-        // Filter transactions up to the current month
-        if (transactionDate.year == selectedDate.year &&
-            transactionDate.month <= now.month) {
-          index = transactionDate.month - 1;
-        }
-      }
-
-      if (index >= 0) {
-        // Correct accumulation: Sum the amounts per index
-        categoryData[index] = (categoryData[index] ?? 0.0) + amount;
       }
     }
   }
 
-  // Ensure missing indexes are zero
-  int maxIndex = _selectedPeriod == 'اسبوعي'
-      ? 7
-      : _selectedPeriod == 'شهري'
-          ? 4
-          : now.month; // Ensure month stops at current
+  // Step 2: Scale category expenses based on total expense at each time step
+  for (int i = 0; i < categoryExpenseAtEachTime.length; i++) {
+    double totalExpense = totalExpenseAtEachTime[i];
+    double categoryExpense = categoryExpenseAtEachTime[i];
 
-  for (int i = 0; i < maxIndex; i++) {
-    spots.add(FlSpot(i.toDouble(), categoryData[i] ?? 0.0));
+    // Ensure correct proportion (Avoid division by zero)
+    double adjustedExpense =
+        (totalExpense > 0) ? (categoryExpense / totalExpense) * expenseData[i].y : 0;
+
+    spots.add(FlSpot(i.toDouble(), adjustedExpense));
   }
 
   return spots;
 }
 
+
   List<String> xAxisLabels;
 if (_selectedPeriod == 'اسبوعي') {
   int todayIndex = DateTime.now().weekday - 1;
-  xAxisLabels = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
 } else if (_selectedPeriod == 'شهري') {
   int currentWeek = _getWeekOfMonth(DateTime.now().day);
   xAxisLabels = ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'].sublist(0, currentWeek);
