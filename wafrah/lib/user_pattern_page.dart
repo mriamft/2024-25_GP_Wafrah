@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
 // Adjust this import based on where your SavingDisPage file is located:
 import 'package:wafrah/saving_dis_page.dart';
 import 'custom_icons.dart';
@@ -35,6 +35,14 @@ class _UserPatternPageState extends State<UserPatternPage> {
     super.initState();
     print("resultData: ${widget.resultData}"); // ✅ Print resultData in console
   }
+final NumberFormat arabicNumberFormat = NumberFormat("#,##0.00", "ar");
+String cleanNumber(String number) {
+  return number
+      .replaceAll(',', '')   // Remove thousands separator
+      .replaceAll('،', '.')  // Convert Arabic decimal separator to '.'
+      .replaceAll(RegExp(r'[^0-9.]'), '') // Remove any non-numeric characters except '.'
+      .replaceAllMapped(RegExp(r'\.(?=.*\.)'), (match) => ''); // Keep only the last decimal point
+}
 
   Color _arrowColor = const Color(0xFF3D3D3D);
   bool _isPressed = false;
@@ -162,7 +170,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
     ),
     const SizedBox(width: 5),
     Text(
-      totalSpending.toStringAsFixed(2),
+      arabicNumberFormat.format(totalSpending),
       style: const TextStyle(
         color: Color(0xFF3D3D3D),
         fontSize: 32,
@@ -218,7 +226,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
     ),
     const SizedBox(width: 5),
     Text(
-      totalIncome.toStringAsFixed(2),
+      arabicNumberFormat.format(totalIncome),
       style: const TextStyle(
         color: Color(0xFF3D3D3D),
         fontSize: 32,
@@ -264,7 +272,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
                 padding: const EdgeInsets.only(top: 30, bottom: 30),
                 child: Wrap(
                   alignment: WrapAlignment.center,
-                  spacing: 60,
+                  spacing: 25,
                   runSpacing: 55,
                   children: _buildCategoryCircles(),
                 ),
@@ -336,12 +344,11 @@ class _UserPatternPageState extends State<UserPatternPage> {
     );
   }
 
-  /// Builds the list of “circle” widgets based on your categories.
   List<Widget> _buildCategoryCircles() {
     // Compute total spending excluding "الراتب"
     double totalSpending = widget.spendingData['TotalSpending'] ?? 0.0;
 
-// Fetch precomputed category percentages from Python API
+    // Fetch precomputed category percentages from Python API
     List<Map<String, dynamic>> categories =
         widget.spendingData['CategorySpending'] != null
             ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
@@ -360,12 +367,12 @@ class _UserPatternPageState extends State<UserPatternPage> {
                 .toList()
             : [];
 
-// ✅ Ensure spending amounts match total spending
+    // ✅ Ensure spending amounts match total spending
     double totalCalculatedSpending = 0.0;
     double largestAmount = 0.0;
     String? largestCategory;
 
-// Convert percentages to amounts & track the largest category
+    // Convert percentages to amounts & track the largest category
     for (var cat in categories) {
       double calculatedAmount = (cat['percentage'] / 100) * totalSpending;
       cat['amount'] = calculatedAmount.toStringAsFixed(2);
@@ -378,7 +385,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
       }
     }
 
-// ✅ Adjust the largest category to absorb rounding error
+    // ✅ Adjust the largest category to absorb rounding error
     double roundingDifference = totalSpending - totalCalculatedSpending;
     if (largestCategory != null) {
       for (var cat in categories) {
@@ -390,11 +397,11 @@ class _UserPatternPageState extends State<UserPatternPage> {
       }
     }
 
-// ✅ Sort by percentage descending order
+    // ✅ Sort by percentage descending order
     categories.sort((a, b) =>
         (b['percentage'] as double).compareTo(a['percentage'] as double));
 
-// ✅ Convert percentage to string with '%' after sorting
+    // ✅ Convert percentage to string with '%' after sorting
     for (var cat in categories) {
       cat['percentage'] =
           '${(cat['percentage'] as double).toStringAsFixed(1)}%';
@@ -409,7 +416,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
       );
     }).toList();
   }
-
   /// Builds a single circular widget (with the arc, icon, spending, etc.)
   /// The percentage text is placed at the end of the circular arc, **outside** the circle.
   Widget _buildCategoryCircleItem({
@@ -420,13 +426,17 @@ class _UserPatternPageState extends State<UserPatternPage> {
   }) {
     // 1) Convert "10%" => 0.10, "8%" => 0.08, etc.
     double progressValue = 0.1;
-    if (percentage.endsWith('%')) {
-      final numeric = percentage.substring(0, percentage.length - 1);
-      final parsed = double.tryParse(numeric.trim());
-      if (parsed != null) {
-        progressValue = parsed / 100.0;
-      }
-    }
+if (percentage.endsWith('%')) {
+  final numeric = percentage.substring(0, percentage.length - 1);
+  final parsed = double.tryParse(numeric.trim());
+  if (parsed != null) {
+    progressValue = parsed / 100.0;
+  }
+
+  // Move percentage sign to the left
+  percentage = '%$numeric'; // Now the percentage symbol is placed before the number
+}
+
 
     // 2) For a 130×130 circle, the center is at (65, 65).
     //    CircularProgressIndicator starts at -90° (top), so angle offset is -pi/2
@@ -453,8 +463,8 @@ class _UserPatternPageState extends State<UserPatternPage> {
         children: [
           // Gray circle background
           Container(
-            width: 130,
-            height: 130,
+            width: 120,
+            height: 120,
             decoration: BoxDecoration(
               color: const Color(0xFFD9D9D9),
               shape: BoxShape.circle,
@@ -470,8 +480,8 @@ class _UserPatternPageState extends State<UserPatternPage> {
 
           // The green progress indicator
           SizedBox(
-            width: 130,
-            height: 130,
+            width: 120,
+            height: 120,
             child: CircularProgressIndicator(
               value: progressValue,
               backgroundColor: Colors.transparent,
@@ -505,14 +515,15 @@ class _UserPatternPageState extends State<UserPatternPage> {
       color: Color(0xFF3D3D3D),
     ),
     const SizedBox(width: 5), // Space between icon and amount
-    Text(
-      amount,
-      style: const TextStyle(
-        color: Color(0xFF3D3D3D),
-        fontSize: 20,
-        fontFamily: 'GE-SS-Two-Bold',
-      ),
-    ),
+Text(
+  arabicNumberFormat.format(double.tryParse(amount.replaceAll(',', '').replaceAll('،', '.')) ?? 0.0),
+  style: const TextStyle(
+    color: Color(0xFF3D3D3D),
+    fontSize: 18,
+    fontFamily: 'GE-SS-Two-Bold',
+  ),
+),
+
   ],
 ),
 
@@ -522,13 +533,13 @@ class _UserPatternPageState extends State<UserPatternPage> {
           // 5) The percentage text placed at the arc endpoint, outside the circle
           Positioned(
             // Adjust these offsets so the text is visually centered around the arc end
-            left: offsetX - 12,
+            left: offsetX -16,
             top: offsetY - 8,
             child: Text(
               percentage,
               style: const TextStyle(
                 color: Color(0xFF535353),
-                fontSize: 16,
+                fontSize: 12,
                 fontFamily: 'GE-SS-Two-Bold',
               ),
             ),

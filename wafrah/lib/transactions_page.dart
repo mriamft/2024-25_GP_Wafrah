@@ -8,6 +8,7 @@ import 'home_page.dart';
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
 import 'custom_icons.dart';
+import 'package:intl/intl.dart';
 
 class TransactionsPage extends StatefulWidget {
   final String userName;
@@ -115,6 +116,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return result;
   }
 
+  String formatNumberWithArabicComma(dynamic number) {
+  if (number == null) return '٠،٠٠'; 
+  try {
+    String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
+  return formattedNumber.replaceAll('.', '،'); 
+  } catch (e) {
+    return number.toString().replaceAll('.', '،'); 
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     List<String> ibans = widget.accounts
@@ -159,50 +170,52 @@ class _TransactionsPageState extends State<TransactionsPage> {
             top: 250,
             left: 10,
             right: 10,
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: DropdownButton<String>(
-                alignment: AlignmentDirectional.topEnd,
-                isExpanded: true,
-                value: selectedIBAN,
-                icon: const Icon(Icons.arrow_drop_down),
-                iconSize: 24,
-                elevation: 16,
-                style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
-                dropdownColor: const Color(0xFFFFFFFF),
-                underline: Container(
-                  height: 2,
-                  color: const Color(0xFF2C8C68),
-                ),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedIBAN = newValue ?? "الكل";
-                  });
-                },
-                items: ["الكل", ...ibans]
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 12.0),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          value,
-                          style: const TextStyle(
-                            fontFamily: 'GE-SS-Two-Light',
-                            fontSize: 16,
-                            color: Color.fromARGB(133, 0, 0, 0),
-                            fontWeight: FontWeight.normal,
-                          ),
+            child: DropdownButton<String>(
+              alignment: AlignmentDirectional.topEnd, // Align to the right
+              isExpanded: true,
+              value: selectedIBAN,
+              icon: const Icon(Icons.arrow_drop_down),
+              iconSize: 24,
+              elevation: 16,
+              style: const TextStyle(
+                color: Color(0xFF3D3D3D),
+                fontSize: 16,
+              ),
+              dropdownColor: const Color(0xFFFFFFFF),
+              underline: Container(
+                height: 2,
+                color: const Color(0xFF2C8C68),
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedIBAN = newValue ?? "الكل";
+                });
+              },
+              items: ["الكل", ...ibans]
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 12.0),
+                    child: Align(
+                      alignment: Alignment.centerRight, // Align text to the right
+                      child: Text(
+                        value,
+                        textAlign: TextAlign.right, // Ensure right-alignment
+                        style: const TextStyle(
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 16,
+                          color: Color.fromARGB(133, 0, 0, 0),
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
+                  ),
+                );
+              }).toList(),
             ),
+
           ),
 
           Positioned(
@@ -655,7 +668,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   Widget _buildTransactionCard(Map<String, dynamic> transaction) {
-    String amount = transaction['Amount'] ?? '0.00';
+    String amount = formatNumberWithArabicComma(transaction['Amount']);
 
     String subtype =
         transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
@@ -729,26 +742,26 @@ class _TransactionsPageState extends State<TransactionsPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                     Icon(
-      CustomIcons.riyal, // Riyal icon instead of text
+Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    Icon(
+      CustomIcons.riyal, 
       size: 14,
-      color: amountColor,
+      color: Colors.white,
     ),
-                      const SizedBox(width: 4),
-                      Text(
-                        amount,
-                        style: TextStyle(
-                          color: amountColor,
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'GE-SS-Two-Bold',
-                        ),
-                      ),
-                    ],
-                  ),
+    const SizedBox(width: 4),
+    Text(
+      amount,
+      style: const TextStyle(
+        fontFamily: 'GE-SS-Two-Bold',
+        fontSize: 15,
+        color: Colors.white,
+      ),
+    ),
+  ],
+),
+
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -888,7 +901,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       }
     }
 
-    String amount = transaction['Amount'] ?? '0.00';
+    String amount = formatNumberWithArabicComma(transaction['Amount']);
 
     String subtype = transaction['SubTransactionType'] ?? 'غير معروف';
     String dateTime = transaction['TransactionDateTime'] ?? 'غير معروف';

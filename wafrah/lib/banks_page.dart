@@ -9,6 +9,8 @@ import 'storage_service.dart';
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
 import 'custom_icons.dart';
+import 'package:intl/intl.dart'; // Import intl package
+
 
 class BanksPage extends StatefulWidget {
   final String userName;
@@ -49,6 +51,18 @@ class _BanksPageState extends State<BanksPage> {
       });
     }
   }
+
+
+String formatNumberWithArabicComma(double number) {
+  // Convert the number to Arabic numerals with a comma separator
+  String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
+
+  // Replace the default decimal point (.) with Arabic comma (،)
+  formattedNumber = formattedNumber.replaceAll('.', '،');
+
+  return formattedNumber;
+}
+
 
   Future<void> _saveAccountsLocally(List<Map<String, dynamic>> accounts) async {
     await _storageService.saveAccountDataLocally(widget.phoneNumber, accounts);
@@ -144,16 +158,17 @@ Padding(
         color: Color(0xFF5F5F5F),
       ),
       const SizedBox(width: 5), // Spacing between icon and amount
-      Text(
-        account['Balance']?.toString() ?? '0',
-        style: const TextStyle(
-          color: Color(0xFF313131),
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'GE-SS-Two-Bold',
-        ),
-        overflow: TextOverflow.ellipsis,
-      ),
+Text(
+  formatNumberWithArabicComma(double.tryParse(account['Balance']?.toString() ?? '0') ?? 0.0),
+  style: const TextStyle(
+    color: Color(0xFF313131),
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    fontFamily: 'GE-SS-Two-Bold',
+  ),
+  overflow: TextOverflow.ellipsis,
+),
+
     ],
   ),
 ),
@@ -494,4 +509,5 @@ Expanded(
       ),
     );
   }
+  
 }

@@ -82,6 +82,19 @@ void initState() {
     _loadPlanFromSecureStorage(); 
 }
 
+String formatNumber(double number) {
+  return NumberFormat("#,##0", "ar").format(number);
+}
+
+
+String convertToArabicNumbers(String input) {
+  const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return input.replaceAllMapped(RegExp(r'[0-9]'), (match) {
+    return arabicNumbers[int.parse(match.group(0)!)];
+  });
+}
+
+
   void generateMonths(dynamic durationMonths) {
     int monthsCount =
         (durationMonths is int) ? durationMonths : durationMonths.toInt();
@@ -666,23 +679,69 @@ Map<String, dynamic> MonthlytrackSavingsProgress() {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
-      body: Stack(
-        children: [
+Widget build(BuildContext context) {
+  DateTime today = DateTime.now();
+  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+
+  // Calculate remaining months (same logic as trackSavingsProgress)
+  int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
+  int elapsedMonths = today.difference(startDate).inDays ~/ 30;
+  int remainingMonths = (totalMonths - elapsedMonths).clamp(0, totalMonths);
+
+  // Calculate remaining days for the current month (same logic as MonthlytrackSavingsProgress)
+  DateTime selectedMonthStart = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+  DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
+  int remainingDays = selectedMonthEnd.difference(today).inDays.clamp(0, 30);
+
+  return Scaffold(
+    backgroundColor: const Color(0xFFF9F9F9),
+    body: Stack(
+      children: [
+        Positioned(
+          top: -100,
+          left: 0,
+          right: 0,
+          child: Image.asset(
+            'assets/images/green_square.png',
+            width: MediaQuery.of(context).size.width,
+            height: 289,
+            fit: BoxFit.contain,
+          ),
+        ),
+
+        // Show remaining months when "الخطة كاملة" is selected
+        if (_currentMonthIndex == 0)
           Positioned(
-            top: -100,
-            left: 0,
-            right: 0,
-            child: Image.asset(
-              'assets/images/green_square.png',
-              width: MediaQuery.of(context).size.width,
-              height: 289,
-              fit: BoxFit.contain,
+            top: 130,
+            left: 75,
+            child: Text(
+              'الأشهر المتبقية لإتمام الخطة: ${convertToArabicNumbers(remainingMonths.toString())}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'GE-SS-Two-Bold',
+                color: Colors.white,
+              ),
             ),
           ),
-          const Positioned(
+
+// Show remaining days when a specific month is selected and not in the future
+if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
+  Positioned(
+    top: 130,
+    left: 16,
+    child: Text(
+      'الأيام المتبقية لإتمام الشهر الحالي من الخطة: ${convertToArabicNumbers(remainingDays.toString())}',
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'GE-SS-Two-Bold',
+        color: Colors.white,
+      ),
+    ),
+  ),
+
+                   const Positioned(
             top: 197,
             left: 280,
             child: Text(
@@ -696,52 +755,54 @@ Map<String, dynamic> MonthlytrackSavingsProgress() {
             ),
           ),
           buildDeleteButton(),
-Positioned(
-  top: 230,
-  left: 4,
-  child: Container(
-    width: 380,
-    height: 38,
-    decoration: BoxDecoration(
-      color: const Color(0xFFF9F9F9),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: DropdownButton<String>(
-      isExpanded: true,
-      value: months[_currentMonthIndex],
-      icon: const Icon(Icons.arrow_drop_down),
-      iconSize: 24,
-      elevation: 16,
-      style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
-      dropdownColor: const Color(0xFFFFFFFF),
-      underline: Container(
-        height: 2,
-        color: const Color(0xFF2C8C68),
-      ),
-      onChanged: _onMonthChanged,
-      items: months.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
+
+        // Dropdown for month selection
+        Positioned(
+          top: 230,
+          left: 4,
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-            child: Align(
-              alignment: Alignment.centerRight, // Keep right alignment if needed
-              child: Text(
-                value,
-                style: const TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 16,
-                  color: Color.fromARGB(133, 0, 0, 0),
-                  fontWeight: FontWeight.normal,
-                ),
+            width: 380,
+            height: 38,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9F9F9),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: months[_currentMonthIndex],
+              icon: const Icon(Icons.arrow_drop_down),
+              iconSize: 24,
+              elevation: 16,
+              style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
+              dropdownColor: const Color(0xFFFFFFFF),
+              underline: Container(
+                height: 2,
+                color: const Color(0xFF2C8C68),
               ),
+              onChanged: _onMonthChanged,
+              items: months.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        value,
+                        style: const TextStyle(
+                          fontFamily: 'GE-SS-Two-Light',
+                          fontSize: 16,
+                          color: Color.fromARGB(133, 0, 0, 0),
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ),
-        );
-      }).toList(),
-    ),
-  ),
-),
+        ),
 const Positioned(
   left: 25,
   top: 275,
@@ -939,17 +1000,7 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
   // Apply the 100% cap after storing the original value
   double progress = originalProgress > 100 ? 100 : originalProgress;
 
-  // Determine color based on progress
-  Color progressColor;
-  if (progress == 100) {
-    progressColor = const Color(0xFF2C8C68); // Green for full savings
-  } else if (progress >= 50) {
-    progressColor = Colors.orange; // Orange for moderate progress
-  } else {
-    progressColor = Colors.red; // Red for low progress
-  }
-
-  // 🔹 Determine if the selected month is in the future
+  // Determine if the selected month is in the future
   DateTime today = DateTime.now();
   DateTime startDate = DateTime.parse(widget.resultData['startDate']);
   DateTime selectedMonthDate = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
@@ -958,7 +1009,7 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
 
   return Container(
     width: 110,
-    height: !isFutureMonth && originalProgress <= 100 ? 135 : 135, // Ensure space for alert only when needed
+    height: 135, // Fixed height
     decoration: BoxDecoration(
       color: const Color(0xFFD9D9D9),
       borderRadius: BorderRadius.circular(8),
@@ -994,19 +1045,20 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
             ),
           ),
 
-        // Display Progress Percentage
-        Positioned(
-          top: 10,
-          right: 70, // Align to the right
-          child: Text(
-            "${progress.toStringAsFixed(0)}%", // Show capped percentage
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+        // ❌ Remove Percentage Display for Future Months
+        if (!isFutureMonth)
+          Positioned(
+            top: 10,
+            right: 70, // Align to the right
+            child: Text(
+              "%${convertToArabicNumbers(formatNumber(progress))}",
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
           ),
-        ),
 
         // Circular Progress Bar with Icon
         Positioned(
@@ -1019,9 +1071,9 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
               alignment: Alignment.center,
               children: [
                 CircularProgressIndicator(
-                  value: progress > 0 ? progress / 100 : 0.01,
+                  value: isFutureMonth ? 0 : (progress > 0 ? progress / 100 : 0.01),
                   backgroundColor: Colors.grey.shade300,
-                  valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(isFutureMonth ? Colors.grey.shade300 : const Color(0xFF2C8C68)),
                   strokeWidth: 6,
                 ),
                 Icon(
@@ -1069,7 +1121,7 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      monthlySavings.toStringAsFixed(2), // Amount text first
+                      formatNumber(monthlySavings), 
                       style: const TextStyle(
                         fontSize: 12,
                         fontFamily: 'GE-SS-Two-Light',
@@ -1092,8 +1144,6 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
     ),
   );
 }
-
-
 
 
   Widget buildBottomNavItem(IconData icon, String label, int index,

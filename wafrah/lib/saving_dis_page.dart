@@ -289,7 +289,7 @@ print(widget.startDate);
                               child: Row(
                                 children: [
                                   SizedBox(
-                                    width: 22,
+                                    width: 35,
                                     height: 34,
                                     child: TextField(
                                       keyboardType: TextInputType.number,
@@ -304,7 +304,7 @@ print(widget.startDate);
                                       ),
                                       controller: TextEditingController(
                                         text:
-                                            '${discretionaryRatios[category]}%', // Display the percentage with %
+                                            '%${discretionaryRatios[category]}', // Display the percentage with %
                                       ),
                                       onChanged: (value) {
                                         // Remove the % sign before parsing

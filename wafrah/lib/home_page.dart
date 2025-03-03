@@ -10,6 +10,8 @@ import 'dart:convert';
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
 import 'custom_icons.dart';
+import 'package:intl/intl.dart';
+
 
 class HomePage extends StatefulWidget {
   final String userName;
@@ -53,16 +55,6 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-    //transactionCategories = _calculateCategoryDataForPieChart();
-//for (var account in widget.accounts) {
-    // Serialize the account object as a JSON string for full output
-//  print('Account: ${jsonEncode(account)}');
-//}
-    //  for (var account in widget.accounts) {
-    // var transactions = account['transactions'] ?? [];
-//     for (var transaction in transactions) {
-    //       print('Transactions for account: $transaction');}
-    // }
     print("Backend response: ${jsonEncode(widget.accounts)}");
 
     _loadVisibilityState(); // Load saved visibility state on initialization
@@ -130,6 +122,13 @@ class _HomePageState extends State<HomePage>
       );
     }
   }
+
+String formatNumberWithArabicComma(double? number) {
+  if (number == null) return '٠،٠٠'; // Default for null values
+  String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
+  return formattedNumber.replaceAll('.', '،'); // Convert dot to Arabic comma
+}
+
 
   // Save the visibility state to SharedPreferences
   Future<void> _saveVisibilityState(bool isVisible) async {
@@ -1446,13 +1445,15 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
                   ),
                   const SizedBox(width: 3),
                   Text(
-                    _minIncome.toStringAsFixed(2),
-                    style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light',
-                      fontSize: 12,
-                      color: Colors.green[700],
-                    ),
-                  ),
+  formatNumberWithArabicComma(_minIncome ?? 0.0), // Ensure it's not null
+  style: TextStyle(
+    fontFamily: 'GE-SS-Two-Light',
+    fontSize: 12,
+    color: Colors.green[700],
+  ),
+  textAlign: TextAlign.right, // Align text to the right instead of RTL
+),
+
                 ],
               ),
               Row(
@@ -1465,13 +1466,15 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
                   ),
                   const SizedBox(width: 3),
                   Text(
-                    _minExpense.toStringAsFixed(2),
-                    style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light',
-                      fontSize: 12,
-                      color: Colors.red[700],
-                    ),
-                  ),
+  formatNumberWithArabicComma(_minExpense ?? 0.0), // Ensure it's not null
+  style: TextStyle(
+    fontFamily: 'GE-SS-Two-Light',
+    fontSize: 12,
+    color: Colors.red[700],
+  ),
+  textAlign: TextAlign.right, // Align text to the right instead of RTL
+),
+
                 ],
               ),
             ],
@@ -1499,15 +1502,16 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
                     color: Colors.green[700],
                   ),
                   const SizedBox(width: 3),
-                  Text(
-                    _maxIncome.toStringAsFixed(2),
-                    style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light',
-                      fontSize: 12,
-                      color: Colors.green[700],
-                    ),
-                    textDirection: TextDirection.rtl,
-                  ),
+Text(
+  formatNumberWithArabicComma(_maxIncome ?? 0.0), // Ensure it's not null
+  style: TextStyle(
+    fontFamily: 'GE-SS-Two-Light',
+    fontSize: 12,
+    color: Colors.green[700],
+  ),
+  textAlign: TextAlign.right, // Align text to the right instead of RTL
+),
+
                 ],
               ),
               Row(
@@ -1520,14 +1524,15 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
                   ),
                   const SizedBox(width: 3),
                   Text(
-                    _maxExpense.toStringAsFixed(2),
-                    style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light',
-                      fontSize: 12,
-                      color: Colors.red[700],
-                    ),
-                    textDirection: TextDirection.rtl,
-                  ),
+  formatNumberWithArabicComma(_maxExpense ?? 0.0), // Ensure it's not null
+  style: TextStyle(
+    fontFamily: 'GE-SS-Two-Light',
+    fontSize: 12,
+    color: Colors.red[700],
+  ),
+  textAlign: TextAlign.right, // Align text to the right instead of RTL
+),
+
                 ],
               ),
             ],
@@ -1556,14 +1561,15 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
                   ),
                   const SizedBox(width: 3),
                   Text(
-                    _filteredIncome.toStringAsFixed(2),
-                    style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light',
-                      fontSize: 12,
-                      color: Colors.green[700],
-                    ),
-                    textDirection: TextDirection.rtl,
-                  ),
+  formatNumberWithArabicComma(_filteredIncome ?? 0.0), // Ensure it's not null
+  style: TextStyle(
+    fontFamily: 'GE-SS-Two-Light',
+    fontSize: 12,
+    color: Colors.green[700],
+  ),
+  textAlign: TextAlign.right, // Align text to the right instead of RTL
+),
+
                 ],
               ),
               Row(
@@ -1576,14 +1582,15 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
                   ),
                   const SizedBox(width: 3),
                   Text(
-                    _filteredExpense.toStringAsFixed(2),
-                    style: TextStyle(
-                      fontFamily: 'GE-SS-Two-Light',
-                      fontSize: 12,
-                      color: Colors.red[700],
-                    ),
-                    textDirection: TextDirection.rtl,
-                  ),
+  formatNumberWithArabicComma(_filteredExpense ?? 0.0), // Ensure it's not null
+  style: TextStyle(
+    fontFamily: 'GE-SS-Two-Light',
+    fontSize: 12,
+    color: Colors.red[700],
+  ),
+  textAlign: TextAlign.right, // Align text to the right instead of RTL
+),
+
                 ],
               ),
             ],
@@ -1655,7 +1662,7 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
           return PieChartSectionData(
             color: color,
             value: value,
-            title: '${percentage.toStringAsFixed(1)}%',
+            title: '%${percentage.toStringAsFixed(1)}',
             titlePositionPercentageOffset: 0.55,
             titleStyle: const TextStyle(
               fontSize: 12,
@@ -1706,15 +1713,16 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
         crossAxisAlignment:
             CrossAxisAlignment.end, // Align children to the right
         children: [
-          Text(
-            'تصنيف عمليات الصرف',
-            textDirection: TextDirection.rtl, // Ensures right-to-left alignment
-            style: TextStyle(
-              fontFamily: 'GE-SS-Two-Bold',
-              fontSize: 16, // Keep font size consistent
-              color: Colors.grey[700],
-            ),
-          ),
+Text(
+  'تصنيف عمليات الصرف',
+  textAlign: TextAlign.right, // Align Arabic text correctly
+  style: TextStyle(
+    fontFamily: 'GE-SS-Two-Bold',
+    fontSize: 16,
+    color: Colors.grey[700],
+  ),
+),
+
           const SizedBox(height: 0), // Add space between title and chart
           SizedBox(
             height: 285, // Increase the height of the pie chart box
@@ -2231,10 +2239,9 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
 ),
 
                       const SizedBox(width: 5),
-                      Text(
-                        _isBalanceVisible
-                            ? getTotalBalance()
-                            : getMaskedValue(),
+Text(
+  _isBalanceVisible ? formatNumberWithArabicComma(double.parse(getTotalBalance())) : getMaskedValue(),
+
                         style: const TextStyle(
                           fontFamily: 'GE-SS-Two-Bold',
                           fontSize: 32,
@@ -2307,10 +2314,8 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
 ),
 
                             const SizedBox(width: 5),
-                            Text(
-                              _isBalanceVisible
-                                  ? totals['expense']!.toStringAsFixed(2)
-                                  : getMaskedValue(),
+Text(
+  _isBalanceVisible ? formatNumberWithArabicComma(totals['expense']!) : getMaskedValue(),
                               style: const TextStyle(
                                 fontFamily: 'GE-SS-Two-Bold',
                                 fontSize: 18,
@@ -2351,10 +2356,8 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
 ),
 
                             const SizedBox(width: 5),
-                            Text(
-                              _isBalanceVisible
-                                  ? totals['income']!.toStringAsFixed(2)
-                                  : getMaskedValue(),
+Text(
+  _isBalanceVisible ? formatNumberWithArabicComma(totals['income']!) : getMaskedValue(),
                               style: const TextStyle(
                                 fontFamily: 'GE-SS-Two-Bold',
                                 fontSize: 18,
