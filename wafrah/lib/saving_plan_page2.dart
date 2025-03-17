@@ -366,283 +366,121 @@ void generateSavingsPlan() {
 
 Map<String, dynamic> trackSavingsProgress() {
   DateTime today = DateTime.now();
-
-  // Ensure startDate exists before parsing
-  String? rawStartDate = widget.resultData['startDate']?.toString();
-  if (rawStartDate == null || rawStartDate.isEmpty) {
-    print("Error: startDate is missing or null");
-    return {'progress': {}, 'lastYearSpending': {}, 'currentYearSpending': {}};
-  }
-  DateTime startDate = DateTime.parse(rawStartDate);
-  
+  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
   int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
-  if (totalMonths == 0) {
-    print("Error: DurationMonths is 0 or null");
-    return {'progress': {}, 'lastYearSpending': {}, 'currentYearSpending': {}};
-  }
+  int totalDays = totalMonths * 30; // Approximate total days for tracking period
 
-  int remainingMonths = totalMonths - today.difference(startDate).inDays ~/ 30;
-  if (remainingMonths < 0) remainingMonths = 0; // Ensure no negative values
-
-  // Corrected Last Year's Spending Period (Same Duration as Current)
   DateTime lastYearStart = startDate.subtract(Duration(days: 365));
-  DateTime lastYearEnd = lastYearStart.add(Duration(days: totalMonths * 30));
-
-  // Corrected Current Spending Period
-  DateTime currentStart = startDate;
-  DateTime currentEnd = today;
-
-  // Debugging: Print the expected date ranges
-  print("Last Year Period: $lastYearStart to $lastYearEnd");
-  print("Current Year Period: $currentStart to $currentEnd");
+  DateTime lastYearEnd = lastYearStart.add(Duration(days: totalDays));
 
   Map<String, double> lastYearSpending = {};
   Map<String, double> currentSpending = {};
   Map<String, double> progressPercentage = {};
 
-  // Ensure 'CategorySavings' exists and filter out zero-value categories
-  Map<String, double> categorySavings = {};
-  if (widget.resultData['CategorySavings'] != null) {
-    categorySavings = Map<String, double>.from(widget.resultData['CategorySavings'])
-        .map((key, value) => MapEntry(key, (value as num).toDouble()))
-        ..removeWhere((key, value) => value == 0.0);
-  } else {
-    print("Error: CategorySavings is null");
-    return {'progress': {}, 'lastYearSpending': {}, 'currentYearSpending': {}};
-  }
+  // Convert category savings values to double
+  Map<String, double> categorySavings = Map<String, double>.from(widget.resultData['CategorySavings'])
+      .map((key, value) => MapEntry(key, (value as num).toDouble()));
 
   for (var account in widget.accounts) {
     for (var transaction in account['transactions']) {
-      if (!transaction.containsKey('TransactionDateTime') || 
-          !transaction.containsKey('Category') || 
-          !transaction.containsKey('Amount')) {
-        print("Error: Missing key in transaction: $transaction");
-        continue;
-      }
-
-      // Debugging: Print transaction details
-      //print("Processing Transaction: $transaction");
-
-      DateTime? transactionDate = DateTime.tryParse(transaction['TransactionDateTime']);
-      if (transactionDate == null) {
-        print("Error: Invalid TransactionDateTime - ${transaction['TransactionDateTime']}");
-        continue;
-      }
-
+      DateTime transactionDate = DateTime.parse(transaction['TransactionDateTime']);
       String category = transaction['Category'] ?? 'Unknown';
-      double amount = double.tryParse(transaction['Amount'].toString()) ?? 0.0; 
-      String type = transaction['SubTransactionType'] ?? 'Unknown';
+      double amount = double.parse(transaction['Amount'].toString());
 
-      if (!categorySavings.containsKey(category)) {
-        //print("Skipping category: $category");
-        continue;
+      if (transactionDate.isAfter(lastYearStart) && transactionDate.isBefore(lastYearEnd)) {
+        lastYearSpending[category] = (lastYearSpending[category] ?? 0) + amount;
+        print("Previos");
+        print(transaction);
       }
 
-      if (amount == 0.0) {
-        print("Warning: Amount is zero for transaction: $transaction");
-      }
-
-      if (type == 'Withdrawal' || type == 'Purchase' || type == 'Deposit' || type == 'MoneyTransfer') {
-        // Last Year's Spending (same period from previous year)
-        if (transactionDate.isAfter(lastYearStart.subtract(Duration(days: 1))) &&
-            transactionDate.isBefore(lastYearEnd.add(Duration(days: 1)))) {
-          //print("Adding to last year spending: $category - Amount: $amount");
-          lastYearSpending[category] = (lastYearSpending[category] ?? 0) + amount;
-        } 
-        // Current Spending (from start date to today)
-        else if (transactionDate.isAfter(currentStart.subtract(Duration(days: 1))) &&
-                 transactionDate.isBefore(currentEnd.add(Duration(days: 1)))) {
-          //print("Adding to current year spending: $category - Amount: $amount");
-          currentSpending[category] = (currentSpending[category] ?? 0) + amount;
-        }
+      if (transactionDate.isAfter(startDate) && transactionDate.isBefore(today)) {
+        currentSpending[category] = (currentSpending[category] ?? 0) + amount;
+        print("Current");
+        print(transaction);
       }
     }
   }
+
+  // Improved Progress Calculation (Fixed Linear Growth)
+  int daysPassed = today.difference(startDate).inDays.clamp(0, totalDays); // Ensure valid days range
+  double dailyProgressGrowth = 100 / totalDays; // Ensures 100% at the end of the duration
 
   for (var category in categorySavings.keys) {
-    double savingPerMonth = categorySavings[category]! / totalMonths;
-    double totalSavingAmount = savingPerMonth * totalMonths;
+    double progress = daysPassed * dailyProgressGrowth; // Linear progress
 
-    // Corrected Total Savings Progress Formula
-    double totalSavingsProgress;
-
-        if (lastYearSpending[category] == 0 && currentSpending[category] == 0) {
-      totalSavingsProgress = savingPerMonth * remainingMonths;  
-    } else {
-       totalSavingsProgress = ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0)) - 
-        ((totalSavingAmount / totalMonths) * remainingMonths);
+    // If spending increased compared to last year, reset progress to 0
+    if ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0) < 0) {
+      progress = 0;
     }
 
-    // Updated Progress Percentage Formula
-    double progressPercentageValue = (totalSavingAmount == 0) ? 0 : (totalSavingsProgress / totalSavingAmount) * 100;
-
-    progressPercentage[category] = progressPercentageValue;
+    progressPercentage[category] = progress.clamp(0, 100); // Ensure it remains between 0-100%
   }
 
-  return {
-    'progress': progressPercentage,
-    'lastYearSpending': lastYearSpending,
-    'currentYearSpending': currentSpending
-  };
+  return {'progress': progressPercentage};
 }
 
 Map<String, dynamic> MonthlytrackSavingsProgress() {
   DateTime today = DateTime.now();
-
-  // Ensure startDate exists before parsing
-  String? rawStartDate = widget.resultData['startDate']?.toString();
-  if (rawStartDate == null || rawStartDate.isEmpty) {
-    print("Error: startDate is missing or null");
-    return {'progress': {}, 'lastYearSpending': {}, 'currentYearSpending': {}};
-  }
-  DateTime startDate = DateTime.parse(rawStartDate);
-  
-  int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
-  if (totalMonths == 0) {
-    print("Error: DurationMonths is 0 or null");
-    return {'progress': {}, 'lastYearSpending': {}, 'currentYearSpending': {}};
-  }
-
-  // Determine the start and end dates of the selected month
+  //.add(Duration(days: 18))
+  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
   DateTime selectedMonthStart = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
   DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
-
-  // Correct Last Year's Spending Period (Same Month, One Year Earlier)
   DateTime lastYearStart = selectedMonthStart.subtract(Duration(days: 365));
   DateTime lastYearEnd = selectedMonthEnd.subtract(Duration(days: 365));
-
-  // Correct Current Year Spending Period
-  DateTime currentStart = selectedMonthStart;
-  DateTime currentEnd = selectedMonthEnd.isBefore(today) ? selectedMonthEnd : today;
-
-  // Debugging: Print the expected date ranges
-  print("Last Year Period: $lastYearStart to $lastYearEnd");
-  print("Current Year Period: $currentStart to $currentEnd");
-
-  // Check if the selected month is in the future
-  if (selectedMonthStart.isAfter(today)) {
-    print("The selected month ($_currentMonthIndex) is in the future. Returning 0% progress.");
-    return {
-      'progress': {for (var key in widget.resultData['CategorySavings'].keys) key: 0.0},
-      'lastYearSpending': {},
-      'currentYearSpending': {}
-    };
-  }
-
-  // Get remaining days in the selected month
-  int remainingDays = selectedMonthEnd.difference(today).inDays;
-  if (remainingDays == 0) remainingDays = 1;
-  if (remainingDays < 0) remainingDays = 0;  // Ensure no negative values
 
   Map<String, double> lastYearSpending = {};
   Map<String, double> currentSpending = {};
   Map<String, double> progressPercentage = {};
 
-  // Ensure 'CategorySavings' exists and filter out zero-value categories
-  Map<String, double> categorySavings = {};
-  if (widget.resultData['CategorySavings'] != null) {
-    categorySavings = Map<String, double>.from(widget.resultData['CategorySavings'])
-        .map((key, value) => MapEntry(key, (value as num).toDouble()))
-        ..removeWhere((key, value) => value == 0.0);
-  } else {
-    print("Error: CategorySavings is null");
-    return {'progress': {}, 'lastYearSpending': {}, 'currentYearSpending': {}};
-  }
+  // Convert category savings values to double
+  Map<String, double> categorySavings = Map<String, double>.from(widget.resultData['CategorySavings'])
+      .map((key, value) => MapEntry(key, (value as num).toDouble()));
 
   for (var account in widget.accounts) {
     for (var transaction in account['transactions']) {
-      
-      if (!transaction.containsKey('TransactionDateTime') || 
-          !transaction.containsKey('Category') || 
-          !transaction.containsKey('Amount')) {
-        print("Error: Missing key in transaction: $transaction");
-        continue;
-      }
-
-      DateTime? transactionDate = DateTime.tryParse(transaction['TransactionDateTime']);
-      if (transactionDate == null) {
-        print("Error: Invalid TransactionDateTime - ${transaction['TransactionDateTime']}");
-        continue;
-      }
-
+      DateTime transactionDate = DateTime.parse(transaction['TransactionDateTime']);
       String category = transaction['Category'] ?? 'Unknown';
-      double amount = double.tryParse(transaction['Amount'].toString()) ?? 0.0; 
-      String type = transaction['SubTransactionType'] ?? 'Unknown';
+      double amount = double.parse(transaction['Amount'].toString());
 
-      if (!categorySavings.containsKey(category)) {
-        continue;  // Skip categories not in savings plan
+      if (transactionDate.isAfter(lastYearStart) && transactionDate.isBefore(lastYearEnd)) {
+        lastYearSpending[category] = (lastYearSpending[category] ?? 0) + amount;
+        /*print("previos");
+        print(transaction);*/
       }
 
-      if (amount == 0.0) {
-        print("Warning: Amount is zero for transaction: $transaction");
+      if (transactionDate.isAfter(selectedMonthStart) && transactionDate.isBefore(today)) {
+        currentSpending[category] = (currentSpending[category] ?? 0) + amount;
+        /*print("Current");
+        print(transaction);*/
       }
-
-      if (type == 'Withdrawal' || type == 'Purchase' || type == 'Deposit' || type == 'MoneyTransfer') {
-        // Last Year's Spending (Same Month One Year Ago)
-        if (transactionDate.isAfter(lastYearStart.subtract(Duration(days: 1))) &&
-            transactionDate.isBefore(lastYearEnd.add(Duration(days: 1)))) {
-          lastYearSpending[category] = (lastYearSpending[category] ?? 0) + amount;
-        } 
-        // Current Spending (Selected Month of Current Year)
-        else if (transactionDate.isAfter(currentStart.subtract(Duration(days: 1))) &&
-                 transactionDate.isBefore(currentEnd.add(Duration(days: 1)))) {
-          currentSpending[category] = (currentSpending[category] ?? 0) + amount;
-        }
-      }
-      
     }
   }
 
-  print("Current spending for السفر: ${currentSpending['السفر']}");
-  print("Last year spending for السفر: ${lastYearSpending['السفر']}");
+  // Improved Progress Calculation (Fixed 3.33% growth per day)
+  int daysPassed = today.difference(selectedMonthStart).inDays.clamp(0, 30); // Ensuring it stays within the month
+  double dailyProgressGrowth = 100 / 30; // 3.33% per day
 
   for (var category in categorySavings.keys) {
-    double savingPerMonth = categorySavings[category]! / totalMonths;
-    double savingPerDay = savingPerMonth / 30;
+    double progress = daysPassed * dailyProgressGrowth;
 
-    double daysFactor = remainingDays / 30.0;  
-
-    double lastYearValue = lastYearSpending[category] ?? 0;
-    double currentYearValue = currentSpending[category] ?? 0;
-
-    double savingsProgress;
-
-    // Debugging for السفر category
-    if (category == 'السفر') {
-      print("Category: السفر");
-      print("Last Year Spending: $lastYearValue");
-      print("Current Year Spending: $currentYearValue");
+    // If spending increased compared to last year, reset progress to 0
+    if ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0) < 0) {
+      progress = 0;
     }
 
-    if (lastYearValue == 0 && currentYearValue == 0) {
-      savingsProgress = savingPerDay * remainingDays;  
-      if (category == 'السفر'){ print("Case: No spending in both years");
-      print("savingPerDay: $savingPerDay");
-      print("daysFactor: $daysFactor");
-      print("savingsProgress: $savingsProgress");
-      }
-    } else if (lastYearValue == 0) {
-      savingsProgress = (-currentYearValue) - (savingPerDay * daysFactor);
-      if (category == 'السفر') print("Case: No last year spending");
-    } else {
-      savingsProgress = (lastYearValue - currentYearValue) - (savingPerDay * daysFactor);
-      if (category == 'السفر') print("Case: Normal case (Both years have spending)");
-    }
-
-    double progressPercentageValue = (savingPerDay == 0) ? 0 : (savingsProgress / savingPerDay) * 100;
-    if (category == 'السفر')
-    print("progressPercentageValue: $progressPercentageValue");
-    if (progressPercentageValue < 0) progressPercentageValue = 0;
-
-    progressPercentage[category] = progressPercentageValue;
+    progressPercentage[category] = progress.clamp(0, 100); // Ensure it doesn't exceed 100%
   }
 
-  return {
-    'progress': progressPercentage,
-    'lastYearSpending': lastYearSpending,
-    'currentYearSpending': currentSpending
-  };
+  return {'progress': progressPercentage};
 }
+
+
+Color getProgressColor(double progress) {
+  if (progress < 50) return Colors.red;
+  if (progress < 75) return Colors.orange;
+  return const Color(0xFF2C8C68); // Matches icon color for 75-100%
+}
+
 
   Future<void> _deletePlanFromStorage() async {
     try {
@@ -691,7 +529,10 @@ Widget build(BuildContext context) {
   // Calculate remaining days for the current month (same logic as MonthlytrackSavingsProgress)
   DateTime selectedMonthStart = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
   DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
-  int remainingDays = selectedMonthEnd.difference(today).inDays.clamp(0, 30);
+
+// Calculate the remaining days correctly
+int daysPassed = today.difference(selectedMonthStart).inDays.clamp(0, 30);
+int remainingDays = (30 - daysPassed).clamp(0, 30); // Ensure it stays in valid range
 
   return Scaffold(
     backgroundColor: const Color(0xFFF9F9F9),
@@ -803,6 +644,7 @@ if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
             ),
           ),
         ),
+        /*
 const Positioned(
   left: 25,
   top: 275,
@@ -817,8 +659,7 @@ const Positioned(
     textAlign: TextAlign.right,
   ),
 ),
-
-
+*/
           Positioned(
             top: 305,
             left: 10,
@@ -1003,13 +844,60 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
   // Determine if the selected month is in the future
   DateTime today = DateTime.now();
   DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-  DateTime selectedMonthDate = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+  DateTime selectedMonthStart = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+  DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
+  DateTime lastYearStart = selectedMonthStart.subtract(Duration(days: 365));
+  DateTime lastYearEnd = selectedMonthEnd.subtract(Duration(days: 365));
+  bool isFutureMonth = selectedMonthStart.isAfter(today);
 
-  bool isFutureMonth = selectedMonthDate.isAfter(today);
+  // **Extract Transactions for the Current and Last Year**
+  double lastYearSpending = 0.0;
+  double currentYearSpending = 0.0;
+
+  for (var account in widget.accounts) {
+    for (var transaction in account['transactions']) {
+      DateTime transactionDate = DateTime.parse(transaction['TransactionDateTime']);
+      String transactionCategory = transaction['Category'] ?? 'Unknown';
+      double amount = double.tryParse(transaction['Amount'].toString()) ?? 0.0;
+
+      if (transactionCategory == category) {
+        // Check if the transaction belongs to last year’s selected month
+        if (transactionDate.isAfter(lastYearStart) && transactionDate.isBefore(lastYearEnd)) {
+          lastYearSpending += amount;
+        }
+
+        // Check if the transaction belongs to this year’s selected month
+        if (transactionDate.isAfter(selectedMonthStart) && transactionDate.isBefore(today)) {
+          currentYearSpending += amount;
+        }
+      }
+    }
+  }
+
+  double amountToSave = monthlySavings.toDouble();
+
+  // **Calculate the adjusted last year's spending (after subtracting savings amount)**
+  double adjustedLastYearSpending = (lastYearSpending - amountToSave).clamp(0, double.infinity);
+
+  // **Avoid division by zero**
+  double differencePercentage = adjustedLastYearSpending > 0
+      ? ((adjustedLastYearSpending - currentYearSpending).abs() / adjustedLastYearSpending) * 100
+      : (amountToSave > 0
+          ? ((amountToSave - currentYearSpending).abs() / amountToSave) * 100
+          : 0);
+
+  // ✅ Alert appears if the difference percentage is between 0% and 25%
+  //bool showAlert = (!isFutureMonth && currentYearSpending > 0 && differencePercentage <= 25);
+bool showAlert = (_currentMonthIndex > 0) &&  // Ensure a specific month is selected
+    (!isFutureMonth &&
+    (currentYearSpending != null && currentYearSpending > 0) && // Ensure it's a valid value
+    (lastYearSpending != null && lastYearSpending > 0) && // Ensure last year had spending
+    (adjustedLastYearSpending > 0) && // Ensure adjusted spending is meaningful
+    (differencePercentage.abs() <= 25 || currentYearSpending > adjustedLastYearSpending));
 
   return Container(
     width: 110,
-    height: 135, // Fixed height
+    height: 135,
     decoration: BoxDecoration(
       color: const Color(0xFFD9D9D9),
       borderRadius: BorderRadius.circular(8),
@@ -1023,11 +911,11 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
     ),
     child: Stack(
       children: [
-        // ✅ Show Alert Box only if the month is not in the future and progress is ≤ 100%
-        if (!isFutureMonth && originalProgress <= 100.0)
+        // Show Alert Box only if the condition is met
+        if (showAlert)
           Positioned(
             top: 5,
-            right: 5, // Align to the right
+            right: 5,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
@@ -1039,17 +927,16 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
                 style: TextStyle(
                   fontSize: 14,
                   fontFamily: 'GE-SS-Two-Light',
-                  color: Colors.white, // White text
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
 
-        // ❌ Remove Percentage Display for Future Months
         if (!isFutureMonth)
           Positioned(
             top: 10,
-            right: 70, // Align to the right
+            right: 70,
             child: Text(
               "%${convertToArabicNumbers(formatNumber(progress))}",
               style: const TextStyle(
@@ -1073,12 +960,14 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
                 CircularProgressIndicator(
                   value: isFutureMonth ? 0 : (progress > 0 ? progress / 100 : 0.01),
                   backgroundColor: Colors.grey.shade300,
-                  valueColor: AlwaysStoppedAnimation<Color>(isFutureMonth ? Colors.grey.shade300 : const Color(0xFF2C8C68)),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isFutureMonth ? Colors.grey.shade300 : getProgressColor(progress),
+                  ),
                   strokeWidth: 6,
                 ),
                 Icon(
                   categoryIcon,
-                  color: const Color(0xFF2C8C68),
+                  color: const Color(0xFF2C8C68), // Icon always stays this color
                   size: 22,
                 ),
               ],
@@ -1104,9 +993,9 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
           top: 80,
           right: 10,
           child: Directionality(
-            textDirection: ui.TextDirection.rtl, // Ensure proper Arabic text alignment
+            textDirection: ui.TextDirection.rtl,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start, // Align text properly
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   "المبلغ المطلوب ادخاره:",
@@ -1116,21 +1005,21 @@ Widget buildCategorySquare(String category, dynamic monthlySavings) {
                     color: Color(0xFF3D3D3D),
                   ),
                 ),
-                const SizedBox(height: 2), // Add spacing between text and amount
+                const SizedBox(height: 2),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      formatNumber(monthlySavings), 
+                      formatNumber(monthlySavings),
                       style: const TextStyle(
                         fontSize: 12,
                         fontFamily: 'GE-SS-Two-Light',
                         color: Color(0xFF3D3D3D),
                       ),
                     ),
-                    const SizedBox(width: 3), // Space between amount and icon
+                    const SizedBox(width: 3),
                     Icon(
-                      CustomIcons.riyal, // Riyal symbol
+                      CustomIcons.riyal,
                       size: 14,
                       color: Color(0xFF3D3D3D),
                     ),
