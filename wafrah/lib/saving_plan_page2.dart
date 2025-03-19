@@ -644,24 +644,25 @@ if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
             ),
           ),
         ),
-        /*
-const Positioned(
-  left: 25,
-  top: 275,
-  child: Text(
-    'بعد إنشاء خطة الادخار، سيكون التقدم دائمًا ١٠٠٪، إلا إذا تم الإنفاق بشكل زائد\n'
-    'في حال تم الإنفاق الزائد في فئة معينة، ستظهر رسالة تحذيرية في مربع هذه الفئة\n',
-    style: TextStyle(
-      color: Color(0xFF3D3D3D),
-      fontSize: 10,
-      fontFamily: 'GE-SS-Two-Light',
+        
+if (_currentMonthIndex != 0)
+  const Positioned(
+    left: 10,
+    top: 275,
+    child: Text(
+      'في حال تم الاقتراب للحد الزدنى من الصرف، ستظهر رسالة تحذيرية في مربع هذه الفئة\n',
+      style: TextStyle(
+        color: Color(0xFF3D3D3D),
+        fontSize: 10,
+        fontFamily: 'GE-SS-Two-Light',
+      ),
+      textAlign: TextAlign.right,
     ),
-    textAlign: TextAlign.right,
   ),
-),
-*/
+
+
           Positioned(
-            top: 305,
+            top: 290,
             left: 10,
             right: 10,
             child: SizedBox(
