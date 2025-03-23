@@ -362,6 +362,93 @@ Future<void> showNotificationsSequentially(List<Map<String, String>> notificatio
   }
 }
 
+Future<void> showNotificationsSequentially(List<Map<String, String>> notifications) async {
+  for (int i = 0; i < notifications.length; i++) {
+    // Show the notification at index i
+    await NotificationService.showNotification(
+      title: notifications[i]['title']!,
+      body: notifications[i]['body']!,
+    );
+
+    // Wait for 2-3 seconds before showing the next notification
+    await Future.delayed(const Duration(seconds: 2));
+  }
+}
+
+
+void showCategoryProgressNotification(Map<String, dynamic> progressData) {
+  // List to store categories that have already received a notification
+  Set<String> notifiedCategories = Set<String>();
+
+  // List of notifications to be shown sequentially
+  List<Future<void>> notificationQueue = [];
+
+  // Loop through progress data and filter categories that exist in the savings plan
+  progressData['progress'].forEach((category, progress) {
+    // Check if the category exists in the current savings plan
+    bool categoryExistsInPlan = savingsPlan.any((plan) => plan['category'] == category);
+
+    // Only show notification if category exists in plan and hasn't been notified yet
+    if (categoryExistsInPlan && !notifiedCategories.contains(category)) {
+      // 50% Progress
+      if (progress >= 50 && progress < 75) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "لقد أكملت 50% من الادخار في فئة $category",
+            body: "أنت في منتصف الطريق! استمر في العمل لتحقيق الهدف.",
+          ),
+        ));
+      }
+      // 75% Progress
+      else if (progress >= 75 && progress < 100) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "أنت قريب جداً من الهدف في فئة $category!",
+            body: "لقد اكثر من 75% من هدفك في هذه الفئة. قريباً ستصل!",
+          ),
+        ));
+      }
+      // 100% Progress
+      else if (progress == 100) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "تم الادخار بنجاح في فئة $category!",
+            body: "تهانينا! لقد أكملت 100% من هدف الادخار في هذه الفئة.",
+          ),
+        ));
+      }
+      // Low savings progress (less than 50%)
+      else if (progress > 0 && progress < 50) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "لقد أكملت تقدماً منخفضاً في فئة $category",
+            body: "أنت على الطريق الصحيح! حاول زيادة المدخرات لتحقيق الهدف.",
+          ),
+        ));
+      }
+      // No progress (0%)
+      else if (progress == 0) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "لم تبدأ الادخار بعد في فئة $category",
+            body: "حاول أن تبدأ في الادخار الآن! لا تتأخر عن تحقيق هدفك.",
+          ),
+        ));
+      }
+
+      // Mark this category as notified
+      notifiedCategories.add(category);
+    }
+  });
+
+  // Execute the notifications sequentially
+  Future.wait(notificationQueue);
+}
 
 void showCategoryProgressNotification(Map<String, dynamic> progressData) {
   // List to store categories that have already received a notification

@@ -32,8 +32,12 @@ class _NotificationPageState extends State<NotificationPage> {
     if (storedNotifications != null) {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       notifications = storedNotifications.split(
           ';'); // Assuming stored notifications are separated by a semicolon
+=======
+      notifications = storedNotifications.split(';'); // Assuming notifications are stored as a semicolon-separated string
+>>>>>>> Stashed changes
 =======
       notifications = storedNotifications.split(';'); // Assuming notifications are stored as a semicolon-separated string
 >>>>>>> Stashed changes
@@ -297,9 +301,12 @@ class _NotificationPageState extends State<NotificationPage> {
                         child: Text(
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                           '2025-03-14', // Format it to YYYY-MM-DD
                           style: TextStyle(
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
                           _getCurrentDateTime(), // Show current date and time
