@@ -3,7 +3,6 @@ import 'dart:math';
 import 'login_page.dart';
 import 'info_page.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'notification_service.dart';
 // class NotificationService {
 //   static final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
 //       FlutterLocalNotificationsPlugin();
@@ -55,7 +54,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey, // Add the navigator key
       initialRoute: '/',

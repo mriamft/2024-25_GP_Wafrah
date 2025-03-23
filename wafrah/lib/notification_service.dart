@@ -2,14 +2,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  static final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  static final FlutterLocalNotificationsPlugin
+      _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Initialize the notification service
   static Future<void> init() async {
     final AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@drawable/greenlogo'); // Icon for notifications
+        AndroidInitializationSettings(
+            '@drawable/greenlogo'); // Icon for notifications
 
     final InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
@@ -48,19 +49,19 @@ class NotificationService {
 
   // Store notifications in secure storage
 // Update this method in NotificationService to track new notifications
-static Future<void> _storeNotification(String title, String body) async {
-  try {
-    List<String> notifications = await getNotifications();
-    notifications.add('$title: $body');
-    await _storage.write(
-        key: 'notifications', value: notifications.join(';'));
+  static Future<void> _storeNotification(String title, String body) async {
+    try {
+      List<String> notifications = await getNotifications();
+      notifications.add('$title: $body');
+      await _storage.write(
+          key: 'notifications', value: notifications.join(';'));
 
-    // Update new notification flag
-    await _storage.write(key: 'hasNewNotifications', value: 'true');
-  } catch (e) {
-    print("Error storing notification: $e");
+      // Update new notification flag
+      await _storage.write(key: 'hasNewNotifications', value: 'true');
+    } catch (e) {
+      print("Error storing notification: $e");
+    }
   }
-}
 
   // Get stored notifications from secure storage
   static Future<List<String>> getNotifications() async {

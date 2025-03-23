@@ -117,14 +117,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   String formatNumberWithArabicComma(dynamic number) {
-  if (number == null) return '٠،٠٠'; 
-  try {
-    String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
-  return formattedNumber.replaceAll('.', '،'); 
-  } catch (e) {
-    return number.toString().replaceAll('.', '،'); 
+    if (number == null) return '٠،٠٠';
+    try {
+      String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
+      return formattedNumber.replaceAll('.', '،');
+    } catch (e) {
+      return number.toString().replaceAll('.', '،');
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +199,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 12.0),
                     child: Align(
-                      alignment: Alignment.centerRight, // Align text to the right
+                      alignment:
+                          Alignment.centerRight, // Align text to the right
                       child: Text(
                         value,
                         textAlign: TextAlign.right, // Ensure right-alignment
@@ -215,7 +216,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 );
               }).toList(),
             ),
-
           ),
 
           Positioned(
@@ -742,26 +742,25 @@ class _TransactionsPageState extends State<TransactionsPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-Row(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    Icon(
-      CustomIcons.riyal, 
-      size: 14,
-      color: Colors.white,
-    ),
-    const SizedBox(width: 4),
-    Text(
-      amount,
-      style: const TextStyle(
-        fontFamily: 'GE-SS-Two-Bold',
-        fontSize: 15,
-        color: Colors.white,
-      ),
-    ),
-  ],
-),
-
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        CustomIcons.riyal,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        amount,
+                        style: const TextStyle(
+                          fontFamily: 'GE-SS-Two-Bold',
+                          fontSize: 15,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -819,10 +818,10 @@ Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-      CustomIcons.riyal, // Riyal icon instead of text
-      size: 14,
-      color: amountColor,
-    ),
+                      CustomIcons.riyal, // Riyal icon instead of text
+                      size: 14,
+                      color: amountColor,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       amount,
@@ -984,27 +983,26 @@ Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-            Row(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    Icon(
-      CustomIcons.riyal,  // Riyal symbol
-      size: 13,
-      color: Colors.white,
-    ),
-    const SizedBox(width: 4), // Space between the symbol and amount
-    Text(
-      'المبلغ: $amount',
-      style: const TextStyle(
-        fontFamily: 'GE-SS-Two-Bold',
-        fontSize: 15,
-        color: Colors.white,
-      ),
-    ),
-  ],
-),
-
-
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    CustomIcons.riyal, // Riyal symbol
+                    size: 13,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(
+                      width: 4), // Space between the symbol and amount
+                  Text(
+                    'المبلغ: $amount',
+                    style: const TextStyle(
+                      fontFamily: 'GE-SS-Two-Bold',
+                      fontSize: 15,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
               Text('النوع: $translatedSubtype',
                   style: const TextStyle(
                       fontFamily: 'GE-SS-Two-Bold',
@@ -1026,8 +1024,8 @@ Row(
                       fontSize: 15,
                       color: Colors.white)),
               Text(':رقم الآيبان \n $accountIban',
-              textAlign: TextAlign.right,
-                      style: const TextStyle(
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
                       fontFamily: 'GE-SS-Two-Bold',
                       fontSize: 15,
                       color: Colors.white)),

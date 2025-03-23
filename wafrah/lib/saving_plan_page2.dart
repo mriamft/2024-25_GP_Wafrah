@@ -14,7 +14,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'main.dart';
 import 'notification_service.dart';
 
-
 class SavingPlanPage2 extends StatefulWidget {
   final String userName;
   final String phoneNumber;
@@ -44,59 +43,59 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   Map<String, dynamic> wap = {};
   bool isLoading = false;
 
-@override
-void initState() {
-  super.initState();
+  @override
+  void initState() {
+    super.initState();
 
-  if (widget.resultData.isEmpty || !widget.resultData.containsKey('startDate')) {
-    print("Loading saved plan data...");
-    _loadPlanFromSecureStorage().then((_) {
-      if (widget.resultData.containsKey('startDate')) {
-        print("startDate found: ${widget.resultData['startDate']}");
-        generateMonths(widget.resultData['DurationMonths']);
-        generateSavingsPlan();
-      } else {
-        print("Error: startDate is still missing after loading from storage.");
-      }
-    });
-  } else {
-    print("Using existing resultData");
+    if (widget.resultData.isEmpty ||
+        !widget.resultData.containsKey('startDate')) {
+      print("Loading saved plan data...");
+      _loadPlanFromSecureStorage().then((_) {
+        if (widget.resultData.containsKey('startDate')) {
+          print("startDate found: ${widget.resultData['startDate']}");
+          generateMonths(widget.resultData['DurationMonths']);
+          generateSavingsPlan();
+        } else {
+          print(
+              "Error: startDate is still missing after loading from storage.");
+        }
+      });
+    } else {
+      print("Using existing resultData");
+      generateMonths(widget.resultData['DurationMonths']);
+      generateSavingsPlan();
+    }
+
     generateMonths(widget.resultData['DurationMonths']);
-    generateSavingsPlan();
+    print("result data");
+    print(widget.resultData["startDate"]);
+    print("resultData Keys: ${widget.resultData.keys}");
+    print(widget.accounts);
+
+    _currentMonthIndex = 0; // Ensure "الخطة كاملة" is selected by default
+
+    // Initialize categoryTotalSavings before calling generateSavingsPlan()
+    categoryTotalSavings = Map<String, double>.from(widget
+        .resultData['CategorySavings']
+        .map((key, value) => MapEntry(key, (value as num).toDouble())));
+
+    // Call generateSavingsPlan after categoryTotalSavings is initialized
+    setState(() {
+      generateSavingsPlan();
+    });
+    _loadPlanFromSecureStorage();
   }
 
-  generateMonths(widget.resultData['DurationMonths']);
-  print("result data");
-  print(widget.resultData["startDate"]);
-  print("resultData Keys: ${widget.resultData.keys}");
-  print(widget.accounts);
+  String formatNumber(double number) {
+    return NumberFormat("#,##0", "ar").format(number);
+  }
 
-  _currentMonthIndex = 0; // Ensure "الخطة كاملة" is selected by default
-
-  // Initialize categoryTotalSavings before calling generateSavingsPlan()
-  categoryTotalSavings = Map<String, double>.from(widget
-      .resultData['CategorySavings']
-      .map((key, value) => MapEntry(key, (value as num).toDouble())));
-
-  // Call generateSavingsPlan after categoryTotalSavings is initialized
-  setState(() {
-    generateSavingsPlan();
-  });
-    _loadPlanFromSecureStorage(); 
-}
-
-String formatNumber(double number) {
-  return NumberFormat("#,##0", "ar").format(number);
-}
-
-
-String convertToArabicNumbers(String input) {
-  const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-  return input.replaceAllMapped(RegExp(r'[0-9]'), (match) {
-    return arabicNumbers[int.parse(match.group(0)!)];
-  });
-}
-
+  String convertToArabicNumbers(String input) {
+    const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return input.replaceAllMapped(RegExp(r'[0-9]'), (match) {
+      return arabicNumbers[int.parse(match.group(0)!)];
+    });
+  }
 
   void generateMonths(dynamic durationMonths) {
     int monthsCount =
@@ -118,210 +117,218 @@ String convertToArabicNumbers(String input) {
     _savePlanToSecureStorage(updatedPlan);
   }
 
-Future<void> _savePlanToSecureStorage(Map<String, dynamic> planData) async {
-  try {
-    // Ensure startDate is saved properly
-    if (!planData.containsKey('startDate') || planData['startDate'] == null) {
-      print("Warning: startDate is missing in planData. Setting default.");
-      planData['startDate'] = widget.resultData['startDate'] ?? DateTime.now().toString();
+  Future<void> _savePlanToSecureStorage(Map<String, dynamic> planData) async {
+    try {
+      // Ensure startDate is saved properly
+      if (!planData.containsKey('startDate') || planData['startDate'] == null) {
+        print("Warning: startDate is missing in planData. Setting default.");
+        planData['startDate'] =
+            widget.resultData['startDate'] ?? DateTime.now().toString();
+      }
+
+      print("Saving plan data: $planData"); // Debugging
+      String planJson = jsonEncode(planData);
+      await secureStorage.write(key: 'savings_plan', value: planJson);
+    } catch (e) {
+      print("Error saving plan to secure storage: $e");
     }
-
-    print("Saving plan data: $planData"); // Debugging
-    String planJson = jsonEncode(planData);
-    await secureStorage.write(key: 'savings_plan', value: planJson);
-  } catch (e) {
-    print("Error saving plan to secure storage: $e");
   }
-}
 
-Future<void> _loadPlanFromSecureStorage() async {
-  try {
-    String? planJson = await secureStorage.read(key: 'savings_plan');
-    if (planJson != null) {
-      Map<String, dynamic> storedPlan = jsonDecode(planJson);
+  Future<void> _loadPlanFromSecureStorage() async {
+    try {
+      String? planJson = await secureStorage.read(key: 'savings_plan');
+      if (planJson != null) {
+        Map<String, dynamic> storedPlan = jsonDecode(planJson);
 
-      setState(() {
-        widget.resultData.addAll(storedPlan);
+        setState(() {
+          widget.resultData.addAll(storedPlan);
 
-        // Ensure startDate is not null
-        if (!widget.resultData.containsKey('startDate') || widget.resultData['startDate'] == null) {
-          print("Error: startDate is missing even after loading from storage. Setting default.");
-          widget.resultData['startDate'] = DateTime.now().toString();
-        }
-      });
+          // Ensure startDate is not null
+          if (!widget.resultData.containsKey('startDate') ||
+              widget.resultData['startDate'] == null) {
+            print(
+                "Error: startDate is missing even after loading from storage. Setting default.");
+            widget.resultData['startDate'] = DateTime.now().toString();
+          }
+        });
+      } else {
+        print('No plan found in secure storage');
+      }
+    } catch (e) {
+      print("Error loading plan from secure storage: $e");
+    }
+  }
+
+  String getArabicMonth(int month) {
+    switch (month) {
+      case 1:
+        return "الأول";
+      case 2:
+        return "الثاني";
+      case 3:
+        return "الثالث";
+      case 4:
+        return "الرابع";
+      case 5:
+        return "الخامس";
+      case 6:
+        return "السادس";
+      case 7:
+        return "السابع";
+      case 8:
+        return "الثامن";
+      case 9:
+        return "التاسع";
+      case 10:
+        return "العاشر";
+      case 11:
+        return "الحادي عشر";
+      case 12:
+        return "الثاني عشر";
+      default:
+        return "الشهر $month"; // Default fallback
+    }
+  }
+
+  void generateSavingsPlan() {
+    print("Generating Savings for Month: $_currentMonthIndex");
+
+    int totalMonths = months.length - 1; // Exclude "الخطة كاملة"
+
+    if (_currentMonthIndex == 0) {
+      // Full Plan (index 0)
+      savingsPlan = categoryTotalSavings.entries
+          .where((entry) => entry.value > 0) // Remove zero-value categories
+          .map((entry) {
+        return {
+          'category': entry.key,
+          'monthlySavings': entry.value, // Full savings
+        };
+      }).toList();
     } else {
-      print('No plan found in secure storage');
+      // Regular Month (from 1 to last index)
+      savingsPlan = categoryTotalSavings.entries
+          .map((entry) {
+            double monthlySavings = entry.value / totalMonths;
+            return {
+              'category': entry.key,
+              'monthlySavings': (_currentMonthIndex == totalMonths)
+                  ? monthlySavings // Show savings for the last month
+                  : monthlySavings, // Show savings per selected month
+            };
+          })
+          .where((entry) => (entry['monthlySavings'] as num) > 0)
+          .toList();
     }
-  } catch (e) {
-    print("Error loading plan from secure storage: $e");
-  }
-}
 
-String getArabicMonth(int month) {
-  switch (month) {
-    case 1:
-      return "الأول";
-    case 2:
-      return "الثاني";
-    case 3:
-      return "الثالث";
-    case 4:
-      return "الرابع";
-    case 5:
-      return "الخامس";
-    case 6:
-      return "السادس";
-    case 7:
-      return "السابع";
-    case 8:
-      return "الثامن";
-    case 9:
-      return "التاسع";
-    case 10:
-      return "العاشر";
-    case 11:
-      return "الحادي عشر";
-    case 12:
-      return "الثاني عشر";
-    default:
-      return "الشهر $month"; // Default fallback
-  }
-}
+    print("Final Computed Savings for $_currentMonthIndex: $savingsPlan");
 
-void generateSavingsPlan() {
-  print("Generating Savings for Month: $_currentMonthIndex");
+    // Track savings progress and store it
+    Map<String, dynamic> progressData = (_currentMonthIndex == 0)
+        ? trackSavingsProgress()
+        : MonthlytrackSavingsProgress();
 
-  int totalMonths = months.length - 1; // Exclude "الخطة كاملة"
+    print("Savings Progress Data: $progressData");
 
-  if (_currentMonthIndex == 0) {
-    // Full Plan (index 0)
-    savingsPlan = categoryTotalSavings.entries
-        .where((entry) => entry.value > 0) // Remove zero-value categories
-        .map((entry) {
-      return {
-        'category': entry.key,
-        'monthlySavings': entry.value, // Full savings
-      };
-    }).toList();
-  } else {
-    // Regular Month (from 1 to last index)
-    savingsPlan = categoryTotalSavings.entries
-        .map((entry) {
-          double monthlySavings = entry.value / totalMonths;
-          return {
-            'category': entry.key,
-            'monthlySavings': (_currentMonthIndex == totalMonths)
-                ? monthlySavings // Show savings for the last month
-                : monthlySavings, // Show savings per selected month
-          };
-        })
-        .where((entry) => (entry['monthlySavings'] as num) > 0)
-        .toList();
-  }
+    // Store progress in state
+    setState(() {
+      wap = progressData; // Store progress data
+    });
 
-  print("Final Computed Savings for $_currentMonthIndex: $savingsPlan");
-
-  // Track savings progress and store it
-  Map<String, dynamic> progressData = (_currentMonthIndex == 0)
-      ? trackSavingsProgress()
-      : MonthlytrackSavingsProgress();
-
-  print("Savings Progress Data: $progressData");
-
-  // Store progress in state
-  setState(() {
-    wap = progressData; // Store progress data
-  });
-
-  // Show notifications based on progress
-showMonthProgressNotification();  
-  // Add the month notification for the user when a new month starts
-  // Add the month notification only if it's the first month or after month completion
-  if (_currentMonthIndex == totalMonths) { // Only notify when the last month ends
-    NotificationService.showNotification(
-      title: "لقد انهيت الشهر ${getArabicMonth(_currentMonthIndex)} من الخطة",
-      body: "شاهد آخر تحديثاتك في الخطة.",
-    );
-  }
-  // Call the function to check for full plan completion
-  checkFullPlanCompletion();
-
-  // Save the updated plan to secure storage
-  Map<String, dynamic> updatedPlan = {
-    'DurationMonths': widget.resultData['DurationMonths'],
-    'CategorySavings': categoryTotalSavings,
-    'MonthlySavingsPlan': savingsPlan,
-    'SavingsGoal': widget.resultData['SavingsGoal'],
-    'startDate': widget.resultData['startDate'],
-    'discretionaryRatios': widget.resultData['discretionaryRatios'],
-  };
-
-  _savePlanToSecureStorage(updatedPlan);
-}
-
-void showProgressNotification(Map<String, dynamic> progressData) {
-  progressData['progress'].forEach((category, progress) {
-    if (progress >= 50 && progress < 75) {
+    // Show notifications based on progress
+    showMonthProgressNotification();
+    // Add the month notification for the user when a new month starts
+    // Add the month notification only if it's the first month or after month completion
+    if (_currentMonthIndex == totalMonths) {
+      // Only notify when the last month ends
       NotificationService.showNotification(
-        title: "أنت في منتصف الطريق!",
-        body: "لقد أكملت 50% من هدفك. استمر في العمل!",
-      );
-    } else if (progress >= 75 && progress < 100) {
-      NotificationService.showNotification(
-        title: "أنت قريب جدًا من الهدف!",
-        body: "لقد أكملت 75% من هدفك. قريبًا ستصل!",
-      );
-    } else if (progress == 100) {
-      NotificationService.showNotification(
-        title: "تمت الخطة بنجاح!",
-        body: "لقد أكملت هدف الادخار الخاص بك. تهانينا!",
+        title: "لقد انهيت الشهر ${getArabicMonth(_currentMonthIndex)} من الخطة",
+        body: "شاهد آخر تحديثاتك في الخطة.",
       );
     }
-  });
-}
+    // Call the function to check for full plan completion
+    checkFullPlanCompletion();
 
-void showMonthProgressNotification() {
-  DateTime today = DateTime.now();
-  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-  
-  // Calculate the number of months passed based on the start date and current date
-  double totalMonths = widget.resultData['DurationMonths'];
-int monthsPassed = (today.year - startDate.year) * 12 + today.month - startDate.month;
-  
-  // Calculate the percentage progress as double
-  double progress = (monthsPassed / totalMonths) * 100;
+    // Save the updated plan to secure storage
+    Map<String, dynamic> updatedPlan = {
+      'DurationMonths': widget.resultData['DurationMonths'],
+      'CategorySavings': categoryTotalSavings,
+      'MonthlySavingsPlan': savingsPlan,
+      'SavingsGoal': widget.resultData['SavingsGoal'],
+      'startDate': widget.resultData['startDate'],
+      'discretionaryRatios': widget.resultData['discretionaryRatios'],
+    };
 
-  // Show notification if the month progress is relevant
-  if (monthsPassed > 0 && monthsPassed <= totalMonths) {
-    NotificationService.showNotification(
-title: "لقد أكملت $monthsPassed من ${totalMonths.toInt()} شهور من الخطة",
-      body: "لقد أنجزت ${progress.toStringAsFixed(2)}% من الخطة. استمر في العمل!",
-    );
+    _savePlanToSecureStorage(updatedPlan);
   }
-}
 
+  void showProgressNotification(Map<String, dynamic> progressData) {
+    progressData['progress'].forEach((category, progress) {
+      if (progress >= 50 && progress < 75) {
+        NotificationService.showNotification(
+          title: "أنت في منتصف الطريق!",
+          body: "لقد أكملت 50% من هدفك. استمر في العمل!",
+        );
+      } else if (progress >= 75 && progress < 100) {
+        NotificationService.showNotification(
+          title: "أنت قريب جدًا من الهدف!",
+          body: "لقد أكملت 75% من هدفك. قريبًا ستصل!",
+        );
+      } else if (progress == 100) {
+        NotificationService.showNotification(
+          title: "تمت الخطة بنجاح!",
+          body: "لقد أكملت هدف الادخار الخاص بك. تهانينا!",
+        );
+      }
+    });
+  }
 
-void checkFullPlanCompletion() {
-  // Check if the user has completed the full plan (last month)
-  if (_currentMonthIndex == months.length - 1) {
-    double totalSavings = categoryTotalSavings.values.fold(0.0, (prev, curr) => prev + curr);
-    double savingsGoal = widget.resultData['SavingsGoal'];
+  void showMonthProgressNotification() {
+    DateTime today = DateTime.now();
+    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
 
-    if (totalSavings >= savingsGoal) {
-      // User achieved the savings goal
+    // Calculate the number of months passed based on the start date and current date
+    double totalMonths = widget.resultData['DurationMonths'];
+    int monthsPassed =
+        (today.year - startDate.year) * 12 + today.month - startDate.month;
+
+    // Calculate the percentage progress as double
+    double progress = (monthsPassed / totalMonths) * 100;
+
+    // Show notification if the month progress is relevant
+    if (monthsPassed > 0 && monthsPassed <= totalMonths) {
       NotificationService.showNotification(
-        title: "تمت الخطة بنجاح!",
-        body: "لقد أكملت هدف الإدخار الخاص بك. تهانينا!",
-      );
-    } else {
-      // User did not achieve the savings goal
-      NotificationService.showNotification(
-        title: "انتهت مدة الخطة",
-        body: "لقد انتهت مدة الخطة ولكن لم تصل إلى الهدف المحدد. استمر في المحاولة!",
+        title:
+            "لقد أكملت $monthsPassed من ${totalMonths.toInt()} شهور من الخطة",
+        body:
+            "لقد أنجزت ${progress.toStringAsFixed(2)}% من الخطة. استمر في العمل!",
       );
     }
   }
-}
+
+  void checkFullPlanCompletion() {
+    // Check if the user has completed the full plan (last month)
+    if (_currentMonthIndex == months.length - 1) {
+      double totalSavings =
+          categoryTotalSavings.values.fold(0.0, (prev, curr) => prev + curr);
+      double savingsGoal = widget.resultData['SavingsGoal'];
+
+      if (totalSavings >= savingsGoal) {
+        // User achieved the savings goal
+        NotificationService.showNotification(
+          title: "تمت الخطة بنجاح!",
+          body: "لقد أكملت هدف الإدخار الخاص بك. تهانينا!",
+        );
+      } else {
+        // User did not achieve the savings goal
+        NotificationService.showNotification(
+          title: "انتهت مدة الخطة",
+          body:
+              "لقد انتهت مدة الخطة ولكن لم تصل إلى الهدف المحدد. استمر في المحاولة!",
+        );
+      }
+    }
+  }
 
   void _updatePlan(Map<String, dynamic> updatedPlan) {
     // Save the updated plan to secure storage
@@ -473,123 +480,146 @@ void checkFullPlanCompletion() {
     );
   }
 
-Map<String, dynamic> trackSavingsProgress() {
-  DateTime today = DateTime.now();
-  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-  int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
-  int totalDays = totalMonths * 30; // Approximate total days for tracking period
+  Map<String, dynamic> trackSavingsProgress() {
+    DateTime today = DateTime.now();
+    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+    int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
+    int totalDays =
+        totalMonths * 30; // Approximate total days for tracking period
 
-  DateTime lastYearStart = startDate.subtract(Duration(days: 365));
-  DateTime lastYearEnd = lastYearStart.add(Duration(days: totalDays));
+    DateTime lastYearStart = startDate.subtract(const Duration(days: 365));
+    DateTime lastYearEnd = lastYearStart.add(Duration(days: totalDays));
 
-  Map<String, double> lastYearSpending = {};
-  Map<String, double> currentSpending = {};
-  Map<String, double> progressPercentage = {};
+    Map<String, double> lastYearSpending = {};
+    Map<String, double> currentSpending = {};
+    Map<String, double> progressPercentage = {};
 
-  // Convert category savings values to double
-  Map<String, double> categorySavings = Map<String, double>.from(widget.resultData['CategorySavings'])
-      .map((key, value) => MapEntry(key, (value as num).toDouble()));
+    // Convert category savings values to double
+    Map<String, double> categorySavings =
+        Map<String, double>.from(widget.resultData['CategorySavings'])
+            .map((key, value) => MapEntry(key, (value as num).toDouble()));
 
-  for (var account in widget.accounts) {
-    for (var transaction in account['transactions']) {
-      DateTime transactionDate = DateTime.parse(transaction['TransactionDateTime']);
-      String category = transaction['Category'] ?? 'Unknown';
-      double amount = double.parse(transaction['Amount'].toString());
+    for (var account in widget.accounts) {
+      for (var transaction in account['transactions']) {
+        DateTime transactionDate =
+            DateTime.parse(transaction['TransactionDateTime']);
+        String category = transaction['Category'] ?? 'Unknown';
+        double amount = double.parse(transaction['Amount'].toString());
 
-      if (transactionDate.isAfter(lastYearStart) && transactionDate.isBefore(lastYearEnd)) {
-        lastYearSpending[category] = (lastYearSpending[category] ?? 0) + amount;
-        print("Previos");
-        print(transaction);
-      }
+        if (transactionDate.isAfter(lastYearStart) &&
+            transactionDate.isBefore(lastYearEnd)) {
+          lastYearSpending[category] =
+              (lastYearSpending[category] ?? 0) + amount;
+          print("Previos");
+          print(transaction);
+        }
 
-      if (transactionDate.isAfter(startDate) && transactionDate.isBefore(today)) {
-        currentSpending[category] = (currentSpending[category] ?? 0) + amount;
-        print("Current");
-        print(transaction);
+        if (transactionDate.isAfter(startDate) &&
+            transactionDate.isBefore(today)) {
+          currentSpending[category] = (currentSpending[category] ?? 0) + amount;
+          print("Current");
+          print(transaction);
+        }
       }
     }
-  }
 
-  // Improved Progress Calculation (Fixed Linear Growth)
-  int daysPassed = today.difference(startDate).inDays.clamp(0, totalDays); // Ensure valid days range
-  double dailyProgressGrowth = 100 / totalDays; // Ensures 100% at the end of the duration
+    // Improved Progress Calculation (Fixed Linear Growth)
+    int daysPassed = today
+        .difference(startDate)
+        .inDays
+        .clamp(0, totalDays); // Ensure valid days range
+    double dailyProgressGrowth =
+        100 / totalDays; // Ensures 100% at the end of the duration
 
-  for (var category in categorySavings.keys) {
-    double progress = daysPassed * dailyProgressGrowth; // Linear progress
+    for (var category in categorySavings.keys) {
+      double progress = daysPassed * dailyProgressGrowth; // Linear progress
 
-    // If spending increased compared to last year, reset progress to 0
-    if ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0) < 0) {
-      progress = 0;
+      // If spending increased compared to last year, reset progress to 0
+      if ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0) <
+          0) {
+        progress = 0;
+      }
+
+      progressPercentage[category] =
+          progress.clamp(0, 100); // Ensure it remains between 0-100%
     }
 
-    progressPercentage[category] = progress.clamp(0, 100); // Ensure it remains between 0-100%
+    return {'progress': progressPercentage};
   }
 
-  return {'progress': progressPercentage};
-}
+  Map<String, dynamic> MonthlytrackSavingsProgress() {
+    DateTime today = DateTime.now();
+    //.add(Duration(days: 18))
+    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+    DateTime selectedMonthStart =
+        startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+    DateTime selectedMonthEnd =
+        selectedMonthStart.add(const Duration(days: 29));
+    DateTime lastYearStart =
+        selectedMonthStart.subtract(const Duration(days: 365));
+    DateTime lastYearEnd = selectedMonthEnd.subtract(const Duration(days: 365));
 
-Map<String, dynamic> MonthlytrackSavingsProgress() {
-  DateTime today = DateTime.now();
-  //.add(Duration(days: 18))
-  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-  DateTime selectedMonthStart = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-  DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
-  DateTime lastYearStart = selectedMonthStart.subtract(Duration(days: 365));
-  DateTime lastYearEnd = selectedMonthEnd.subtract(Duration(days: 365));
+    Map<String, double> lastYearSpending = {};
+    Map<String, double> currentSpending = {};
+    Map<String, double> progressPercentage = {};
 
-  Map<String, double> lastYearSpending = {};
-  Map<String, double> currentSpending = {};
-  Map<String, double> progressPercentage = {};
+    // Convert category savings values to double
+    Map<String, double> categorySavings =
+        Map<String, double>.from(widget.resultData['CategorySavings'])
+            .map((key, value) => MapEntry(key, (value as num).toDouble()));
 
-  // Convert category savings values to double
-  Map<String, double> categorySavings = Map<String, double>.from(widget.resultData['CategorySavings'])
-      .map((key, value) => MapEntry(key, (value as num).toDouble()));
+    for (var account in widget.accounts) {
+      for (var transaction in account['transactions']) {
+        DateTime transactionDate =
+            DateTime.parse(transaction['TransactionDateTime']);
+        String category = transaction['Category'] ?? 'Unknown';
+        double amount = double.parse(transaction['Amount'].toString());
 
-  for (var account in widget.accounts) {
-    for (var transaction in account['transactions']) {
-      DateTime transactionDate = DateTime.parse(transaction['TransactionDateTime']);
-      String category = transaction['Category'] ?? 'Unknown';
-      double amount = double.parse(transaction['Amount'].toString());
-
-      if (transactionDate.isAfter(lastYearStart) && transactionDate.isBefore(lastYearEnd)) {
-        lastYearSpending[category] = (lastYearSpending[category] ?? 0) + amount;
-        /*print("previos");
+        if (transactionDate.isAfter(lastYearStart) &&
+            transactionDate.isBefore(lastYearEnd)) {
+          lastYearSpending[category] =
+              (lastYearSpending[category] ?? 0) + amount;
+          /*print("previos");
         print(transaction);*/
-      }
+        }
 
-      if (transactionDate.isAfter(selectedMonthStart) && transactionDate.isBefore(today)) {
-        currentSpending[category] = (currentSpending[category] ?? 0) + amount;
-        /*print("Current");
+        if (transactionDate.isAfter(selectedMonthStart) &&
+            transactionDate.isBefore(today)) {
+          currentSpending[category] = (currentSpending[category] ?? 0) + amount;
+          /*print("Current");
         print(transaction);*/
+        }
       }
     }
-  }
 
-  // Improved Progress Calculation (Fixed 3.33% growth per day)
-  int daysPassed = today.difference(selectedMonthStart).inDays.clamp(0, 30); // Ensuring it stays within the month
-  double dailyProgressGrowth = 100 / 30; // 3.33% per day
+    // Improved Progress Calculation (Fixed 3.33% growth per day)
+    int daysPassed = today
+        .difference(selectedMonthStart)
+        .inDays
+        .clamp(0, 30); // Ensuring it stays within the month
+    double dailyProgressGrowth = 100 / 30; // 3.33% per day
 
-  for (var category in categorySavings.keys) {
-    double progress = daysPassed * dailyProgressGrowth;
+    for (var category in categorySavings.keys) {
+      double progress = daysPassed * dailyProgressGrowth;
 
-    // If spending increased compared to last year, reset progress to 0
-    if ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0) < 0) {
-      progress = 0;
+      // If spending increased compared to last year, reset progress to 0
+      if ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0) <
+          0) {
+        progress = 0;
+      }
+
+      progressPercentage[category] =
+          progress.clamp(0, 100); // Ensure it doesn't exceed 100%
     }
 
-    progressPercentage[category] = progress.clamp(0, 100); // Ensure it doesn't exceed 100%
+    return {'progress': progressPercentage};
   }
 
-  return {'progress': progressPercentage};
-}
-
-
-Color getProgressColor(double progress) {
-  if (progress < 50) return Colors.red;
-  if (progress < 75) return Colors.orange;
-  return const Color(0xFF2C8C68); // Matches icon color for 75-100%
-}
-
+  Color getProgressColor(double progress) {
+    if (progress < 50) return Colors.red;
+    if (progress < 75) return Colors.orange;
+    return const Color(0xFF2C8C68); // Matches icon color for 75-100%
+  }
 
   Future<void> _deletePlanFromStorage() async {
     try {
@@ -626,72 +656,75 @@ Color getProgressColor(double progress) {
   }
 
   @override
-Widget build(BuildContext context) {
-  DateTime today = DateTime.now();
-  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+  Widget build(BuildContext context) {
+    DateTime today = DateTime.now();
+    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
 
-  // Calculate remaining months (same logic as trackSavingsProgress)
-  int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
-  int elapsedMonths = today.difference(startDate).inDays ~/ 30;
-  int remainingMonths = (totalMonths - elapsedMonths).clamp(0, totalMonths);
+    // Calculate remaining months (same logic as trackSavingsProgress)
+    int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
+    int elapsedMonths = today.difference(startDate).inDays ~/ 30;
+    int remainingMonths = (totalMonths - elapsedMonths).clamp(0, totalMonths);
 
-  // Calculate remaining days for the current month (same logic as MonthlytrackSavingsProgress)
-  DateTime selectedMonthStart = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-  DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
+    // Calculate remaining days for the current month (same logic as MonthlytrackSavingsProgress)
+    DateTime selectedMonthStart =
+        startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+    DateTime selectedMonthEnd =
+        selectedMonthStart.add(const Duration(days: 29));
 
 // Calculate the remaining days correctly
-int daysPassed = today.difference(selectedMonthStart).inDays.clamp(0, 30);
-int remainingDays = (30 - daysPassed).clamp(0, 30); // Ensure it stays in valid range
+    int daysPassed = today.difference(selectedMonthStart).inDays.clamp(0, 30);
+    int remainingDays =
+        (30 - daysPassed).clamp(0, 30); // Ensure it stays in valid range
 
-  return Scaffold(
-    backgroundColor: const Color(0xFFF9F9F9),
-    body: Stack(
-      children: [
-        Positioned(
-          top: -100,
-          left: 0,
-          right: 0,
-          child: Image.asset(
-            'assets/images/green_square.png',
-            width: MediaQuery.of(context).size.width,
-            height: 289,
-            fit: BoxFit.contain,
-          ),
-        ),
-
-        // Show remaining months when "الخطة كاملة" is selected
-        if (_currentMonthIndex == 0)
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9F9F9),
+      body: Stack(
+        children: [
           Positioned(
-            top: 130,
-            left: 75,
-            child: Text(
-              'الأشهر المتبقية لإتمام الخطة: ${convertToArabicNumbers(remainingMonths.toString())}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'GE-SS-Two-Bold',
-                color: Colors.white,
-              ),
+            top: -100,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              'assets/images/green_square.png',
+              width: MediaQuery.of(context).size.width,
+              height: 289,
+              fit: BoxFit.contain,
             ),
           ),
 
-// Show remaining days when a specific month is selected and not in the future
-if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
-  Positioned(
-    top: 130,
-    left: 16,
-    child: Text(
-      'الأيام المتبقية لإتمام الشهر الحالي من الخطة: ${convertToArabicNumbers(remainingDays.toString())}',
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        fontFamily: 'GE-SS-Two-Bold',
-        color: Colors.white,
-      ),
-    ),
-  ),
+          // Show remaining months when "الخطة كاملة" is selected
+          if (_currentMonthIndex == 0)
+            Positioned(
+              top: 130,
+              left: 75,
+              child: Text(
+                'الأشهر المتبقية لإتمام الخطة: ${convertToArabicNumbers(remainingMonths.toString())}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'GE-SS-Two-Bold',
+                  color: Colors.white,
+                ),
+              ),
+            ),
 
-                   const Positioned(
+// Show remaining days when a specific month is selected and not in the future
+          if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
+            Positioned(
+              top: 130,
+              left: 16,
+              child: Text(
+                'الأيام المتبقية لإتمام الشهر الحالي من الخطة: ${convertToArabicNumbers(remainingDays.toString())}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'GE-SS-Two-Bold',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+
+          const Positioned(
             top: 197,
             left: 280,
             child: Text(
@@ -706,69 +739,69 @@ if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
           ),
           buildDeleteButton(),
 
-        // Dropdown for month selection
-        Positioned(
-          top: 230,
-          left: 4,
-          child: Container(
-            width: 380,
-            height: 38,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9F9F9),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: DropdownButton<String>(
-              isExpanded: true,
-              value: months[_currentMonthIndex],
-              icon: const Icon(Icons.arrow_drop_down),
-              iconSize: 24,
-              elevation: 16,
-              style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
-              dropdownColor: const Color(0xFFFFFFFF),
-              underline: Container(
-                height: 2,
-                color: const Color(0xFF2C8C68),
+          // Dropdown for month selection
+          Positioned(
+            top: 230,
+            left: 4,
+            child: Container(
+              width: 380,
+              height: 38,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9F9F9),
+                borderRadius: BorderRadius.circular(8),
               ),
-              onChanged: _onMonthChanged,
-              items: months.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        value,
-                        style: const TextStyle(
-                          fontFamily: 'GE-SS-Two-Light',
-                          fontSize: 16,
-                          color: Color.fromARGB(133, 0, 0, 0),
-                          fontWeight: FontWeight.normal,
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: months[_currentMonthIndex],
+                icon: const Icon(Icons.arrow_drop_down),
+                iconSize: 24,
+                elevation: 16,
+                style: const TextStyle(color: Color(0xFF3D3D3D), fontSize: 16),
+                dropdownColor: const Color(0xFFFFFFFF),
+                underline: Container(
+                  height: 2,
+                  color: const Color(0xFF2C8C68),
+                ),
+                onChanged: _onMonthChanged,
+                items: months.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 12.0),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          value,
+                          style: const TextStyle(
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 16,
+                            color: Color.fromARGB(133, 0, 0, 0),
+                            fontWeight: FontWeight.normal,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              }).toList(),
+                  );
+                }).toList(),
+              ),
             ),
           ),
-        ),
-        
-if (_currentMonthIndex != 0)
-  const Positioned(
-    left: 10,
-    top: 275,
-    child: Text(
-      'في حال تم الاقتراب للحد الزدنى من الصرف، ستظهر رسالة تحذيرية في مربع هذه الفئة\n',
-      style: TextStyle(
-        color: Color(0xFF3D3D3D),
-        fontSize: 10,
-        fontFamily: 'GE-SS-Two-Light',
-      ),
-      textAlign: TextAlign.right,
-    ),
-  ),
 
+          if (_currentMonthIndex != 0)
+            const Positioned(
+              left: 10,
+              top: 275,
+              child: Text(
+                'في حال تم الاقتراب للحد الزدنى من الصرف، ستظهر رسالة تحذيرية في مربع هذه الفئة\n',
+                style: TextStyle(
+                  color: Color(0xFF3D3D3D),
+                  fontSize: 10,
+                  fontFamily: 'GE-SS-Two-Light',
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
 
           Positioned(
             top: 290,
@@ -924,226 +957,245 @@ if (_currentMonthIndex != 0)
     );
   }
 
-Widget buildCategorySquare(String category, dynamic monthlySavings) {
-  Map<String, IconData> categoryIcons = {
-    'المطاعم': Icons.restaurant,
-    'التعليم': Icons.school,
-    'الصحة': Icons.local_hospital,
-    'تسوق': Icons.shopping_bag,
-    'البقالة': Icons.local_grocery_store,
-    'النقل': Icons.directions_bus,
-    'السفر': Icons.flight,
-    'المدفوعات الحكومية': Icons.account_balance,
-    'الترفيه': Icons.gamepad_rounded,
-    'الاستثمار': Icons.trending_up,
-    'الإيجار': Icons.home,
-    'القروض': Icons.money,
-    'الراتب': Icons.account_balance_wallet,
-    'التحويلات': Icons.swap_horiz,
-    'الخطة كامله': Icons.check_circle,
-  };
+  Widget buildCategorySquare(String category, dynamic monthlySavings) {
+    Map<String, IconData> categoryIcons = {
+      'المطاعم': Icons.restaurant,
+      'التعليم': Icons.school,
+      'الصحة': Icons.local_hospital,
+      'تسوق': Icons.shopping_bag,
+      'البقالة': Icons.local_grocery_store,
+      'النقل': Icons.directions_bus,
+      'السفر': Icons.flight,
+      'المدفوعات الحكومية': Icons.account_balance,
+      'الترفيه': Icons.gamepad_rounded,
+      'الاستثمار': Icons.trending_up,
+      'الإيجار': Icons.home,
+      'القروض': Icons.money,
+      'الراتب': Icons.account_balance_wallet,
+      'التحويلات': Icons.swap_horiz,
+      'الخطة كامله': Icons.check_circle,
+    };
 
-  IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
+    IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
 
-  // Get the original progress without modification
-  double originalProgress = wap['progress']?[category] ?? 0.0;
+    // Get the original progress without modification
+    double originalProgress = wap['progress']?[category] ?? 0.0;
 
-  // Apply the 100% cap after storing the original value
-  double progress = originalProgress > 100 ? 100 : originalProgress;
+    // Apply the 100% cap after storing the original value
+    double progress = originalProgress > 100 ? 100 : originalProgress;
 
-  // Determine if the selected month is in the future
-  DateTime today = DateTime.now();
-  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-  DateTime selectedMonthStart = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-  DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
-  DateTime lastYearStart = selectedMonthStart.subtract(Duration(days: 365));
-  DateTime lastYearEnd = selectedMonthEnd.subtract(Duration(days: 365));
-  bool isFutureMonth = selectedMonthStart.isAfter(today);
+    // Determine if the selected month is in the future
+    DateTime today = DateTime.now();
+    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+    DateTime selectedMonthStart =
+        startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+    DateTime selectedMonthEnd =
+        selectedMonthStart.add(const Duration(days: 29));
+    DateTime lastYearStart =
+        selectedMonthStart.subtract(const Duration(days: 365));
+    DateTime lastYearEnd = selectedMonthEnd.subtract(const Duration(days: 365));
+    bool isFutureMonth = selectedMonthStart.isAfter(today);
 
-  // **Extract Transactions for the Current and Last Year**
-  double lastYearSpending = 0.0;
-  double currentYearSpending = 0.0;
+    // **Extract Transactions for the Current and Last Year**
+    double lastYearSpending = 0.0;
+    double currentYearSpending = 0.0;
 
-  for (var account in widget.accounts) {
-    for (var transaction in account['transactions']) {
-      DateTime transactionDate = DateTime.parse(transaction['TransactionDateTime']);
-      String transactionCategory = transaction['Category'] ?? 'Unknown';
-      double amount = double.tryParse(transaction['Amount'].toString()) ?? 0.0;
+    for (var account in widget.accounts) {
+      for (var transaction in account['transactions']) {
+        DateTime transactionDate =
+            DateTime.parse(transaction['TransactionDateTime']);
+        String transactionCategory = transaction['Category'] ?? 'Unknown';
+        double amount =
+            double.tryParse(transaction['Amount'].toString()) ?? 0.0;
 
-      if (transactionCategory == category) {
-        // Check if the transaction belongs to last year’s selected month
-        if (transactionDate.isAfter(lastYearStart) && transactionDate.isBefore(lastYearEnd)) {
-          lastYearSpending += amount;
-        }
+        if (transactionCategory == category) {
+          // Check if the transaction belongs to last year’s selected month
+          if (transactionDate.isAfter(lastYearStart) &&
+              transactionDate.isBefore(lastYearEnd)) {
+            lastYearSpending += amount;
+          }
 
-        // Check if the transaction belongs to this year’s selected month
-        if (transactionDate.isAfter(selectedMonthStart) && transactionDate.isBefore(today)) {
-          currentYearSpending += amount;
+          // Check if the transaction belongs to this year’s selected month
+          if (transactionDate.isAfter(selectedMonthStart) &&
+              transactionDate.isBefore(today)) {
+            currentYearSpending += amount;
+          }
         }
       }
     }
-  }
 
-  double amountToSave = monthlySavings.toDouble();
+    double amountToSave = monthlySavings.toDouble();
 
-  // **Calculate the adjusted last year's spending (after subtracting savings amount)**
-  double adjustedLastYearSpending = (lastYearSpending - amountToSave).clamp(0, double.infinity);
+    // **Calculate the adjusted last year's spending (after subtracting savings amount)**
+    double adjustedLastYearSpending =
+        (lastYearSpending - amountToSave).clamp(0, double.infinity);
 
-  // **Avoid division by zero**
-  double differencePercentage = adjustedLastYearSpending > 0
-      ? ((adjustedLastYearSpending - currentYearSpending).abs() / adjustedLastYearSpending) * 100
-      : (amountToSave > 0
-          ? ((amountToSave - currentYearSpending).abs() / amountToSave) * 100
-          : 0);
+    // **Avoid division by zero**
+    double differencePercentage = adjustedLastYearSpending > 0
+        ? ((adjustedLastYearSpending - currentYearSpending).abs() /
+                adjustedLastYearSpending) *
+            100
+        : (amountToSave > 0
+            ? ((amountToSave - currentYearSpending).abs() / amountToSave) * 100
+            : 0);
 
-  // ✅ Alert appears if the difference percentage is between 0% and 25%
-  //bool showAlert = (!isFutureMonth && currentYearSpending > 0 && differencePercentage <= 25);
-bool showAlert = (_currentMonthIndex > 0) &&  // Ensure a specific month is selected
-    (!isFutureMonth &&
-    (currentYearSpending != null && currentYearSpending > 0) && // Ensure it's a valid value
-    (lastYearSpending != null && lastYearSpending > 0) && // Ensure last year had spending
-    (adjustedLastYearSpending > 0) && // Ensure adjusted spending is meaningful
-    (differencePercentage.abs() <= 25 || currentYearSpending > adjustedLastYearSpending));
+    // ✅ Alert appears if the difference percentage is between 0% and 25%
+    //bool showAlert = (!isFutureMonth && currentYearSpending > 0 && differencePercentage <= 25);
+    bool showAlert =
+        (_currentMonthIndex > 0) && // Ensure a specific month is selected
+            (!isFutureMonth &&
+                (currentYearSpending > 0) && // Ensure it's a valid value
+                (lastYearSpending > 0) && // Ensure last year had spending
+                (adjustedLastYearSpending >
+                    0) && // Ensure adjusted spending is meaningful
+                (differencePercentage.abs() <= 25 ||
+                    currentYearSpending > adjustedLastYearSpending));
 
-  return Container(
-    width: 110,
-    height: 135,
-    decoration: BoxDecoration(
-      color: const Color(0xFFD9D9D9),
-      borderRadius: BorderRadius.circular(8),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.5),
-          blurRadius: 4,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    ),
-    child: Stack(
-      children: [
-        // Show Alert Box only if the condition is met
-        if (showAlert)
-          Positioned(
-            top: 5,
-            right: 5,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(222, 247, 89, 78), // Red background
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Text(
-                "تنبيه",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'GE-SS-Two-Light',
-                  color: Colors.white,
+    return Container(
+      width: 110,
+      height: 135,
+      decoration: BoxDecoration(
+        color: const Color(0xFFD9D9D9),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Show Alert Box only if the condition is met
+          if (showAlert)
+            Positioned(
+              top: 5,
+              right: 5,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color:
+                      const Color.fromARGB(222, 247, 89, 78), // Red background
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ),
-            ),
-          ),
-
-        if (!isFutureMonth)
-          Positioned(
-            top: 10,
-            right: 70,
-            child: Text(
-              "%${convertToArabicNumbers(formatNumber(progress))}",
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ),
-
-        // Circular Progress Bar with Icon
-        Positioned(
-          top: 18,
-          left: 10,
-          child: SizedBox(
-            width: 45,
-            height: 45,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CircularProgressIndicator(
-                  value: isFutureMonth ? 0 : (progress > 0 ? progress / 100 : 0.01),
-                  backgroundColor: Colors.grey.shade300,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    isFutureMonth ? Colors.grey.shade300 : getProgressColor(progress),
-                  ),
-                  strokeWidth: 6,
-                ),
-                Icon(
-                  categoryIcon,
-                  color: const Color(0xFF2C8C68), // Icon always stays this color
-                  size: 22,
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // Category Name
-        Positioned(
-          top: 50,
-          right: 10,
-          child: Text(
-            category,
-            textAlign: TextAlign.right,
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: 'GE-SS-Two-Bold',
-              color: Color(0xFF3D3D3D),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 80,
-          right: 10,
-          child: Directionality(
-            textDirection: ui.TextDirection.rtl,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "المبلغ المطلوب ادخاره:",
+                child: const Text(
+                  "تنبيه",
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
                     fontFamily: 'GE-SS-Two-Light',
-                    color: Color(0xFF3D3D3D),
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      formatNumber(monthlySavings),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'GE-SS-Two-Light',
-                        color: Color(0xFF3D3D3D),
-                      ),
+              ),
+            ),
+
+          if (!isFutureMonth)
+            Positioned(
+              top: 10,
+              right: 70,
+              child: Text(
+                "%${convertToArabicNumbers(formatNumber(progress))}",
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+
+          // Circular Progress Bar with Icon
+          Positioned(
+            top: 18,
+            left: 10,
+            child: SizedBox(
+              width: 45,
+              height: 45,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: isFutureMonth
+                        ? 0
+                        : (progress > 0 ? progress / 100 : 0.01),
+                    backgroundColor: Colors.grey.shade300,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isFutureMonth
+                          ? Colors.grey.shade300
+                          : getProgressColor(progress),
                     ),
-                    const SizedBox(width: 3),
-                    Icon(
-                      CustomIcons.riyal,
-                      size: 14,
+                    strokeWidth: 6,
+                  ),
+                  Icon(
+                    categoryIcon,
+                    color:
+                        const Color(0xFF2C8C68), // Icon always stays this color
+                    size: 22,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Category Name
+          Positioned(
+            top: 50,
+            right: 10,
+            child: Text(
+              category,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: 'GE-SS-Two-Bold',
+                color: Color(0xFF3D3D3D),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 80,
+            right: 10,
+            child: Directionality(
+              textDirection: ui.TextDirection.rtl,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "المبلغ المطلوب ادخاره:",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'GE-SS-Two-Light',
                       color: Color(0xFF3D3D3D),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        formatNumber(monthlySavings),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'GE-SS-Two-Light',
+                          color: Color(0xFF3D3D3D),
+                        ),
+                      ),
+                      const SizedBox(width: 3),
+                      const Icon(
+                        CustomIcons.riyal,
+                        size: 14,
+                        color: Color(0xFF3D3D3D),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 
   Widget buildBottomNavItem(IconData icon, String label, int index,
       {required VoidCallback onTap}) {

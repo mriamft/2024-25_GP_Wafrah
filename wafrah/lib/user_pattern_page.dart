@@ -35,14 +35,17 @@ class _UserPatternPageState extends State<UserPatternPage> {
     super.initState();
     print("resultData: ${widget.resultData}"); // ✅ Print resultData in console
   }
-final NumberFormat arabicNumberFormat = NumberFormat("#,##0.00", "ar");
-String cleanNumber(String number) {
-  return number
-      .replaceAll(',', '')   // Remove thousands separator
-      .replaceAll('،', '.')  // Convert Arabic decimal separator to '.'
-      .replaceAll(RegExp(r'[^0-9.]'), '') // Remove any non-numeric characters except '.'
-      .replaceAllMapped(RegExp(r'\.(?=.*\.)'), (match) => ''); // Keep only the last decimal point
-}
+
+  final NumberFormat arabicNumberFormat = NumberFormat("#,##0.00", "ar");
+  String cleanNumber(String number) {
+    return number
+        .replaceAll(',', '') // Remove thousands separator
+        .replaceAll('،', '.') // Convert Arabic decimal separator to '.'
+        .replaceAll(RegExp(r'[^0-9.]'),
+            '') // Remove any non-numeric characters except '.'
+        .replaceAllMapped(RegExp(r'\.(?=.*\.)'),
+            (match) => ''); // Keep only the last decimal point
+  }
 
   Color _arrowColor = const Color(0xFF3D3D3D);
   bool _isPressed = false;
@@ -160,25 +163,25 @@ String cleanNumber(String number) {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                   Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    Icon(
-      CustomIcons.riyal, // Riyal symbol
-      size: 14, // Adjust size as needed
-      color: Color(0xFF3D3D3D),
-    ),
-    const SizedBox(width: 5),
-    Text(
-      arabicNumberFormat.format(totalSpending),
-      style: const TextStyle(
-        color: Color(0xFF3D3D3D),
-        fontSize: 32,
-        fontFamily: 'GE-SS-Two-Bold',
-      ),
-    ),
-  ],
-),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          CustomIcons.riyal, // Riyal symbol
+                          size: 14, // Adjust size as needed
+                          color: Color(0xFF3D3D3D),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          arabicNumberFormat.format(totalSpending),
+                          style: const TextStyle(
+                            color: Color(0xFF3D3D3D),
+                            fontSize: 32,
+                            fontFamily: 'GE-SS-Two-Bold',
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -216,25 +219,25 @@ String cleanNumber(String number) {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                   Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    Icon(
-      CustomIcons.riyal, // Riyal symbol
-      size: 14, // Adjust size as needed
-      color: Color(0xFF3D3D3D),
-    ),
-    const SizedBox(width: 5),
-    Text(
-      arabicNumberFormat.format(totalIncome),
-      style: const TextStyle(
-        color: Color(0xFF3D3D3D),
-        fontSize: 32,
-        fontFamily: 'GE-SS-Two-Bold',
-      ),
-    ),
-  ],
-),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          CustomIcons.riyal, // Riyal symbol
+                          size: 14, // Adjust size as needed
+                          color: Color(0xFF3D3D3D),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          arabicNumberFormat.format(totalIncome),
+                          style: const TextStyle(
+                            color: Color(0xFF3D3D3D),
+                            fontSize: 32,
+                            fontFamily: 'GE-SS-Two-Bold',
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -416,6 +419,7 @@ String cleanNumber(String number) {
       );
     }).toList();
   }
+
   /// Builds a single circular widget (with the arc, icon, spending, etc.)
   /// The percentage text is placed at the end of the circular arc, **outside** the circle.
   Widget _buildCategoryCircleItem({
@@ -426,17 +430,17 @@ String cleanNumber(String number) {
   }) {
     // 1) Convert "10%" => 0.10, "8%" => 0.08, etc.
     double progressValue = 0.1;
-if (percentage.endsWith('%')) {
-  final numeric = percentage.substring(0, percentage.length - 1);
-  final parsed = double.tryParse(numeric.trim());
-  if (parsed != null) {
-    progressValue = parsed / 100.0;
-  }
+    if (percentage.endsWith('%')) {
+      final numeric = percentage.substring(0, percentage.length - 1);
+      final parsed = double.tryParse(numeric.trim());
+      if (parsed != null) {
+        progressValue = parsed / 100.0;
+      }
 
-  // Move percentage sign to the left
-  percentage = '%$numeric'; // Now the percentage symbol is placed before the number
-}
-
+      // Move percentage sign to the left
+      percentage =
+          '%$numeric'; // Now the percentage symbol is placed before the number
+    }
 
     // 2) For a 130×130 circle, the center is at (65, 65).
     //    CircularProgressIndicator starts at -90° (top), so angle offset is -pi/2
@@ -507,33 +511,33 @@ if (percentage.endsWith('%')) {
               ),
               const SizedBox(height: 5),
               Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    Icon(
-      CustomIcons.riyal, // Riyal symbol
-      size: 14, // Adjust size if needed
-      color: Color(0xFF3D3D3D),
-    ),
-    const SizedBox(width: 5), // Space between icon and amount
-Text(
-  arabicNumberFormat.format(double.tryParse(amount.replaceAll(',', '').replaceAll('،', '.')) ?? 0.0),
-  style: const TextStyle(
-    color: Color(0xFF3D3D3D),
-    fontSize: 18,
-    fontFamily: 'GE-SS-Two-Bold',
-  ),
-),
-
-  ],
-),
-
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    CustomIcons.riyal, // Riyal symbol
+                    size: 14, // Adjust size if needed
+                    color: Color(0xFF3D3D3D),
+                  ),
+                  const SizedBox(width: 5), // Space between icon and amount
+                  Text(
+                    arabicNumberFormat.format(double.tryParse(
+                            amount.replaceAll(',', '').replaceAll('،', '.')) ??
+                        0.0),
+                    style: const TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 18,
+                      fontFamily: 'GE-SS-Two-Bold',
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
 
           // 5) The percentage text placed at the arc endpoint, outside the circle
           Positioned(
             // Adjust these offsets so the text is visually centered around the arc end
-            left: offsetX -16,
+            left: offsetX - 16,
             top: offsetY - 8,
             child: Text(
               percentage,

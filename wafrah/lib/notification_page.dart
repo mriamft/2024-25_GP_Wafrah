@@ -6,7 +6,8 @@ class NotificationPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
 
-  const NotificationPage({super.key, required this.userName, required this.phoneNumber});
+  const NotificationPage(
+      {super.key, required this.userName, required this.phoneNumber});
 
   @override
   _NotificationPageState createState() => _NotificationPageState();
@@ -28,8 +29,9 @@ class _NotificationPageState extends State<NotificationPage> {
     // Fetch notifications from secure storage (update this line with your actual data fetching logic)
     String? storedNotifications = await _storage.read(key: 'notifications');
     if (storedNotifications != null) {
-      notifications = storedNotifications.split(';');  // Assuming stored notifications are separated by a semicolon
-    } 
+      notifications = storedNotifications.split(
+          ';'); // Assuming stored notifications are separated by a semicolon
+    }
 
     setState(() {
       hasNewNotifications = notifications.isNotEmpty;
@@ -64,7 +66,8 @@ class _NotificationPageState extends State<NotificationPage> {
             children: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog without deleting
+                  Navigator.of(context)
+                      .pop(); // Close the dialog without deleting
                 },
                 child: const Text(
                   'إلغاء',
@@ -82,7 +85,8 @@ class _NotificationPageState extends State<NotificationPage> {
                     notifications.removeAt(index); // Delete the notification
                     hasNewNotifications = notifications.isNotEmpty;
                   });
-                  Navigator.of(context).pop(); // Close the dialog after deleting
+                  Navigator.of(context)
+                      .pop(); // Close the dialog after deleting
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
@@ -138,14 +142,14 @@ class _NotificationPageState extends State<NotificationPage> {
             right: 15,
             child: GestureDetector(
               onTap: _onArrowTap,
-              child: Icon(
+              child: const Icon(
                 Icons.arrow_forward_ios,
-                color: const Color(0xFF3D3D3D),
+                color: Color(0xFF3D3D3D),
                 size: 28,
               ),
             ),
           ),
-          
+
           // Header text (as in the original header)
           const Positioned(
             top: 58,
@@ -171,14 +175,15 @@ class _NotificationPageState extends State<NotificationPage> {
               child: Column(
                 children: List.generate(notifications.length, (index) {
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.end, // Right align all content
+                    crossAxisAlignment:
+                        CrossAxisAlignment.end, // Right align all content
                     children: [
                       // Date displayed outside the gray box
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15.0),
+                      const Padding(
+                        padding: EdgeInsets.only(right: 15.0),
                         child: Text(
                           '2025-03-14', // Format it to YYYY-MM-DD
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             color: Color(0xFF3D3D3D),
                             fontWeight: FontWeight.bold,
@@ -186,31 +191,37 @@ class _NotificationPageState extends State<NotificationPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 5), // Space between date and notification
+                      const SizedBox(
+                          height: 5), // Space between date and notification
 
                       // Notification container with delete button
                       Container(
                         margin: const EdgeInsets.symmetric(vertical: 5.0),
                         padding: const EdgeInsets.all(10.0),
                         decoration: BoxDecoration(
-                          color: Colors.grey[300], // Slightly darker background for the notification box
+                          color: Colors.grey[
+                              300], // Slightly darker background for the notification box
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start, // Align delete button to the left
+                          mainAxisAlignment: MainAxisAlignment
+                              .start, // Align delete button to the left
                           children: [
                             // Delete Button
                             IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red),
                               onPressed: () {
-                                _deleteNotification(index); // Show confirmation dialog
+                                _deleteNotification(
+                                    index); // Show confirmation dialog
                               },
                             ),
-                            const SizedBox(width: 10), // Space between button and content
+                            const SizedBox(
+                                width: 10), // Space between button and content
                             // Notification content
                             Expanded(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end, // Right align everything
+                                crossAxisAlignment: CrossAxisAlignment
+                                    .end, // Right align everything
                                 children: [
                                   // Notification title (bold)
                                   Text(
@@ -221,7 +232,9 @@ class _NotificationPageState extends State<NotificationPage> {
                                       fontFamily: 'GE-SS-Two-Light',
                                     ),
                                   ),
-                                  const SizedBox(height: 5), // Space between title and body
+                                  const SizedBox(
+                                      height:
+                                          5), // Space between title and body
                                   // Notification body
                                   Text(
                                     notifications[index].split(":")[1], // Body
@@ -229,7 +242,8 @@ class _NotificationPageState extends State<NotificationPage> {
                                       fontSize: 14,
                                       fontFamily: 'GE-SS-Two-Light',
                                     ),
-                                    textAlign: TextAlign.right, // Right align the text
+                                    textAlign:
+                                        TextAlign.right, // Right align the text
                                   ),
                                 ],
                               ),

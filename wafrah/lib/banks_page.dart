@@ -5,12 +5,11 @@ import 'home_page.dart';
 import 'saving_plan_page.dart';
 import 'settings_page.dart';
 import 'storage_service.dart';
-// Import your goal page for navigation
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
 import 'custom_icons.dart';
 import 'package:intl/intl.dart'; // Import intl package
-
+import 'chatbot.dart';
 
 class BanksPage extends StatefulWidget {
   final String userName;
@@ -52,17 +51,15 @@ class _BanksPageState extends State<BanksPage> {
     }
   }
 
+  String formatNumberWithArabicComma(double number) {
+    // Convert the number to Arabic numerals with a comma separator
+    String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
 
-String formatNumberWithArabicComma(double number) {
-  // Convert the number to Arabic numerals with a comma separator
-  String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
+    // Replace the default decimal point (.) with Arabic comma (،)
+    formattedNumber = formattedNumber.replaceAll('.', '،');
 
-  // Replace the default decimal point (.) with Arabic comma (،)
-  formattedNumber = formattedNumber.replaceAll('.', '،');
-
-  return formattedNumber;
-}
-
+    return formattedNumber;
+  }
 
   Future<void> _saveAccountsLocally(List<Map<String, dynamic>> accounts) async {
     await _storageService.saveAccountDataLocally(widget.phoneNumber, accounts);
@@ -137,106 +134,114 @@ String formatNumberWithArabicComma(double number) {
         accountTypeTranslations[accountSubType] ?? accountSubType;
 
     return Container(
-    margin: const EdgeInsets.only(bottom: 20),
-    width: 340,
-    height: 50,
-    decoration: BoxDecoration(
-      color: const Color(0xFFD9D9D9),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween, // ✅ Ensures spacing between items
-      children: [
-        // Left section for monetary amount
-Padding(
-  padding: const EdgeInsets.only(left: 12.0),
-  child: Row(
-    children: [
-      Icon(
-        CustomIcons.riyal, // Use the new Riyal symbol
-        size: 14, // Adjust size as needed
-        color: Color(0xFF5F5F5F),
+      margin: const EdgeInsets.only(bottom: 20),
+      width: 340,
+      height: 50,
+      decoration: BoxDecoration(
+        color: const Color(0xFFD9D9D9),
+        borderRadius: BorderRadius.circular(8),
       ),
-      const SizedBox(width: 5), // Spacing between icon and amount
-Text(
-  formatNumberWithArabicComma(double.tryParse(account['Balance']?.toString() ?? '0') ?? 0.0),
-  style: const TextStyle(
-    color: Color(0xFF313131),
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-    fontFamily: 'GE-SS-Two-Bold',
-  ),
-  overflow: TextOverflow.ellipsis,
-),
-
-    ],
-  ),
-),
-
-    // Middle section for account details
-Expanded(
-  child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.end, // ✅ Ensures right alignment
-    children: [
-      Text(
-        translatedAccountSubType,
-        style: const TextStyle(
-          color: Color(0xFF3D3D3D),
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'GE-SS-Two-Bold',
-        ),
-        overflow: TextOverflow.ellipsis,
-      ),
-
-      const SizedBox(height: 8), // ✅ Adds space above the IBAN to prevent overlap
-
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end, // ✅ Ensures text alignment
+      child: Row(
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween, // ✅ Ensures spacing between items
         children: [
-          Expanded( // ✅ Allows the IBAN to take available space
-            child: Text(
-              account['IBAN'] ?? 'رقم الايبان',
-              style: const TextStyle(
-                color: Color(0xFF5F5F5F),
-                fontSize: 13,
-                fontFamily: 'GE-SS-Two-Light',
-              ),
-              textAlign: TextAlign.right,
-              softWrap: false, // Prevents automatic wrapping
-              overflow: TextOverflow.visible, // ✅ Ensures full IBAN is shown
+          // Left section for monetary amount
+          Padding(
+            padding: const EdgeInsets.only(left: 12.0),
+            child: Row(
+              children: [
+                const Icon(
+                  CustomIcons.riyal, // Use the new Riyal symbol
+                  size: 14, // Adjust size as needed
+                  color: Color(0xFF5F5F5F),
+                ),
+                const SizedBox(width: 5), // Spacing between icon and amount
+                Text(
+                  formatNumberWithArabicComma(
+                      double.tryParse(account['Balance']?.toString() ?? '0') ??
+                          0.0),
+                  style: const TextStyle(
+                    color: Color(0xFF313131),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'GE-SS-Two-Bold',
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 5),
-          const Text(
-            'رقم الآيبان',
-            style: TextStyle(
-              color: Color(0xFF3D3D3D),
-              fontSize: 13,
-              fontFamily: 'GE-SS-Two-Bold',
+
+          // Middle section for account details
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment:
+                  CrossAxisAlignment.end, // ✅ Ensures right alignment
+              children: [
+                Text(
+                  translatedAccountSubType,
+                  style: const TextStyle(
+                    color: Color(0xFF3D3D3D),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'GE-SS-Two-Bold',
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(
+                    height:
+                        8), // ✅ Adds space above the IBAN to prevent overlap
+
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.end, // ✅ Ensures text alignment
+                  children: [
+                    Expanded(
+                      // ✅ Allows the IBAN to take available space
+                      child: Text(
+                        account['IBAN'] ?? 'رقم الايبان',
+                        style: const TextStyle(
+                          color: Color(0xFF5F5F5F),
+                          fontSize: 13,
+                          fontFamily: 'GE-SS-Two-Light',
+                        ),
+                        textAlign: TextAlign.right,
+                        softWrap: false, // Prevents automatic wrapping
+                        overflow: TextOverflow
+                            .visible, // ✅ Ensures full IBAN is shown
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'رقم الآيبان',
+                      style: TextStyle(
+                        color: Color(0xFF3D3D3D),
+                        fontSize: 13,
+                        fontFamily: 'GE-SS-Two-Bold',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Right section for SAMA logo
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Image.asset(
+              'assets/images/SAMA_logo.png',
+              width: 30,
+              height: 30,
+              fit: BoxFit.contain,
             ),
           ),
         ],
       ),
-    ],
-  ),
-),
-
-        // Right section for SAMA logo
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Image.asset(
-            'assets/images/SAMA_logo.png',
-            width: 30,
-            height: 30,
-            fit: BoxFit.contain,
-          ),
-        ),
-      ],
-    ),
-  );
-}
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -481,7 +486,48 @@ Expanded(
               ),
             ),
           ),
+          // Chatbot button with the image in the specified position
+          Positioned(
+            top: 650, // Position the image at x=333 and y=702
+            left: 328,
+            child: GestureDetector(
+              onTap: navigateToChatbot, // Navigate to Chatbot when clicked
+              child: Container(
+                width: 55,
+                height: 55,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/chatbotIcon.png', // Image path
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  void navigateToChatbot() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Chatbot(
+          userName: widget.userName,
+          phoneNumber: widget.phoneNumber,
+          accounts: widget.accounts,
+        ),
       ),
     );
   }
@@ -509,5 +555,4 @@ Expanded(
       ),
     );
   }
-  
 }

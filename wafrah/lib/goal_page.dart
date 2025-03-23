@@ -317,17 +317,17 @@ class _GoalPageState extends State<GoalPage> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Row(
+                            const Row(
                               children: [
-                                const Text(
+                                Text(
                                   '*',
                                   style: TextStyle(
                                     color: Colors.red,
                                     fontSize: 14,
                                   ),
                                 ),
-                                const SizedBox(width: 5),
-                                const Text(
+                                SizedBox(width: 5),
+                                Text(
                                   'الهدف',
                                   style: TextStyle(
                                     color: Color(0xFF3D3D3D),
@@ -377,17 +377,17 @@ class _GoalPageState extends State<GoalPage> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Row(
+                            const Row(
                               children: [
-                                const Text(
+                                Text(
                                   '*',
                                   style: TextStyle(
                                     color: Colors.red,
                                     fontSize: 14,
                                   ),
                                 ),
-                                const SizedBox(width: 5),
-                                const Text(
+                                SizedBox(width: 5),
+                                Text(
                                   'تاريخ البداية',
                                   style: TextStyle(
                                     color: Color(0xFF3D3D3D),
@@ -639,8 +639,8 @@ class _GoalPageState extends State<GoalPage> {
                       : const Color(0xFF6D6D6D),
                   borderRadius: BorderRadius.circular(100),
                 ),
-                child: Center(
-                  child: const Text(
+                child: const Center(
+                  child: Text(
                     'استمرار',
                     style: TextStyle(
                         color: Colors.white,
@@ -656,18 +656,18 @@ class _GoalPageState extends State<GoalPage> {
             Positioned.fill(
               child: Container(
                 color: Colors.black.withOpacity(0.5),
-                child: Column(
+                child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const CircularProgressIndicator(
+                    CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
                         Color(
                             0xFF69BA9C), // Match the color used in AccLinkPage
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    const Text(
+                    SizedBox(height: 20),
+                    Text(
                       "يتم الآن معالجة البيانات", // Loading message
                       style: TextStyle(
                         color: Colors.white,

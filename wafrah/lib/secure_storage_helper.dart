@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+const FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
 // Save the plan data to secure storage
 Future<void> savePlanToSecureStorage(Map<String, dynamic> planData) async {
