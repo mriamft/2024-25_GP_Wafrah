@@ -132,8 +132,8 @@ dependencies:
   shared_preferences: ^2.0.13
   another_flushbar: ^1.10.24
   audioplayers: ^6.1.0 # Or the latest compatible version
-  
-
+  flutter_local_notifications: ^19.0.0
+  workmanager: ^0.5.2
 
 
 dev_dependencies:

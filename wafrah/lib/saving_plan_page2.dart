@@ -10,6 +10,9 @@ import 'dart:convert'; // For JSON encoding and decoding
 import 'package:intl/intl.dart'; // For date formatting
 import 'custom_icons.dart';
 import 'dart:ui' as ui;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'main.dart';
+import 'notification_service.dart';
 
 
 class SavingPlanPage2 extends StatefulWidget {
@@ -154,6 +157,36 @@ Future<void> _loadPlanFromSecureStorage() async {
   }
 }
 
+String getArabicMonth(int month) {
+  switch (month) {
+    case 1:
+      return "الأول";
+    case 2:
+      return "الثاني";
+    case 3:
+      return "الثالث";
+    case 4:
+      return "الرابع";
+    case 5:
+      return "الخامس";
+    case 6:
+      return "السادس";
+    case 7:
+      return "السابع";
+    case 8:
+      return "الثامن";
+    case 9:
+      return "التاسع";
+    case 10:
+      return "العاشر";
+    case 11:
+      return "الحادي عشر";
+    case 12:
+      return "الثاني عشر";
+    default:
+      return "الشهر $month"; // Default fallback
+  }
+}
 
 void generateSavingsPlan() {
   print("Generating Savings for Month: $_currentMonthIndex");
@@ -200,6 +233,19 @@ void generateSavingsPlan() {
     wap = progressData; // Store progress data
   });
 
+  // Show notifications based on progress
+showMonthProgressNotification();  
+  // Add the month notification for the user when a new month starts
+  // Add the month notification only if it's the first month or after month completion
+  if (_currentMonthIndex == totalMonths) { // Only notify when the last month ends
+    NotificationService.showNotification(
+      title: "لقد انهيت الشهر ${getArabicMonth(_currentMonthIndex)} من الخطة",
+      body: "شاهد آخر تحديثاتك في الخطة.",
+    );
+  }
+  // Call the function to check for full plan completion
+  checkFullPlanCompletion();
+
   // Save the updated plan to secure storage
   Map<String, dynamic> updatedPlan = {
     'DurationMonths': widget.resultData['DurationMonths'],
@@ -213,6 +259,69 @@ void generateSavingsPlan() {
   _savePlanToSecureStorage(updatedPlan);
 }
 
+void showProgressNotification(Map<String, dynamic> progressData) {
+  progressData['progress'].forEach((category, progress) {
+    if (progress >= 50 && progress < 75) {
+      NotificationService.showNotification(
+        title: "أنت في منتصف الطريق!",
+        body: "لقد أكملت 50% من هدفك. استمر في العمل!",
+      );
+    } else if (progress >= 75 && progress < 100) {
+      NotificationService.showNotification(
+        title: "أنت قريب جدًا من الهدف!",
+        body: "لقد أكملت 75% من هدفك. قريبًا ستصل!",
+      );
+    } else if (progress == 100) {
+      NotificationService.showNotification(
+        title: "تمت الخطة بنجاح!",
+        body: "لقد أكملت هدف الادخار الخاص بك. تهانينا!",
+      );
+    }
+  });
+}
+
+void showMonthProgressNotification() {
+  DateTime today = DateTime.now();
+  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+  
+  // Calculate the number of months passed based on the start date and current date
+  double totalMonths = widget.resultData['DurationMonths'];
+int monthsPassed = (today.year - startDate.year) * 12 + today.month - startDate.month;
+  
+  // Calculate the percentage progress as double
+  double progress = (monthsPassed / totalMonths) * 100;
+
+  // Show notification if the month progress is relevant
+  if (monthsPassed > 0 && monthsPassed <= totalMonths) {
+    NotificationService.showNotification(
+title: "لقد أكملت $monthsPassed من ${totalMonths.toInt()} شهور من الخطة",
+      body: "لقد أنجزت ${progress.toStringAsFixed(2)}% من الخطة. استمر في العمل!",
+    );
+  }
+}
+
+
+void checkFullPlanCompletion() {
+  // Check if the user has completed the full plan (last month)
+  if (_currentMonthIndex == months.length - 1) {
+    double totalSavings = categoryTotalSavings.values.fold(0.0, (prev, curr) => prev + curr);
+    double savingsGoal = widget.resultData['SavingsGoal'];
+
+    if (totalSavings >= savingsGoal) {
+      // User achieved the savings goal
+      NotificationService.showNotification(
+        title: "تمت الخطة بنجاح!",
+        body: "لقد أكملت هدف الإدخار الخاص بك. تهانينا!",
+      );
+    } else {
+      // User did not achieve the savings goal
+      NotificationService.showNotification(
+        title: "انتهت مدة الخطة",
+        body: "لقد انتهت مدة الخطة ولكن لم تصل إلى الهدف المحدد. استمر في المحاولة!",
+      );
+    }
+  }
+}
 
   void _updatePlan(Map<String, dynamic> updatedPlan) {
     // Save the updated plan to secure storage

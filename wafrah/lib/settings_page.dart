@@ -20,6 +20,7 @@ import 'secure_storage_helper.dart'; // Import the secure storage helper
 class SettingsPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
+  
   final List<Map<String, dynamic>> accounts;
   const SettingsPage({
     super.key,
@@ -38,6 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Color _resetPasswordColor = const Color(0xFFD9D9D9);
   Color _notificationColor = const Color(0xFFD9D9D9);
   Color _supportColor = const Color(0xFFD9D9D9);
+bool hasNewNotifications = false; // Track new notifications
 
   // Custom page transition
   Route _createNoTransitionRoute(Widget page) {
@@ -49,6 +51,21 @@ class _SettingsPageState extends State<SettingsPage> {
       },
     );
   }
+// In SettingsPage, check for new notifications in initState
+@override
+void initState() {
+  super.initState();
+  _checkForNewNotifications();
+}
+
+// In SettingsPage, add the check for new notifications in initState
+void _checkForNewNotifications() async {
+  String? hasNewNotifications = await _storage.read(key: 'hasNewNotifications');
+  setState(() {
+    this.hasNewNotifications = (hasNewNotifications == 'true');
+  });
+}
+
 
 //Profile Setting
   void _onProfileTap() {
@@ -80,19 +97,21 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-  void _onNotificationTap() {
+void _onNotificationTap() {
+  setState(() {
+    hasNewNotifications = false;  // Mark notifications as read when opening the page
+    _notificationColor = Colors.grey[400]!; // Change notification button color to normal
+  });
+
+  Navigator.of(context)
+      .push(_createNoTransitionRoute(NotificationPage(
+          userName: widget.userName, phoneNumber: widget.phoneNumber)))
+      .then((_) {
     setState(() {
-      _notificationColor = Colors.grey[400]!;
+      _notificationColor = const Color(0xFFD9D9D9);
     });
-    Navigator.of(context)
-        .push(_createNoTransitionRoute(NotificationPage(
-            userName: widget.userName, phoneNumber: widget.phoneNumber)))
-        .then((_) {
-      setState(() {
-        _notificationColor = const Color(0xFFD9D9D9);
-      });
-    });
-  }
+  });
+}
 
   void navigateToSavingPlan() async {
     // Check if there is a saved plan
@@ -552,58 +571,83 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          //Manage Notifications UI
-          Positioned(
-            top: 365,
-            left: 19,
-            right: 19,
-            child: GestureDetector(
-              onTap: _onNotificationTap,
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: _notificationColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 10),
-                    const Icon(Icons.arrow_back_ios_new,
-                        color: Color(0xFF3D3D3D), size: 15),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight * 0.9,
-                        child: const Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'إدارة الإشعارات',
-                              style: TextStyle(
-                                color: Color(0xFF3D3D3D),
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'GE-SS-Two-Bold',
-                              ),
-                            ),
-                            Text(
-                              'تفعيل الإشعارات وضبطها',
-                              style: TextStyle(
-                                color: Color(0xFF686868),
-                                fontSize: 9,
-                                fontFamily: 'GE-SS-Two-Light',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+// Manage Notifications UI
+Positioned(
+  top: 365,
+  left: 19,
+  right: 19,
+  child: GestureDetector(
+    onTap: _onNotificationTap,
+    child: Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: _notificationColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 10),
+          const Icon(Icons.arrow_back_ios_new,
+              color: Color(0xFF3D3D3D), size: 15),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight * 0.9,
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'إدارة الإشعارات',
+                    style: TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'GE-SS-Two-Bold',
                     ),
-                  ],
-                ),
+                  ),
+                  Text(
+                    'تفعيل الإشعارات وضبطها',
+                    style: TextStyle(
+                      color: Color(0xFF686868),
+                      fontSize: 9,
+                      fontFamily: 'GE-SS-Two-Light',
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
+          // Red Dot Indicator
+          if (hasNewNotifications)
+Positioned(
+  right: 10,
+  top: 10,
+  child: Stack(
+    children: [
+      const Icon(Icons.notifications),
+      // Show red dot if new notifications are available
+          if (hasNewNotifications)
+            Positioned(
+              right: 10,
+              top: 10,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+            ),
+          ),
+        ),
+    ],
+  ),
+),
+        ],
+      ),
+    ),
+  ),
+),
 
           //Contact Support UI
           Positioned(

@@ -6,10 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.wafrah"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
+    namespace = "com.example.wafrah"
+    compileSdk = 35
+    ndkVersion = flutter.ndkVersion
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
