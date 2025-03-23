@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart'; // Import this for date formatting
 import 'notification_service.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -26,11 +27,15 @@ class _NotificationPageState extends State<NotificationPage> {
 
   // Load notifications from secure storage
   void _loadNotifications() async {
-    // Fetch notifications from secure storage (update this line with your actual data fetching logic)
+    // Fetch notifications from secure storage
     String? storedNotifications = await _storage.read(key: 'notifications');
     if (storedNotifications != null) {
+<<<<<<< Updated upstream
       notifications = storedNotifications.split(
           ';'); // Assuming stored notifications are separated by a semicolon
+=======
+      notifications = storedNotifications.split(';'); // Assuming notifications are stored as a semicolon-separated string
+>>>>>>> Stashed changes
     }
 
     setState(() {
@@ -116,18 +121,92 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  // Remove all notifications from the list
+  // Remove all notifications from the list and secure storage
   void _clearNotifications() async {
-    await _storage.delete(key: 'notifications');
-    setState(() {
-      notifications.clear();
-      hasNewNotifications = false;
-    });
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'تأكيد حذف جميع الإشعارات',
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontFamily: 'GE-SS-Two-Bold',
+            fontSize: 20,
+            color: Color(0xFF3D3D3D),
+          ),
+        ),
+        content: const Text(
+          'هل أنت متأكد أنك تريد حذف جميع الإشعارات؟',
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontFamily: 'GE-SS-Two-Light',
+            color: Color(0xFF3D3D3D),
+          ),
+        ),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog without deleting
+                },
+                child: const Text(
+                  'إلغاء',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    color: Color(0xFF838383),
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20),
+              TextButton(
+                onPressed: () async {
+                  await _storage.delete(key: 'notifications');
+                  setState(() {
+                    notifications.clear();
+                    hasNewNotifications = false;
+                  });
+                  Navigator.of(context).pop(); // Close the dialog after deleting
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'تم حذف جميع الإشعارات بنجاح.',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontFamily: 'GE-SS-Two-Light',
+                        ),
+                      ),
+                      backgroundColor: Color(0xFF0FBE7C),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'حذف الكل',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Light',
+                    fontSize: 18,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   // Handle arrow tap to go back
   void _onArrowTap() {
     Navigator.pop(context);
+  }
+
+  // Get current date and time
+  String _getCurrentDateTime() {
+    DateTime now = DateTime.now();
+    return DateFormat('yyyy-MM-dd').format(now); // Format date as yyyy-MM-dd HH:mm
   }
 
   @override
@@ -164,7 +243,37 @@ class _NotificationPageState extends State<NotificationPage> {
               ),
             ),
           ),
+          // "Delete All" button positioned on the top left
+          Positioned(
+            top: 51,
+            left: 15,
+            child: ElevatedButton(
+  onPressed: notifications.isEmpty ? null : _clearNotifications, // Disable button if no notifications
+  style: ButtonStyle(
+    backgroundColor: MaterialStateProperty.resolveWith<Color>( 
+      (Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return Color(0xFF707070); // Darker gray when the button is disabled
+        }
+        return Colors.red; // Color when the button is enabled
+      },
+    ),
+    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    )),
+    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 14, vertical: 8)),
+  ),
+  child: const Text(
+    'حذف الكل',
+    style: TextStyle(
+      fontFamily: 'GE-SS-Two-Light',
+      color: Colors.white,
+      fontSize: 12,
+    ),
+  ),
+)
 
+          ),
           // Notifications List wrapped in a SingleChildScrollView
           Positioned(
             top: 100,
@@ -182,8 +291,13 @@ class _NotificationPageState extends State<NotificationPage> {
                       const Padding(
                         padding: EdgeInsets.only(right: 15.0),
                         child: Text(
+<<<<<<< Updated upstream
                           '2025-03-14', // Format it to YYYY-MM-DD
                           style: TextStyle(
+=======
+                          _getCurrentDateTime(), // Show current date and time
+                          style: const TextStyle(
+>>>>>>> Stashed changes
                             fontSize: 14,
                             color: Color(0xFF3D3D3D),
                             fontWeight: FontWeight.bold,
@@ -257,8 +371,6 @@ class _NotificationPageState extends State<NotificationPage> {
               ),
             ),
           ),
-
-          // Red dot indicator if there are new notifications
         ],
       ),
     );

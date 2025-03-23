@@ -235,12 +235,48 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       wap = progressData; // Store progress data
     });
 
+<<<<<<< Updated upstream
     // Show notifications based on progress
     showMonthProgressNotification();
     // Add the month notification for the user when a new month starts
     // Add the month notification only if it's the first month or after month completion
     if (_currentMonthIndex == totalMonths) {
       // Only notify when the last month ends
+=======
+  print("Final Computed Savings for $_currentMonthIndex: $savingsPlan");
+
+  // Track savings progress and store it
+  Map<String, dynamic> progressData = (_currentMonthIndex == 0)
+      ? trackSavingsProgress()
+      : MonthlytrackSavingsProgress();
+
+  print("Savings Progress Data: $progressData");
+
+  // Store progress in state
+  setState(() {
+    wap = progressData; // Store progress data
+  });
+
+  showMonthProgressNotification();
+  showCategoryProgressNotification(progressData); // Call the category progress notification
+
+  // Save the updated plan to secure storage
+  Map<String, dynamic> updatedPlan = {
+    'DurationMonths': widget.resultData['DurationMonths'],
+    'CategorySavings': categoryTotalSavings,
+    'MonthlySavingsPlan': savingsPlan,
+    'SavingsGoal': widget.resultData['SavingsGoal'],
+    'startDate': widget.resultData['startDate'],
+    'discretionaryRatios': widget.resultData['discretionaryRatios'],
+  };
+
+  _savePlanToSecureStorage(updatedPlan);
+}
+
+void showProgressNotification(Map<String, dynamic> progressData) {
+  progressData['progress'].forEach((category, progress) {
+    if (progress >= 50 && progress < 75) {
+>>>>>>> Stashed changes
       NotificationService.showNotification(
         title: "لقد انهيت الشهر ${getArabicMonth(_currentMonthIndex)} من الخطة",
         body: "شاهد آخر تحديثاتك في الخطة.",
@@ -249,6 +285,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     // Call the function to check for full plan completion
     checkFullPlanCompletion();
 
+<<<<<<< Updated upstream
     // Save the updated plan to secure storage
     Map<String, dynamic> updatedPlan = {
       'DurationMonths': widget.resultData['DurationMonths'],
@@ -260,8 +297,24 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     };
 
     _savePlanToSecureStorage(updatedPlan);
+=======
+void showMonthProgressNotification() {
+  DateTime today = DateTime.now();
+  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+
+  int totalMonths = widget.resultData['DurationMonths'].toInt();
+  int monthsPassed = today.difference(startDate).inDays ~/ 30; // Calculate number of months passed
+
+  // Only show notification if the user has completed a month
+  if (monthsPassed > 0 && monthsPassed <= totalMonths && today.day == DateTime(today.year, today.month, 0).day) {
+    NotificationService.showNotification(
+      title: "لقد أكملت الشهر $monthsPassed من ${totalMonths.toInt()} شهور من الخطة",
+      body: "في هذا الشهر أنجزت ${((monthsPassed / totalMonths) * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
+    );
+>>>>>>> Stashed changes
   }
 
+<<<<<<< Updated upstream
   void showProgressNotification(Map<String, dynamic> progressData) {
     progressData['progress'].forEach((category, progress) {
       if (progress >= 50 && progress < 75) {
@@ -282,6 +335,95 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       }
     });
   }
+=======
+Future<void> showNotificationsSequentially(List<Map<String, String>> notifications) async {
+  for (int i = 0; i < notifications.length; i++) {
+    // Show the notification at index i
+    await NotificationService.showNotification(
+      title: notifications[i]['title']!,
+      body: notifications[i]['body']!,
+    );
+
+    // Wait for 2-3 seconds before showing the next notification
+    await Future.delayed(const Duration(seconds: 2));
+  }
+}
+
+
+void showCategoryProgressNotification(Map<String, dynamic> progressData) {
+  // List to store categories that have already received a notification
+  Set<String> notifiedCategories = Set<String>();
+
+  // List of notifications to be shown sequentially
+  List<Future<void>> notificationQueue = [];
+
+  // Loop through progress data and filter categories that exist in the savings plan
+  progressData['progress'].forEach((category, progress) {
+    // Check if the category exists in the current savings plan
+    bool categoryExistsInPlan = savingsPlan.any((plan) => plan['category'] == category);
+
+    // Only show notification if category exists in plan and hasn't been notified yet
+    if (categoryExistsInPlan && !notifiedCategories.contains(category)) {
+      // 50% Progress
+      if (progress >= 50 && progress < 75) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "لقد أكملت 50% من الادخار في فئة $category",
+            body: "أنت في منتصف الطريق! استمر في العمل لتحقيق الهدف.",
+          ),
+        ));
+      }
+      // 75% Progress
+      else if (progress >= 75 && progress < 100) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "أنت قريب جداً من الهدف في فئة $category!",
+            body: "لقد اكثر من 75% من هدفك في هذه الفئة. قريباً ستصل!",
+          ),
+        ));
+      }
+      // 100% Progress
+      else if (progress == 100) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "تم الادخار بنجاح في فئة $category!",
+            body: "تهانينا! لقد أكملت 100% من هدف الادخار في هذه الفئة.",
+          ),
+        ));
+      }
+      // Low savings progress (less than 50%)
+      else if (progress > 0 && progress < 50) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "لقد أكملت تقدماً منخفضاً في فئة $category",
+            body: "أنت على الطريق الصحيح! حاول زيادة المدخرات لتحقيق الهدف.",
+          ),
+        ));
+      }
+      // No progress (0%)
+      else if (progress == 0) {
+        notificationQueue.add(Future.delayed(
+          Duration(milliseconds: notificationQueue.length * 10000), // Add delay between notifications
+          () => NotificationService.showNotification(
+            title: "لم تبدأ الادخار بعد في فئة $category",
+            body: "حاول أن تبدأ في الادخار الآن! لا تتأخر عن تحقيق هدفك.",
+          ),
+        ));
+      }
+
+      // Mark this category as notified
+      notifiedCategories.add(category);
+    }
+  });
+
+  // Execute the notifications sequentially
+  Future.wait(notificationQueue);
+}
+>>>>>>> Stashed changes
 
   void showMonthProgressNotification() {
     DateTime today = DateTime.now();
