@@ -940,45 +940,66 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
-                      onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SettingsPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts,
-                        ),
-                      ),
-                    );
-                  }),
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
-                      onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TransactionsPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts,
-                        ),
-                      ),
-                    );
-                  }),
                   buildBottomNavItem(
-                      Icons.account_balance_outlined, "الحسابات", 2, onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BanksPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts,
+                    Icons.settings_outlined,
+                    "إعدادات",
+                    0,
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              SettingsPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    },
+                  ),
+                  buildBottomNavItem(
+                    Icons.credit_card,
+                    "سجل المعاملات",
+                    1,
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              TransactionsPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
+                        ),
+                      );
+                    },
+                  ),
+                  buildBottomNavItem(
+                    Icons.account_balance_outlined,
+                    "الحسابات",
+                    2,
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              BanksPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
+                        ),
+                      );
+                    },
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10, right: 0),
                     child: buildBottomNavItem(
@@ -1024,17 +1045,33 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(
-                              userName: widget.userName,
-                              phoneNumber: widget.phoneNumber,
-                              accounts: widget.accounts),
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              HomePage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
                         ),
                       );
                     },
                   ),
                 ),
               ],
+            ),
+          ),
+          Positioned(
+            left: 338,
+            top: 785,
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: const BoxDecoration(
+                color: Color(0xFF2C8C68),
+                shape: BoxShape.circle,
+              ),
             ),
           ),
           // ✅ زر الذكاء الاصطناعي (chatbot) في مكان محدد

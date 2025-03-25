@@ -6,7 +6,7 @@ import 'home_page.dart';
 import 'banks_page.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
 import 'saving_plan_page2.dart';
-
+import 'chatbot.dart';
 
 class SavingPlanPage extends StatefulWidget {
   final String userName;
@@ -25,9 +25,8 @@ class SavingPlanPage extends StatefulWidget {
 }
 
 class _SavingPlanPageState extends State<SavingPlanPage> {
-
   bool _isPressed = false;
-  bool _isPlanSaved = false;  
+  bool _isPlanSaved = false;
   // Define the function to check and navigate to SavingPlanPage2 or GoalPage
   void navigateToSavingPlan() async {
     // Check if there is a saved plan
@@ -42,7 +41,7 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
-            resultData: savedPlan,  // Pass saved plan data to the next page
+            resultData: savedPlan, // Pass saved plan data to the next page
           ),
         ),
       );
@@ -61,7 +60,6 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
     }
   }
 
-
   // Function to save the plan and update state
   Future<void> _savePlan(Map<String, dynamic> planData) async {
     await savePlanToSecureStorage(planData); // Save the plan securely
@@ -77,11 +75,12 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
           userName: widget.userName,
           phoneNumber: widget.phoneNumber,
           accounts: widget.accounts,
-          resultData: planData,  // Pass the saved plan data
+          resultData: planData, // Pass the saved plan data
         ),
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -211,45 +210,66 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
-                      onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SettingsPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts,
-                        ),
-                      ),
-                    );
-                  }),
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
-                      onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TransactionsPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts,
-                        ),
-                      ),
-                    );
-                  }),
                   buildBottomNavItem(
-                      Icons.account_balance_outlined, "الحسابات", 2, onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BanksPage(
-                          userName: widget.userName,
-                          phoneNumber: widget.phoneNumber,
-                          accounts: widget.accounts,
+                    Icons.settings_outlined,
+                    "إعدادات",
+                    0,
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              SettingsPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    },
+                  ),
+                  buildBottomNavItem(
+                    Icons.credit_card,
+                    "سجل المعاملات",
+                    1,
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              TransactionsPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
+                        ),
+                      );
+                    },
+                  ),
+                  buildBottomNavItem(
+                    Icons.account_balance_outlined,
+                    "الحسابات",
+                    2,
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              BanksPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
+                        ),
+                      );
+                    },
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10, right: 0),
                     child: buildBottomNavItem(
@@ -309,11 +329,15 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(
-                              userName: widget.userName,
-                              phoneNumber: widget.phoneNumber,
-                              accounts: widget.accounts),
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              HomePage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
                         ),
                       );
                     },
@@ -322,7 +346,48 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
               ],
             ),
           ),
+// ✅ زر الذكاء الاصطناعي (chatbot) في مكان محدد
+          Positioned(
+            top: 650,
+            left: 328,
+            child: GestureDetector(
+              onTap: navigateToChatbot,
+              child: Container(
+                width: 55,
+                height: 55,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/chatbotIcon.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  void navigateToChatbot() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Chatbot(
+          userName: widget.userName,
+          phoneNumber: widget.phoneNumber,
+          accounts: widget.accounts,
+        ),
       ),
     );
   }

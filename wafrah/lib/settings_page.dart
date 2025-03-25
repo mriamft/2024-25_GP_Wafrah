@@ -125,25 +125,29 @@ class _SettingsPageState extends State<SettingsPage> {
     if (savedPlan != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => SavingPlanPage2(
+        PageRouteBuilder(
+          pageBuilder: (context, animation1, animation2) => SavingPlanPage2(
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
             resultData: savedPlan, // Pass saved plan data to the next page
           ),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
         ),
       );
     } else {
       // If no saved plan exists, navigate to GoalPage to create a new plan
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => SavingPlanPage(
+        PageRouteBuilder(
+          pageBuilder: (context, animation1, animation2) => SavingPlanPage(
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
           ),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
         ),
       );
     }

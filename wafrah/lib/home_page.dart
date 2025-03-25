@@ -99,25 +99,29 @@ class _HomePageState extends State<HomePage>
     if (savedPlan != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => SavingPlanPage2(
+        PageRouteBuilder(
+          pageBuilder: (context, animation1, animation2) => SavingPlanPage2(
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
             resultData: savedPlan, // Pass saved plan data to the next page
           ),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
         ),
       );
     } else {
       // If no saved plan exists, navigate to GoalPage to create a new plan
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => SavingPlanPage(
+        PageRouteBuilder(
+          pageBuilder: (context, animation1, animation2) => SavingPlanPage(
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
           ),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
         ),
       );
     }
@@ -2102,18 +2106,26 @@ class _HomePageState extends State<HomePage>
                     );
                   }),
                   buildBottomNavItem(
-                      Icons.account_balance_outlined, "الحسابات", 2,
-                      isSelected: true, onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => BanksPage(
-                                userName: widget.userName,
-                                phoneNumber: widget.phoneNumber,
-                                accounts: widget.accounts,
-                              )),
-                    );
-                  }),
+                    Icons.account_balance_outlined,
+                    "الحسابات",
+                    2,
+                    isSelected: true,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              BanksPage(
+                            userName: widget.userName,
+                            phoneNumber: widget.phoneNumber,
+                            accounts: widget.accounts,
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
+                        ),
+                      );
+                    },
+                  ),
                   buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
                       onTap: navigateToSavingPlan),
                 ],
