@@ -21,6 +21,7 @@ class Chatbot extends StatefulWidget {
 class _ChatbotState extends State<Chatbot> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
+  bool isTyping = false;
 
   Color _arrowColor = const Color(0xFF3D3D3D);
 
@@ -38,16 +39,19 @@ class _ChatbotState extends State<Chatbot> {
     setState(() {
       _messages.add({"sender": "user", "text": message});
       _controller.clear();
+      isTyping = true;
     });
 
     final response = await http.post(
-      Uri.parse('http://localhost:5005/webhooks/rest/webhook'),
+      Uri.parse('http://10.0.2.2:5005/webhooks/rest/webhook'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         "sender": widget.phoneNumber,
         "message": message,
       }),
     );
+
+    setState(() => isTyping = false);
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -70,23 +74,92 @@ class _ChatbotState extends State<Chatbot> {
 
   Widget _buildMessage(Map<String, dynamic> message) {
     bool isUser = message["sender"] == "user";
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isUser ? const Color(0xFF2C8C68) : Colors.grey.shade300,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          message["text"],
-          style: TextStyle(
-            color: isUser ? Colors.white : Colors.black87,
-            fontFamily: 'GE-SS-Two-Bold',
-            fontSize: 16,
+
+    if (isUser) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFD7D7D7),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            message["text"],
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: Color(0xFF3D3D3D),
+              fontFamily: 'GE-SS-Two-Bold',
+              fontSize: 16,
+            ),
           ),
         ),
+      );
+    } else {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          textDirection: TextDirection.rtl,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 4.0),
+              child: Image.asset(
+                'assets/images/responseIcon.png',
+                width: 30,
+                height: 30,
+              ),
+            ),
+            Container(
+              constraints: const BoxConstraints(maxWidth: 250),
+              margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                message["text"],
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontFamily: 'GE-SS-Two-Bold',
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget _buildTypingBubble() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        textDirection: TextDirection.rtl,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: Image.asset(
+              'assets/images/responseIcon.png',
+              width: 30,
+              height: 30,
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const AnimatedDots(),
+          ),
+        ],
       ),
     );
   }
@@ -97,7 +170,6 @@ class _ChatbotState extends State<Chatbot> {
       backgroundColor: const Color(0xFF2C8C68),
       body: Stack(
         children: [
-          // White background container
           Positioned(
             top: -50,
             left: 0,
@@ -118,8 +190,6 @@ class _ChatbotState extends State<Chatbot> {
               ),
             ),
           ),
-
-          // Back arrow
           Positioned(
             top: 60,
             right: 15,
@@ -132,8 +202,6 @@ class _ChatbotState extends State<Chatbot> {
               ),
             ),
           ),
-
-          // Title
           const Positioned(
             top: 58,
             left: 170,
@@ -160,8 +228,6 @@ class _ChatbotState extends State<Chatbot> {
               ),
             ),
           ),
-
-          // Chat area
           Positioned.fill(
             top: 170,
             child: Column(
@@ -169,24 +235,38 @@ class _ChatbotState extends State<Chatbot> {
                 Expanded(
                   child: ListView.builder(
                     reverse: true,
-                    itemCount: _messages.length,
-                    itemBuilder: (context, index) =>
-                        _buildMessage(_messages.reversed.toList()[index]),
+                    itemCount: _messages.length + (isTyping ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (isTyping && index == 0) {
+                        return _buildTypingBubble();
+                      } else {
+                        final actualIndex = isTyping ? index - 1 : index;
+                        return _buildMessage(
+                            _messages.reversed.toList()[actualIndex]);
+                      }
+                    },
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
                     children: [
+                      IconButton(
+                        icon: const Icon(Icons.send, color: Color(0xFFD7D7D7)),
+                        onPressed: () => _sendMessage(_controller.text),
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
                           controller: _controller,
+                          textAlign: TextAlign.right,
                           decoration: InputDecoration(
-                            hintText: "اكتب رسالتك...",
-                            hintStyle:
-                                const TextStyle(fontFamily: 'GE-SS-Two-Bold'),
+                            hintText: "...اكتب رسالتك",
+                            hintStyle: const TextStyle(
+                              fontFamily: 'GE-SS-Two-Bold',
+                            ),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: const Color(0xFFD7D7D7),
                             contentPadding:
                                 const EdgeInsets.symmetric(horizontal: 16),
                             border: OutlineInputBorder(
@@ -195,11 +275,6 @@ class _ChatbotState extends State<Chatbot> {
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.send, color: Colors.white),
-                        onPressed: () => _sendMessage(_controller.text),
                       ),
                     ],
                   ),
@@ -210,5 +285,51 @@ class _ChatbotState extends State<Chatbot> {
         ],
       ),
     );
+  }
+}
+
+class AnimatedDots extends StatefulWidget {
+  const AnimatedDots({super.key});
+
+  @override
+  _AnimatedDotsState createState() => _AnimatedDotsState();
+}
+
+class _AnimatedDotsState extends State<AnimatedDots>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<int> _dotsAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(duration: const Duration(seconds: 1), vsync: this)
+          ..repeat();
+    _dotsAnimation = StepTween(begin: 1, end: 3).animate(_controller);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _dotsAnimation,
+      builder: (context, child) {
+        return Text(
+          "." * _dotsAnimation.value,
+          style: const TextStyle(
+            fontSize: 20,
+            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'GE-SS-Two-Bold',
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
