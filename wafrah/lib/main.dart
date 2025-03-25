@@ -3,44 +3,6 @@ import 'dart:math';
 import 'login_page.dart';
 import 'info_page.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// class NotificationService {
-//   static final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-//       FlutterLocalNotificationsPlugin();
-
-//   static Future<void> init() async {
-//     final AndroidInitializationSettings initializationSettingsAndroid =
-//         AndroidInitializationSettings('greenLogo'); // app icon for notification
-
-//     final InitializationSettings initializationSettings =
-//         InitializationSettings(android: initializationSettingsAndroid);
-
-//     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
-//   }
-
-//   static Future<void> showNotification(
-//       {required String title, required String body}) async {
-//     const AndroidNotificationDetails androidPlatformChannelSpecifics =
-//         AndroidNotificationDetails(
-//       'saving_plan_channel',
-//       'Saving Plan Notifications',
-//       channelDescription: 'Notifications to track saving progress',
-//       importance: Importance.max,
-//       priority: Priority.high,
-//       ticker: 'ticker',
-//     );
-
-//     const NotificationDetails platformChannelSpecifics =
-//         NotificationDetails(android: androidPlatformChannelSpecifics);
-
-//     await _flutterLocalNotificationsPlugin.show(
-//       0, // Notification ID
-//       title,
-//       body,
-//       platformChannelSpecifics,
-//       payload: 'item x', // Optional payload
-//     );
-//   }
-// }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 

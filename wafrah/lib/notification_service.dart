@@ -1,22 +1,43 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/material.dart';
+
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
       _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
+  static late Function(String?) onNotificationResponse;
 
-  // Initialize the notification service
-  static Future<void> init() async {
+  // Initialize the notification service and set onSelectNotification callback
+  // Initialize the notification service and pass the onNotificationResponse callback.
+  static Future<void> init(Function(String?) onNotificationResponseCallback) async {
+    onNotificationResponse = onNotificationResponseCallback;
+
     final AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings(
-            '@drawable/greenlogo'); // Icon for notifications
+        AndroidInitializationSettings('@drawable/greenlogo'); // Icon for notifications
 
     final InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    // Initialize the plugin without onSelectNotification
+    await _flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+    );
+
+    // Initialize the plugin with the new onDidReceiveNotificationResponse parameter.
+    await _flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        final String? payload = response.payload;
+        if (onNotificationResponse != null) {
+          onNotificationResponse(payload);
+        }
+      },
+    );
   }
+
+
 
   // Show notification
   static Future<void> showNotification(
@@ -46,6 +67,8 @@ class NotificationService {
     // Store notification
     await _storeNotification(title, body);
   }
+
+
 
   // Store notifications in secure storage
 // Update this method in NotificationService to track new notifications

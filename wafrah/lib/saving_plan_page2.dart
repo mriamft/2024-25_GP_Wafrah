@@ -35,6 +35,8 @@ class SavingPlanPage2 extends StatefulWidget {
 
 class _SavingPlanPage2State extends State<SavingPlanPage2> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+// Track sent notifications to avoid duplicates
+Map<String, Map<int, bool>> sentNotifications = {};
 
   int _currentMonthIndex = 0; // Track the selected month
   List<String> months = []; // Dynamically generated months
@@ -48,6 +50,25 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   void initState() {
     super.initState();
 
+  // Initialize the notification service and pass a callback to navigate to SavingPlanPage2 when tapped.
+  NotificationService.init((String? payload) {
+    if (payload != null) {
+      print('Notification clicked with payload: $payload');
+    navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (context) => SavingPlanPage2(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            resultData: widget.resultData,
+            accounts: widget.accounts,
+          ),
+        ),
+      );
+    }
+  });
+
+
+    // Load plan data
     if (widget.resultData.isEmpty ||
         !widget.resultData.containsKey('startDate')) {
       print("Loading saved plan data...");
@@ -90,6 +111,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   String formatNumber(double number) {
     return NumberFormat("#,##0", "ar").format(number);
   }
+
 
   String convertToArabicNumbers(String input) {
     const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -236,9 +258,14 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       wap = progressData; // Store progress data
     });
 
-    showMonthProgressNotification();
-    showCategoryProgressNotification(
-        progressData); // Call the category progress notification
+    // Only send month notifications if the month has started.
+    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+    DateTime selectedMonthStart =
+        startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+    if (!selectedMonthStart.isAfter(DateTime.now())) {
+      showMonthProgressNotification();
+    }
+    showCategoryProgressNotification(progressData);
 
     // Save the updated plan to secure storage
     Map<String, dynamic> updatedPlan = {
@@ -274,26 +301,31 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     });
   }
 
+  // Fix month-end notification: use current month's last day and only if month has started.
   void showMonthProgressNotification() {
     DateTime today = DateTime.now();
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-
     int totalMonths = widget.resultData['DurationMonths'].toInt();
-    int monthsPassed = today.difference(startDate).inDays ~/
-        30; // Calculate number of months passed
+    int monthsPassed = today.difference(startDate).inDays ~/ 30;
 
-    // Only show notification if the user has completed a month
-    if (monthsPassed > 0 &&
-        monthsPassed <= totalMonths &&
-        today.day == DateTime(today.year, today.month, 0).day) {
+    // Check if the selected month (using _currentMonthIndex) is already started.
+    DateTime selectedMonthStart =
+        startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+    if (selectedMonthStart.isAfter(today)) return;
+
+    // Get the last day of the current month
+    int lastDayOfMonth = DateTime(today.year, today.month + 1, 0).day;
+
+    print("Today's Date: $today, Start Date: $startDate, Months Passed: $monthsPassed");
+
+    if (monthsPassed > 0 && monthsPassed <= totalMonths && today.day == lastDayOfMonth) {
       NotificationService.showNotification(
-        title:
-            "لقد أكملت الشهر $monthsPassed من ${totalMonths.toInt()} شهور من الخطة",
-        body:
-            "في هذا الشهر أنجزت ${((monthsPassed / totalMonths) * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
+        title: "لقد أكملت الشهر $monthsPassed من ${totalMonths.toInt()} شهور من الخطة",
+        body: "في هذا الشهر أنجزت ${((monthsPassed / totalMonths) * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
       );
     }
   }
+
 
   Future<void> showNotificationsSequentially(
       List<Map<String, String>> notifications) async {
@@ -309,75 +341,65 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     }
   }
 
-  void showCategoryProgressNotification(Map<String, dynamic> progressData) {
-    // List to store categories that have already received a notification
-    Set<String> notifiedCategories = Set<String>();
+void showCategoryProgressNotification(Map<String, dynamic> progressData) {
 
-    // List of notifications to be shown sequentially
-    List<Future<void>> notificationQueue = [];
+  // List of notifications to be shown sequentially
+  List<Future<void>> notificationQueue = [];
 
-    // Loop through progress data and filter categories that exist in the savings plan
-    progressData['progress'].forEach((category, progress) {
-      // Check if the category exists in the current savings plan
-      bool categoryExistsInPlan =
-          savingsPlan.any((plan) => plan['category'] == category);
+  // Loop through progress data and filter categories that exist in the savings plan
+  progressData['progress'].forEach((category, progress) {
+    // Check if the category exists in the current savings plan
+    bool categoryExistsInPlan = savingsPlan.any((plan) => plan['category'] == category);
 
-      // Only show notification if category exists in plan and hasn't been notified yet
-      if (categoryExistsInPlan && !notifiedCategories.contains(category)) {
-        // 50% Progress
+    // Check if the category exists in the plan and hasn't been notified yet for this month
+    if (categoryExistsInPlan) {
+      // Initialize the sentNotifications map for the category if not already initialized
+sentNotifications.putIfAbsent(category, () => {});
+
+        // Only send if this category has not been notified this month
+        if (sentNotifications[category]?[_currentMonthIndex] != true) {
+          // Only send if the current selected month is not in the future
+          DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+          DateTime selectedMonthStart =
+              startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+          if (selectedMonthStart.isAfter(DateTime.now())) return;
+        
+        // Progress Notifications
         if (progress >= 50 && progress < 75) {
           notificationQueue.add(Future.delayed(
-            Duration(
-                milliseconds: notificationQueue.length *
-                    10000), // Add delay between notifications
+            Duration(milliseconds: notificationQueue.length * 10000), // Delay between notifications
             () => NotificationService.showNotification(
               title: "لقد أكملت 50% من الادخار في فئة $category",
               body: "أنت في منتصف الطريق! استمر في العمل لتحقيق الهدف.",
             ),
           ));
-        }
-        // 75% Progress
-        else if (progress >= 75 && progress < 100) {
+        } else if (progress >= 75 && progress < 100) {
           notificationQueue.add(Future.delayed(
-            Duration(
-                milliseconds: notificationQueue.length *
-                    10000), // Add delay between notifications
+            Duration(milliseconds: notificationQueue.length * 10000),
             () => NotificationService.showNotification(
               title: "أنت قريب جداً من الهدف في فئة $category!",
               body: "لقد أكملت 75% من هدفك في هذه الفئة. قريباً ستصل!",
             ),
           ));
-        }
-        // 100% Progress
-        else if (progress == 100) {
+        } else if (progress == 100) {
           notificationQueue.add(Future.delayed(
-            Duration(
-                milliseconds: notificationQueue.length *
-                    10000), // Add delay between notifications
+            Duration(milliseconds: notificationQueue.length * 10000),
             () => NotificationService.showNotification(
               title: "تمت الخطة بنجاح في فئة $category!",
               body: "تهانينا! لقد أكملت 100% من هدف الادخار في هذه الفئة.",
             ),
           ));
-        }
-        // Low savings progress (less than 50%)
-        else if (progress > 0 && progress < 50) {
+        } else if (progress > 0 && progress < 50) {
           notificationQueue.add(Future.delayed(
-            Duration(
-                milliseconds: notificationQueue.length *
-                    10000), // Add delay between notifications
+            Duration(milliseconds: notificationQueue.length * 10000),
             () => NotificationService.showNotification(
               title: "لقد أكملت تقدماً منخفضاً في فئة $category",
               body: "أنت على الطريق الصحيح! حاول زيادة المدخرات لتحقيق الهدف.",
             ),
           ));
-        }
-        // No progress (0%)
-        else if (progress == 0) {
+        } else if (progress == 0) {
           notificationQueue.add(Future.delayed(
-            Duration(
-                milliseconds: notificationQueue.length *
-                    10000), // Add delay between notifications
+            Duration(milliseconds: notificationQueue.length * 10000),
             () => NotificationService.showNotification(
               title: "لم تبدأ الادخار بعد في فئة $category",
               body: "حاول أن تبدأ في الادخار الآن! لا تتأخر عن تحقيق هدفك.",
@@ -385,14 +407,15 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
           ));
         }
 
-        // Mark this category as notified
-        notifiedCategories.add(category);
+        // Mark this category as notified for the current month
+        sentNotifications[category]![_currentMonthIndex] = true;
       }
-    });
+    }
+  });
 
-    // Execute the notifications sequentially
-    Future.wait(notificationQueue);
-  }
+  // Execute the notifications sequentially
+  Future.wait(notificationQueue);
+}
 
   void checkFullPlanCompletion() {
     // Check if the user has completed the full plan (last month)
