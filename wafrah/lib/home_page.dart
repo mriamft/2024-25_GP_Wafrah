@@ -11,7 +11,7 @@ import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
 import 'custom_icons.dart';
 import 'package:intl/intl.dart';
-
+import 'chatbot.dart';
 
 class HomePage extends StatefulWidget {
   final String userName;
@@ -123,12 +123,11 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-String formatNumberWithArabicComma(double? number) {
-  if (number == null) return '٠،٠٠'; // Default for null values
-  String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
-  return formattedNumber.replaceAll('.', '،'); // Convert dot to Arabic comma
-}
-
+  String formatNumberWithArabicComma(double? number) {
+    if (number == null) return '٠،٠٠'; // Default for null values
+    String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
+    return formattedNumber.replaceAll('.', '،'); // Convert dot to Arabic comma
+  }
 
   // Save the visibility state to SharedPreferences
   Future<void> _saveVisibilityState(bool isVisible) async {
@@ -352,245 +351,267 @@ String formatNumberWithArabicComma(double? number) {
       return 4;
     }
   }
+
   int _getTimeIndex(DateTime transactionDate) {
-  if (_selectedPeriod == 'اسبوعي') {
-    return transactionDate.weekday - 1; // Saturday = 0, Friday = 6
-  } else if (_selectedPeriod == 'شهري') {
-    return _getWeekOfMonth(transactionDate.day) - 1; // 0-based index for weeks
-  } else if (_selectedPeriod == 'سنوي') {
-    return transactionDate.month - 1; // 0-based index for months
+    if (_selectedPeriod == 'اسبوعي') {
+      return transactionDate.weekday - 1; // Saturday = 0, Friday = 6
+    } else if (_selectedPeriod == 'شهري') {
+      return _getWeekOfMonth(transactionDate.day) -
+          1; // 0-based index for weeks
+    } else if (_selectedPeriod == 'سنوي') {
+      return transactionDate.month - 1; // 0-based index for months
+    }
+    return -1; // Out of range
   }
-  return -1; // Out of range
-}
 
-  
   Widget buildCategoryLineChart() {
-  List<FlSpot> generateSpotsForCategory(String category) {
-  List<FlSpot> spots = [];
+    List<FlSpot> generateSpotsForCategory(String category) {
+      List<FlSpot> spots = [];
 
-  if (expenseData.isEmpty) return [];
+      if (expenseData.isEmpty) return [];
 
-  // Initialize list to store category expenses at each time step
-  List<double> categoryExpenseAtEachTime = List.filled(expenseData.length, 0.0);
-  List<double> totalExpenseAtEachTime = List.filled(expenseData.length, 0.0);
+      // Initialize list to store category expenses at each time step
+      List<double> categoryExpenseAtEachTime =
+          List.filled(expenseData.length, 0.0);
+      List<double> totalExpenseAtEachTime =
+          List.filled(expenseData.length, 0.0);
 
-  // Step 1: Collect all expenses per time step
-  for (var account in widget.accounts) {
-    var transactions = account['transactions'] ?? [];
-    for (var transaction in transactions) {
-      String dateStr = transaction['TransactionDateTime'] ?? '';
-      DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+      // Step 1: Collect all expenses per time step
+      for (var account in widget.accounts) {
+        var transactions = account['transactions'] ?? [];
+        for (var transaction in transactions) {
+          String dateStr = transaction['TransactionDateTime'] ?? '';
+          DateTime transactionDate =
+              DateTime.tryParse(dateStr) ?? DateTime.now();
 
-      double amount =
-          double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
-      String transactionCategory =
-          transaction['Category'] ?? 'غير مصنف'; // Default category
+          double amount =
+              double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+          String transactionCategory =
+              transaction['Category'] ?? 'غير مصنف'; // Default category
 
-      // Find the time index for this transaction
-      int timeIndex = _getTimeIndex(transactionDate);
-      if (timeIndex >= 0 && timeIndex < categoryExpenseAtEachTime.length) {
-        totalExpenseAtEachTime[timeIndex] += amount; // Track total expenses at this time step
-        if (transactionCategory == category) {
-          categoryExpenseAtEachTime[timeIndex] += amount; // Assign category expenses
+          // Find the time index for this transaction
+          int timeIndex = _getTimeIndex(transactionDate);
+          if (timeIndex >= 0 && timeIndex < categoryExpenseAtEachTime.length) {
+            totalExpenseAtEachTime[timeIndex] +=
+                amount; // Track total expenses at this time step
+            if (transactionCategory == category) {
+              categoryExpenseAtEachTime[timeIndex] +=
+                  amount; // Assign category expenses
+            }
+          }
         }
       }
+
+      // Step 2: Scale category expenses based on total expense at each time step
+      for (int i = 0; i < categoryExpenseAtEachTime.length; i++) {
+        double totalExpense = totalExpenseAtEachTime[i];
+        double categoryExpense = categoryExpenseAtEachTime[i];
+
+        // Ensure correct proportion (Avoid division by zero)
+        double adjustedExpense = (totalExpense > 0)
+            ? (categoryExpense / totalExpense) * expenseData[i].y
+            : 0;
+
+        spots.add(FlSpot(i.toDouble(), adjustedExpense));
+      }
+
+      return spots;
     }
-  }
 
-  // Step 2: Scale category expenses based on total expense at each time step
-  for (int i = 0; i < categoryExpenseAtEachTime.length; i++) {
-    double totalExpense = totalExpenseAtEachTime[i];
-    double categoryExpense = categoryExpenseAtEachTime[i];
+    List<String> xAxisLabels;
+    if (_selectedPeriod == 'اسبوعي') {
+      int todayIndex = DateTime.now().weekday - 1;
+      xAxisLabels = [
+        'السبت',
+        'الأحد',
+        'الإثنين',
+        'الثلاثاء',
+        'الأربعاء',
+        'الخميس',
+        'الجمعة'
+      ];
+    } else if (_selectedPeriod == 'شهري') {
+      int currentWeek = _getWeekOfMonth(DateTime.now().day);
+      xAxisLabels = ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4']
+          .sublist(0, currentWeek);
+    } else {
+      int currentMonth = DateTime.now().month;
+      xAxisLabels = [
+        'يناير',
+        'فبراير',
+        'مارس',
+        'أبريل',
+        'مايو',
+        'يونيو',
+        'يوليو',
+        'أغسطس',
+        'سبتمبر',
+        'أكتوبر',
+        'نوفمبر',
+        'ديسمبر'
+      ].sublist(0, currentMonth);
+    }
 
-    // Ensure correct proportion (Avoid division by zero)
-    double adjustedExpense =
-        (totalExpense > 0) ? (categoryExpense / totalExpense) * expenseData[i].y : 0;
+    Map<String, Color> categoryColors = {
+      "التعليم": Colors.blue,
+      "الترفيه": Colors.purple,
+      "المدفوعات الحكومية": Colors.orange,
+      "البقالة": Colors.green,
+      "الصحة": Colors.red,
+      "القروض": Colors.brown,
+      "الاستثمار": Colors.indigo,
+      "الإيجار": Colors.teal,
+      "المطاعم": Colors.pink,
+      "تسوق": Colors.amber,
+      "التحويلات": Colors.cyan,
+      "النقل": Colors.deepPurple,
+      "السفر": Colors.deepOrange,
+      "أخرى": Colors.grey
+    };
 
-    spots.add(FlSpot(i.toDouble(), adjustedExpense));
-  }
-
-  return spots;
-}
-
-
-  List<String> xAxisLabels;
-if (_selectedPeriod == 'اسبوعي') {
-  int todayIndex = DateTime.now().weekday - 1;
-xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
-} else if (_selectedPeriod == 'شهري') {
-  int currentWeek = _getWeekOfMonth(DateTime.now().day);
-  xAxisLabels = ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'].sublist(0, currentWeek);
-} else {
-  int currentMonth = DateTime.now().month;
-  xAxisLabels = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'].sublist(0, currentMonth);
-}
-
-
-  Map<String, Color> categoryColors = {
-    "التعليم": Colors.blue,
-    "الترفيه": Colors.purple,
-    "المدفوعات الحكومية": Colors.orange,
-    "البقالة": Colors.green,
-    "الصحة": Colors.red,
-    "القروض": Colors.brown,
-    "الاستثمار": Colors.indigo,
-    "الإيجار": Colors.teal,
-    "المطاعم": Colors.pink,
-    "تسوق": Colors.amber,
-    "التحويلات": Colors.cyan,
-    "النقل": Colors.deepPurple,
-    "السفر": Colors.deepOrange,
-    "أخرى": Colors.grey
-  };
-
-  return Column(
-    children: [
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 8.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 5,
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            Align(
-  alignment: Alignment.centerRight,
-  child: Text(
-    'توزيع الصرف حسب الفئة',
-    textAlign: TextAlign.right,
-    style: TextStyle(
-                fontFamily: 'GE-SS-Two-Bold',
-                fontSize: 14,
-                color: Colors.grey[700],
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 5,
               ),
-  ),
-            ),
-
-          
-              
-             
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 300,
-              child: LineChart(
-                LineChartData(
-                  minY: 0,
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        getTitlesWidget: (value, _) {
-                          return Text(
-                            value.toInt().toString(),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'GE-SS-Two-Light',
-                              color: Colors.grey,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 35,
-                        interval: 1,
-                        getTitlesWidget: (value, _) {
-                          int index = value.toInt();
-                          if (index >= 0 && index < xAxisLabels.length) {
+            ],
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'توزيع الصرف حسب الفئة',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Bold',
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 300,
+                child: LineChart(
+                  LineChartData(
+                    minY: 0,
+                    titlesData: FlTitlesData(
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 40,
+                          getTitlesWidget: (value, _) {
                             return Text(
-                              xAxisLabels[index],
+                              value.toInt().toString(),
                               style: const TextStyle(
-                                fontSize: 10,
+                                fontSize: 12,
                                 fontFamily: 'GE-SS-Two-Light',
                                 color: Colors.grey,
                               ),
                             );
-                          }
-                          return const SizedBox.shrink();
-                        },
+                          },
+                        ),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 35,
+                          interval: 1,
+                          getTitlesWidget: (value, _) {
+                            int index = value.toInt();
+                            if (index >= 0 && index < xAxisLabels.length) {
+                              return Text(
+                                xAxisLabels[index],
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontFamily: 'GE-SS-Two-Light',
+                                  color: Colors.grey,
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
                       ),
                     ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                  ),
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: true,
-                    drawHorizontalLine: true,
-                    verticalInterval: 1,
-                    getDrawingHorizontalLine: (value) => FlLine(
-                      color: Colors.grey.withOpacity(0.2),
-                      strokeWidth: 1,
-                    ),
-                    getDrawingVerticalLine: (value) => FlLine(
-                      color: Colors.grey.withOpacity(0.2),
-                      strokeWidth: 1,
-                    ),
-                  ),
-                  lineBarsData: categoryColors.entries.map((entry) {
-                    return LineChartBarData(
-                      spots: generateSpotsForCategory(entry.key),
-                      isCurved: true,
-                      color: entry.value,
-                      barWidth: 3,
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: entry.value.withOpacity(0.4),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: true,
+                      drawHorizontalLine: true,
+                      verticalInterval: 1,
+                      getDrawingHorizontalLine: (value) => FlLine(
+                        color: Colors.grey.withOpacity(0.2),
+                        strokeWidth: 1,
                       ),
-                    );
-                  }).toList(),
+                      getDrawingVerticalLine: (value) => FlLine(
+                        color: Colors.grey.withOpacity(0.2),
+                        strokeWidth: 1,
+                      ),
+                    ),
+                    lineBarsData: categoryColors.entries.map((entry) {
+                      return LineChartBarData(
+                        spots: generateSpotsForCategory(entry.key),
+                        isCurved: true,
+                        color: entry.value,
+                        barWidth: 3,
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: entry.value.withOpacity(0.4),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 10,
-              children: categoryColors.entries.map((entry) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      color: entry.value,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      entry.key,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'GE-SS-Two-Light',
-                        color: Colors.black,
+              const SizedBox(height: 10),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 10,
+                children: categoryColors.entries.map((entry) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        color: entry.value,
                       ),
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ],
+                      const SizedBox(width: 5),
+                      Text(
+                        entry.key,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'GE-SS-Two-Light',
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
 
 // Monthly data calculation for the 'سنوي' view (for completeness)
   void _calculateMonthlyData(DateTime currentDate) {
@@ -1411,196 +1432,201 @@ xAxisLabels = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء',
 
 //static part
   Widget buildStatisticsSummary() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 239, 239, 239),
-        borderRadius: BorderRadius.circular(8.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 239, 239, 239),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // Minimum Column
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'الحد الأدنى',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Bold',
+                    fontSize: 12,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      CustomIcons.riyal,
+                      size: 11,
+                      color: Colors.green[700],
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      formatNumberWithArabicComma(
+                          _minIncome ?? 0.0), // Ensure it's not null
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 12,
+                        color: Colors.green[700],
+                      ),
+                      textAlign: TextAlign
+                          .right, // Align text to the right instead of RTL
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      CustomIcons.riyal,
+                      size: 11,
+                      color: Colors.red[700],
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      formatNumberWithArabicComma(
+                          _minExpense ?? 0.0), // Ensure it's not null
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 12,
+                        color: Colors.red[700],
+                      ),
+                      textAlign: TextAlign
+                          .right, // Align text to the right instead of RTL
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            // Maximum Column
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'الحد الأعلى',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Bold',
+                    fontSize: 12,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      CustomIcons.riyal,
+                      size: 11,
+                      color: Colors.green[700],
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      formatNumberWithArabicComma(
+                          _maxIncome ?? 0.0), // Ensure it's not null
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 12,
+                        color: Colors.green[700],
+                      ),
+                      textAlign: TextAlign
+                          .right, // Align text to the right instead of RTL
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      CustomIcons.riyal,
+                      size: 11,
+                      color: Colors.red[700],
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      formatNumberWithArabicComma(
+                          _maxExpense ?? 0.0), // Ensure it's not null
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 12,
+                        color: Colors.red[700],
+                      ),
+                      textAlign: TextAlign
+                          .right, // Align text to the right instead of RTL
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            // Average Column
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'المتوسط',
+                  style: TextStyle(
+                    fontFamily: 'GE-SS-Two-Bold',
+                    fontSize: 12,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      CustomIcons.riyal,
+                      size: 11,
+                      color: Colors.green[700],
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      formatNumberWithArabicComma(
+                          _filteredIncome ?? 0.0), // Ensure it's not null
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 12,
+                        color: Colors.green[700],
+                      ),
+                      textAlign: TextAlign
+                          .right, // Align text to the right instead of RTL
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      CustomIcons.riyal,
+                      size: 11,
+                      color: Colors.red[700],
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      formatNumberWithArabicComma(
+                          _filteredExpense ?? 0.0), // Ensure it's not null
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        fontSize: 12,
+                        color: Colors.red[700],
+                      ),
+                      textAlign: TextAlign
+                          .right, // Align text to the right instead of RTL
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          // Minimum Column
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'الحد الأدنى',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Bold',
-                  fontSize: 12,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    CustomIcons.riyal,
-                    size: 11,
-                    color: Colors.green[700],
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-  formatNumberWithArabicComma(_minIncome ?? 0.0), // Ensure it's not null
-  style: TextStyle(
-    fontFamily: 'GE-SS-Two-Light',
-    fontSize: 12,
-    color: Colors.green[700],
-  ),
-  textAlign: TextAlign.right, // Align text to the right instead of RTL
-),
-
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    CustomIcons.riyal,
-                    size: 11,
-                    color: Colors.red[700],
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-  formatNumberWithArabicComma(_minExpense ?? 0.0), // Ensure it's not null
-  style: TextStyle(
-    fontFamily: 'GE-SS-Two-Light',
-    fontSize: 12,
-    color: Colors.red[700],
-  ),
-  textAlign: TextAlign.right, // Align text to the right instead of RTL
-),
-
-                ],
-              ),
-            ],
-          ),
-
-          // Maximum Column
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'الحد الأعلى',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Bold',
-                  fontSize: 12,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    CustomIcons.riyal,
-                    size: 11,
-                    color: Colors.green[700],
-                  ),
-                  const SizedBox(width: 3),
-Text(
-  formatNumberWithArabicComma(_maxIncome ?? 0.0), // Ensure it's not null
-  style: TextStyle(
-    fontFamily: 'GE-SS-Two-Light',
-    fontSize: 12,
-    color: Colors.green[700],
-  ),
-  textAlign: TextAlign.right, // Align text to the right instead of RTL
-),
-
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    CustomIcons.riyal,
-                    size: 11,
-                    color: Colors.red[700],
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-  formatNumberWithArabicComma(_maxExpense ?? 0.0), // Ensure it's not null
-  style: TextStyle(
-    fontFamily: 'GE-SS-Two-Light',
-    fontSize: 12,
-    color: Colors.red[700],
-  ),
-  textAlign: TextAlign.right, // Align text to the right instead of RTL
-),
-
-                ],
-              ),
-            ],
-          ),
-
-          // Average Column
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'المتوسط',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Bold',
-                  fontSize: 12,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    CustomIcons.riyal,
-                    size: 11,
-                    color: Colors.green[700],
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-  formatNumberWithArabicComma(_filteredIncome ?? 0.0), // Ensure it's not null
-  style: TextStyle(
-    fontFamily: 'GE-SS-Two-Light',
-    fontSize: 12,
-    color: Colors.green[700],
-  ),
-  textAlign: TextAlign.right, // Align text to the right instead of RTL
-),
-
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    CustomIcons.riyal,
-                    size: 11,
-                    color: Colors.red[700],
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-  formatNumberWithArabicComma(_filteredExpense ?? 0.0), // Ensure it's not null
-  style: TextStyle(
-    fontFamily: 'GE-SS-Two-Light',
-    fontSize: 12,
-    color: Colors.red[700],
-  ),
-  textAlign: TextAlign.right, // Align text to the right instead of RTL
-),
-
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
+    );
+  }
 
 // Pie chart to show transaction categories
   Widget buildPieChart() {
@@ -1713,15 +1739,15 @@ Text(
         crossAxisAlignment:
             CrossAxisAlignment.end, // Align children to the right
         children: [
-Text(
-  'تصنيف عمليات الصرف',
-  textAlign: TextAlign.right, // Align Arabic text correctly
-  style: TextStyle(
-    fontFamily: 'GE-SS-Two-Bold',
-    fontSize: 16,
-    color: Colors.grey[700],
-  ),
-),
+          Text(
+            'تصنيف عمليات الصرف',
+            textAlign: TextAlign.right, // Align Arabic text correctly
+            style: TextStyle(
+              fontFamily: 'GE-SS-Two-Bold',
+              fontSize: 16,
+              color: Colors.grey[700],
+            ),
+          ),
 
           const SizedBox(height: 0), // Add space between title and chart
           SizedBox(
@@ -2163,7 +2189,48 @@ Text(
               ),
             ),
           ),
+          // ✅ زر الذكاء الاصطناعي (chatbot) في مكان محدد
+          Positioned(
+            top: 650,
+            left: 328,
+            child: GestureDetector(
+              onTap: navigateToChatbot,
+              child: Container(
+                width: 55,
+                height: 55,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/chatbotIcon.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  void navigateToChatbot() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Chatbot(
+          userName: widget.userName,
+          phoneNumber: widget.phoneNumber,
+          accounts: widget.accounts,
+        ),
       ),
     );
   }
@@ -2233,15 +2300,16 @@ Text(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(
-  CustomIcons.riyal,
-  size: 23,
-  color: Colors.black,
-),
-
+                        CustomIcons.riyal,
+                        size: 23,
+                        color: Colors.black,
+                      ),
                       const SizedBox(width: 5),
-Text(
-  _isBalanceVisible ? formatNumberWithArabicComma(double.parse(getTotalBalance())) : getMaskedValue(),
-
+                      Text(
+                        _isBalanceVisible
+                            ? formatNumberWithArabicComma(
+                                double.parse(getTotalBalance()))
+                            : getMaskedValue(),
                         style: const TextStyle(
                           fontFamily: 'GE-SS-Two-Bold',
                           fontSize: 32,
@@ -2308,14 +2376,16 @@ Text(
                         Row(
                           children: [
                             const Icon(
-  CustomIcons.riyal,
-  size: 14,
-  color: Colors.black,
-),
-
+                              CustomIcons.riyal,
+                              size: 14,
+                              color: Colors.black,
+                            ),
                             const SizedBox(width: 5),
-Text(
-  _isBalanceVisible ? formatNumberWithArabicComma(totals['expense']!) : getMaskedValue(),
+                            Text(
+                              _isBalanceVisible
+                                  ? formatNumberWithArabicComma(
+                                      totals['expense']!)
+                                  : getMaskedValue(),
                               style: const TextStyle(
                                 fontFamily: 'GE-SS-Two-Bold',
                                 fontSize: 18,
@@ -2350,14 +2420,16 @@ Text(
                         Row(
                           children: [
                             const Icon(
-  CustomIcons.riyal,
-  size: 14,
-  color: Colors.black,
-),
-
+                              CustomIcons.riyal,
+                              size: 14,
+                              color: Colors.black,
+                            ),
                             const SizedBox(width: 5),
-Text(
-  _isBalanceVisible ? formatNumberWithArabicComma(totals['income']!) : getMaskedValue(),
+                            Text(
+                              _isBalanceVisible
+                                  ? formatNumberWithArabicComma(
+                                      totals['income']!)
+                                  : getMaskedValue(),
                               style: const TextStyle(
                                 fontFamily: 'GE-SS-Two-Bold',
                                 fontSize: 18,
@@ -2439,7 +2511,7 @@ Text(
             const SizedBox(height: 10),
             buildPieChartWithBorder(),
             const SizedBox(height: 10),
-buildCategoryLineChart(), 
+            buildCategoryLineChart(),
           ],
         ),
       ),

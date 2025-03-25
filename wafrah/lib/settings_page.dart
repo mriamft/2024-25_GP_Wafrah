@@ -16,6 +16,7 @@ import 'package:another_flushbar/flushbar.dart';
 // Import your goal page for navigation
 import 'saving_plan_page2.dart';
 import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'chatbot.dart';
 
 class SettingsPage extends StatefulWidget {
   final String userName;
@@ -808,7 +809,48 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
           ),
+          // ✅ زر الذكاء الاصطناعي (chatbot) في مكان محدد
+          Positioned(
+            top: 650,
+            left: 328,
+            child: GestureDetector(
+              onTap: navigateToChatbot,
+              child: Container(
+                width: 55,
+                height: 55,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/chatbotIcon.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  void navigateToChatbot() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Chatbot(
+          userName: widget.userName,
+          phoneNumber: widget.phoneNumber,
+          accounts: widget.accounts,
+        ),
       ),
     );
   }
