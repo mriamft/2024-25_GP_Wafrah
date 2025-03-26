@@ -11,12 +11,18 @@ class GlobalNotificationManager {
   GlobalNotificationManager._internal();
 
   Timer? _timer;
-  // For each category, store the last notified milestone for the current month.
-  // (Milestones: 0 = 0%, 1 = >0% & <50%, 2 = 50%-<75%, 3 = 75%-<100%, 4 = 100%)
-  final Map<String, int> _sentMilestones = {};
+    // For aggregated notifications:
+  // For each milestone (1: >0 & <50, 2: 50%-<75, 3: 75%-<100, 4: 100%)
+  // we store the last count notified.
+  final Map<int, int> _sentAggregatedMilestones = {};
 
   // Track the last plan month for which a month-end notification was sent.
   int _lastNotifiedMonth = 0;
+  // Track if mid-month notification has been sent in the current plan month.
+  bool _midMonthNotified = false;
+  // For each category, store the last notified milestone for the current month.
+  // (Milestones: 0 = 0%, 1 = >0% & <50%, 2 = 50%-<75%, 3 = 75%-<100%, 4 = 100%)
+  final Map<String, int> _sentMilestones = {};
 
   // These will be updated when a user’s saving plan data becomes available.
   Map<String, dynamic>? _resultData;
@@ -40,6 +46,8 @@ class GlobalNotificationManager {
           : (resultData['DurationMonths'] as num).toInt();
     }
     // Reset notifications tracking whenever plan data is updated.
+        _sentAggregatedMilestones.clear();
+
     _sentMilestones.clear();
     _lastNotifiedMonth = 0;
   }
@@ -50,7 +58,7 @@ class GlobalNotificationManager {
     _accounts = null;
     _planStartDate = null;
     _durationMonths = null;
-    _sentMilestones.clear();
+    _sentAggregatedMilestones.clear();
     _lastNotifiedMonth = 0;
   }
 
@@ -76,8 +84,11 @@ class GlobalNotificationManager {
         _durationMonths == null) {
       return;
     }
-    // Check both month-end and category milestone notifications.
+    // Check month-end and mid-month notifications
     _checkMonthEndNotification();
+    _checkMidMonthNotification();
+    // Check aggregated category milestone notifications
+    _checkAggregatedCategoryProgressNotifications();
     _checkCategoryProgressNotifications();
   }
 
@@ -165,15 +176,22 @@ class GlobalNotificationManager {
   }
 
   /// Check and send a month‑end notification if a full 30‑day period has passed.
+  /// Check and send a month‑end notification if a full 30‑day period has passed.
   void _checkMonthEndNotification() {
     final DateTime now = DateTime.now();
     final int daysPassed = now.difference(_planStartDate!).inDays;
     final int totalMonths = _durationMonths!;
     final int monthsPassed = daysPassed ~/ 30;
 
+    // Reset mid-month flag if we entered a new month.
+    if (monthsPassed > _lastNotifiedMonth) {
+      _midMonthNotified = false;
+    }
+
     // Do nothing if less than one month has passed.
     if (daysPassed < 30) return;
 
+    // End-of-month notification (send only once per month end)
     if (daysPassed % 30 == 0 &&
         monthsPassed <= totalMonths &&
         monthsPassed > _lastNotifiedMonth) {
@@ -182,55 +200,137 @@ class GlobalNotificationManager {
         body: "في هذا الشهر أنجزت ${(monthsPassed / totalMonths * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
       );
       _lastNotifiedMonth = monthsPassed;
+      // If the plan is fully complete, send a final notification:
+      if (monthsPassed == totalMonths) {
+        NotificationService.showNotification(
+          title: "تهانينا! لقد أكملت الخطة بنسبة 100%",
+          body: "لقد أنجزت كل أهداف الادخار المحددة. مبروك!",
+        );
+      }
+    }
+  }
+    /// Check and send a mid‑month notification when day 15 of the current plan month is reached.
+  void _checkMidMonthNotification() {
+    final DateTime now = DateTime.now();
+    final int daysSincePlanStart = now.difference(_planStartDate!).inDays;
+    final int daysPassedInCurrentMonth = daysSincePlanStart % 30;
+    // Determine the current plan month (1-indexed)
+    final int currentPlanMonthNumber = (daysSincePlanStart ~/ 30) + 1;
+    // If it is the 15th day (or very close) and mid-month notification hasn't been sent
+    if (daysPassedInCurrentMonth == 15 && !_midMonthNotified) {
+      // For percentage achieved in the current month, we assume 15*dailyGrowth.
+      double progress = (15 * (100 / 30)).clamp(0, 100);
+      NotificationService.showNotification(
+        title: "أنت في منتصف الشهر $currentPlanMonthNumber من الخطة",
+        body: "لقد أنجزت ${progress.toStringAsFixed(2)}% من هدف هذا الشهر. استمر في العمل!",
+      );
+      _midMonthNotified = true;
     }
   }
 
+  /// Helper to determine milestone based on progress value.
+  int _milestoneFromProgress(double progress) {
+    if (progress == 0) return 0;
+    if (progress > 0 && progress < 50) return 1;
+    if (progress >= 50 && progress < 75) return 2;
+    if (progress >= 75 && progress < 100) return 3;
+    if (progress == 100) return 4;
+    return 0;
+  }
+
+void _checkAggregatedCategoryProgressNotifications() {
+  final monthlyProgress = _calculateMonthlyProgress();
+  final int totalCategories = monthlyProgress.length;
+  // For milestones 1, 2, 3, and 4, count how many categories have reached at least that milestone.
+  for (int milestone = 1; milestone <= 4; milestone++) {
+    int count = monthlyProgress.values
+        .where((progress) => _milestoneFromProgress(progress) >= milestone)
+        .length;
+    // Get the previously notified count for this milestone (default 0)
+    int prevCount = _sentAggregatedMilestones[milestone] ?? 0;
+    // If the count increased, send a new notification reflecting all categories that reached this milestone.
+    if (count > prevCount) {
+      String milestoneText;
+      String bodyText;
+      switch (milestone) {
+        case 1:
+          milestoneText = "بدأت الادخار";
+          bodyText = "أنت على الطريق الصحيح! حاول زيادة المدخرات لتحقيق الهدف.";
+          break;
+        case 2:
+          milestoneText = "أكملت 50%";
+          bodyText = "أنت في منتصف الطريق! استمر في العمل لتحقيق الهدف.";
+          break;
+        case 3:
+          milestoneText = "أنت قريب جداً من الهدف";
+          bodyText = "لقد أكملت 75% من هدفك في هذه الفئات. قريباً ستصل!";
+          break;
+        case 4:
+          milestoneText = "تمت الخطة بنجاح";
+          bodyText = "تهانينا! لقد أكملت 100% من هدف الادخار في هذه الفئات.";
+          break;
+        default:
+          milestoneText = "";
+          bodyText = "";
+      }
+      NotificationService.showNotification(
+        title: "لقد $milestoneText في $count فئة من أصل $totalCategories فئات",
+        body: bodyText,
+      );
+      // Update the stored count so that future notifications reflect any further increase.
+      _sentAggregatedMilestones[milestone] = count;
+    }
+  }
+}
+
+
+
   /// Check each category’s progress (only for categories in the saving plan and for the current month)
   /// and send a notification if a new milestone is reached.
-void _checkCategoryProgressNotifications() {
-  final Map<String, double> monthlyProgress = _calculateMonthlyProgress();
-  monthlyProgress.forEach((category, progress) {
-    int currentMilestone;
-    if (progress == 0) {
-      currentMilestone = 0;
-    } else if (progress > 0 && progress < 50) {
-      currentMilestone = 1;
-    } else if (progress >= 50 && progress < 75) {
-      currentMilestone = 2;
-    } else if (progress >= 75 && progress < 100) {
-      currentMilestone = 3;
-    } else if (progress == 100) {
-      currentMilestone = 4;
-    } else {
-      currentMilestone = 0;
-    }
+ void _checkCategoryProgressNotifications() {
+   final Map<String, double> monthlyProgress = _calculateMonthlyProgress();
+   monthlyProgress.forEach((category, progress) {
+     int currentMilestone;
+     if (progress == 0) {
+       currentMilestone = 0;
+     } else if (progress > 0 && progress < 50) {
+       currentMilestone = 1;
+     } else if (progress >= 50 && progress < 75) {
+       currentMilestone = 2;
+     } else if (progress >= 75 && progress < 100) {
+       currentMilestone = 3;
+     } else if (progress == 100) {
+       currentMilestone = 4;
+     } else {
+       currentMilestone = 0;
+     }
 
-    // If the category has never been notified before, send notification (even for 0%).
-    if (!_sentMilestones.containsKey(category)) {
-      final delay = Duration(seconds: _sentMilestones.length * 5);
-      Future.delayed(delay, () {
-        NotificationService.showNotification(
-          title: _getCategoryNotificationTitle(category, currentMilestone),
-          body: _getCategoryNotificationBody(category, currentMilestone),
-        );
-      });
-      _sentMilestones[category] = currentMilestone;
-    } else {
-      final int previousMilestone = _sentMilestones[category]!;
-      // Only send a notification if the current milestone is higher than what was already notified.
-      if (currentMilestone > previousMilestone) {
-        final delay = Duration(seconds: _sentMilestones.length * 5);
-        Future.delayed(delay, () {
-          NotificationService.showNotification(
-            title: _getCategoryNotificationTitle(category, currentMilestone),
-            body: _getCategoryNotificationBody(category, currentMilestone),
-          );
-        });
-        _sentMilestones[category] = currentMilestone;
-      }
-    }
-  });
-}
+     // If the category has never been notified before, send notification (even for 0%).
+     if (!_sentMilestones.containsKey(category)) {
+       final delay = Duration(seconds: _sentMilestones.length * 5);
+       Future.delayed(delay, () {
+         NotificationService.showNotification(
+           title: _getCategoryNotificationTitle(category, currentMilestone),
+           body: _getCategoryNotificationBody(category, currentMilestone),
+         );
+       });
+       _sentMilestones[category] = currentMilestone;
+     } else {
+       final int previousMilestone = _sentMilestones[category]!;
+       // Only send a notification if the current milestone is higher than what was already notified.
+       if (currentMilestone > previousMilestone) {
+         final delay = Duration(seconds: _sentMilestones.length * 5);
+         Future.delayed(delay, () {
+           NotificationService.showNotification(
+             title: _getCategoryNotificationTitle(category, currentMilestone),
+             body: _getCategoryNotificationBody(category, currentMilestone),
+           );
+         });
+         _sentMilestones[category] = currentMilestone;
+       }
+     }
+   });
+ }
 
   String _getCategoryNotificationTitle(String category, int milestone) {
     switch (milestone) {
@@ -262,3 +362,4 @@ void _checkCategoryProgressNotifications() {
     }
   }
 }
+

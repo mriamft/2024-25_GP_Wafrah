@@ -70,32 +70,43 @@ class _SupportPageState extends State<SupportPage> {
               ),
             ),
           ),
-          Positioned(
-            top: 243,
-            left: 121,
-            child: RichText(
-              text: const TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'أهلًا ',
-                    style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 35,
-                      fontFamily: 'GE-SS-Two-Bold',
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'عبير',
-                    style: TextStyle(
-                      color: Color(0xFF2C8C68),
-                      fontSize: 35,
-                      fontFamily: 'GE-SS-Two-Bold',
-                    ),
-                  ),
-                ],
-              ),
-            ),
+Positioned(
+  top: 243,
+  left: 15,
+  right: 15,
+  child: Row(
+    mainAxisSize: MainAxisSize.min,
+    textDirection: TextDirection.rtl, // Use RTL ordering
+    children: [
+      // Greeting block: will appear on the right
+      Text(
+        'أهلًا',
+        style: const TextStyle(
+          color: Color(0xFF3D3D3D),
+          fontSize: 35,
+          fontFamily: 'GE-SS-Two-Bold',
+        ),
+      ),
+      const SizedBox(width: 10), // small gap between blocks
+      // Name block: will appear on the left
+      Flexible(
+        child: Text(
+          widget.userName,
+          textAlign: TextAlign.left,
+          style: const TextStyle(
+            color: Color(0xFF2C8C68),
+            fontSize: 35,
+            fontFamily: 'GE-SS-Two-Bold',
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ],
+  ),
+),
+
+
           const Positioned(
             top: 294,
             left: 20,
@@ -164,17 +175,19 @@ class _SupportPageState extends State<SupportPage> {
     );
   }
 
-  void launchEmail() async {
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: 'WafrahApplication@gmail.com',
-      queryParameters: {'subject': 'التواصل مع الدعم'},
-    );
-    print('Launching email: ${emailLaunchUri.toString()}');
-    if (await canLaunchUrl(emailLaunchUri)) {
-      await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication);
-    } else {
-      print('Could not launch $emailLaunchUri');
-    }
+Future<void> launchEmail() async {
+  final Uri emailLaunchUri = Uri(
+    scheme: 'mailto',
+    path: 'WafrahApplication@gmail.com',
+    queryParameters: {
+      'subject': 'التواصل مع الدعم',
+    },
+  );
+
+  if (await canLaunchUrl(emailLaunchUri)) {
+    await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication);
+  } else {
+    print('Could not launch $emailLaunchUri');
   }
+}
 }
