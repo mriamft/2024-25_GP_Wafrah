@@ -3,12 +3,20 @@ import 'dart:math';
 import 'login_page.dart';
 import 'info_page.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'global_notification_manager.dart';
+import 'notification_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+// Declare a global instance so you can update it from anywhere.
+final GlobalNotificationManager globalNotificationManager = GlobalNotificationManager();
 
 void main() {
+  // Start the global notification manager.
+  globalNotificationManager.start();
+  
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

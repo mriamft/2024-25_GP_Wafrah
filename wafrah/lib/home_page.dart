@@ -12,6 +12,8 @@ import 'secure_storage_helper.dart'; // Import the secure storage helper
 import 'custom_icons.dart';
 import 'package:intl/intl.dart';
 import 'chatbot.dart';
+import 'global_notification_manager.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // For secure storage
 
 class HomePage extends StatefulWidget {
   final String userName;
@@ -32,6 +34,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   Map<String, double> transactionCategories = {};
+  final GlobalNotificationManager globalNotificationManager = GlobalNotificationManager();
 
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
@@ -55,6 +58,20 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+        globalNotificationManager.start();
+
+    // After fetching user data and if a saving plan exists,
+    // update the manager:
+    loadUserPlan().then((planData) {
+      if (planData != null) {
+        globalNotificationManager.updateData(
+          resultData: planData,
+          accounts: widget.accounts,
+        );
+      } else {
+        globalNotificationManager.clearData();
+      }
+    });
     print("Backend response: ${jsonEncode(widget.accounts)}");
 
     _loadVisibilityState(); // Load saved visibility state on initialization
@@ -81,6 +98,21 @@ class _HomePageState extends State<HomePage>
     // Initialize the dashboard data
     updateDashboardData(); // Call this to populate the initial chart data
   }
+Future<Map<String, dynamic>?> loadUserPlan() async {
+  try {
+    final secureStorage = FlutterSecureStorage();
+    String? planJson = await secureStorage.read(key: 'savings_plan');
+    if (planJson != null) {
+      return jsonDecode(planJson) as Map<String, dynamic>;
+    } else {
+      print('No plan found in secure storage');
+      return null;
+    }
+  } catch (e) {
+    print("Error loading plan from secure storage: $e");
+    return null;
+  }
+}
 
   // Load the saved visibility state from SharedPreferences
   Future<void> _loadVisibilityState() async {

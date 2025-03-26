@@ -36,7 +36,8 @@ class SavingPlanPage2 extends StatefulWidget {
 class _SavingPlanPage2State extends State<SavingPlanPage2> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 // Track sent notifications to avoid duplicates
-Map<String, Map<int, bool>> sentNotifications = {};
+Map<String, Map<int, int>> sentNotifications = {};
+int lastNotifiedMonth = 0; // tracks last month for which a notification was sent
 
   int _currentMonthIndex = 0; // Track the selected month
   List<String> months = []; // Dynamically generated months
@@ -258,14 +259,14 @@ Map<String, Map<int, bool>> sentNotifications = {};
       wap = progressData; // Store progress data
     });
 
-    // Only send month notifications if the month has started.
-    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-    DateTime selectedMonthStart =
-        startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-    if (!selectedMonthStart.isAfter(DateTime.now())) {
-      showMonthProgressNotification();
-    }
-    showCategoryProgressNotification(progressData);
+    // // Only send month notifications if the month has started.
+    // DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+    // DateTime selectedMonthStart =
+    //     startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+    // if (!selectedMonthStart.isAfter(DateTime.now())) {
+    //   checkMonthEndNotification();
+    // }
+    // showCategoryProgressNotification(progressData);
 
     // Save the updated plan to secure storage
     Map<String, dynamic> updatedPlan = {
@@ -302,29 +303,62 @@ Map<String, Map<int, bool>> sentNotifications = {};
   }
 
   // Fix month-end notification: use current month's last day and only if month has started.
-  void showMonthProgressNotification() {
-    DateTime today = DateTime.now();
-    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-    int totalMonths = widget.resultData['DurationMonths'].toInt();
-    int monthsPassed = today.difference(startDate).inDays ~/ 30;
+void showMonthProgressNotification() {
+  DateTime today = DateTime.now();
+  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+  int totalMonths = widget.resultData['DurationMonths'].toInt();
+  
+  // Calculate days passed and determine which plan month we're in (each month = 30 days)
+  int daysPassed = today.difference(startDate).inDays;
+  int monthsPassed = daysPassed ~/ 30;
 
-    // Check if the selected month (using _currentMonthIndex) is already started.
-    DateTime selectedMonthStart =
-        startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-    if (selectedMonthStart.isAfter(today)) return;
+  // If less than one full 30-day period has passed, do nothing.
+  if (daysPassed < 30) return;
 
-    // Get the last day of the current month
-    int lastDayOfMonth = DateTime(today.year, today.month + 1, 0).day;
-
-    print("Today's Date: $today, Start Date: $startDate, Months Passed: $monthsPassed");
-
-    if (monthsPassed > 0 && monthsPassed <= totalMonths && today.day == lastDayOfMonth) {
-      NotificationService.showNotification(
-        title: "لقد أكملت الشهر $monthsPassed من ${totalMonths.toInt()} شهور من الخطة",
-        body: "في هذا الشهر أنجزت ${((monthsPassed / totalMonths) * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
-      );
-    }
+  // If daysPassed is exactly divisible by 30 (i.e. end of a plan month),
+  // and we haven't already sent a notification for this month, then send it.
+  if (daysPassed % 30 == 0 && monthsPassed <= totalMonths && monthsPassed > lastNotifiedMonth) {
+    NotificationService.showNotification(
+      title: "لقد أكملت الشهر $monthsPassed من ${totalMonths} شهور من الخطة",
+      body: "في هذا الشهر أنجزت ${(monthsPassed / totalMonths * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
+    );
+    // Update state so we don't resend for this period
+    setState(() {
+      lastNotifiedMonth = monthsPassed;
+    });
   }
+}
+// void checkMonthEndNotification() {
+//   // Only send notifications when a specific plan month is selected (not for the "Full Plan" view).
+//   if (_currentMonthIndex == 0) return;
+
+//   DateTime today = DateTime.now();
+//   DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+//   int totalMonths = widget.resultData['DurationMonths'].toInt();
+
+//   // Calculate the total days elapsed since the start.
+//   int daysPassed = today.difference(startDate).inDays;
+//   // Determine the plan month number (each month is 30 days).
+//   int monthsPassed = daysPassed ~/ 30;
+
+//   // Only send a notification if:
+//   // • At least one full 30-day period has passed (daysPassed > 0)
+//   // • Today marks the exact end of a 30-day period (daysPassed % 30 == 0)
+//   // • The plan month is within the total plan duration
+//   // • And we haven't already sent a notification for this plan month.
+//   if (daysPassed > 0 &&
+//       daysPassed % 30 == 0 &&
+//       monthsPassed <= totalMonths &&
+//       monthsPassed > lastNotifiedMonth) {
+//     NotificationService.showNotification(
+//       title: "لقد أكملت الشهر $monthsPassed من $totalMonths شهور من الخطة",
+//       body: "في هذا الشهر أنجزت ${(monthsPassed / totalMonths * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
+//     );
+//     setState(() {
+//       lastNotifiedMonth = monthsPassed;
+//     });
+//   }
+// }
 
 
   Future<void> showNotificationsSequentially(
@@ -341,81 +375,111 @@ Map<String, Map<int, bool>> sentNotifications = {};
     }
   }
 
-void showCategoryProgressNotification(Map<String, dynamic> progressData) {
+// void showCategoryProgressNotification(Map<String, dynamic> progressData) {
+//   // List of notifications to be shown sequentially
+//   List<Future<void>> notificationQueue = [];
 
-  // List of notifications to be shown sequentially
-  List<Future<void>> notificationQueue = [];
+//   // Loop through progress data and filter categories that exist in the savings plan
+//   progressData['progress'].forEach((category, progress) {
+//     // Check if the category exists in the current savings plan
+//     bool categoryExistsInPlan = savingsPlan.any((plan) => plan['category'] == category);
+//     if (categoryExistsInPlan) {
+//       // Ensure we have a map for this category
+//       sentNotifications.putIfAbsent(category, () => {});
 
-  // Loop through progress data and filter categories that exist in the savings plan
-  progressData['progress'].forEach((category, progress) {
-    // Check if the category exists in the current savings plan
-    bool categoryExistsInPlan = savingsPlan.any((plan) => plan['category'] == category);
+//       // Determine the current milestone based on progress:
+//       // 0: 0% progress, 1: >0% and <50%, 2: 50%-<75%, 3: 75%-<100%, 4: 100%
+//       int currentMilestone;
+//       if (progress == 0) {
+//         currentMilestone = 0;
+//       } else if (progress > 0 && progress < 50) {
+//         currentMilestone = 1;
+//       } else if (progress >= 50 && progress < 75) {
+//         currentMilestone = 2;
+//       } else if (progress >= 75 && progress < 100) {
+//         currentMilestone = 3;
+//       } else if (progress == 100) {
+//         currentMilestone = 4;
+//       } else {
+//         currentMilestone = 0;
+//       }
 
-    // Check if the category exists in the plan and hasn't been notified yet for this month
-    if (categoryExistsInPlan) {
-      // Initialize the sentNotifications map for the category if not already initialized
-sentNotifications.putIfAbsent(category, () => {});
+//       // Retrieve the previously notified milestone for this category in the current month (if any)
+//       int? previousMilestone = sentNotifications[category]?[_currentMonthIndex];
 
-        // Only send if this category has not been notified this month
-        if (sentNotifications[category]?[_currentMonthIndex] != true) {
-          // Only send if the current selected month is not in the future
-          DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-          DateTime selectedMonthStart =
-              startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-          if (selectedMonthStart.isAfter(DateTime.now())) return;
-        
-        // Progress Notifications
-        if (progress >= 50 && progress < 75) {
-          notificationQueue.add(Future.delayed(
-            Duration(milliseconds: notificationQueue.length * 10000), // Delay between notifications
-            () => NotificationService.showNotification(
-              title: "لقد أكملت 50% من الادخار في فئة $category",
-              body: "أنت في منتصف الطريق! استمر في العمل لتحقيق الهدف.",
-            ),
-          ));
-        } else if (progress >= 75 && progress < 100) {
-          notificationQueue.add(Future.delayed(
-            Duration(milliseconds: notificationQueue.length * 10000),
-            () => NotificationService.showNotification(
-              title: "أنت قريب جداً من الهدف في فئة $category!",
-              body: "لقد أكملت 75% من هدفك في هذه الفئة. قريباً ستصل!",
-            ),
-          ));
-        } else if (progress == 100) {
-          notificationQueue.add(Future.delayed(
-            Duration(milliseconds: notificationQueue.length * 10000),
-            () => NotificationService.showNotification(
-              title: "تمت الخطة بنجاح في فئة $category!",
-              body: "تهانينا! لقد أكملت 100% من هدف الادخار في هذه الفئة.",
-            ),
-          ));
-        } else if (progress > 0 && progress < 50) {
-          notificationQueue.add(Future.delayed(
-            Duration(milliseconds: notificationQueue.length * 10000),
-            () => NotificationService.showNotification(
-              title: "لقد أكملت تقدماً منخفضاً في فئة $category",
-              body: "أنت على الطريق الصحيح! حاول زيادة المدخرات لتحقيق الهدف.",
-            ),
-          ));
-        } else if (progress == 0) {
-          notificationQueue.add(Future.delayed(
-            Duration(milliseconds: notificationQueue.length * 10000),
-            () => NotificationService.showNotification(
-              title: "لم تبدأ الادخار بعد في فئة $category",
-              body: "حاول أن تبدأ في الادخار الآن! لا تتأخر عن تحقيق هدفك.",
-            ),
-          ));
-        }
+//       // If a notification was sent before but the current milestone is lower,
+//       // reset the flag so that a new notification can be sent when progress increases.
+//       if (previousMilestone != null && currentMilestone < previousMilestone) {
+//         sentNotifications[category]![_currentMonthIndex] = 0;
+//         previousMilestone = 0;
+//       }
 
-        // Mark this category as notified for the current month
-        sentNotifications[category]![_currentMonthIndex] = true;
-      }
-    }
-  });
+//       // If no notification has been sent yet or if the new milestone is higher, send one.
+//       if (previousMilestone == null || currentMilestone > previousMilestone) {
+//         // Only send if the current selected month is not in the future.
+//         DateTime planStartDate = DateTime.parse(widget.resultData['startDate']);
+//         DateTime selectedMonthStart =
+//             planStartDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+//         if (selectedMonthStart.isAfter(DateTime.now())) return;
 
-  // Execute the notifications sequentially
-  Future.wait(notificationQueue);
-}
+//         // Schedule a notification based on the current milestone.
+//         if (currentMilestone == 2) {
+//           // 50% progress reached
+//           notificationQueue.add(Future.delayed(
+//             Duration(milliseconds: notificationQueue.length * 1000),
+//             () => NotificationService.showNotification(
+//               title: "لقد أكملت 50% من الادخار في فئة $category",
+//               body: "أنت في منتصف الطريق! استمر في العمل لتحقيق الهدف.",
+//             ),
+//           ));
+//         } else if (currentMilestone == 3) {
+//           // 75% progress reached
+//           notificationQueue.add(Future.delayed(
+//             Duration(milliseconds: notificationQueue.length * 1000),
+//             () => NotificationService.showNotification(
+//               title: "أنت قريب جداً من الهدف في فئة $category!",
+//               body: "لقد أكملت 75% من هدفك في هذه الفئة. قريباً ستصل!",
+//             ),
+//           ));
+//         } else if (currentMilestone == 4) {
+//           // 100% progress reached
+//           notificationQueue.add(Future.delayed(
+//             Duration(milliseconds: notificationQueue.length * 1000),
+//             () => NotificationService.showNotification(
+//               title: "تمت الخطة بنجاح في فئة $category!",
+//               body: "تهانينا! لقد أكملت 100% من هدف الادخار في هذه الفئة.",
+//             ),
+//           ));
+//         } else if (currentMilestone == 1) {
+//           // Low progress (between 0 and 50)
+//           notificationQueue.add(Future.delayed(
+//             Duration(milliseconds: notificationQueue.length * 1000),
+//             () => NotificationService.showNotification(
+//               title: "لقد أكملت تقدماً منخفضاً في فئة $category",
+//               body: "أنت على الطريق الصحيح! حاول زيادة المدخرات لتحقيق الهدف.",
+//             ),
+//           ));
+//         } else if (currentMilestone == 0) {
+//           // 0% progress
+//           notificationQueue.add(Future.delayed(
+//             Duration(milliseconds: notificationQueue.length * 1000),
+//             () => NotificationService.showNotification(
+//               title: "لم تبدأ الادخار بعد في فئة $category",
+//               body: "حاول أن تبدأ في الادخار الآن! لا تتأخر عن تحقيق هدفك.",
+//             ),
+//           ));
+//         }
+
+//         // Update the milestone for this category in the current month
+//         sentNotifications[category]![_currentMonthIndex] = currentMilestone;
+//       }
+//     }
+//   });
+
+//   // Execute all scheduled notifications sequentially
+//   Future.wait(notificationQueue);
+// }
+
 
   void checkFullPlanCompletion() {
     // Check if the user has completed the full plan (last month)

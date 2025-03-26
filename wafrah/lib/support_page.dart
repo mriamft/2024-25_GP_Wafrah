@@ -5,8 +5,8 @@ class SupportPage extends StatefulWidget {
   final String phoneNumber;
   final String userName;
 
-  const SupportPage(
-      {super.key, required this.userName, required this.phoneNumber});
+  const SupportPage({Key? key, required this.userName, required this.phoneNumber})
+      : super(key: key);
 
   @override
   _SupportPageState createState() => _SupportPageState();
@@ -14,6 +14,7 @@ class SupportPage extends StatefulWidget {
 
 class _SupportPageState extends State<SupportPage> {
   Color _arrowColor = const Color(0xFF3D3D3D);
+
   void _onArrowTap() {
     setState(() {
       _arrowColor = Colors.grey;
@@ -164,15 +165,14 @@ class _SupportPageState extends State<SupportPage> {
   }
 
   void launchEmail() async {
-    print('Launching email...');
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: 'WafrahApplication@gmail.com',
-      query: Uri.encodeFull('subject=التواصل مع الدعم'),
+      queryParameters: {'subject': 'التواصل مع الدعم'},
     );
-
-    if (await canLaunch(emailLaunchUri.toString())) {
-      await launch(emailLaunchUri.toString());
+    print('Launching email: ${emailLaunchUri.toString()}');
+    if (await canLaunchUrl(emailLaunchUri)) {
+      await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication);
     } else {
       print('Could not launch $emailLaunchUri');
     }
