@@ -367,3 +367,26 @@ app.delete('/delete-user', (req, res) => {
     }
   });
 });
+
+// Update userName
+app.post('/update-username', (req, res) => {
+  const { phoneNumber, newUserName } = req.body;
+
+  if (!phoneNumber || !newUserName) {
+    return res.status(400).send('Phone number and new username are required');
+  }
+
+  const sql = 'UPDATE user SET userName = ? WHERE phoneNumber = ?';
+  db.query(sql, [newUserName, phoneNumber], (err, result) => {
+    if (err) {
+      console.error('Error updating userName:', err);
+      return res.status(500).send('Database error while updating userName');
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('User not found');
+    }
+
+    res.send({ success: true, message: 'Username updated successfully' });
+  });
+});
