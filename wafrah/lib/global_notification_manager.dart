@@ -76,21 +76,29 @@ class GlobalNotificationManager {
     _timer = null;
   }
 
-  void _checkNotifications() {
-    // Do nothing if no saving plan data exists.
-    if (_resultData == null ||
-        _planStartDate == null ||
-        _accounts == null ||
-        _durationMonths == null) {
-      return;
-    }
-    // Check month-end and mid-month notifications
-    _checkMonthEndNotification();
-    _checkMidMonthNotification();
-    // Check aggregated category milestone notifications
-    _checkAggregatedCategoryProgressNotifications();
-    _checkCategoryProgressNotifications();
+void _checkNotifications() {
+  // If there is no saving plan data, send an invitation notification and return.
+  if (_resultData == null ||
+      _planStartDate == null ||
+      _accounts == null ||
+      _durationMonths == null ||
+      !_resultData!.containsKey('MonthlySavingsPlan') ||
+      (_resultData!['MonthlySavingsPlan'] is List &&
+       (_resultData!['MonthlySavingsPlan'] as List).isEmpty) ||
+      !_resultData!.containsKey('CategorySavings')) {
+    NotificationService.showNotification(
+      title: "لا توجد خطة ادخار!",
+      body: "لم تقم بإضافة خطة ادخار بعد. انضم إلينا وابدأ خطتك الآن!",
+    );
+    return;
   }
+
+  // Otherwise, proceed with your normal notification checks.
+  _checkMonthEndNotification();
+  _checkMidMonthNotification();
+  _checkAggregatedCategoryProgressNotifications();
+  _checkCategoryProgressNotifications();
+}
 
   /// Calculate progress for the **current plan month** only.
   Map<String, double> _calculateMonthlyProgress() {
