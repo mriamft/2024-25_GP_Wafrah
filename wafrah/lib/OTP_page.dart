@@ -124,7 +124,7 @@ class _OTPPageState extends State<OTPPage> {
     }
  
     final url =
-        Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/verify-otp');
+        Uri.parse('https://login-service.ngrok.io/verify-otp');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -163,7 +163,7 @@ class _OTPPageState extends State<OTPPage> {
   }
  
 Future<void> addUserToDatabase() async {
-  final url = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/adduser');
+  final url = Uri.parse('https://login-service.ngrok.io/adduser');
   final response = await http.post(
     url,
     headers: {"Content-Type": "application/json"},
@@ -184,7 +184,7 @@ Future<void> addUserToDatabase() async {
  
       try {
         // First, try to load accounts data from the server
-        final accountsUrl = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/accounts');
+        final accountsUrl = Uri.parse('https://login-service.ngrok.io/accounts');
  
         final accountsResponse = await http.get(
           accountsUrl,
@@ -234,7 +234,7 @@ Future<void> _redirectToHomePage() async {
  
       try {
         // First, try to load accounts data from the server
-        final accountsUrl = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/accounts');
+        final accountsUrl = Uri.parse('https://login-service.ngrok.io/accounts');
  
         final accountsResponse = await http.get(
           accountsUrl,
@@ -244,7 +244,7 @@ Future<void> _redirectToHomePage() async {
         if (accountsResponse.statusCode == 200) {
 try {
         // First, try to load accounts data from the server
-        final accountsUrl = Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/accounts');
+        final accountsUrl = Uri.parse('https://login-service.ngrok.io/accounts');
  
         final accountsResponse = await http.get(
           accountsUrl,
@@ -285,7 +285,7 @@ try {
   Future<void> resendOTP() async {
     if (canResend) {
       final url =
-          Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/send-otp');
+          Uri.parse('https://login-service.ngrok.io/send-otp');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

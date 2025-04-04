@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'success_plan_page.dart'; // Import SuccessPlanPage
 import 'custom_icons.dart';
+import 'package:intl/intl.dart';
 
 class SavingDisPage extends StatefulWidget {
   final String userName;
@@ -25,6 +26,8 @@ class SavingDisPage extends StatefulWidget {
 class _SavingDisPageState extends State<SavingDisPage> {
   Color _arrowColor = const Color(0xFF3D3D3D);
   bool _isPressed = false;
+
+  final NumberFormat arabicNumberFormat = NumberFormat("#,##0.00", "ar");
 
   // Define all possible categories
   final List<String> allCategories = [
@@ -341,14 +344,14 @@ print(widget.startDate);
                             left: 24,
                             top: 16,
                             child: Text(
-                              categorySavings[category]!.toStringAsFixed(
-                                  0), // Display category savings
-                              style: const TextStyle(
-                                color: Color(0xFF3D3D3D),
-                                fontSize: 17,
-                                fontFamily: 'GE-SS-Two-Bold',
-                              ),
-                            ),
+  arabicNumberFormat.format(categorySavings[category]),
+  style: const TextStyle(
+    color: Color(0xFF3D3D3D),
+    fontSize: 17,
+    fontFamily: 'GE-SS-Two-Bold',
+  ),
+),
+
                           ),
                           const Positioned(
   left: 3,
@@ -375,15 +378,14 @@ print(widget.startDate);
               left: 122,
             top: 245,
               child: Text(
-                'مجموع النسب لا يساوي ١٠٠%! نسبتك الحالية هي ${totalPercentage.toInt()}%',
-                style: const TextStyle(
-                  color: Color(0xFFDD2C35),
-                  fontSize: 11,
-                  fontFamily: 'GE-SS-Two-Light',
-                ),
-                textAlign: TextAlign.right, // Proper alignment for Arabic
-                textDirection: TextDirection.rtl, // Ensure RTL text flow
-              ),
+  'مجموع النسب لا يساوي ١٠٠%! نسبتك الحالية هي ${arabicNumberFormat.format(totalPercentage.toInt())}%',
+  style: const TextStyle(
+    color: Color(0xFFDD2C35),
+    fontSize: 11,
+    fontFamily: 'GE-SS-Two-Light',
+  ),
+  textAlign: TextAlign.right,
+),
             ),
 
           Positioned(
@@ -464,5 +466,3 @@ print(widget.startDate);
     );
   }
 }
-
-
