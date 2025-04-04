@@ -38,6 +38,8 @@ class _NotificationPageState extends State<NotificationPage> {
           .split(';')
           .where((s) => s.trim().isNotEmpty)
           .toList();
+      // Debug print to see the stored notifications:
+      print("Stored notifications: $storedNotifications");
     }
     setState(() {
       hasNewNotifications = notifications.isNotEmpty;
@@ -304,6 +306,7 @@ class _NotificationPageState extends State<NotificationPage> {
                         title = content;
                         body = '';
                       }
+                      // Simply try parsing the timestamp as ISO8601.
                       DateTime? notifTime = DateTime.tryParse(timestampString);
                       if (notifTime == null) {
                         formattedTime = _getCurrentDateTime();
@@ -330,7 +333,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      // Display the actual stored time.
+                      // Display the stored time.
                       Padding(
                         padding: const EdgeInsets.only(right: 15.0),
                         child: Text(

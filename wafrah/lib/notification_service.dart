@@ -72,19 +72,22 @@ class NotificationService {
 
   // Store notifications in secure storage
 // Update this method in NotificationService to track new notifications
-  static Future<void> _storeNotification(String title, String body) async {
-    try {
-      List<String> notifications = await getNotifications();
-      notifications.add('$title: $body');
-      await _storage.write(
-          key: 'notifications', value: notifications.join(';'));
+static Future<void> _storeNotification(String title, String body) async {
+  try {
+    List<String> notifications = await getNotifications();
+    // Create a timestamp string using ISO8601 format.
+    String timestamp = DateTime.now().toIso8601String(); // e.g. "2025-04-04T01:10:00.000"
+    // Store in the expected format: "timestamp|title:body"
+    notifications.add('$timestamp|$title: $body');
+    await _storage.write(key: 'notifications', value: notifications.join(';'));
 
-      // Update new notification flag
-      await _storage.write(key: 'hasNewNotifications', value: 'true');
-    } catch (e) {
-      print("Error storing notification: $e");
-    }
+    // Update new notification flag
+    await _storage.write(key: 'hasNewNotifications', value: 'true');
+  } catch (e) {
+    print("Error storing notification: $e");
   }
+}
+
 
   // Get stored notifications from secure storage
   static Future<List<String>> getNotifications() async {

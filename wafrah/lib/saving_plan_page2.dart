@@ -14,6 +14,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'main.dart';
 import 'notification_service.dart';
 import 'chatbot.dart';
+import 'global_notification_manager.dart'; 
 
 class SavingPlanPage2 extends StatefulWidget {
   final String userName;
@@ -47,15 +48,15 @@ int lastNotifiedMonth = 0; // tracks last month for which a notification was sen
   Map<String, dynamic> wap = {};
   bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
+ @override
+void initState() {
+  super.initState();
 
   // Initialize the notification service and pass a callback to navigate to SavingPlanPage2 when tapped.
   NotificationService.init((String? payload) {
     if (payload != null) {
       print('Notification clicked with payload: $payload');
-    navigatorKey.currentState?.push(
+      navigatorKey.currentState?.push(
         MaterialPageRoute(
           builder: (context) => SavingPlanPage2(
             userName: widget.userName,
@@ -68,46 +69,57 @@ int lastNotifiedMonth = 0; // tracks last month for which a notification was sen
     }
   });
 
+  // Load plan data
+  if (widget.resultData.isEmpty ||
+      !widget.resultData.containsKey('startDate')) {
+    print("Loading saved plan data...");
+    _loadPlanFromSecureStorage().then((_) {
+      if (widget.resultData.containsKey('startDate')) {
+        print("startDate found: ${widget.resultData['startDate']}");
+        generateMonths(widget.resultData['DurationMonths']);
+        generateSavingsPlan();
 
-    // Load plan data
-    if (widget.resultData.isEmpty ||
-        !widget.resultData.containsKey('startDate')) {
-      print("Loading saved plan data...");
-      _loadPlanFromSecureStorage().then((_) {
-        if (widget.resultData.containsKey('startDate')) {
-          print("startDate found: ${widget.resultData['startDate']}");
-          generateMonths(widget.resultData['DurationMonths']);
-          generateSavingsPlan();
-        } else {
-          print(
-              "Error: startDate is still missing after loading from storage.");
-        }
-      });
-    } else {
-      print("Using existing resultData");
-      generateMonths(widget.resultData['DurationMonths']);
-      generateSavingsPlan();
-    }
-
-    generateMonths(widget.resultData['DurationMonths']);
-    print("result data");
-    print(widget.resultData["startDate"]);
-    print("resultData Keys: ${widget.resultData.keys}");
-    print(widget.accounts);
-
-    _currentMonthIndex = 0; // Ensure "الخطة كاملة" is selected by default
-
-    // Initialize categoryTotalSavings before calling generateSavingsPlan()
-    categoryTotalSavings = Map<String, double>.from(widget
-        .resultData['CategorySavings']
-        .map((key, value) => MapEntry(key, (value as num).toDouble())));
-
-    // Call generateSavingsPlan after categoryTotalSavings is initialized
-    setState(() {
-      generateSavingsPlan();
+        // Update the GlobalNotificationManager with the new plan data.
+        GlobalNotificationManager().updateData(
+          resultData: widget.resultData,
+          accounts: widget.accounts,
+        );
+      } else {
+        print("Error: startDate is still missing after loading from storage.");
+      }
     });
-    _loadPlanFromSecureStorage();
+  } else {
+    print("Using existing resultData");
+    generateMonths(widget.resultData['DurationMonths']);
+    generateSavingsPlan();
+
+    // Update the GlobalNotificationManager with the existing plan data.
+    GlobalNotificationManager().updateData(
+      resultData: widget.resultData,
+      accounts: widget.accounts,
+    );
   }
+
+  generateMonths(widget.resultData['DurationMonths']);
+  print("result data");
+  print(widget.resultData["startDate"]);
+  print("resultData Keys: ${widget.resultData.keys}");
+  print(widget.accounts);
+
+  _currentMonthIndex = 0; // Ensure "الخطة كاملة" is selected by default
+
+  // Initialize categoryTotalSavings before calling generateSavingsPlan()
+  categoryTotalSavings = Map<String, double>.from(widget
+      .resultData['CategorySavings']
+      .map((key, value) => MapEntry(key, (value as num).toDouble())));
+
+  // Call generateSavingsPlan after categoryTotalSavings is initialized
+  setState(() {
+    generateSavingsPlan();
+  });
+  _loadPlanFromSecureStorage();
+}
+
 
   String formatNumber(double number) {
     return NumberFormat("#,##0", "ar").format(number);
