@@ -291,54 +291,68 @@ void _checkAggregatedCategoryProgressNotifications() {
   }
 }
 
+/// Convert a milestone integer to a short descriptive string.
+String _milestoneToString(int milestone) {
+  switch (milestone) {
+    case 1:
+      return "بدأت الادخار";
+    case 2:
+      return "50% من الهدف";
+    case 3:
+      return "75% من الهدف";
+    case 4:
+      return "100% من الهدف";
+    default:
+      return "";
+  }
+}
+
+/// Aggregates category progress updates and sends a single, concise notification.
+void _checkCategoryProgressNotifications() {
+  // Retrieve the monthly progress for each category from your helper.
+  final Map<String, double> monthlyProgress = _calculateMonthlyProgress();
+  final Map<String, int> updatedCategories = {};
+
+  // Check for each category if its milestone has improved.
+  monthlyProgress.forEach((category, progress) {
+    int currentMilestone = _milestoneFromProgress(progress);
+    if (!_sentMilestones.containsKey(category)) {
+      if (currentMilestone > 0) {
+        updatedCategories[category] = currentMilestone;
+        _sentMilestones[category] = currentMilestone;
+      }
+    } else {
+      int previousMilestone = _sentMilestones[category]!;
+      if (currentMilestone > previousMilestone) {
+        updatedCategories[category] = currentMilestone;
+        _sentMilestones[category] = currentMilestone;
+      }
+    }
+  });
+
+  // Only send a notification if there is an update.
+  if (updatedCategories.isNotEmpty) {
+    String title = "تقدم الادخار";
+    String body;
+
+    if (updatedCategories.length == 1) {
+      // If there's only one category, show its name and milestone.
+      final String cat = updatedCategories.keys.first;
+      final int milestone = updatedCategories[cat]!;
+      body = "في فئة $cat، ${_milestoneToString(milestone)}.";
+    } else {
+      // For multiple updated categories, show just the count.
+      body = "لقد حققت تقدمًا في ${updatedCategories.length} فئات. استمر في الادخار!";
+    }
+
+    NotificationService.showNotification(
+      title: title,
+      body: body,
+    );
+  }
+}
 
 
-  /// Check each category’s progress (only for categories in the saving plan and for the current month)
-  /// and send a notification if a new milestone is reached.
- void _checkCategoryProgressNotifications() {
-   final Map<String, double> monthlyProgress = _calculateMonthlyProgress();
-   monthlyProgress.forEach((category, progress) {
-     int currentMilestone;
-     if (progress == 0) {
-       currentMilestone = 0;
-     } else if (progress > 0 && progress < 50) {
-       currentMilestone = 1;
-     } else if (progress >= 50 && progress < 75) {
-       currentMilestone = 2;
-     } else if (progress >= 75 && progress < 100) {
-       currentMilestone = 3;
-     } else if (progress == 100) {
-       currentMilestone = 4;
-     } else {
-       currentMilestone = 0;
-     }
-
-     // If the category has never been notified before, send notification (even for 0%).
-     if (!_sentMilestones.containsKey(category)) {
-       final delay = Duration(seconds: _sentMilestones.length * 5);
-       Future.delayed(delay, () {
-         NotificationService.showNotification(
-           title: _getCategoryNotificationTitle(category, currentMilestone),
-           body: _getCategoryNotificationBody(category, currentMilestone),
-         );
-       });
-       _sentMilestones[category] = currentMilestone;
-     } else {
-       final int previousMilestone = _sentMilestones[category]!;
-       // Only send a notification if the current milestone is higher than what was already notified.
-       if (currentMilestone > previousMilestone) {
-         final delay = Duration(seconds: _sentMilestones.length * 5);
-         Future.delayed(delay, () {
-           NotificationService.showNotification(
-             title: _getCategoryNotificationTitle(category, currentMilestone),
-             body: _getCategoryNotificationBody(category, currentMilestone),
-           );
-         });
-         _sentMilestones[category] = currentMilestone;
-       }
-     }
-   });
- }
 
   String _getCategoryNotificationTitle(String category, int milestone) {
     switch (milestone) {

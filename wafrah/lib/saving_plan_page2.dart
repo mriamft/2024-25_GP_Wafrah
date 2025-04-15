@@ -842,7 +842,7 @@ void showMonthProgressNotification() {
               left: 10,
               top: 275,
               child: Text(
-                'في حال تم الاقتراب للحد الزدنى من الصرف، ستظهر رسالة تحذيرية في مربع هذه الفئة\n',
+                'في حال تم الاقتراب للحد الأدنى من الصرف، ستظهر رسالة تحذيرية في مربع هذه الفئة\n',
                 style: TextStyle(
                   color: Color(0xFF3D3D3D),
                   fontSize: 10,
