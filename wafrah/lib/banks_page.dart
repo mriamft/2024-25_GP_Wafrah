@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wafrah/session_manager.dart';
 import 'acc_link_page.dart';
 import 'transactions_page.dart';
 import 'home_page.dart';
@@ -36,7 +37,14 @@ class _BanksPageState extends State<BanksPage> {
   void initState() {
     super.initState();
     _initializeAccounts();
+    SessionManager.startTracking(context);
   }
+  @override
+void dispose() {
+  SessionManager.dispose();
+  super.dispose();
+}
+
 
   Future<void> _initializeAccounts() async {
     if (widget.accounts.isNotEmpty) {

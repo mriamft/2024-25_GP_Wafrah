@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 // Adjust this import based on where your SavingDisPage file is located:
 import 'package:wafrah/saving_dis_page.dart';
+import 'package:wafrah/session_manager.dart';
 import 'custom_icons.dart';
 
 class UserPatternPage extends StatefulWidget {
@@ -30,9 +31,17 @@ class UserPatternPage extends StatefulWidget {
 }
 
 class _UserPatternPageState extends State<UserPatternPage> {
+
+
+@override
+void dispose() {
+  SessionManager.dispose();
+  super.dispose();
+}
   @override
   void initState() {
     super.initState();
+    SessionManager.startTracking(context);
     print("resultData: ${widget.resultData}"); // ✅ Print resultData in console
   }
 

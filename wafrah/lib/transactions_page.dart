@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wafrah/session_manager.dart';
 import 'settings_page.dart';
 import 'banks_page.dart';
 import 'dart:async';
@@ -33,6 +34,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
   bool _showNotification = false;
   String _notificationMessage = '';
   Color _notificationColor = Colors.red;
+
+        @override
+void initState() {
+  super.initState();
+  SessionManager.startTracking(context);
+}
+
+@override
+void dispose() {
+  SessionManager.dispose();
+  super.dispose();
+}
 
 // Show a top notification for 5 seconds
   void showNotification(String message, {Color color = Colors.red}) {

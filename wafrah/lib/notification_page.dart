@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import 'package:wafrah/session_manager.dart';
 import 'notification_service.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -26,6 +27,7 @@ class _NotificationPageState extends State<NotificationPage> {
   void initState() {
     super.initState();
     _loadNotifications();
+    SessionManager.startTracking(context);
   }
 
   // Load notifications from secure storage.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wafrah/session_manager.dart';
 
 class SupportPage extends StatefulWidget {
   final String phoneNumber;
@@ -17,6 +18,18 @@ class SupportPage extends StatefulWidget {
 
 class _SupportPageState extends State<SupportPage> {
   Color _arrowColor = const Color(0xFF3D3D3D);
+
+        @override
+void initState() {
+  super.initState();
+  SessionManager.startTracking(context);
+}
+
+@override
+void dispose() {
+  SessionManager.dispose();
+  super.dispose();
+}
 
   // Force mailto to use %20 for spaces, avoiding "+" in some clients.
   Future<void> _launchEmail() async {

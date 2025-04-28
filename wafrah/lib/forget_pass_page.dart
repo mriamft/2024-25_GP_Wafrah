@@ -22,6 +22,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
   Color _buttonColor = Colors.white;
   String phoneErrorMessage = ''; 
 
+
   // Show notification method
   void showNotification(String message,
       {Color color = const Color(0xFFC62C2C)}) {

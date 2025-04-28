@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:wafrah/session_manager.dart';
 import 'package:wafrah/user_pattern_page.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
@@ -36,6 +37,12 @@ class _GoalPageState extends State<GoalPage> {
   Timer? _notificationTimer;
   bool _showNotification = false;
   String _notificationMessage = '';
+
+@override
+void initState() {
+  super.initState();
+  SessionManager.startTracking(context);
+}
   // Show notification method
   void showNotification(String message, {Color color = Colors.red}) {
     setState(() {
@@ -61,6 +68,7 @@ class _GoalPageState extends State<GoalPage> {
     startDateController.dispose();
     durationController.dispose();
     endDateController.dispose();
+    SessionManager.dispose();
     super.dispose();
   }
 

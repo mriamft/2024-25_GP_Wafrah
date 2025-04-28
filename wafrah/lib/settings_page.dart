@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:wafrah/main.dart';
+import 'package:wafrah/session_manager.dart';
 import 'package:wafrah/storage_service.dart';
 import 'saving_plan_page.dart';
 import 'transactions_page.dart';
@@ -42,6 +43,13 @@ class _SettingsPageState extends State<SettingsPage> {
   Color _supportColor = const Color(0xFFD9D9D9);
   bool hasNewNotifications = false; // Track new notifications
 
+
+@override
+void dispose() {
+  SessionManager.dispose();
+  super.dispose();
+}
+
   // Custom page transition
   Route _createNoTransitionRoute(Widget page) {
     return PageRouteBuilder(
@@ -58,7 +66,9 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _checkForNewNotifications();
+    SessionManager.startTracking(context);
   }
+
 
 // In SettingsPage, add the check for new notifications in initState
   void _checkForNewNotifications() async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
+import 'package:wafrah/session_manager.dart';
 import 'settings_page.dart';
 import 'saving_plan_page.dart';
 import 'transactions_page.dart';
@@ -48,10 +49,17 @@ int lastNotifiedMonth = 0; // tracks last month for which a notification was sen
   Map<String, dynamic> wap = {};
   bool isLoading = false;
 
+
+@override
+void dispose() {
+  SessionManager.dispose();
+  super.dispose();
+}
+
  @override
 void initState() {
   super.initState();
-
+SessionManager.startTracking(context);
   // Initialize the notification service and pass a callback to navigate to SavingPlanPage2 when tapped.
   NotificationService.init((String? payload) {
     if (payload != null) {
@@ -1415,4 +1423,3 @@ if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
 }
 
 }
-

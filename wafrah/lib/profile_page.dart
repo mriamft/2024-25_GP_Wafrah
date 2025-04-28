@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:wafrah/session_manager.dart';
 import 'dart:convert';
 import 'settings_page.dart' as Settings;
 
@@ -35,12 +36,14 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _nameController.text = widget.userName;
+    SessionManager.startTracking(context);
   }
 
   @override
 void dispose() {
   _notificationTimer?.cancel();
   _nameController.dispose();
+  SessionManager.dispose();
   super.dispose();
 }
 

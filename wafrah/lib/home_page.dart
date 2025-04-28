@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wafrah/session_manager.dart';
 import 'settings_page.dart';
 import 'transactions_page.dart';
 import 'saving_plan_page.dart';
@@ -63,6 +64,8 @@ List<String> selectedCategories = [];
   void initState() {
     super.initState();
     globalNotificationManager.start();
+    SessionManager.startTracking(context);
+    
 
     // After fetching user data and if a saving plan exists, update the manager:
     loadUserPlan().then((planData) {
@@ -163,6 +166,8 @@ List<String> selectedCategories = [];
   void dispose() {
     _controller.dispose();
     _pageController.dispose();
+      SessionManager.dispose();
+
     super.dispose();
   }
 

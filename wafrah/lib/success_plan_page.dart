@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wafrah/session_manager.dart';
 import 'saving_plan_page2.dart'; // Import SavingPlanPage2
 
 class SuccessPlanPage extends StatefulWidget {
@@ -20,9 +21,18 @@ class SuccessPlanPage extends StatefulWidget {
 }
 
 class _SuccessPlanPageState extends State<SuccessPlanPage> {
+
+@override
+void dispose() {
+  SessionManager.dispose();
+  super.dispose();
+}
+
     @override
   void initState() {
     super.initState();
+SessionManager.startTracking(context);
+    
 print("Success" );
 print( widget.resultData);
 

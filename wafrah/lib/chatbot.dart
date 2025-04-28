@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wafrah/session_manager.dart';
 
 class Chatbot extends StatefulWidget {
   final String userName;
@@ -28,8 +29,16 @@ class _ChatbotState extends State<Chatbot> {
   @override
   void initState() {
     super.initState();
+    SessionManager.startTracking(context);
     _loadMessages();
   }
+
+  @override
+void dispose() {
+  SessionManager.dispose();
+  super.dispose();
+}
+
 
   Future<void> _loadMessages() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
