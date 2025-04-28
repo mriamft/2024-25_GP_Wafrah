@@ -22,16 +22,10 @@ class SuccessPlanPage extends StatefulWidget {
 
 class _SuccessPlanPageState extends State<SuccessPlanPage> {
 
-@override
-void dispose() {
-  SessionManager.dispose();
-  super.dispose();
-}
 
     @override
   void initState() {
     super.initState();
-SessionManager.startTracking(context);
     
 print("Success" );
 print( widget.resultData);

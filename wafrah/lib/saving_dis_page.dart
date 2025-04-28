@@ -65,16 +65,10 @@ class _SavingDisPageState extends State<SavingDisPage> {
 
 
 
-@override
-void dispose() {
-  SessionManager.dispose();
-  super.dispose();
-}
 
   @override
   void initState() {
     super.initState();
-    SessionManager.startTracking(context);
     // Extract discretionaryRatios and CategorySavings from resultData
     Map<String, dynamic> rawRatios =
         widget.resultData['discretionaryRatios'] ?? {};

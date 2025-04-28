@@ -60,41 +60,38 @@ List<String> selectedCategories = [];
   int monthOffset = 0;
   int yearOffset = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    globalNotificationManager.start();
+@override
+void initState() {
+  super.initState();
+  globalNotificationManager.start();
+
+  // تأجيل بداية SessionManager لما يكتمل بناء الصفحة
+  WidgetsBinding.instance.addPostFrameCallback((_) {
     SessionManager.startTracking(context);
-    
+  });
 
-    // After fetching user data and if a saving plan exists, update the manager:
-    loadUserPlan().then((planData) {
-      if (planData != null) {
-        globalNotificationManager.updateData(
-          resultData: planData,
-          accounts: widget.accounts,
-        );
-      } else {
-        globalNotificationManager.clearData();
-      }
-    });
-    print("Backend response: ${jsonEncode(widget.accounts)}");
+  loadUserPlan().then((planData) {
+    if (planData != null) {
+      globalNotificationManager.updateData(
+        resultData: planData,
+        accounts: widget.accounts,
+      );
+    } else {
+      globalNotificationManager.clearData();
+    }
+  });
 
-    _loadVisibilityState(); // Load saved visibility state
+  _loadVisibilityState();
+  _controller = AnimationController(
+    duration: const Duration(seconds: 2),
+    vsync: this,
+  );
+  _offsetAnimation = Tween<Offset>(begin: const Offset(0, -1), end: const Offset(0, 0))
+      .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  _controller.forward();
+  updateDashboardData();
+}
 
-    print('Transaction Categories33: $transactionCategories');
-
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-
-    _offsetAnimation = Tween<Offset>(begin: const Offset(0, -1), end: const Offset(0, 0))
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-
-    _controller.forward();
-    updateDashboardData();
-  }
 
   Future<Map<String, dynamic>?> loadUserPlan() async {
     try {
@@ -166,7 +163,7 @@ List<String> selectedCategories = [];
   void dispose() {
     _controller.dispose();
     _pageController.dispose();
-      SessionManager.dispose();
+    SessionManager.dispose();
 
     super.dispose();
   }

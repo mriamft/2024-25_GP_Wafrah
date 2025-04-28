@@ -33,15 +33,9 @@ class UserPatternPage extends StatefulWidget {
 class _UserPatternPageState extends State<UserPatternPage> {
 
 
-@override
-void dispose() {
-  SessionManager.dispose();
-  super.dispose();
-}
   @override
   void initState() {
     super.initState();
-    SessionManager.startTracking(context);
     print("resultData: ${widget.resultData}"); // ✅ Print resultData in console
   }
 

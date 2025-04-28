@@ -29,15 +29,10 @@ class _ChatbotState extends State<Chatbot> {
   @override
   void initState() {
     super.initState();
-    SessionManager.startTracking(context);
     _loadMessages();
   }
 
-  @override
-void dispose() {
-  SessionManager.dispose();
-  super.dispose();
-}
+
 
 
   Future<void> _loadMessages() async {
@@ -320,30 +315,35 @@ void dispose() {
                     child: Row(
                       children: [
                         IconButton(
-                          icon:
-                              const Icon(Icons.send, color: Color(0xFFD7D7D7)),
-                          onPressed: () => _sendMessage(_controller.text),
-                        ),
+  icon: const Icon(Icons.send, color: Color(0xFFD7D7D7)),
+  onPressed: () {
+    SessionManager.resetTimer(); // ➡️ أضف هذا هنا قبل الإرسال
+    _sendMessage(_controller.text);
+  },
+),
+
                         const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            controller: _controller,
-                            textAlign: TextAlign.right,
-                            decoration: InputDecoration(
-                              hintText: "...اكتب رسالتك",
-                              hintStyle:
-                                  const TextStyle(fontFamily: 'GE-SS-Two-Bold'),
-                              filled: true,
-                              fillColor: const Color(0xFFD7D7D7),
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
-                        ),
+Expanded(
+  child: TextField(
+    controller: _controller,
+    textAlign: TextAlign.right,
+    onChanged: (_) {
+      SessionManager.resetTimer();    
+    },
+    decoration: InputDecoration(
+      hintText: "...اكتب رسالتك",
+      hintStyle: const TextStyle(fontFamily: 'GE-SS-Two-Bold'),
+      filled: true,
+      fillColor: const Color(0xFFD7D7D7),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30),
+        borderSide: BorderSide.none,
+      ),
+    ),
+  ),
+),
+
                       ],
                     ),
                   ),

@@ -36,14 +36,12 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _nameController.text = widget.userName;
-    SessionManager.startTracking(context);
   }
 
   @override
 void dispose() {
   _notificationTimer?.cancel();
   _nameController.dispose();
-  SessionManager.dispose();
   super.dispose();
 }
 

@@ -15,7 +15,7 @@ class SessionManager {
 
   static void _resetTimer(BuildContext context) {
     _inactivityTimer?.cancel();
-    _inactivityTimer = Timer(const Duration(minutes: 1), () {
+    _inactivityTimer = Timer(const Duration(minutes: 10), () {
       _showConfirmationDialog(context);
     });
   }
@@ -138,4 +138,11 @@ startTracking(navigatorKey.currentState!.overlay!.context);
     _inactivityTimer?.cancel();
     _confirmationTimer?.cancel();
   }
+
+  static void resetTimer() {
+  if (navigatorKey.currentState != null) {
+    _resetTimer(navigatorKey.currentState!.overlay!.context);
+  }
+}
+
 }

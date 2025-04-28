@@ -44,11 +44,6 @@ class _SettingsPageState extends State<SettingsPage> {
   bool hasNewNotifications = false; // Track new notifications
 
 
-@override
-void dispose() {
-  SessionManager.dispose();
-  super.dispose();
-}
 
   // Custom page transition
   Route _createNoTransitionRoute(Widget page) {
@@ -66,7 +61,6 @@ void dispose() {
   void initState() {
     super.initState();
     _checkForNewNotifications();
-    SessionManager.startTracking(context);
   }
 
 

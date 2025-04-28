@@ -50,16 +50,10 @@ int lastNotifiedMonth = 0; // tracks last month for which a notification was sen
   bool isLoading = false;
 
 
-@override
-void dispose() {
-  SessionManager.dispose();
-  super.dispose();
-}
 
  @override
 void initState() {
   super.initState();
-SessionManager.startTracking(context);
   // Initialize the notification service and pass a callback to navigate to SavingPlanPage2 when tapped.
   NotificationService.init((String? payload) {
     if (payload != null) {

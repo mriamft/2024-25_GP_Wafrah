@@ -29,17 +29,7 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
   bool _isPressed = false;
   bool _isPlanSaved = false;
 
-  @override
-void initState() {
-  super.initState();
-  SessionManager.startTracking(context);
-}
 
-@override
-void dispose() {
-  SessionManager.dispose();
-  super.dispose();
-}
 
   // Define the function to check and navigate to SavingPlanPage2 or GoalPage
   void navigateToSavingPlan() async {
