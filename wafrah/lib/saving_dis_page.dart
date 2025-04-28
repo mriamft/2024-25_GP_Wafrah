@@ -56,13 +56,12 @@ class _SavingDisPageState extends State<SavingDisPage> {
   late Map<String, int> initialDiscretionaryRatios; // Store initial ratios
   late Map<String, double> initialCategorySavings; // Store initial savings
   late final Map<String, TextEditingController> controllers = {
-    for (var category in allCategories)
-      category: TextEditingController(
-        text:
-            ((widget.resultData['discretionaryRatios']?[category] ?? 0) as int)
-                .toString(),
-      ),
-  };
+  for (var category in allCategories)
+    category: TextEditingController(
+      text: '%${(widget.resultData['discretionaryRatios']?[category] ?? 0)}',
+    ),
+};
+
 
   @override
   void initState() {
@@ -90,6 +89,7 @@ print(widget.startDate);
     // Store initial values for resetting later
     initialDiscretionaryRatios = Map.from(discretionaryRatios);
     initialCategorySavings = Map.from(categorySavings);
+    
   }
 
   void _onArrowTap() {
@@ -121,13 +121,18 @@ print(widget.startDate);
     });
   }
 
-  void _resetCategoryDistribution() {
-    setState(() {
-      // Reset to the initial values
-      discretionaryRatios = Map.from(initialDiscretionaryRatios);
-      categorySavings = Map.from(initialCategorySavings);
+void _resetCategoryDistribution() {
+  setState(() {
+    discretionaryRatios = Map.from(initialDiscretionaryRatios);
+    categorySavings = Map.from(initialCategorySavings);
+
+    // Reset the controllers text as well
+    discretionaryRatios.forEach((category, value) {
+      controllers[category]!.text = '%${value}';
     });
-  }
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -295,46 +300,36 @@ print(widget.startDate);
                                     width: 35,
                                     height: 34,
                                     child: TextField(
-                                      keyboardType: TextInputType.number,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontFamily: 'GE-SS-Two-Light',
-                                        color: Color(0xFF3D3D3D),
-                                      ),
-                                      decoration: const InputDecoration(
-                                        border: InputBorder.none,
-                                      ),
-                                      controller: TextEditingController(
-                                        text:
-                                            '%${discretionaryRatios[category]}', // Display the percentage with %
-                                      ),
-                                      onChanged: (value) {
-                                        // Remove the % sign before parsing
-                                        String sanitizedValue =
-                                            value.replaceAll('%', '').trim();
-                                        double? newValue =
-                                            double.tryParse(sanitizedValue);
+  keyboardType: TextInputType.number,
+  textAlign: TextAlign.center,
+  style: const TextStyle(
+    fontSize: 14,
+    fontFamily: 'GE-SS-Two-Light',
+    color: Color(0xFF3D3D3D),
+  ),
+  decoration: const InputDecoration(
+    border: InputBorder.none,
+  ),
+  controller: controllers[category],
+onChanged: (value) {
+  String sanitizedValue = value.replaceAll('%', '').trim(); // Remove %
+  double? newValue = double.tryParse(sanitizedValue);
 
-                                        if (newValue != null &&
-                                            newValue >= 0 &&
-                                            newValue <= 100) {
-                                          setState(() {
-                                            // Update the ratio and synchronize other components
-                                            discretionaryRatios[category] =
-                                                newValue.toInt();
-                                            double totalSavingsGoal = widget
-                                                    .resultData["SavingsGoal"]
-                                                    ?.toDouble() ??
-                                                0.0;
-                                            categorySavings[category] =
-                                                (totalSavingsGoal *
-                                                        (newValue / 100))
-                                                    .toDouble();
-                                          });
-                                        }
-                                      },
-                                    ),
+  if (newValue != null && newValue >= 0 && newValue <= 100) {
+    setState(() {
+      discretionaryRatios[category] = newValue.toInt();
+      double totalSavingsGoal = widget.resultData["SavingsGoal"]?.toDouble() ?? 0.0;
+      categorySavings[category] = (totalSavingsGoal * (newValue / 100)).toDouble();
+      controllers[category]!.text = '%${newValue.toInt()}';
+      controllers[category]!.selection = TextSelection.fromPosition(
+        TextPosition(offset: controllers[category]!.text.length - 1),
+      );
+    });
+  }
+},
+
+),
+
                                   ),
                                 ],
                               ),

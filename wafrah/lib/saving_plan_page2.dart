@@ -742,36 +742,38 @@ void showMonthProgressNotification() {
           ),
 
           // Show remaining months when "الخطة كاملة" is selected
-          if (_currentMonthIndex == 0)
-            Positioned(
-              top: 130,
-              left: 75,
-              child: Text(
-                'الأشهر المتبقية لإتمام الخطة: ${convertToArabicNumbers(remainingMonths.toString())}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'GE-SS-Two-Bold',
-                  color: Colors.white,
-                ),
-              ),
-            ),
+if (_currentMonthIndex == 0)
+  Positioned(
+    top: 130,
+    left: 95,
+    child: Text(
+      'متبقي ${convertToArabicNumbers(remainingMonths.toString())} شهر لإتمام الخطة',
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'GE-SS-Two-Bold',
+        color: Colors.white,
+      ),
+    ),
+  ),
+
 
 // Show remaining days when a specific month is selected and not in the future
-          if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
-            Positioned(
-              top: 130,
-              left: 16,
-              child: Text(
-                'الأيام المتبقية لإتمام الشهر الحالي من الخطة: ${convertToArabicNumbers(remainingDays.toString())}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'GE-SS-Two-Bold',
-                  color: Colors.white,
-                ),
-              ),
-            ),
+if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
+  Positioned(
+    top: 130,
+    left: 95,
+    child: Text(
+      'متبقي ${convertToArabicNumbers(remainingDays.toString())} يوم لإتمام الشهر',
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'GE-SS-Two-Bold',
+        color: Colors.white,
+      ),
+    ),
+  ),
+
 
           const Positioned(
             top: 197,
@@ -836,8 +838,8 @@ void showMonthProgressNotification() {
               ),
             ),
           ),
-
-          if (_currentMonthIndex != 0)
+//Alert
+          /*if (_currentMonthIndex != 0)
             const Positioned(
               left: 10,
               top: 275,
@@ -850,7 +852,7 @@ void showMonthProgressNotification() {
                 ),
                 textAlign: TextAlign.right,
               ),
-            ),
+            ),*/
 
           Positioned(
             top: 290,
@@ -1164,9 +1166,8 @@ void showMonthProgressNotification() {
             ? ((amountToSave - currentYearSpending).abs() / amountToSave) * 100
             : 0);
 
-    // ✅ Alert appears if the difference percentage is between 0% and 25%
-    //bool showAlert = (!isFutureMonth && currentYearSpending > 0 && differencePercentage <= 25);
-    bool showAlert =
+    // Alert
+/*    bool showAlert =
         (_currentMonthIndex > 0) && // Ensure a specific month is selected
             (!isFutureMonth &&
                 (currentYearSpending != null &&
@@ -1176,7 +1177,7 @@ void showMonthProgressNotification() {
                 (adjustedLastYearSpending >
                     0) && // Ensure adjusted spending is meaningful
                 (differencePercentage.abs() <= 25 ||
-                    currentYearSpending > adjustedLastYearSpending));
+                    currentYearSpending > adjustedLastYearSpending));*/
 
     return Container(
       width: 110,
@@ -1194,8 +1195,8 @@ void showMonthProgressNotification() {
       ),
       child: Stack(
         children: [
-          // Show Alert Box only if the condition is met
-          if (showAlert)
+          // Alert
+         /* if (showAlert)
             Positioned(
               top: 5,
               right: 5,
@@ -1216,7 +1217,7 @@ void showMonthProgressNotification() {
                   ),
                 ),
               ),
-            ),
+            ),*/
 
           if (!isFutureMonth)
             Positioned(
@@ -1283,41 +1284,73 @@ void showMonthProgressNotification() {
             top: 80,
             right: 10,
             child: Directionality(
-              textDirection: ui.TextDirection.rtl,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "المبلغ المطلوب ادخاره:",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'GE-SS-Two-Light',
-                      color: Color(0xFF3D3D3D),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        formatNumber(monthlySavings),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontFamily: 'GE-SS-Two-Light',
-                          color: Color(0xFF3D3D3D),
-                        ),
-                      ),
-                      const SizedBox(width: 3),
-                      Icon(
-                        CustomIcons.riyal,
-                        size: 14,
-                        color: Color(0xFF3D3D3D),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+  textDirection: ui.TextDirection.rtl,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // First line: مطلوب ادخار
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "مطلوب ادخار: ",
+            style: TextStyle(
+              fontSize: 12,
+              fontFamily: 'GE-SS-Two-Light',
+              color: Color(0xFF3D3D3D),
             ),
+          ),
+          Text(
+            formatNumber(monthlySavings),
+            style: const TextStyle(
+              fontSize: 12,
+              fontFamily: 'GE-SS-Two-Light',
+              color: Color(0xFF3D3D3D),
+            ),
+          ),
+          const SizedBox(width: 3),
+          Icon(
+            CustomIcons.riyal,
+            size: 14,
+            color: Color(0xFF3D3D3D),
+          ),
+        ],
+      ),
+
+      const SizedBox(height: 4), // Space between lines
+
+      // Second line: المصروف
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "المصروف: ",
+            style: TextStyle(
+              fontSize: 12,
+              fontFamily: 'GE-SS-Two-Light',
+              color: Color(0xFF3D3D3D),
+            ),
+          ),
+          Text(
+            formatNumber(calculateSpentAmount(category)),
+            style: const TextStyle(
+              fontSize: 12,
+              fontFamily: 'GE-SS-Two-Light',
+              color: Color(0xFF3D3D3D),
+            ),
+          ),
+          const SizedBox(width: 3),
+          Icon(
+            CustomIcons.riyal,
+            size: 14,
+            color: Color(0xFF3D3D3D),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+
           ),
         ],
       ),
@@ -1348,4 +1381,38 @@ void showMonthProgressNotification() {
       ),
     );
   }
+
+  double calculateSpentAmount(String category) {
+  DateTime today = DateTime.now();
+  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+  DateTime selectedStartDate;
+
+  if (_currentMonthIndex == 0) {
+    // Whole plan selected
+    selectedStartDate = startDate;
+  } else {
+    // Specific month selected (fixed 30 days)
+    selectedStartDate = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+  }
+
+  double totalSpent = 0.0;
+
+  for (var account in widget.accounts) {
+    for (var transaction in account['transactions']) {
+      DateTime transactionDate = DateTime.parse(transaction['TransactionDateTime']);
+      String transactionCategory = transaction['Category'] ?? 'Unknown';
+      double amount = double.tryParse(transaction['Amount'].toString()) ?? 0.0;
+
+      if (transactionCategory == category &&
+          transactionDate.isAfter(selectedStartDate) &&
+          transactionDate.isBefore(today)) {
+        totalSpent += amount;
+      }
+    }
+  }
+
+  return totalSpent;
 }
+
+}
+
