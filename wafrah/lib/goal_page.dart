@@ -27,7 +27,7 @@ class _GoalPageState extends State<GoalPage> {
   final TextEditingController goalController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController durationController = TextEditingController();
-  final TextEditingController endDateController = TextEditingController();
+  //final TextEditingController endDateController = TextEditingController();
 
   bool isLoading = false;
   String outputMessage = "";
@@ -67,7 +67,7 @@ void initState() {
     goalController.dispose();
     startDateController.dispose();
     durationController.dispose();
-    endDateController.dispose();
+    //endDateController.dispose();
     SessionManager.dispose();
     super.dispose();
   }
@@ -104,28 +104,28 @@ void initState() {
     final isGoalFilled = goalController.text.isNotEmpty;
     final isStartDateFilled = startDateController.text.isNotEmpty;
     final isDurationFilled = durationController.text.isNotEmpty;
-    final isEndDateFilled = endDateController.text.isNotEmpty;
+    //final isEndDateFilled = endDateController.text.isNotEmpty;
 
-    return isGoalFilled && (isDurationFilled || isEndDateFilled);
+    return isGoalFilled && (isDurationFilled);
   }
 
   void _onDurationChanged(String value) {
     setState(() {
       durationController.text = value;
       if (value.isNotEmpty) {
-        endDateController.clear(); // Clear end date if duration is filled
+        //endDateController.clear(); // Clear end date if duration is filled
       }
     });
   }
 
-  void _onEndDateChanged(String value) {
+  /*void _onEndDateChanged(String value) {
     setState(() {
       endDateController.text = value;
       if (value.isNotEmpty) {
         durationController.clear(); // Clear duration if end date is filled
       }
     });
-  }
+  }*/
 
   Future<void> _runFlaskAPI() async {
     setState(() {
@@ -137,12 +137,13 @@ void initState() {
       double durationInMonths = 0;
       if (durationController.text.isNotEmpty) {
         durationInMonths = double.parse(durationController.text);
-      } else if (endDateController.text.isNotEmpty) {
+      } 
+      /*else if (endDateController.text.isNotEmpty) {
         final startDate = DateTime.parse(startDateController.text);
         final endDate = DateTime.parse(endDateController.text);
         durationInMonths =
             (endDate.difference(startDate).inDays / 30).ceilToDouble();
-      }
+      }*/
 
       final goal = double.parse(goalController.text);
       final startDate = startDateController.text;
@@ -453,7 +454,7 @@ void initState() {
                   const Padding(
                     padding: EdgeInsets.only(right: 45.0),
                     child: Text(
-                      'المدة المرغوبة',
+                     "المدة المرغوبة بالأشهر",
                       style: TextStyle(
                         color: Color(0xFF3D3D3D),
                         fontSize: 14,
@@ -469,30 +470,6 @@ void initState() {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            const Text(
-                              'المدة بالأشهر',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: 'GE-SS-Two-Light',
-                              ),
-                            ),
-                            Radio<String>(
-                              value: "duration",
-                              groupValue: selectedOption,
-                              activeColor: const Color(
-                                  0xFF2C8C68), // Circular button color
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedOption = value!;
-                                  endDateController.clear(); // Clear end date
-                                });
-                              },
-                            ),
-                          ],
-                        ),
                         SizedBox(
                           width: 150,
                           height: 28,
@@ -530,7 +507,7 @@ void initState() {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Row(
+                        /*Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             const Text(
@@ -593,7 +570,7 @@ void initState() {
                               ),
                             ),
                           ),
-                        ),
+                        ),*/
                       ],
                     ),
                   ),
@@ -624,7 +601,7 @@ void initState() {
           ),
           const Positioned(
             top: 350,
-            left: 260,
+            left: 205,
             child: Text(
               '*',
               style: TextStyle(
