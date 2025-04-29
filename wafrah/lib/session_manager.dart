@@ -15,7 +15,7 @@ class SessionManager {
 
   static void _resetTimer(BuildContext context) {
     _inactivityTimer?.cancel();
-    _inactivityTimer = Timer(const Duration(minutes: 10), () {
+    _inactivityTimer = Timer(const Duration(minutes: 15), () {
       _showConfirmationDialog(context);
     });
   }
