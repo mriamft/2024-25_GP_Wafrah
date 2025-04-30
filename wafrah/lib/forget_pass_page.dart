@@ -48,7 +48,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
   // Check if phone number exists in the database
   Future<bool> phoneNumberExists(String phoneNumber) async {
     final url =
-        Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/checkPhoneNumber');
+        Uri.parse('https://login-service.ngrok.io/checkPhoneNumber');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -72,7 +72,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
       if (exists) {
         // Send OTP only if the phone number exists
         final url =
-            Uri.parse('https://c2f7-82-167-113-9.ngrok-free.app/send-otp');
+            Uri.parse('https://login-service.ngrok.io/send-otp');
         final response = await http.post(
           url,
           headers: {"Content-Type": "application/json"},

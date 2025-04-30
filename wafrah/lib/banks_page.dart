@@ -203,39 +203,37 @@ void dispose() {
                 ),
 
                 const SizedBox(
-                    height:
-                        8), // ✅ Adds space above the IBAN to prevent overlap
+                    height: 8), // ✅ Adds space above the IBAN to prevent overlap
 
                 Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.end, // ✅ Ensures text alignment
-                  children: [
-                    Expanded(
-                      // ✅ Allows the IBAN to take available space
-                      child: Text(
-                        account['IBAN'] ?? 'رقم الايبان',
-                        style: const TextStyle(
-                          color: Color(0xFF5F5F5F),
-                          fontSize: 13,
-                          fontFamily: 'GE-SS-Two-Light',
-                        ),
-                        textAlign: TextAlign.right,
-                        softWrap: false, // Prevents automatic wrapping
-                        overflow: TextOverflow
-                            .visible, // ✅ Ensures full IBAN is shown
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'رقم الآيبان',
-                      style: TextStyle(
-                        color: Color(0xFF3D3D3D),
-                        fontSize: 13,
-                        fontFamily: 'GE-SS-Two-Bold',
-                      ),
-                    ),
-                  ],
-                ),
+  mainAxisAlignment: MainAxisAlignment.end, // ✅ Ensures text alignment
+  children: [
+    Expanded(
+      // ✅ Allows the IBAN to take available space
+      child: Text(
+        account['IBAN'] ?? 'رقم الايبان',
+        style: const TextStyle(
+          color: Color(0xFF5F5F5F),
+          fontSize: 13,
+          fontFamily: 'GE-SS-Two-Light',
+        ),
+        textAlign: TextAlign.right,
+        softWrap: false, // Prevents automatic wrapping
+        overflow: TextOverflow.visible, // ✅ Ensures full IBAN is shown
+      ),
+    ),
+    const SizedBox(width: 16), // Increased space
+    const Text(
+      'رقم الآيبان',
+      style: TextStyle(
+        color: Color(0xFF3D3D3D),
+        fontSize: 13,
+        fontFamily: 'GE-SS-Two-Bold',
+      ),
+    ),
+  ],
+),
+
               ],
             ),
           ),
