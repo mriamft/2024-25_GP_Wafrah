@@ -34,6 +34,8 @@ class SavingPlanPage2 extends StatefulWidget {
 }
 
 class _SavingPlanPage2State extends State<SavingPlanPage2> {
+  /// index 0 = الخطة كاملة، 1..N = كل شهر
+  late List<List<Map<String, dynamic>>> _monthlyPlans;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 // Track sent notifications to avoid duplicates
   Map<String, Map<int, int>> sentNotifications = {};
@@ -51,13 +53,13 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   @override
   void initState() {
     super.initState();
-    // Initialize the notification service and pass a callback to navigate to SavingPlanPage2 when tapped.
+
+    // 1) تهيئة خدمة الإشعارات
     NotificationService.init((String? payload) {
       if (payload != null) {
-        print('Notification clicked with payload: $payload');
         navigatorKey.currentState?.push(
           MaterialPageRoute(
-            builder: (context) => SavingPlanPage2(
+            builder: (_) => SavingPlanPage2(
               userName: widget.userName,
               phoneNumber: widget.phoneNumber,
               resultData: widget.resultData,
@@ -68,56 +70,61 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       }
     });
 
-    // Load plan data
-    if (widget.resultData.isEmpty ||
-        !widget.resultData.containsKey('startDate')) {
-      print("Loading saved plan data...");
-      _loadPlanFromSecureStorage().then((_) {
-        if (widget.resultData.containsKey('startDate')) {
-          print("startDate found: ${widget.resultData['startDate']}");
-          generateMonths(widget.resultData['DurationMonths']);
-          generateSavingsPlan();
+    // 2) بناء الخطة مبدئيّاً من resultData الواردة
+    _setupPlan();
 
-          // Update the GlobalNotificationManager with the new plan data.
-          GlobalNotificationManager().updateData(
-            resultData: widget.resultData,
-            accounts: widget.accounts,
-          );
-        } else {
-          print(
-              "Error: startDate is still missing after loading from storage.");
-        }
-      });
-    } else {
-      print("Using existing resultData");
-      generateMonths(widget.resultData['DurationMonths']);
-      generateSavingsPlan();
+    // 3) حاول تحميل الخطة من Secure Storage ثم أعد بناءها
+    _loadPlanFromSecureStorage().then((_) {
+      _setupPlan();
+    });
+  }
 
-      // Update the GlobalNotificationManager with the existing plan data.
-      GlobalNotificationManager().updateData(
-        resultData: widget.resultData,
-        accounts: widget.accounts,
-      );
-    }
-
+  /// دالة مساعدة لتهيئة الشهور وبناء الخطة
+  void _setupPlan() {
+    // توليد قائمة الشهور (الخطة كاملة + شهور الخطة)
     generateMonths(widget.resultData['DurationMonths']);
-    print("result data");
-    print(widget.resultData["startDate"]);
-    print("resultData Keys: ${widget.resultData.keys}");
-    print(widget.accounts);
 
-    _currentMonthIndex = 0; // Ensure "الخطة كاملة" is selected by default
+    // تهيئة categoryTotalSavings من resultData
+    categoryTotalSavings = Map<String, double>.from(
+      (widget.resultData['CategorySavings'] as Map<String, dynamic>)
+          .map((key, value) => MapEntry(key, (value as num).toDouble())),
+    );
 
-    // Initialize categoryTotalSavings before calling generateSavingsPlan()
-    categoryTotalSavings = Map<String, double>.from(widget
-        .resultData['CategorySavings']
-        .map((key, value) => MapEntry(key, (value as num).toDouble())));
+    // بناء _monthlyPlans للعرض الكامل والشهري
+    final int totalMonths = widget.resultData['DurationMonths'] as int;
+    _monthlyPlans = List.generate(
+      totalMonths + 1,
+      (i) {
+        if (i == 0) {
+          // الخطة كاملة
+          return categoryTotalSavings.entries
+              .where((e) => e.value > 0)
+              .map((e) => {
+                    'category': e.key,
+                    'monthlySavings': e.value,
+                  })
+              .toList();
+        }
+        // كل شهر مقسوم بالتساوي
+        return categoryTotalSavings.entries
+            .where((e) => e.value > 0)
+            .map((e) => {
+                  'category': e.key,
+                  'monthlySavings':
+                      double.parse((e.value / totalMonths).toStringAsFixed(2)),
+                })
+            .toList();
+      },
+    );
 
-    // Call generateSavingsPlan after categoryTotalSavings is initialized
+    // أخيراً نولد الخطة الفعلية ونحدّث الواجهة والإشعارات
     setState(() {
       generateSavingsPlan();
     });
-    _loadPlanFromSecureStorage();
+    GlobalNotificationManager().updateData(
+      resultData: widget.resultData,
+      accounts: widget.accounts,
+    );
   }
 
   String formatNumber(double number) {
@@ -225,70 +232,24 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   }
 
   void generateSavingsPlan() {
-    print("Generating Savings for Month: $_currentMonthIndex");
+    // نأخذ الجزء الجاهز حسب الفهرس
+    savingsPlan = _monthlyPlans[_currentMonthIndex];
 
-    int totalMonths = months.length - 1; // Exclude "الخطة كاملة"
-
-    if (_currentMonthIndex == 0) {
-      // Full Plan (index 0)
-      savingsPlan = categoryTotalSavings.entries
-          .where((entry) => entry.value > 0) // Remove zero-value categories
-          .map((entry) {
-        return {
-          'category': entry.key,
-          'monthlySavings': entry.value, // Full savings
-        };
-      }).toList();
-    } else {
-      // Regular Month (from 1 to last index)
-      savingsPlan = categoryTotalSavings.entries
-          .map((entry) {
-            double monthlySavings = entry.value / totalMonths;
-            return {
-              'category': entry.key,
-              'monthlySavings': (_currentMonthIndex == totalMonths)
-                  ? monthlySavings // Show savings for the last month
-                  : monthlySavings, // Show savings per selected month
-            };
-          })
-          .where((entry) => (entry['monthlySavings'] as num) > 0)
-          .toList();
-    }
-
-    print("Final Computed Savings for $_currentMonthIndex: $savingsPlan");
-
-    // Track savings progress and store it
-    Map<String, dynamic> progressData = (_currentMonthIndex == 0)
+    // حساب التقدّم
+    final progressData = (_currentMonthIndex == 0)
         ? trackSavingsProgress()
         : MonthlytrackSavingsProgress();
+    setState(() => wap = progressData);
 
-    print("Savings Progress Data: $progressData");
-
-    // Store progress in state
-    setState(() {
-      wap = progressData; // Store progress data
-    });
-
-    // // Only send month notifications if the month has started.
-    // DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-    // DateTime selectedMonthStart =
-    //     startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-    // if (!selectedMonthStart.isAfter(DateTime.now())) {
-    //   checkMonthEndNotification();
-    // }
-    // showCategoryProgressNotification(progressData);
-
-    // Save the updated plan to secure storage
-    Map<String, dynamic> updatedPlan = {
+    // حفظ الخطة المعدّلة
+    _savePlanToSecureStorage({
       'DurationMonths': widget.resultData['DurationMonths'],
       'CategorySavings': categoryTotalSavings,
       'MonthlySavingsPlan': savingsPlan,
       'SavingsGoal': widget.resultData['SavingsGoal'],
       'startDate': widget.resultData['startDate'],
       'discretionaryRatios': widget.resultData['discretionaryRatios'],
-    };
-
-    _savePlanToSecureStorage(updatedPlan);
+    });
   }
 
   void showProgressNotification(Map<String, dynamic> progressData) {
@@ -864,20 +825,9 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Center(
                     child: Wrap(
-                      spacing: 27, // Space between squares
-                      runSpacing: 30, // Space between rows
-                      children: _currentMonthIndex == months.length - 1
-                          ? buildCategorySquares() // Show all categories with total
-                          : savingsPlan.map((saving) {
-                              return SizedBox(
-                                width: (MediaQuery.of(context).size.width / 2) -
-                                    40,
-                                child: buildCategorySquare(
-                                  saving['category'],
-                                  saving['monthlySavings'],
-                                ),
-                              );
-                            }).toList(),
+                      spacing: 27,
+                      runSpacing: 30,
+                      children: buildCategorySquares(), // ≤ هنا
                     ),
                   ),
                 ),
