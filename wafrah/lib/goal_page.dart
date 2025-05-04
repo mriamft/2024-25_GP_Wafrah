@@ -38,11 +38,12 @@ class _GoalPageState extends State<GoalPage> {
   bool _showNotification = false;
   String _notificationMessage = '';
 
-@override
-void initState() {
-  super.initState();
-  SessionManager.startTracking(context);
-}
+  @override
+  void initState() {
+    super.initState();
+    SessionManager.startTracking(context);
+  }
+
   // Show notification method
   void showNotification(String message, {Color color = Colors.red}) {
     setState(() {
@@ -137,7 +138,7 @@ void initState() {
       double durationInMonths = 0;
       if (durationController.text.isNotEmpty) {
         durationInMonths = double.parse(durationController.text);
-      } 
+      }
       /*else if (endDateController.text.isNotEmpty) {
         final startDate = DateTime.parse(startDateController.text);
         final endDate = DateTime.parse(endDateController.text);
@@ -166,6 +167,8 @@ void initState() {
         }
       }
 
+      final String todayOverride = "2025-05-15";
+
       // Call the savings API
       final savingsResponse = await http.post(
         savingsUrl,
@@ -175,6 +178,7 @@ void initState() {
           "duration_months": durationInMonths,
           "transactions": transactions,
           "start_date": startDate,
+          "today": todayOverride
         }),
       );
 
@@ -454,7 +458,7 @@ void initState() {
                   const Padding(
                     padding: EdgeInsets.only(right: 45.0),
                     child: Text(
-                     "المدة المرغوبة بالأشهر",
+                      "المدة المرغوبة بالأشهر",
                       style: TextStyle(
                         color: Color(0xFF3D3D3D),
                         fontSize: 14,

@@ -1,6 +1,5 @@
 // global_notification_manager.dart
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'notification_service.dart';
 
 class GlobalNotificationManager {
@@ -11,7 +10,7 @@ class GlobalNotificationManager {
   GlobalNotificationManager._internal();
 
   Timer? _timer;
-    // For aggregated notifications:
+  // For aggregated notifications:
   // For each milestone (1: >0 & <50, 2: 50%-<75, 3: 75%-<100, 4: 100%)
   // we store the last count notified.
   final Map<int, int> _sentAggregatedMilestones = {};
@@ -46,7 +45,7 @@ class GlobalNotificationManager {
           : (resultData['DurationMonths'] as num).toInt();
     }
     // Reset notifications tracking whenever plan data is updated.
-        _sentAggregatedMilestones.clear();
+    _sentAggregatedMilestones.clear();
 
     _sentMilestones.clear();
     _lastNotifiedMonth = 0;
@@ -76,63 +75,64 @@ class GlobalNotificationManager {
     _timer = null;
   }
 
-void _checkNotifications() {
-  // If there is no saving plan data, send an invitation notification and return.
-  if (_resultData == null ||
-      _planStartDate == null ||
-      _accounts == null ||
-      _durationMonths == null ||
-      !_resultData!.containsKey('MonthlySavingsPlan') ||
-      (_resultData!['MonthlySavingsPlan'] is List &&
-       (_resultData!['MonthlySavingsPlan'] as List).isEmpty) ||
-      !_resultData!.containsKey('CategorySavings')) {
-    NotificationService.showNotification(
-      title: "لا توجد خطة ادخار!",
-      body: "لم تقم بإضافة خطة ادخار بعد. انضم إلينا وابدأ خطتك الآن!",
-    );
-    return;
-  }
+  void _checkNotifications() {
+    // If there is no saving plan data, send an invitation notification and return.
+    if (_resultData == null ||
+        _planStartDate == null ||
+        _accounts == null ||
+        _durationMonths == null ||
+        !_resultData!.containsKey('MonthlySavingsPlan') ||
+        (_resultData!['MonthlySavingsPlan'] is List &&
+            (_resultData!['MonthlySavingsPlan'] as List).isEmpty) ||
+        !_resultData!.containsKey('CategorySavings')) {
+      NotificationService.showNotification(
+        title: "لا توجد خطة ادخار!",
+        body: "لم تقم بإضافة خطة ادخار بعد. انضم إلينا وابدأ خطتك الآن!",
+      );
+      return;
+    }
 
-  // Otherwise, proceed with your normal notification checks.
-  _checkMonthEndNotification();
-  _checkMidMonthNotification();
-  _checkAggregatedCategoryProgressNotifications();
-  _checkCategoryProgressNotifications();
-}
+    // Otherwise, proceed with your normal notification checks.
+    _checkMonthEndNotification();
+    _checkMidMonthNotification();
+    _checkAggregatedCategoryProgressNotifications();
+    _checkCategoryProgressNotifications();
+  }
 
   /// Calculate progress for the **current plan month** only.
   Map<String, double> _calculateMonthlyProgress() {
     final Map<String, double> progressPercentage = {};
-    
+
     // Ensure we have saving plan data with at least the "CategorySavings" field.
     if (!_resultData!.containsKey('CategorySavings')) return progressPercentage;
-    
+
     // Extract the list of categories that are in the saving plan.
     List<String> savingPlanCategories = [];
     if (_resultData!.containsKey('MonthlySavingsPlan')) {
-      savingPlanCategories = (_resultData!['MonthlySavingsPlan'] as List<dynamic>)
-          .map((e) => e['category'] as String)
-          .toList();
+      savingPlanCategories =
+          (_resultData!['MonthlySavingsPlan'] as List<dynamic>)
+              .map((e) => e['category'] as String)
+              .toList();
     }
-    
+
     // Get the savings assigned per category (from the plan).
     final Map<String, double> categorySavings = Map<String, double>.from(
-      _resultData!['CategorySavings'].map((key, value) =>
-          MapEntry(key, (value as num).toDouble())),
+      _resultData!['CategorySavings']
+          .map((key, value) => MapEntry(key, (value as num).toDouble())),
     );
-    
+
     // Filter to only include categories from the saving plan.
     final filteredCategorySavings = Map<String, double>.fromEntries(
-      categorySavings.entries.where((entry) => savingPlanCategories.contains(entry.key))
-    );
-    
+        categorySavings.entries
+            .where((entry) => savingPlanCategories.contains(entry.key)));
+
     final DateTime now = DateTime.now();
     final int daysSincePlanStart = now.difference(_planStartDate!).inDays;
     // Determine which plan month we're in (0-indexed).
     final int currentPlanMonthIndex = daysSincePlanStart ~/ 30;
     // Compute the days passed in the current month (range 0 to 30).
     final int daysPassedInCurrentMonth = daysSincePlanStart % 30;
-    final double dailyProgressGrowth = 100 / 30;
+    const double dailyProgressGrowth = 100 / 30;
 
     // Now calculate progress for each category in the saving plan.
     filteredCategorySavings.forEach((category, _) {
@@ -141,11 +141,13 @@ void _checkNotifications() {
       // For the current month, define its start date:
       final DateTime currentMonthStart =
           _planStartDate!.add(Duration(days: currentPlanMonthIndex * 30));
-      
+
       double lastYearSpending = _calculateCategorySpendingForPeriod(
         category,
         currentMonthStart.subtract(const Duration(days: 365)),
-        currentMonthStart.add(const Duration(days: 30)).subtract(const Duration(seconds: 15)),
+        currentMonthStart
+            .add(const Duration(days: 30))
+            .subtract(const Duration(seconds: 15)),
       );
       double currentSpending = _calculateCategorySpendingForPeriod(
         category,
@@ -172,7 +174,8 @@ void _checkNotifications() {
         final transactionCategory = transaction['Category'] ?? 'Unknown';
         if (transactionCategory != category) continue;
         final transactionDate =
-            DateTime.tryParse(transaction['TransactionDateTime'] ?? '') ?? DateTime.now();
+            DateTime.tryParse(transaction['TransactionDateTime'] ?? '') ??
+                DateTime.now();
         if (transactionDate.isAfter(start) && transactionDate.isBefore(end)) {
           double amount =
               double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
@@ -205,7 +208,8 @@ void _checkNotifications() {
         monthsPassed > _lastNotifiedMonth) {
       NotificationService.showNotification(
         title: "لقد أكملت الشهر $monthsPassed من $totalMonths شهور من الخطة",
-        body: "في هذا الشهر أنجزت ${(monthsPassed / totalMonths * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
+        body:
+            "في هذا الشهر أنجزت ${(monthsPassed / totalMonths * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
       );
       _lastNotifiedMonth = monthsPassed;
       // If the plan is fully complete, send a final notification:
@@ -217,7 +221,8 @@ void _checkNotifications() {
       }
     }
   }
-    /// Check and send a mid‑month notification when day 15 of the current plan month is reached.
+
+  /// Check and send a mid‑month notification when day 15 of the current plan month is reached.
   void _checkMidMonthNotification() {
     final DateTime now = DateTime.now();
     final int daysSincePlanStart = now.difference(_planStartDate!).inDays;
@@ -230,7 +235,8 @@ void _checkNotifications() {
       double progress = (15 * (100 / 30)).clamp(0, 100);
       NotificationService.showNotification(
         title: "أنت في منتصف الشهر $currentPlanMonthNumber من الخطة",
-        body: "لقد أنجزت ${progress.toStringAsFixed(2)}% من هدف هذا الشهر. استمر في العمل!",
+        body:
+            "لقد أنجزت ${progress.toStringAsFixed(2)}% من هدف هذا الشهر. استمر في العمل!",
       );
       _midMonthNotified = true;
     }
@@ -246,113 +252,114 @@ void _checkNotifications() {
     return 0;
   }
 
-void _checkAggregatedCategoryProgressNotifications() {
-  final monthlyProgress = _calculateMonthlyProgress();
-  final int totalCategories = monthlyProgress.length;
-  // For milestones 1, 2, 3, and 4, count how many categories have reached at least that milestone.
-  for (int milestone = 1; milestone <= 4; milestone++) {
-    int count = monthlyProgress.values
-        .where((progress) => _milestoneFromProgress(progress) >= milestone)
-        .length;
-    // Get the previously notified count for this milestone (default 0)
-    int prevCount = _sentAggregatedMilestones[milestone] ?? 0;
-    // If the count increased, send a new notification reflecting all categories that reached this milestone.
-    if (count > prevCount) {
-      String milestoneText;
-      String bodyText;
-      switch (milestone) {
-        case 1:
-          milestoneText = "بدأت الادخار";
-          bodyText = "أنت على الطريق الصحيح! حاول زيادة المدخرات لتحقيق الهدف.";
-          break;
-        case 2:
-          milestoneText = "أكملت 50%";
-          bodyText = "أنت في منتصف الطريق! استمر في العمل لتحقيق الهدف.";
-          break;
-        case 3:
-          milestoneText = "أنت قريب جداً من الهدف";
-          bodyText = "لقد أكملت 75% من هدفك في هذه الفئات. قريباً ستصل!";
-          break;
-        case 4:
-          milestoneText = "تمت الخطة بنجاح";
-          bodyText = "تهانينا! لقد أكملت 100% من هدف الادخار في هذه الفئات.";
-          break;
-        default:
-          milestoneText = "";
-          bodyText = "";
+  void _checkAggregatedCategoryProgressNotifications() {
+    final monthlyProgress = _calculateMonthlyProgress();
+    final int totalCategories = monthlyProgress.length;
+    // For milestones 1, 2, 3, and 4, count how many categories have reached at least that milestone.
+    for (int milestone = 1; milestone <= 4; milestone++) {
+      int count = monthlyProgress.values
+          .where((progress) => _milestoneFromProgress(progress) >= milestone)
+          .length;
+      // Get the previously notified count for this milestone (default 0)
+      int prevCount = _sentAggregatedMilestones[milestone] ?? 0;
+      // If the count increased, send a new notification reflecting all categories that reached this milestone.
+      if (count > prevCount) {
+        String milestoneText;
+        String bodyText;
+        switch (milestone) {
+          case 1:
+            milestoneText = "بدأت الادخار";
+            bodyText =
+                "أنت على الطريق الصحيح! حاول زيادة المدخرات لتحقيق الهدف.";
+            break;
+          case 2:
+            milestoneText = "أكملت 50%";
+            bodyText = "أنت في منتصف الطريق! استمر في العمل لتحقيق الهدف.";
+            break;
+          case 3:
+            milestoneText = "أنت قريب جداً من الهدف";
+            bodyText = "لقد أكملت 75% من هدفك في هذه الفئات. قريباً ستصل!";
+            break;
+          case 4:
+            milestoneText = "تمت الخطة بنجاح";
+            bodyText = "تهانينا! لقد أكملت 100% من هدف الادخار في هذه الفئات.";
+            break;
+          default:
+            milestoneText = "";
+            bodyText = "";
+        }
+        NotificationService.showNotification(
+          title:
+              "لقد $milestoneText في $count فئة من أصل $totalCategories فئات",
+          body: bodyText,
+        );
+        // Update the stored count so that future notifications reflect any further increase.
+        _sentAggregatedMilestones[milestone] = count;
       }
+    }
+  }
+
+  /// Convert a milestone integer to a short descriptive string.
+  String _milestoneToString(int milestone) {
+    switch (milestone) {
+      case 1:
+        return "بدأت الادخار";
+      case 2:
+        return "50% من الهدف";
+      case 3:
+        return "75% من الهدف";
+      case 4:
+        return "100% من الهدف";
+      default:
+        return "";
+    }
+  }
+
+  /// Aggregates category progress updates and sends a single, concise notification.
+  void _checkCategoryProgressNotifications() {
+    // Retrieve the monthly progress for each category from your helper.
+    final Map<String, double> monthlyProgress = _calculateMonthlyProgress();
+    final Map<String, int> updatedCategories = {};
+
+    // Check for each category if its milestone has improved.
+    monthlyProgress.forEach((category, progress) {
+      int currentMilestone = _milestoneFromProgress(progress);
+      if (!_sentMilestones.containsKey(category)) {
+        if (currentMilestone > 0) {
+          updatedCategories[category] = currentMilestone;
+          _sentMilestones[category] = currentMilestone;
+        }
+      } else {
+        int previousMilestone = _sentMilestones[category]!;
+        if (currentMilestone > previousMilestone) {
+          updatedCategories[category] = currentMilestone;
+          _sentMilestones[category] = currentMilestone;
+        }
+      }
+    });
+
+    // Only send a notification if there is an update.
+    if (updatedCategories.isNotEmpty) {
+      String title = "تقدم الادخار";
+      String body;
+
+      if (updatedCategories.length == 1) {
+        // If there's only one category, show its name and milestone.
+        final String cat = updatedCategories.keys.first;
+        final int milestone = updatedCategories[cat]!;
+        body = "في فئة $cat، ${_milestoneToString(milestone)}.";
+      } else {
+        // For multiple updated categories, show just the count.
+        body =
+            "لقد حققت تقدمًا في ${updatedCategories.length} فئات. استمر في الادخار!";
+      }
+
       NotificationService.showNotification(
-        title: "لقد $milestoneText في $count فئة من أصل $totalCategories فئات",
-        body: bodyText,
+        title: title,
+        body: body,
       );
-      // Update the stored count so that future notifications reflect any further increase.
-      _sentAggregatedMilestones[milestone] = count;
     }
   }
-}
-
-/// Convert a milestone integer to a short descriptive string.
-String _milestoneToString(int milestone) {
-  switch (milestone) {
-    case 1:
-      return "بدأت الادخار";
-    case 2:
-      return "50% من الهدف";
-    case 3:
-      return "75% من الهدف";
-    case 4:
-      return "100% من الهدف";
-    default:
-      return "";
-  }
-}
-
-/// Aggregates category progress updates and sends a single, concise notification.
-void _checkCategoryProgressNotifications() {
-  // Retrieve the monthly progress for each category from your helper.
-  final Map<String, double> monthlyProgress = _calculateMonthlyProgress();
-  final Map<String, int> updatedCategories = {};
-
-  // Check for each category if its milestone has improved.
-  monthlyProgress.forEach((category, progress) {
-    int currentMilestone = _milestoneFromProgress(progress);
-    if (!_sentMilestones.containsKey(category)) {
-      if (currentMilestone > 0) {
-        updatedCategories[category] = currentMilestone;
-        _sentMilestones[category] = currentMilestone;
-      }
-    } else {
-      int previousMilestone = _sentMilestones[category]!;
-      if (currentMilestone > previousMilestone) {
-        updatedCategories[category] = currentMilestone;
-        _sentMilestones[category] = currentMilestone;
-      }
-    }
-  });
-
-  // Only send a notification if there is an update.
-  if (updatedCategories.isNotEmpty) {
-    String title = "تقدم الادخار";
-    String body;
-
-    if (updatedCategories.length == 1) {
-      // If there's only one category, show its name and milestone.
-      final String cat = updatedCategories.keys.first;
-      final int milestone = updatedCategories[cat]!;
-      body = "في فئة $cat، ${_milestoneToString(milestone)}.";
-    } else {
-      // For multiple updated categories, show just the count.
-      body = "لقد حققت تقدمًا في ${updatedCategories.length} فئات. استمر في الادخار!";
-    }
-
-    NotificationService.showNotification(
-      title: title,
-      body: body,
-    );
-  }
-}
-
-
 
   String _getCategoryNotificationTitle(String category, int milestone) {
     switch (milestone) {
@@ -384,4 +391,3 @@ void _checkCategoryProgressNotifications() {
     }
   }
 }
-

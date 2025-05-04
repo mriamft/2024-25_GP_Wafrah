@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wafrah/session_manager.dart';
 
 class SupportPage extends StatefulWidget {
   final String phoneNumber;
   final String userName;
 
   const SupportPage({
-    Key? key,
+    super.key,
     required this.userName,
     required this.phoneNumber,
-  }) : super(key: key);
+  });
 
   @override
   _SupportPageState createState() => _SupportPageState();
@@ -18,8 +17,6 @@ class SupportPage extends StatefulWidget {
 
 class _SupportPageState extends State<SupportPage> {
   Color _arrowColor = const Color(0xFF3D3D3D);
-
-
 
   // Force mailto to use %20 for spaces, avoiding "+" in some clients.
   Future<void> _launchEmail() async {
@@ -164,7 +161,6 @@ class _SupportPageState extends State<SupportPage> {
                     ),
                     const SizedBox(height: 8),
 
-
                     // The button
                     GestureDetector(
                       onTap: _launchEmail,
@@ -188,7 +184,7 @@ class _SupportPageState extends State<SupportPage> {
                         ),
                       ),
                     ),
-                    
+
                     // .نرد عادةً في أقل من 10 دقائق
                     const Text(
                       '.نرد عادةً في أقل من 10 دقائق',

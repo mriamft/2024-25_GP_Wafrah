@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:wafrah/session_manager.dart';
-import 'notification_service.dart';
 
 class NotificationPage extends StatefulWidget {
   final String userName;
@@ -251,22 +250,23 @@ class _NotificationPageState extends State<NotificationPage> {
             top: 51,
             left: 15,
             child: ElevatedButton(
-              onPressed: sortedNotifications.isEmpty ? null : _clearNotifications,
+              onPressed:
+                  sortedNotifications.isEmpty ? null : _clearNotifications,
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.disabled)) {
+                backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.disabled)) {
                       return const Color(0xFF707070);
                     }
                     return Colors.red;
                   },
                 ),
-                shape: MaterialStateProperty.all(
+                shape: WidgetStateProperty.all(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                padding: MaterialStateProperty.all(
+                padding: WidgetStateProperty.all(
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 ),
               ),
@@ -313,7 +313,8 @@ class _NotificationPageState extends State<NotificationPage> {
                       if (notifTime == null) {
                         formattedTime = _getCurrentDateTime();
                       } else {
-                        formattedTime = DateFormat('yyyy-MM-dd HH:mm').format(notifTime);
+                        formattedTime =
+                            DateFormat('yyyy-MM-dd HH:mm').format(notifTime);
                       }
                     } else {
                       formattedTime = _getCurrentDateTime();

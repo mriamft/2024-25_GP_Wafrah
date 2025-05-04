@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wafrah/session_manager.dart';
 import 'goal_page.dart'; // Import your goal page for navigation
 import 'settings_page.dart';
 import 'transactions_page.dart';
@@ -28,8 +27,6 @@ class SavingPlanPage extends StatefulWidget {
 class _SavingPlanPageState extends State<SavingPlanPage> {
   bool _isPressed = false;
   bool _isPlanSaved = false;
-
-
 
   // Define the function to check and navigate to SavingPlanPage2 or GoalPage
   void navigateToSavingPlan() async {

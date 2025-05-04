@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
-import 'package:wafrah/session_manager.dart';
 import 'settings_page.dart';
 import 'saving_plan_page.dart';
 import 'transactions_page.dart';
@@ -11,11 +10,10 @@ import 'dart:convert'; // For JSON encoding and decoding
 import 'package:intl/intl.dart'; // For date formatting
 import 'custom_icons.dart';
 import 'dart:ui' as ui;
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'main.dart';
 import 'notification_service.dart';
 import 'chatbot.dart';
-import 'global_notification_manager.dart'; 
+import 'global_notification_manager.dart';
 
 class SavingPlanPage2 extends StatefulWidget {
   final String userName;
@@ -38,8 +36,9 @@ class SavingPlanPage2 extends StatefulWidget {
 class _SavingPlanPage2State extends State<SavingPlanPage2> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 // Track sent notifications to avoid duplicates
-Map<String, Map<int, int>> sentNotifications = {};
-int lastNotifiedMonth = 0; // tracks last month for which a notification was sent
+  Map<String, Map<int, int>> sentNotifications = {};
+  int lastNotifiedMonth =
+      0; // tracks last month for which a notification was sent
 
   int _currentMonthIndex = 0; // Track the selected month
   List<String> months = []; // Dynamically generated months
@@ -49,84 +48,81 @@ int lastNotifiedMonth = 0; // tracks last month for which a notification was sen
   Map<String, dynamic> wap = {};
   bool isLoading = false;
 
-
-
- @override
-void initState() {
-  super.initState();
-  // Initialize the notification service and pass a callback to navigate to SavingPlanPage2 when tapped.
-  NotificationService.init((String? payload) {
-    if (payload != null) {
-      print('Notification clicked with payload: $payload');
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(
-          builder: (context) => SavingPlanPage2(
-            userName: widget.userName,
-            phoneNumber: widget.phoneNumber,
-            resultData: widget.resultData,
-            accounts: widget.accounts,
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the notification service and pass a callback to navigate to SavingPlanPage2 when tapped.
+    NotificationService.init((String? payload) {
+      if (payload != null) {
+        print('Notification clicked with payload: $payload');
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (context) => SavingPlanPage2(
+              userName: widget.userName,
+              phoneNumber: widget.phoneNumber,
+              resultData: widget.resultData,
+              accounts: widget.accounts,
+            ),
           ),
-        ),
-      );
-    }
-  });
-
-  // Load plan data
-  if (widget.resultData.isEmpty ||
-      !widget.resultData.containsKey('startDate')) {
-    print("Loading saved plan data...");
-    _loadPlanFromSecureStorage().then((_) {
-      if (widget.resultData.containsKey('startDate')) {
-        print("startDate found: ${widget.resultData['startDate']}");
-        generateMonths(widget.resultData['DurationMonths']);
-        generateSavingsPlan();
-
-        // Update the GlobalNotificationManager with the new plan data.
-        GlobalNotificationManager().updateData(
-          resultData: widget.resultData,
-          accounts: widget.accounts,
         );
-      } else {
-        print("Error: startDate is still missing after loading from storage.");
       }
     });
-  } else {
-    print("Using existing resultData");
+
+    // Load plan data
+    if (widget.resultData.isEmpty ||
+        !widget.resultData.containsKey('startDate')) {
+      print("Loading saved plan data...");
+      _loadPlanFromSecureStorage().then((_) {
+        if (widget.resultData.containsKey('startDate')) {
+          print("startDate found: ${widget.resultData['startDate']}");
+          generateMonths(widget.resultData['DurationMonths']);
+          generateSavingsPlan();
+
+          // Update the GlobalNotificationManager with the new plan data.
+          GlobalNotificationManager().updateData(
+            resultData: widget.resultData,
+            accounts: widget.accounts,
+          );
+        } else {
+          print(
+              "Error: startDate is still missing after loading from storage.");
+        }
+      });
+    } else {
+      print("Using existing resultData");
+      generateMonths(widget.resultData['DurationMonths']);
+      generateSavingsPlan();
+
+      // Update the GlobalNotificationManager with the existing plan data.
+      GlobalNotificationManager().updateData(
+        resultData: widget.resultData,
+        accounts: widget.accounts,
+      );
+    }
+
     generateMonths(widget.resultData['DurationMonths']);
-    generateSavingsPlan();
+    print("result data");
+    print(widget.resultData["startDate"]);
+    print("resultData Keys: ${widget.resultData.keys}");
+    print(widget.accounts);
 
-    // Update the GlobalNotificationManager with the existing plan data.
-    GlobalNotificationManager().updateData(
-      resultData: widget.resultData,
-      accounts: widget.accounts,
-    );
+    _currentMonthIndex = 0; // Ensure "الخطة كاملة" is selected by default
+
+    // Initialize categoryTotalSavings before calling generateSavingsPlan()
+    categoryTotalSavings = Map<String, double>.from(widget
+        .resultData['CategorySavings']
+        .map((key, value) => MapEntry(key, (value as num).toDouble())));
+
+    // Call generateSavingsPlan after categoryTotalSavings is initialized
+    setState(() {
+      generateSavingsPlan();
+    });
+    _loadPlanFromSecureStorage();
   }
-
-  generateMonths(widget.resultData['DurationMonths']);
-  print("result data");
-  print(widget.resultData["startDate"]);
-  print("resultData Keys: ${widget.resultData.keys}");
-  print(widget.accounts);
-
-  _currentMonthIndex = 0; // Ensure "الخطة كاملة" is selected by default
-
-  // Initialize categoryTotalSavings before calling generateSavingsPlan()
-  categoryTotalSavings = Map<String, double>.from(widget
-      .resultData['CategorySavings']
-      .map((key, value) => MapEntry(key, (value as num).toDouble())));
-
-  // Call generateSavingsPlan after categoryTotalSavings is initialized
-  setState(() {
-    generateSavingsPlan();
-  });
-  _loadPlanFromSecureStorage();
-}
-
 
   String formatNumber(double number) {
     return NumberFormat("#,##0", "ar").format(number);
   }
-
 
   String convertToArabicNumbers(String input) {
     const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -317,32 +313,34 @@ void initState() {
   }
 
   // Fix month-end notification: use current month's last day and only if month has started.
-void showMonthProgressNotification() {
-  DateTime today = DateTime.now();
-  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-  int totalMonths = widget.resultData['DurationMonths'].toInt();
-  
-  // Calculate days passed and determine which plan month we're in (each month = 30 days)
-  int daysPassed = today.difference(startDate).inDays;
-  int monthsPassed = daysPassed ~/ 30;
+  void showMonthProgressNotification() {
+    DateTime today = DateTime.now();
+    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+    int totalMonths = widget.resultData['DurationMonths'].toInt();
 
-  // If less than one full 30-day period has passed, do nothing.
-  if (daysPassed < 30) return;
+    // Calculate days passed and determine which plan month we're in (each month = 30 days)
+    int daysPassed = today.difference(startDate).inDays;
+    int monthsPassed = daysPassed ~/ 30;
 
-  // If daysPassed is exactly divisible by 30 (i.e. end of a plan month),
-  // and we haven't already sent a notification for this month, then send it.
-  if (daysPassed % 30 == 0 && monthsPassed <= totalMonths && monthsPassed > lastNotifiedMonth) {
-    NotificationService.showNotification(
-      title: "لقد أكملت الشهر $monthsPassed من ${totalMonths} شهور من الخطة",
-      body: "في هذا الشهر أنجزت ${(monthsPassed / totalMonths * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
-    );
-    // Update state so we don't resend for this period
-    setState(() {
-      lastNotifiedMonth = monthsPassed;
-    });
+    // If less than one full 30-day period has passed, do nothing.
+    if (daysPassed < 30) return;
+
+    // If daysPassed is exactly divisible by 30 (i.e. end of a plan month),
+    // and we haven't already sent a notification for this month, then send it.
+    if (daysPassed % 30 == 0 &&
+        monthsPassed <= totalMonths &&
+        monthsPassed > lastNotifiedMonth) {
+      NotificationService.showNotification(
+        title: "لقد أكملت الشهر $monthsPassed من $totalMonths شهور من الخطة",
+        body:
+            "في هذا الشهر أنجزت ${(monthsPassed / totalMonths * 100).toStringAsFixed(2)}% من الخطة. استمر في العمل!",
+      );
+      // Update state so we don't resend for this period
+      setState(() {
+        lastNotifiedMonth = monthsPassed;
+      });
+    }
   }
-}
-
 
   Future<void> showNotificationsSequentially(
       List<Map<String, String>> notifications) async {
@@ -357,8 +355,6 @@ void showMonthProgressNotification() {
       await Future.delayed(const Duration(seconds: 2));
     }
   }
-
-
 
   void checkFullPlanCompletion() {
     // Check if the user has completed the full plan (last month)
@@ -541,7 +537,7 @@ void showMonthProgressNotification() {
     int totalDays =
         totalMonths * 30; // Approximate total days for tracking period
 
-    DateTime lastYearStart = startDate.subtract(Duration(days: 365));
+    DateTime lastYearStart = startDate.subtract(const Duration(days: 365));
     DateTime lastYearEnd = lastYearStart.add(Duration(days: totalDays));
 
     Map<String, double> lastYearSpending = {};
@@ -607,9 +603,11 @@ void showMonthProgressNotification() {
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
     DateTime selectedMonthStart =
         startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-    DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
-    DateTime lastYearStart = selectedMonthStart.subtract(Duration(days: 365));
-    DateTime lastYearEnd = selectedMonthEnd.subtract(Duration(days: 365));
+    DateTime selectedMonthEnd =
+        selectedMonthStart.add(const Duration(days: 29));
+    DateTime lastYearStart =
+        selectedMonthStart.subtract(const Duration(days: 365));
+    DateTime lastYearEnd = selectedMonthEnd.subtract(const Duration(days: 365));
 
     Map<String, double> lastYearSpending = {};
     Map<String, double> currentSpending = {};
@@ -720,7 +718,8 @@ void showMonthProgressNotification() {
     // Calculate remaining days for the current month (same logic as MonthlytrackSavingsProgress)
     DateTime selectedMonthStart =
         startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-    DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
+    DateTime selectedMonthEnd =
+        selectedMonthStart.add(const Duration(days: 29));
 
 // Calculate the remaining days correctly
     int daysPassed = today.difference(selectedMonthStart).inDays.clamp(0, 30);
@@ -744,38 +743,36 @@ void showMonthProgressNotification() {
           ),
 
           // Show remaining months when "الخطة كاملة" is selected
-if (_currentMonthIndex == 0)
-  Positioned(
-    top: 130,
-    left: 95,
-    child: Text(
-      'متبقي ${convertToArabicNumbers(remainingMonths.toString())} شهر لإتمام الخطة',
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        fontFamily: 'GE-SS-Two-Bold',
-        color: Colors.white,
-      ),
-    ),
-  ),
-
+          if (_currentMonthIndex == 0)
+            Positioned(
+              top: 130,
+              left: 95,
+              child: Text(
+                'متبقي ${convertToArabicNumbers(remainingMonths.toString())} شهر لإتمام الخطة',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'GE-SS-Two-Bold',
+                  color: Colors.white,
+                ),
+              ),
+            ),
 
 // Show remaining days when a specific month is selected and not in the future
-if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
-  Positioned(
-    top: 130,
-    left: 95,
-    child: Text(
-      'متبقي ${convertToArabicNumbers(remainingDays.toString())} يوم لإتمام الشهر',
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        fontFamily: 'GE-SS-Two-Bold',
-        color: Colors.white,
-      ),
-    ),
-  ),
-
+          if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
+            Positioned(
+              top: 130,
+              left: 95,
+              child: Text(
+                'متبقي ${convertToArabicNumbers(remainingDays.toString())} يوم لإتمام الشهر',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'GE-SS-Two-Bold',
+                  color: Colors.white,
+                ),
+              ),
+            ),
 
           const Positioned(
             top: 197,
@@ -1120,9 +1117,11 @@ if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
     DateTime selectedMonthStart =
         startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-    DateTime selectedMonthEnd = selectedMonthStart.add(Duration(days: 29));
-    DateTime lastYearStart = selectedMonthStart.subtract(Duration(days: 365));
-    DateTime lastYearEnd = selectedMonthEnd.subtract(Duration(days: 365));
+    DateTime selectedMonthEnd =
+        selectedMonthStart.add(const Duration(days: 29));
+    DateTime lastYearStart =
+        selectedMonthStart.subtract(const Duration(days: 365));
+    DateTime lastYearEnd = selectedMonthEnd.subtract(const Duration(days: 365));
     bool isFutureMonth = selectedMonthStart.isAfter(today);
 
     // **Extract Transactions for the Current and Last Year**
@@ -1198,7 +1197,7 @@ if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
       child: Stack(
         children: [
           // Alert
-         /* if (showAlert)
+          /* if (showAlert)
             Positioned(
               top: 5,
               right: 5,
@@ -1286,73 +1285,72 @@ if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
             top: 80,
             right: 10,
             child: Directionality(
-  textDirection: ui.TextDirection.rtl,
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // First line: مطلوب ادخار
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            "مطلوب ادخار: ",
-            style: TextStyle(
-              fontSize: 12,
-              fontFamily: 'GE-SS-Two-Light',
-              color: Color(0xFF3D3D3D),
-            ),
-          ),
-          Text(
-            formatNumber(monthlySavings),
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'GE-SS-Two-Light',
-              color: Color(0xFF3D3D3D),
-            ),
-          ),
-          const SizedBox(width: 3),
-          Icon(
-            CustomIcons.riyal,
-            size: 14,
-            color: Color(0xFF3D3D3D),
-          ),
-        ],
-      ),
+              textDirection: ui.TextDirection.rtl,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // First line: مطلوب ادخار
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "مطلوب ادخار: ",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'GE-SS-Two-Light',
+                          color: Color(0xFF3D3D3D),
+                        ),
+                      ),
+                      Text(
+                        formatNumber(monthlySavings),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'GE-SS-Two-Light',
+                          color: Color(0xFF3D3D3D),
+                        ),
+                      ),
+                      const SizedBox(width: 3),
+                      const Icon(
+                        CustomIcons.riyal,
+                        size: 14,
+                        color: Color(0xFF3D3D3D),
+                      ),
+                    ],
+                  ),
 
-      const SizedBox(height: 4), // Space between lines
+                  const SizedBox(height: 4), // Space between lines
 
-      // Second line: المصروف
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            "المصروف: ",
-            style: TextStyle(
-              fontSize: 12,
-              fontFamily: 'GE-SS-Two-Light',
-              color: Color(0xFF3D3D3D),
+                  // Second line: المصروف
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "المصروف: ",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'GE-SS-Two-Light',
+                          color: Color(0xFF3D3D3D),
+                        ),
+                      ),
+                      Text(
+                        formatNumber(calculateSpentAmount(category)),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'GE-SS-Two-Light',
+                          color: Color(0xFF3D3D3D),
+                        ),
+                      ),
+                      const SizedBox(width: 3),
+                      const Icon(
+                        CustomIcons.riyal,
+                        size: 14,
+                        color: Color(0xFF3D3D3D),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          Text(
-            formatNumber(calculateSpentAmount(category)),
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'GE-SS-Two-Light',
-              color: Color(0xFF3D3D3D),
-            ),
-          ),
-          const SizedBox(width: 3),
-          Icon(
-            CustomIcons.riyal,
-            size: 14,
-            color: Color(0xFF3D3D3D),
-          ),
-        ],
-      ),
-    ],
-  ),
-),
-
           ),
         ],
       ),
@@ -1385,35 +1383,37 @@ if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
   }
 
   double calculateSpentAmount(String category) {
-  DateTime today = DateTime.now();
-  DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-  DateTime selectedStartDate;
+    DateTime today = DateTime.now();
+    DateTime startDate = DateTime.parse(widget.resultData['startDate']);
+    DateTime selectedStartDate;
 
-  if (_currentMonthIndex == 0) {
-    // Whole plan selected
-    selectedStartDate = startDate;
-  } else {
-    // Specific month selected (fixed 30 days)
-    selectedStartDate = startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-  }
+    if (_currentMonthIndex == 0) {
+      // Whole plan selected
+      selectedStartDate = startDate;
+    } else {
+      // Specific month selected (fixed 30 days)
+      selectedStartDate =
+          startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
+    }
 
-  double totalSpent = 0.0;
+    double totalSpent = 0.0;
 
-  for (var account in widget.accounts) {
-    for (var transaction in account['transactions']) {
-      DateTime transactionDate = DateTime.parse(transaction['TransactionDateTime']);
-      String transactionCategory = transaction['Category'] ?? 'Unknown';
-      double amount = double.tryParse(transaction['Amount'].toString()) ?? 0.0;
+    for (var account in widget.accounts) {
+      for (var transaction in account['transactions']) {
+        DateTime transactionDate =
+            DateTime.parse(transaction['TransactionDateTime']);
+        String transactionCategory = transaction['Category'] ?? 'Unknown';
+        double amount =
+            double.tryParse(transaction['Amount'].toString()) ?? 0.0;
 
-      if (transactionCategory == category &&
-          transactionDate.isAfter(selectedStartDate) &&
-          transactionDate.isBefore(today)) {
-        totalSpent += amount;
+        if (transactionCategory == category &&
+            transactionDate.isAfter(selectedStartDate) &&
+            transactionDate.isBefore(today)) {
+          totalSpent += amount;
+        }
       }
     }
+
+    return totalSpent;
   }
-
-  return totalSpent;
-}
-
 }

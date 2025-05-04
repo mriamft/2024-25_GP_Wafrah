@@ -32,9 +32,11 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   Map<String, double> transactionCategories = {};
-  final GlobalNotificationManager globalNotificationManager = GlobalNotificationManager();
+  final GlobalNotificationManager globalNotificationManager =
+      GlobalNotificationManager();
 
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
@@ -51,7 +53,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   double _minExpense = double.infinity;
   double _maxExpense = double.negativeInfinity;
   int _touchedIndex = -1;
-List<String> selectedCategories = [];
+  List<String> selectedCategories = [];
 
   List<FlSpot> incomeData = [];
   List<FlSpot> expenseData = [];
@@ -60,42 +62,42 @@ List<String> selectedCategories = [];
   int monthOffset = 0;
   int yearOffset = 0;
 
-@override
-void initState() {
-  super.initState();
-  globalNotificationManager.start();
+  @override
+  void initState() {
+    super.initState();
+    globalNotificationManager.start();
 
-  // تأجيل بداية SessionManager لما يكتمل بناء الصفحة
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    SessionManager.startTracking(context);
-  });
+    // تأجيل بداية SessionManager لما يكتمل بناء الصفحة
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SessionManager.startTracking(context);
+    });
 
-  loadUserPlan().then((planData) {
-    if (planData != null) {
-      globalNotificationManager.updateData(
-        resultData: planData,
-        accounts: widget.accounts,
-      );
-    } else {
-      globalNotificationManager.clearData();
-    }
-  });
+    loadUserPlan().then((planData) {
+      if (planData != null) {
+        globalNotificationManager.updateData(
+          resultData: planData,
+          accounts: widget.accounts,
+        );
+      } else {
+        globalNotificationManager.clearData();
+      }
+    });
 
-  _loadVisibilityState();
-  _controller = AnimationController(
-    duration: const Duration(seconds: 2),
-    vsync: this,
-  );
-  _offsetAnimation = Tween<Offset>(begin: const Offset(0, -1), end: const Offset(0, 0))
-      .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-  _controller.forward();
-  updateDashboardData();
-}
-
+    _loadVisibilityState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _offsetAnimation = Tween<Offset>(
+            begin: const Offset(0, -1), end: const Offset(0, 0))
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _controller.forward();
+    updateDashboardData();
+  }
 
   Future<Map<String, dynamic>?> loadUserPlan() async {
     try {
-      final secureStorage = FlutterSecureStorage();
+      const secureStorage = FlutterSecureStorage();
       String? planJson = await secureStorage.read(key: 'savings_plan');
       if (planJson != null) {
         return jsonDecode(planJson) as Map<String, dynamic>;
@@ -206,25 +208,30 @@ void initState() {
     if (_selectedPeriod == 'سنوي') {
       _calculateMonthlyData(selectedDate);
       calculateStatistics('سنوي', selectedDate);
-      transactionCategories = _calculateCategoryDataForPieChart('سنوي', selectedDate);
+      transactionCategories =
+          _calculateCategoryDataForPieChart('سنوي', selectedDate);
     } else if (_selectedPeriod == 'شهري') {
       _calculateWeeklyData(selectedDate);
       calculateStatistics('شهري', selectedDate);
-      transactionCategories = _calculateCategoryDataForPieChart('شهري', selectedDate);
+      transactionCategories =
+          _calculateCategoryDataForPieChart('شهري', selectedDate);
     } else if (_selectedPeriod == 'اسبوعي') {
       int startDay = ((4 - weekOffset) * 7) - 6;
       int endDay = (4 - weekOffset) * 7;
-      DateTime weeklyDate = DateTime(selectedDate.year, selectedDate.month, startDay);
+      DateTime weeklyDate =
+          DateTime(selectedDate.year, selectedDate.month, startDay);
       _calculateDailyData(weeklyDate);
       calculateStatistics('اسبوعي', weeklyDate);
-      transactionCategories = _calculateCategoryDataForPieChart('اسبوعي', weeklyDate);
+      transactionCategories =
+          _calculateCategoryDataForPieChart('اسبوعي', weeklyDate);
     }
     setState(() {});
   }
 
   void calculateStatistics(String period, DateTime selectedDate) {
     DateTime now = DateTime.now();
-    DateTime cutoffDate = DateTime(2025, now.month, now.day, now.hour, now.minute, now.second);
+    DateTime cutoffDate =
+        DateTime(2025, now.month, now.day, now.hour, now.minute, now.second);
 
     _minIncome = double.infinity;
     _maxIncome = double.negativeInfinity;
@@ -247,7 +254,8 @@ void initState() {
         if (period == 'اسبوعي' &&
             transactionDate.year == 2025 &&
             transactionDate.month == selectedDate.month &&
-            _getWeekOfMonth(transactionDate.day) == _getWeekOfMonth(selectedDate.day)) {
+            _getWeekOfMonth(transactionDate.day) ==
+                _getWeekOfMonth(selectedDate.day)) {
           includeTransaction = true;
         } else if (period == 'شهري' &&
             transactionDate.year == 2025 &&
@@ -257,14 +265,23 @@ void initState() {
           includeTransaction = true;
         }
         if (includeTransaction) {
-          String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-          double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+          String subtype =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                  'غير معروف';
+          double amount =
+              double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
           if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
             totalIncome += amount;
             incomeCount++;
             _minIncome = amount < _minIncome ? amount : _minIncome;
             _maxIncome = amount > _maxIncome ? amount : _maxIncome;
-          } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
+          } else if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(subtype)) {
             totalExpense += amount;
             expenseCount++;
             _minExpense = amount < _minExpense ? amount : _minExpense;
@@ -286,9 +303,10 @@ void initState() {
 
   void _calculateWeeklyData(DateTime currentDate) {
     DateTime now = DateTime.now();
-    DateTime cutoffDate = currentDate.month == now.month && currentDate.year == now.year
-        ? DateTime(currentDate.year, currentDate.month, now.day)
-        : DateTime(currentDate.year, currentDate.month + 1, 0);
+    DateTime cutoffDate =
+        currentDate.month == now.month && currentDate.year == now.year
+            ? DateTime(currentDate.year, currentDate.month, now.day)
+            : DateTime(currentDate.year, currentDate.month + 1, 0);
 
     Map<int, double> weeklyIncome = {};
     Map<int, double> weeklyExpense = {};
@@ -302,19 +320,29 @@ void initState() {
             transactionDate.month == currentDate.month &&
             transactionDate.isBefore(cutoffDate)) {
           int week = ((transactionDate.day - 1) / 7).floor();
-          double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
-          String type = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+          double amount =
+              double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+          String type =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
           if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
             weeklyIncome[week] = (weeklyIncome[week] ?? 0.0) + amount;
-          } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(type)) {
+          } else if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(type)) {
             weeklyExpense[week] = (weeklyExpense[week] ?? 0.0) + amount;
           }
         }
       }
     }
 
-    incomeData = List.generate(4, (i) => FlSpot(i.toDouble(), weeklyIncome[i] ?? 0.0));
-    expenseData = List.generate(4, (i) => FlSpot(i.toDouble(), weeklyExpense[i] ?? 0.0));
+    incomeData =
+        List.generate(4, (i) => FlSpot(i.toDouble(), weeklyIncome[i] ?? 0.0));
+    expenseData =
+        List.generate(4, (i) => FlSpot(i.toDouble(), weeklyExpense[i] ?? 0.0));
 
     print('Weekly Income Data: $weeklyIncome');
     print('Weekly Expense Data: $weeklyExpense');
@@ -342,382 +370,434 @@ void initState() {
     }
     return -1;
   }
-Widget buildCategoryLineChart() {
-  // Predefined mapping of category names to colors.
-  Map<String, Color> categoryColors = {
-    "التعليم": Colors.blue,
-    "الترفيه": Colors.purple,
-    "المدفوعات الحكومية": Colors.orange,
-    "البقالة": Colors.green,
-    "الصحة": Colors.red,
-    "القروض": Colors.brown,
-    "الاستثمار": Colors.indigo,
-    "الإيجار": Colors.teal,
-    "المطاعم": Colors.pink,
-    "تسوق": Colors.amber,
-    "التحويلات": Colors.cyan,
-    "النقل": Colors.deepPurple,
-    "السفر": Colors.deepOrange,
-    "أخرى": Colors.grey
-  };
 
-  // Calculate the list of all categories with nonzero totals from your transactionCategories.
-  List<String> allUsedCategories = transactionCategories.entries
-      .where((entry) => entry.value > 0)
-      .map((entry) => entry.key)
-      .toList();
+  Widget buildCategoryLineChart() {
+    // Predefined mapping of category names to colors.
+    Map<String, Color> categoryColors = {
+      "التعليم": Colors.blue,
+      "الترفيه": Colors.purple,
+      "المدفوعات الحكومية": Colors.orange,
+      "البقالة": Colors.green,
+      "الصحة": Colors.red,
+      "القروض": Colors.brown,
+      "الاستثمار": Colors.indigo,
+      "الإيجار": Colors.teal,
+      "المطاعم": Colors.pink,
+      "تسوق": Colors.amber,
+      "التحويلات": Colors.cyan,
+      "النقل": Colors.deepPurple,
+      "السفر": Colors.deepOrange,
+      "أخرى": Colors.grey
+    };
 
-  // If no category is selected yet, default to all used categories.
-  if (selectedCategories.isEmpty) {
-    selectedCategories = List.from(allUsedCategories);
-  }
+    // Calculate the list of all categories with nonzero totals from your transactionCategories.
+    List<String> allUsedCategories = transactionCategories.entries
+        .where((entry) => entry.value > 0)
+        .map((entry) => entry.key)
+        .toList();
 
-  // Build filter chips with colored borders and selected backgrounds.
-  Widget categoryFilterChips = SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      children: allUsedCategories.map((cat) {
-        bool isSelected = selectedCategories.contains(cat);
-        // Determine the color for the category.
-        Color chipColor = categoryColors[cat] ?? Colors.grey;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: FilterChip(
-            label: Text(
-              cat,
-              style: const TextStyle(fontFamily: 'GE-SS-Two-Light'),
-            ),
-            backgroundColor: Colors.white,
-            selectedColor: chipColor.withOpacity(0.3), // light tint when selected
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: chipColor), // border in category color
-            ),
-            selected: isSelected,
-            onSelected: (selected) {
-              setState(() {
-                if (selected) {
-                  selectedCategories.add(cat);
-                } else {
-                  selectedCategories.remove(cat);
-                }
-              });
-            },
-          ),
-        );
-      }).toList(),
-    ),
-  );
-
-  // Determine the number of intervals and x-axis labels based on the period.
-  int numIntervals;
-  List<String> xAxisLabels;
-  if (_selectedPeriod == 'اسبوعي') {
-    numIntervals = 7;
-    xAxisLabels = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
-  } else if (_selectedPeriod == 'شهري') {
-    numIntervals = 4;
-    xAxisLabels = ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'];
-  } else if (_selectedPeriod == 'سنوي') {
-    numIntervals = 12;
-    xAxisLabels = [
-      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-    ];
-  } else {
-    numIntervals = 0;
-    xAxisLabels = [];
-  }
-
-  // Map each selected category to its color.
-  Map<String, Color> filteredCategoryColors = {};
-  for (var cat in selectedCategories) {
-    filteredCategoryColors[cat] = categoryColors[cat] ?? Colors.grey;
-  }
-
-  // Use the same cutoff logic as before.
-  DateTime now = DateTime.now();
-  DateTime selectedDate = DateTime(2025, now.month - monthOffset, now.day);
-
-  // Compute the maximum Y value across the selected categories.
-  double computedMaxY = 0;
-  for (var cat in selectedCategories) {
-    List<double> catValues = _calculateCategoryData(_selectedPeriod, selectedDate, cat);
-    for (var value in catValues) {
-      if (value > computedMaxY) computedMaxY = value;
+    // If no category is selected yet, default to all used categories.
+    if (selectedCategories.isEmpty) {
+      selectedCategories = List.from(allUsedCategories);
     }
-  }
-  if (computedMaxY > 0) computedMaxY *= 1.1;
 
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      categoryFilterChips,
-      const SizedBox(height: 8),
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 5,
+    // Build filter chips with colored borders and selected backgrounds.
+    Widget categoryFilterChips = SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: allUsedCategories.map((cat) {
+          bool isSelected = selectedCategories.contains(cat);
+          // Determine the color for the category.
+          Color chipColor = categoryColors[cat] ?? Colors.grey;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: FilterChip(
+              label: Text(
+                cat,
+                style: const TextStyle(fontFamily: 'GE-SS-Two-Light'),
+              ),
+              backgroundColor: Colors.white,
+              selectedColor:
+                  chipColor.withOpacity(0.3), // light tint when selected
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: chipColor), // border in category color
+              ),
+              selected: isSelected,
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    selectedCategories.add(cat);
+                  } else {
+                    selectedCategories.remove(cat);
+                  }
+                });
+              },
             ),
-          ],
-        ),
-        child: SizedBox(
-          height: 300,
-          child: LineChart(
-            LineChartData(
-              minY: 0,
-              maxY: computedMaxY,
-              titlesData: FlTitlesData(
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 40,
-                    getTitlesWidget: (value, meta) {
-                      return Text(
-                        value.toInt().toString(),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontFamily: 'GE-SS-Two-Light',
-                          color: Colors.grey,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 35,
-                    interval: 1,
-                    getTitlesWidget: (value, meta) {
-                      int index = value.toInt();
-                      if (index >= 0 && index < xAxisLabels.length) {
+          );
+        }).toList(),
+      ),
+    );
+
+    // Determine the number of intervals and x-axis labels based on the period.
+    int numIntervals;
+    List<String> xAxisLabels;
+    if (_selectedPeriod == 'اسبوعي') {
+      numIntervals = 7;
+      xAxisLabels = [
+        'السبت',
+        'الأحد',
+        'الاثنين',
+        'الثلاثاء',
+        'الأربعاء',
+        'الخميس',
+        'الجمعة'
+      ];
+    } else if (_selectedPeriod == 'شهري') {
+      numIntervals = 4;
+      xAxisLabels = ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'];
+    } else if (_selectedPeriod == 'سنوي') {
+      numIntervals = 12;
+      xAxisLabels = [
+        'يناير',
+        'فبراير',
+        'مارس',
+        'أبريل',
+        'مايو',
+        'يونيو',
+        'يوليو',
+        'أغسطس',
+        'سبتمبر',
+        'أكتوبر',
+        'نوفمبر',
+        'ديسمبر'
+      ];
+    } else {
+      numIntervals = 0;
+      xAxisLabels = [];
+    }
+
+    // Map each selected category to its color.
+    Map<String, Color> filteredCategoryColors = {};
+    for (var cat in selectedCategories) {
+      filteredCategoryColors[cat] = categoryColors[cat] ?? Colors.grey;
+    }
+
+    // Use the same cutoff logic as before.
+    DateTime now = DateTime.now();
+    DateTime selectedDate = DateTime(2025, now.month - monthOffset, now.day);
+
+    // Compute the maximum Y value across the selected categories.
+    double computedMaxY = 0;
+    for (var cat in selectedCategories) {
+      List<double> catValues =
+          _calculateCategoryData(_selectedPeriod, selectedDate, cat);
+      for (var value in catValues) {
+        if (value > computedMaxY) computedMaxY = value;
+      }
+    }
+    if (computedMaxY > 0) computedMaxY *= 1.1;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        categoryFilterChips,
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 5,
+              ),
+            ],
+          ),
+          child: SizedBox(
+            height: 300,
+            child: LineChart(
+              LineChartData(
+                minY: 0,
+                maxY: computedMaxY,
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
                         return Text(
-                          xAxisLabels[index],
+                          value.toInt().toString(),
                           style: const TextStyle(
-                            fontSize: 10,
+                            fontSize: 12,
                             fontFamily: 'GE-SS-Two-Light',
                             color: Colors.grey,
                           ),
                         );
-                      }
-                      return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 35,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        int index = value.toInt();
+                        if (index >= 0 && index < xAxisLabels.length) {
+                          return Text(
+                            xAxisLabels[index],
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontFamily: 'GE-SS-Two-Light',
+                              color: Colors.grey,
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                ),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: true,
+                  drawHorizontalLine: true,
+                  verticalInterval: 1,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: Colors.grey.withOpacity(0.2),
+                    strokeWidth: 1,
+                  ),
+                  getDrawingVerticalLine: (value) => FlLine(
+                    color: Colors.grey.withOpacity(0.2),
+                    strokeWidth: 1,
+                  ),
+                ),
+                lineTouchData: LineTouchData(
+                  enabled: true,
+                  touchTooltipData: LineTouchTooltipData(
+                    tooltipRoundedRadius: 8,
+                    tooltipPadding: const EdgeInsets.all(8),
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((touchedSpot) {
+                        // Map bar index to category using the order in filteredCategoryColors.
+                        List<String> dispCats =
+                            filteredCategoryColors.keys.toList();
+                        String catName = dispCats[touchedSpot.barIndex];
+                        return LineTooltipItem(
+                          '$catName: ${touchedSpot.y.toStringAsFixed(2)}',
+                          const TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'GE-SS-Two-Light',
+                            color: Colors.black,
+                          ),
+                        );
+                      }).toList();
                     },
                   ),
                 ),
-                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                // Generate a line for each selected category.
+                lineBarsData: filteredCategoryColors.entries.map((entry) {
+                  String cat = entry.key;
+                  Color lineColor = entry.value;
+                  List<double> catValues = _calculateCategoryData(
+                      _selectedPeriod, selectedDate, cat);
+                  List<FlSpot> spots = [];
+                  for (int i = 0; i < catValues.length; i++) {
+                    spots.add(FlSpot(i.toDouble(), catValues[i]));
+                  }
+                  return LineChartBarData(
+                    spots: spots,
+                    isCurved: false,
+                    color: lineColor,
+                    barWidth: 3,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (FlSpot spot, double percent,
+                          LineChartBarData barData, int index) {
+                        return FlDotCirclePainter(
+                          radius: 4,
+                          color: lineColor,
+                          strokeWidth: 0,
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: lineColor.withOpacity(0.4),
+                    ),
+                  );
+                }).toList(),
               ),
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: true,
-                drawHorizontalLine: true,
-                verticalInterval: 1,
-                getDrawingHorizontalLine: (value) => FlLine(
-                  color: Colors.grey.withOpacity(0.2),
-                  strokeWidth: 1,
-                ),
-                getDrawingVerticalLine: (value) => FlLine(
-                  color: Colors.grey.withOpacity(0.2),
-                  strokeWidth: 1,
-                ),
-              ),
-              lineTouchData: LineTouchData(
-                enabled: true,
-                touchTooltipData: LineTouchTooltipData(
-                  tooltipRoundedRadius: 8,
-                  tooltipPadding: const EdgeInsets.all(8),
-                  getTooltipItems: (touchedSpots) {
-                    return touchedSpots.map((touchedSpot) {
-                      // Map bar index to category using the order in filteredCategoryColors.
-                      List<String> dispCats = filteredCategoryColors.keys.toList();
-                      String catName = dispCats[touchedSpot.barIndex];
-                      return LineTooltipItem(
-                        '$catName: ${touchedSpot.y.toStringAsFixed(2)}',
-                        const TextStyle(
-                          fontSize: 12,
-                          fontFamily: 'GE-SS-Two-Light',
-                          color: Colors.black,
-                        ),
-                      );
-                    }).toList();
-                  },
-                ),
-              ),
-              // Generate a line for each selected category.
-              lineBarsData: filteredCategoryColors.entries.map((entry) {
-                String cat = entry.key;
-                Color lineColor = entry.value;
-                List<double> catValues = _calculateCategoryData(_selectedPeriod, selectedDate, cat);
-                List<FlSpot> spots = [];
-                for (int i = 0; i < catValues.length; i++) {
-                  spots.add(FlSpot(i.toDouble(), catValues[i]));
-                }
-                return LineChartBarData(
-                  spots: spots,
-                  isCurved: false,
-                  color: lineColor,
-                  barWidth: 3,
-                  dotData: FlDotData(
-                    show: true,
-                    getDotPainter: (FlSpot spot, double percent, LineChartBarData barData, int index) {
-                      return FlDotCirclePainter(
-                        radius: 4,
-                        color: lineColor,
-                        strokeWidth: 0,
-                      );
-                    },
-                  ),
-                  belowBarData: BarAreaData(
-                    show: true,
-                    color: lineColor.withOpacity(0.4),
-                  ),
-                );
-              }).toList(),
             ),
           ),
         ),
-      ),
-    ],
-  );
-}
-/// Returns a list of double values representing expense totals for the given [category]
-/// grouped according to the [period] over the [selectedDate] timeline.
-///
-/// For period:
-/// - 'سنوي': Groups by month (0 to currentMonth-1)
-/// - 'شهري': Groups by week within the month (0 to 3)
-/// - 'اسبوعي': Groups by day within the selected week
-List<double> _calculateCategoryData(String period, DateTime selectedDate, String category) {
-  // We'll accumulate totals in different buckets.
-  if (period == 'سنوي') {
-    // Yearly: Group by month. (Mimic _calculateMonthlyData)
-    DateTime now = DateTime.now();
-    DateTime cutoffDate = DateTime(now.year, now.month, now.day);
-    Map<int, double> monthlyTotals = {};
-    for (var account in widget.accounts) {
-      var transactions = account['transactions'] ?? [];
-      for (var tx in transactions) {
-        String dateStr = tx['TransactionDateTime'] ?? '';
-        DateTime? txDate = DateTime.tryParse(dateStr);
-        if (txDate == null) continue;
-        // Skip transactions after the cutoff.
-        if (txDate.isAfter(cutoffDate)) continue;
-        // Only consider transactions in the given year.
-        if (txDate.year != selectedDate.year) continue;
-        String txCategory = tx['Category'] ??
-            tx['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-            'غير مصنف';
-        // Only process expense transactions.
-        if (!['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable']
-            .contains(tx['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '')) {
-          continue;
-        }
-        // Only add if the transaction category matches.
-        if (txCategory != category) continue;
-        int monthIndex = txDate.month - 1;
-        monthlyTotals[monthIndex] = (monthlyTotals[monthIndex] ?? 0.0) +
-            (double.tryParse(tx['Amount']?.toString() ?? '0') ?? 0.0);
-      }
-    }
-    int currentMonthIndex = now.month - 1;
-    List<double> result = List.filled(currentMonthIndex + 1, 0.0);
-    for (int i = 0; i <= currentMonthIndex; i++) {
-      result[i] = monthlyTotals[i] ?? 0.0;
-    }
-    return result;
-  } else if (period == 'شهري') {
-    // Monthly: Group by week in the month. (Mimic _calculateWeeklyData)
-    DateTime now = DateTime.now();
-    // If we're in the current month, cutoff is today; otherwise, use the end of the month.
-    DateTime cutoffDate = (selectedDate.month == now.month && selectedDate.year == now.year)
-        ? DateTime(selectedDate.year, selectedDate.month, now.day)
-        : DateTime(selectedDate.year, selectedDate.month + 1, 0);
-    Map<int, double> weeklyTotals = {};
-    for (var account in widget.accounts) {
-      var transactions = account['transactions'] ?? [];
-      for (var tx in transactions) {
-        String dateStr = tx['TransactionDateTime'] ?? '';
-        DateTime? txDate = DateTime.tryParse(dateStr);
-        if (txDate == null) continue;
-        if (txDate.isAfter(cutoffDate)) continue;
-        if (!(txDate.year == selectedDate.year && txDate.month == selectedDate.month))
-          continue;
-        String txCategory = tx['Category'] ??
-            tx['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-            'غير مصنف';
-        if (!['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable']
-            .contains(tx['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '')) {
-          continue;
-        }
-        if (txCategory != category) continue;
-        int weekIndex = ((txDate.day - 1) / 7).floor(); // gives 0, 1, 2, or 3
-        weeklyTotals[weekIndex] = (weeklyTotals[weekIndex] ?? 0.0) +
-            (double.tryParse(tx['Amount']?.toString() ?? '0') ?? 0.0);
-      }
-    }
-    // There are 4 weeks in a month.
-    List<double> result = List.filled(4, 0.0);
-    for (int i = 0; i < 4; i++) {
-      result[i] = weeklyTotals[i] ?? 0.0;
-    }
-    return result;
-  } else if (period == 'اسبوعي') {
-    // Weekly: Group by day in the selected week. (Mimic _calculateDailyData)
-    DateTime now = DateTime.now();
-    // Determine cutoff: if we're in current month, cutoff is now; otherwise, last day of the month.
-    DateTime cutoffDate = (selectedDate.month == now.month)
-        ? DateTime(2025, now.month, now.day, now.hour, now.minute, now.second)
-        : DateTime(2025, selectedDate.month + 1, 1, now.hour, now.minute, now.second)
-            .subtract(const Duration(days: 1));
-    // The income/expense logic used weekOffset to determine the selected week.
-    int selectedWeek = 4 - (weekOffset % 4);
-    int startDay = (selectedWeek - 1) * 7 + 1;
-    int endDay = selectedWeek * 7;
-    Map<int, double> dailyTotals = { for (int i = startDay; i <= endDay; i++) i: 0.0 };
-    for (var account in widget.accounts) {
-      var transactions = account['transactions'] ?? [];
-      for (var tx in transactions) {
-        String dateStr = tx['TransactionDateTime'] ?? '';
-        DateTime? txDate = DateTime.tryParse(dateStr);
-        if (txDate == null) continue;
-        // Only consider transactions in 2025 for the current selected month and within the selected week.
-        if (!(txDate.year == 2025 &&
-            txDate.month == selectedDate.month &&
-            txDate.day >= startDay &&
-            txDate.day <= endDay))
-          continue;
-        if (!txDate.isBefore(cutoffDate)) continue;
-        String txCategory = tx['Category'] ??
-            tx['SubTransactionType']?.replaceAll('KSAOB.', '') ??
-            'غير مصنف';
-        if (!['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable']
-            .contains(tx['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '')) {
-          continue;
-        }
-        if (txCategory != category) continue;
-        int day = txDate.day;
-        dailyTotals[day] = (dailyTotals[day] ?? 0) +
-            (double.tryParse(tx['Amount']?.toString() ?? '0') ?? 0.0);
-      }
-    }
-    // Construct a list for each day (x coordinate 0-based)
-    List<double> result = [];
-    for (int i = startDay; i <= endDay; i++) {
-      result.add(dailyTotals[i] ?? 0.0);
-    }
-    return result;
+      ],
+    );
   }
-  return [];
-}
 
+  /// Returns a list of double values representing expense totals for the given [category]
+  /// grouped according to the [period] over the [selectedDate] timeline.
+  ///
+  /// For period:
+  /// - 'سنوي': Groups by month (0 to currentMonth-1)
+  /// - 'شهري': Groups by week within the month (0 to 3)
+  /// - 'اسبوعي': Groups by day within the selected week
+  List<double> _calculateCategoryData(
+      String period, DateTime selectedDate, String category) {
+    // We'll accumulate totals in different buckets.
+    if (period == 'سنوي') {
+      // Yearly: Group by month. (Mimic _calculateMonthlyData)
+      DateTime now = DateTime.now();
+      DateTime cutoffDate = DateTime(now.year, now.month, now.day);
+      Map<int, double> monthlyTotals = {};
+      for (var account in widget.accounts) {
+        var transactions = account['transactions'] ?? [];
+        for (var tx in transactions) {
+          String dateStr = tx['TransactionDateTime'] ?? '';
+          DateTime? txDate = DateTime.tryParse(dateStr);
+          if (txDate == null) continue;
+          // Skip transactions after the cutoff.
+          if (txDate.isAfter(cutoffDate)) continue;
+          // Only consider transactions in the given year.
+          if (txDate.year != selectedDate.year) continue;
+          String txCategory = tx['Category'] ??
+              tx['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+              'غير مصنف';
+          // Only process expense transactions.
+          if (![
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(
+              tx['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '')) {
+            continue;
+          }
+          // Only add if the transaction category matches.
+          if (txCategory != category) continue;
+          int monthIndex = txDate.month - 1;
+          monthlyTotals[monthIndex] = (monthlyTotals[monthIndex] ?? 0.0) +
+              (double.tryParse(tx['Amount']?.toString() ?? '0') ?? 0.0);
+        }
+      }
+      int currentMonthIndex = now.month - 1;
+      List<double> result = List.filled(currentMonthIndex + 1, 0.0);
+      for (int i = 0; i <= currentMonthIndex; i++) {
+        result[i] = monthlyTotals[i] ?? 0.0;
+      }
+      return result;
+    } else if (period == 'شهري') {
+      // Monthly: Group by week in the month. (Mimic _calculateWeeklyData)
+      DateTime now = DateTime.now();
+      // If we're in the current month, cutoff is today; otherwise, use the end of the month.
+      DateTime cutoffDate =
+          (selectedDate.month == now.month && selectedDate.year == now.year)
+              ? DateTime(selectedDate.year, selectedDate.month, now.day)
+              : DateTime(selectedDate.year, selectedDate.month + 1, 0);
+      Map<int, double> weeklyTotals = {};
+      for (var account in widget.accounts) {
+        var transactions = account['transactions'] ?? [];
+        for (var tx in transactions) {
+          String dateStr = tx['TransactionDateTime'] ?? '';
+          DateTime? txDate = DateTime.tryParse(dateStr);
+          if (txDate == null) continue;
+          if (txDate.isAfter(cutoffDate)) continue;
+          if (!(txDate.year == selectedDate.year &&
+              txDate.month == selectedDate.month)) {
+            continue;
+          }
+          String txCategory = tx['Category'] ??
+              tx['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+              'غير مصنف';
+          if (![
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(
+              tx['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '')) {
+            continue;
+          }
+          if (txCategory != category) continue;
+          int weekIndex = ((txDate.day - 1) / 7).floor(); // gives 0, 1, 2, or 3
+          weeklyTotals[weekIndex] = (weeklyTotals[weekIndex] ?? 0.0) +
+              (double.tryParse(tx['Amount']?.toString() ?? '0') ?? 0.0);
+        }
+      }
+      // There are 4 weeks in a month.
+      List<double> result = List.filled(4, 0.0);
+      for (int i = 0; i < 4; i++) {
+        result[i] = weeklyTotals[i] ?? 0.0;
+      }
+      return result;
+    } else if (period == 'اسبوعي') {
+      // Weekly: Group by day in the selected week. (Mimic _calculateDailyData)
+      DateTime now = DateTime.now();
+      // Determine cutoff: if we're in current month, cutoff is now; otherwise, last day of the month.
+      DateTime cutoffDate = (selectedDate.month == now.month)
+          ? DateTime(2025, now.month, now.day, now.hour, now.minute, now.second)
+          : DateTime(2025, selectedDate.month + 1, 1, now.hour, now.minute,
+                  now.second)
+              .subtract(const Duration(days: 1));
+      // The income/expense logic used weekOffset to determine the selected week.
+      int selectedWeek = 4 - (weekOffset % 4);
+      int startDay = (selectedWeek - 1) * 7 + 1;
+      int endDay = selectedWeek * 7;
+      Map<int, double> dailyTotals = {
+        for (int i = startDay; i <= endDay; i++) i: 0.0
+      };
+      for (var account in widget.accounts) {
+        var transactions = account['transactions'] ?? [];
+        for (var tx in transactions) {
+          String dateStr = tx['TransactionDateTime'] ?? '';
+          DateTime? txDate = DateTime.tryParse(dateStr);
+          if (txDate == null) continue;
+          // Only consider transactions in 2025 for the current selected month and within the selected week.
+          if (!(txDate.year == 2025 &&
+              txDate.month == selectedDate.month &&
+              txDate.day >= startDay &&
+              txDate.day <= endDay)) {
+            continue;
+          }
+          if (!txDate.isBefore(cutoffDate)) continue;
+          String txCategory = tx['Category'] ??
+              tx['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+              'غير مصنف';
+          if (![
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(
+              tx['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '')) {
+            continue;
+          }
+          if (txCategory != category) continue;
+          int day = txDate.day;
+          dailyTotals[day] = (dailyTotals[day] ?? 0) +
+              (double.tryParse(tx['Amount']?.toString() ?? '0') ?? 0.0);
+        }
+      }
+      // Construct a list for each day (x coordinate 0-based)
+      List<double> result = [];
+      for (int i = startDay; i <= endDay; i++) {
+        result.add(dailyTotals[i] ?? 0.0);
+      }
+      return result;
+    }
+    return [];
+  }
 
   void _calculateMonthlyData(DateTime currentDate) {
     DateTime now = DateTime.now();
@@ -731,14 +811,25 @@ List<double> _calculateCategoryData(String period, DateTime selectedDate, String
       for (var transaction in transactions) {
         String dateStr = transaction['TransactionDateTime'] ?? '';
         DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
-        if (transactionDate.isBefore(cutoffDate) || transactionDate.isAtSameMomentAs(cutoffDate)) {
+        if (transactionDate.isBefore(cutoffDate) ||
+            transactionDate.isAtSameMomentAs(cutoffDate)) {
           if (transactionDate.year == currentDate.year) {
             int month = transactionDate.month - 1;
-            double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
-            String type = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+            double amount =
+                double.tryParse(transaction['Amount']?.toString() ?? '0') ??
+                    0.0;
+            String type =
+                transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                    '';
             if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
               monthlyIncome[month] = (monthlyIncome[month] ?? 0.0) + amount;
-            } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(type)) {
+            } else if ([
+              'MoneyTransfer',
+              'Withdrawal',
+              'Purchase',
+              'DepositReversal',
+              'NotApplicable'
+            ].contains(type)) {
               monthlyExpense[month] = (monthlyExpense[month] ?? 0.0) + amount;
             }
           }
@@ -746,12 +837,18 @@ List<double> _calculateCategoryData(String period, DateTime selectedDate, String
       }
     }
 
-    incomeData = List.generate(12, (i) => FlSpot(i.toDouble(), monthlyIncome[i] ?? 0.0));
-    expenseData = List.generate(12, (i) => FlSpot(i.toDouble(), monthlyExpense[i] ?? 0.0));
+    incomeData =
+        List.generate(12, (i) => FlSpot(i.toDouble(), monthlyIncome[i] ?? 0.0));
+    expenseData = List.generate(
+        12, (i) => FlSpot(i.toDouble(), monthlyExpense[i] ?? 0.0));
 
     int currentMonthIndex = now.month - 1;
-    incomeData = incomeData.where((spot) => spot.x <= currentMonthIndex.toDouble()).toList();
-    expenseData = expenseData.where((spot) => spot.x <= currentMonthIndex.toDouble()).toList();
+    incomeData = incomeData
+        .where((spot) => spot.x <= currentMonthIndex.toDouble())
+        .toList();
+    expenseData = expenseData
+        .where((spot) => spot.x <= currentMonthIndex.toDouble())
+        .toList();
 
     setState(() {});
   }
@@ -760,14 +857,20 @@ List<double> _calculateCategoryData(String period, DateTime selectedDate, String
     DateTime now = DateTime.now();
     DateTime cutoffDate = (currentDate.month == now.month)
         ? DateTime(2025, now.month, now.day, now.hour, now.minute, now.second)
-        : DateTime(2025, currentDate.month + 1, 1, now.hour, now.minute, now.second).subtract(const Duration(days: 1));
+        : DateTime(2025, currentDate.month + 1, 1, now.hour, now.minute,
+                now.second)
+            .subtract(const Duration(days: 1));
 
     int selectedWeek = 4 - (weekOffset % 4);
     int startDay = (selectedWeek - 1) * 7 + 1;
     int endDay = selectedWeek * 7;
 
-    Map<int, double> dailyIncome = { for (int i = startDay; i <= endDay; i++) i: 0.0 };
-    Map<int, double> dailyExpense = { for (int i = startDay; i <= endDay; i++) i: 0.0 };
+    Map<int, double> dailyIncome = {
+      for (int i = startDay; i <= endDay; i++) i: 0.0
+    };
+    Map<int, double> dailyExpense = {
+      for (int i = startDay; i <= endDay; i++) i: 0.0
+    };
 
     for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
@@ -780,11 +883,19 @@ List<double> _calculateCategoryData(String period, DateTime selectedDate, String
             transactionDate.day <= endDay &&
             transactionDate.isBefore(cutoffDate)) {
           int day = transactionDate.day;
-          double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
-          String type = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+          double amount =
+              double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+          String type =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
           if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(type)) {
             dailyIncome[day] = (dailyIncome[day] ?? 0.0) + amount;
-          } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(type)) {
+          } else if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(type)) {
             dailyExpense[day] = (dailyExpense[day] ?? 0.0) + amount;
           }
         }
@@ -804,7 +915,8 @@ List<double> _calculateCategoryData(String period, DateTime selectedDate, String
 
   String getCurrentWeekLabel() {
     int currentWeek = 4 - (weekOffset % 4);
-    DateTime currentDate = DateTime(2025, DateTime.now().month - monthOffset, 1);
+    DateTime currentDate =
+        DateTime(2025, DateTime.now().month - monthOffset, 1);
     String monthName = getMonthName(currentDate.month);
     return '$monthName 2025 - الأسبوع $currentWeek';
   }
@@ -853,30 +965,46 @@ List<double> _calculateCategoryData(String period, DateTime selectedDate, String
 
   String getMonthName(int month) {
     switch (month) {
-      case 1: return 'يناير';
-      case 2: return 'فبراير';
-      case 3: return 'مارس';
-      case 4: return 'أبريل';
-      case 5: return 'مايو';
-      case 6: return 'يونيو';
-      case 7: return 'يوليو';
-      case 8: return 'أغسطس';
-      case 9: return 'سبتمبر';
-      case 10: return 'أكتوبر';
-      case 11: return 'نوفمبر';
-      case 12: return 'ديسمبر';
-      default: return '';
+      case 1:
+        return 'يناير';
+      case 2:
+        return 'فبراير';
+      case 3:
+        return 'مارس';
+      case 4:
+        return 'أبريل';
+      case 5:
+        return 'مايو';
+      case 6:
+        return 'يونيو';
+      case 7:
+        return 'يوليو';
+      case 8:
+        return 'أغسطس';
+      case 9:
+        return 'سبتمبر';
+      case 10:
+        return 'أكتوبر';
+      case 11:
+        return 'نوفمبر';
+      case 12:
+        return 'ديسمبر';
+      default:
+        return '';
     }
   }
 
   Widget buildWeekNavigationButtons() {
     DateTime now = DateTime.now();
     DateTime selectedDate = DateTime(2025, now.month - monthOffset, 1);
-    bool isCurrentMonth = selectedDate.month == now.month && selectedDate.year == now.year;
+    bool isCurrentMonth =
+        selectedDate.month == now.month && selectedDate.year == now.year;
     int currentWeekInMonth = ((now.day - 1) / 7).floor() + 1;
     int displayedWeek = 4 - weekOffset;
     bool disableLeft = displayedWeek == 1;
-    bool disableRight = isCurrentMonth ? (displayedWeek >= currentWeekInMonth) : (displayedWeek == 4);
+    bool disableRight = isCurrentMonth
+        ? (displayedWeek >= currentWeekInMonth)
+        : (displayedWeek == 4);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -1151,29 +1279,30 @@ List<double> _calculateCategoryData(String period, DateTime selectedDate, String
                     strokeWidth: 1,
                   ),
                 ),
-lineTouchData: LineTouchData(
-  enabled: true,
-  touchTooltipData: LineTouchTooltipData(
-    tooltipRoundedRadius: 8,
-    tooltipPadding: const EdgeInsets.all(8),
-    getTooltipItems: (touchedSpots) {
-      return touchedSpots.map((touchedSpot) {
-        // Use the available 'color' property from LineChartBarData
-        final barData = touchedSpot.bar as LineChartBarData;
-        final barColor = barData.color ?? Colors.white;
-        final seriesName = touchedSpot.barIndex == 0 ? 'الدخل' : 'الصرف';
-        return LineTooltipItem(
-          '$seriesName: ${touchedSpot.y.toStringAsFixed(2)}',
-          TextStyle(
-            color: barColor,
-            fontSize: 12,
-            fontFamily: 'GE-SS-Two-Light',
-          ),
-        );
-      }).toList();
-    },
-  ),
-),
+                lineTouchData: LineTouchData(
+                  enabled: true,
+                  touchTooltipData: LineTouchTooltipData(
+                    tooltipRoundedRadius: 8,
+                    tooltipPadding: const EdgeInsets.all(8),
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((touchedSpot) {
+                        // Use the available 'color' property from LineChartBarData
+                        final barData = touchedSpot.bar;
+                        final barColor = barData.color ?? Colors.white;
+                        final seriesName =
+                            touchedSpot.barIndex == 0 ? 'الدخل' : 'الصرف';
+                        return LineTooltipItem(
+                          '$seriesName: ${touchedSpot.y.toStringAsFixed(2)}',
+                          TextStyle(
+                            color: barColor,
+                            fontSize: 12,
+                            fontFamily: 'GE-SS-Two-Light',
+                          ),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
                 lineBarsData: [
                   LineChartBarData(
                     spots: incomeData,
@@ -1250,10 +1379,14 @@ lineTouchData: LineTouchData(
       for (var transaction in transactions) {
         String? dateStr = transaction['TransactionDateTime'];
         if (dateStr != null) {
-          DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+          DateTime transactionDate =
+              DateTime.tryParse(dateStr) ?? DateTime.now();
           int month = transactionDate.month - 1;
-          String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-          double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+          String subtype =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                  'غير معروف';
+          double amount =
+              double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
           if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
             monthlyIncome[month] = (monthlyIncome[month] ?? 0) + amount;
           }
@@ -1274,11 +1407,21 @@ lineTouchData: LineTouchData(
       for (var transaction in transactions) {
         String? dateStr = transaction['TransactionDateTime'];
         if (dateStr != null) {
-          DateTime transactionDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+          DateTime transactionDate =
+              DateTime.tryParse(dateStr) ?? DateTime.now();
           int month = transactionDate.month - 1;
-          String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-          double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
-          if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
+          String subtype =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                  'غير معروف';
+          double amount =
+              double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+          if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(subtype)) {
             monthlyExpense[month] = (monthlyExpense[month] ?? 0) + amount;
           }
         }
@@ -1295,8 +1438,11 @@ lineTouchData: LineTouchData(
     for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
-        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-        double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        double amount =
+            double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
         if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
           if (amount < minIncome) {
             minIncome = amount;
@@ -1312,8 +1458,11 @@ lineTouchData: LineTouchData(
     for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
-        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-        double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        double amount =
+            double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
         if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
           if (amount > maxIncome) {
             maxIncome = amount;
@@ -1330,8 +1479,11 @@ lineTouchData: LineTouchData(
     for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
-        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-        double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        double amount =
+            double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
         if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
           totalIncome += amount;
           count++;
@@ -1346,9 +1498,18 @@ lineTouchData: LineTouchData(
     for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
-        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-        double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
-        if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        double amount =
+            double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+        if ([
+          'MoneyTransfer',
+          'Withdrawal',
+          'Purchase',
+          'DepositReversal',
+          'NotApplicable'
+        ].contains(subtype)) {
           if (amount < minExpense) {
             minExpense = amount;
           }
@@ -1363,9 +1524,18 @@ lineTouchData: LineTouchData(
     for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
-        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-        double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
-        if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        double amount =
+            double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+        if ([
+          'MoneyTransfer',
+          'Withdrawal',
+          'Purchase',
+          'DepositReversal',
+          'NotApplicable'
+        ].contains(subtype)) {
           if (amount > maxExpense) {
             maxExpense = amount;
           }
@@ -1381,9 +1551,18 @@ lineTouchData: LineTouchData(
     for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
-        String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-        double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
-        if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
+        String subtype =
+            transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير معروف';
+        double amount =
+            double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+        if ([
+          'MoneyTransfer',
+          'Withdrawal',
+          'Purchase',
+          'DepositReversal',
+          'NotApplicable'
+        ].contains(subtype)) {
           totalExpense += amount;
           count++;
         }
@@ -1637,7 +1816,8 @@ lineTouchData: LineTouchData(
                 _touchedIndex = -1;
                 return;
               }
-              _touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+              _touchedIndex =
+                  pieTouchResponse.touchedSection!.touchedSectionIndex;
             });
           },
         ),
@@ -1719,8 +1899,10 @@ lineTouchData: LineTouchData(
       Color startColor = baseColors[startIndex];
       Color endColor = baseColors[endIndex];
       int red = (startColor.red + (endColor.red - startColor.red) * t).toInt();
-      int green = (startColor.green + (endColor.green - startColor.green) * t).toInt();
-      int blue = (startColor.blue + (endColor.blue - startColor.blue) * t).toInt();
+      int green =
+          (startColor.green + (endColor.green - startColor.green) * t).toInt();
+      int blue =
+          (startColor.blue + (endColor.blue - startColor.blue) * t).toInt();
       greenShades.add(Color.fromARGB(255, red, green, blue));
     }
     return greenShades;
@@ -1752,7 +1934,9 @@ lineTouchData: LineTouchData(
               showTitles: true,
               getTitlesWidget: (index, _) {
                 String category = categoryData.keys.toList()[index.toInt()];
-                return Text(category, style: const TextStyle(fontSize: 10, fontFamily: 'GE-SS-Two-Light'));
+                return Text(category,
+                    style: const TextStyle(
+                        fontSize: 10, fontFamily: 'GE-SS-Two-Light'));
               },
             ),
           ),
@@ -1795,14 +1979,25 @@ lineTouchData: LineTouchData(
       var transactions = account['transactions'] ?? [];
       for (var transaction in transactions) {
         String? dateStr = transaction['TransactionDateTime'];
-        DateTime transactionDate = DateTime.tryParse(dateStr ?? '') ?? DateTime.now();
-        if (transactionDate.isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+        DateTime transactionDate =
+            DateTime.tryParse(dateStr ?? '') ?? DateTime.now();
+        if (transactionDate
+                .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
             transactionDate.isBefore(today.add(const Duration(days: 1)))) {
-          String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير معروف';
-          double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+          String subtype =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                  'غير معروف';
+          double amount =
+              double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
           if (['Deposit', 'WithdrawalReversal', 'Refund'].contains(subtype)) {
             totalIncome += amount;
-          } else if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal', 'NotApplicable'].contains(subtype)) {
+          } else if ([
+            'MoneyTransfer',
+            'Withdrawal',
+            'Purchase',
+            'DepositReversal',
+            'NotApplicable'
+          ].contains(subtype)) {
             totalExpense += amount;
           }
         }
@@ -1933,26 +2128,36 @@ lineTouchData: LineTouchData(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0, onTap: () {
+                  buildBottomNavItem(Icons.settings_outlined, "إعدادات", 0,
+                      onTap: () {
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            SettingsPage(userName: widget.userName, phoneNumber: widget.phoneNumber, accounts: widget.accounts),
+                            SettingsPage(
+                                userName: widget.userName,
+                                phoneNumber: widget.phoneNumber,
+                                accounts: widget.accounts),
                         transitionDuration: const Duration(seconds: 0),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return child;
                         },
                       ),
                       (route) => false,
                     );
                   }),
-                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1, onTap: () {
+                  buildBottomNavItem(Icons.credit_card, "سجل المعاملات", 1,
+                      onTap: () {
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            TransactionsPage(userName: widget.userName, phoneNumber: widget.phoneNumber, accounts: widget.accounts),
+                            TransactionsPage(
+                                userName: widget.userName,
+                                phoneNumber: widget.phoneNumber,
+                                accounts: widget.accounts),
                         transitionDuration: const Duration(seconds: 0),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return child;
                         },
                       ),
@@ -1969,14 +2174,18 @@ lineTouchData: LineTouchData(
                         context,
                         PageRouteBuilder(
                           pageBuilder: (context, animation1, animation2) =>
-                              BanksPage(userName: widget.userName, phoneNumber: widget.phoneNumber, accounts: widget.accounts),
+                              BanksPage(
+                                  userName: widget.userName,
+                                  phoneNumber: widget.phoneNumber,
+                                  accounts: widget.accounts),
                           transitionDuration: Duration.zero,
                           reverseTransitionDuration: Duration.zero,
                         ),
                       );
                     },
                   ),
-                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3, onTap: navigateToSavingPlan),
+                  buildBottomNavItem(Icons.calendar_today, "خطة الإدخار", 3,
+                      onTap: navigateToSavingPlan),
                 ],
               ),
             ),
@@ -2019,7 +2228,10 @@ lineTouchData: LineTouchData(
                       gradient: LinearGradient(
                         colors: _isCirclePressed
                             ? [const Color(0xFF1A7A5E), const Color(0xFF6FC3A0)]
-                            : [const Color(0xFF2C8C68), const Color(0xFF8FD9BD)],
+                            : [
+                                const Color(0xFF2C8C68),
+                                const Color(0xFF8FD9BD)
+                              ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
@@ -2160,7 +2372,8 @@ lineTouchData: LineTouchData(
                       const SizedBox(width: 5),
                       Text(
                         _isBalanceVisible
-                            ? formatNumberWithArabicComma(double.parse(getTotalBalance()))
+                            ? formatNumberWithArabicComma(
+                                double.parse(getTotalBalance()))
                             : getMaskedValue(),
                         style: const TextStyle(
                           fontFamily: 'GE-SS-Two-Bold',
@@ -2210,7 +2423,8 @@ lineTouchData: LineTouchData(
                   children: [
                     Column(
                       children: [
-                        const Icon(Icons.arrow_downward, color: Colors.red, size: 24),
+                        const Icon(Icons.arrow_downward,
+                            color: Colors.red, size: 24),
                         const SizedBox(height: 5),
                         const Text(
                           'الصرف',
@@ -2223,11 +2437,13 @@ lineTouchData: LineTouchData(
                         const SizedBox(height: 5),
                         Row(
                           children: [
-                            const Icon(CustomIcons.riyal, size: 14, color: Colors.black),
+                            const Icon(CustomIcons.riyal,
+                                size: 14, color: Colors.black),
                             const SizedBox(width: 5),
                             Text(
                               _isBalanceVisible
-                                  ? formatNumberWithArabicComma(totals['expense']!)
+                                  ? formatNumberWithArabicComma(
+                                      totals['expense']!)
                                   : getMaskedValue(),
                               style: const TextStyle(
                                 fontFamily: 'GE-SS-Two-Bold',
@@ -2246,7 +2462,8 @@ lineTouchData: LineTouchData(
                     ),
                     Column(
                       children: [
-                        const Icon(Icons.arrow_upward, color: Colors.green, size: 24),
+                        const Icon(Icons.arrow_upward,
+                            color: Colors.green, size: 24),
                         const SizedBox(height: 5),
                         const Text(
                           'الدخل',
@@ -2259,11 +2476,13 @@ lineTouchData: LineTouchData(
                         const SizedBox(height: 5),
                         Row(
                           children: [
-                            const Icon(CustomIcons.riyal, size: 14, color: Colors.black),
+                            const Icon(CustomIcons.riyal,
+                                size: 14, color: Colors.black),
                             const SizedBox(width: 5),
                             Text(
                               _isBalanceVisible
-                                  ? formatNumberWithArabicComma(totals['income']!)
+                                  ? formatNumberWithArabicComma(
+                                      totals['income']!)
                                   : getMaskedValue(),
                               style: const TextStyle(
                                 fontFamily: 'GE-SS-Two-Bold',
@@ -2351,7 +2570,8 @@ lineTouchData: LineTouchData(
     );
   }
 
-  List<Map<String, dynamic>> _filterTransactionsByPeriod(List<dynamic> accounts) {
+  List<Map<String, dynamic>> _filterTransactionsByPeriod(
+      List<dynamic> accounts) {
     List<Map<String, dynamic>> filteredTransactions = [];
     DateTime now = DateTime.now();
     DateTime selectedDate;
@@ -2372,7 +2592,8 @@ lineTouchData: LineTouchData(
         if (_selectedPeriod == 'اسبوعي' &&
             transactionDate.year == selectedDate.year &&
             transactionDate.month == selectedDate.month &&
-            _getWeekOfMonth(transactionDate.day) == _getWeekOfMonth(selectedDate.day)) {
+            _getWeekOfMonth(transactionDate.day) ==
+                _getWeekOfMonth(selectedDate.day)) {
           filteredTransactions.add(transaction);
         } else if (_selectedPeriod == 'شهري' &&
             transactionDate.year == selectedDate.year &&
@@ -2387,9 +2608,11 @@ lineTouchData: LineTouchData(
     return filteredTransactions;
   }
 
-  Map<String, double> _calculateCategoryDataForPieChart(String period, DateTime selectedDate) {
+  Map<String, double> _calculateCategoryDataForPieChart(
+      String period, DateTime selectedDate) {
     DateTime now = DateTime.now();
-    DateTime cutoffDate = DateTime(2025, now.month, now.day, now.hour, now.minute, now.second);
+    DateTime cutoffDate =
+        DateTime(2025, now.month, now.day, now.hour, now.minute, now.second);
     Map<String, double> categoryTotals = {};
     for (var account in widget.accounts) {
       var transactions = account['transactions'] ?? [];
@@ -2403,7 +2626,8 @@ lineTouchData: LineTouchData(
         if (period == 'اسبوعي' &&
             transactionDate.year == 2025 &&
             transactionDate.month == selectedDate.month &&
-            _getWeekOfMonth(transactionDate.day) == _getWeekOfMonth(selectedDate.day)) {
+            _getWeekOfMonth(transactionDate.day) ==
+                _getWeekOfMonth(selectedDate.day)) {
           includeTransaction = true;
         } else if (period == 'شهري' &&
             transactionDate.year == 2025 &&
@@ -2413,12 +2637,19 @@ lineTouchData: LineTouchData(
           includeTransaction = true;
         }
         if (includeTransaction) {
-          String subtype = transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
-          if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal'].contains(subtype)) {
-            String category = transaction['Category'] ?? transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? 'غير مصنف';
-            double amount = double.tryParse(transaction['Amount']?.toString() ?? '0') ?? 0.0;
+          String subtype =
+              transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ?? '';
+          if (['MoneyTransfer', 'Withdrawal', 'Purchase', 'DepositReversal']
+              .contains(subtype)) {
+            String category = transaction['Category'] ??
+                transaction['SubTransactionType']?.replaceAll('KSAOB.', '') ??
+                'غير مصنف';
+            double amount =
+                double.tryParse(transaction['Amount']?.toString() ?? '0') ??
+                    0.0;
             if (amount > 0.0) {
-              categoryTotals[category] = (categoryTotals[category] ?? 0.0) + amount;
+              categoryTotals[category] =
+                  (categoryTotals[category] ?? 0.0) + amount;
             }
           }
         }

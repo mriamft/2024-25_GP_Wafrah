@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:wafrah/session_manager.dart';
 import 'dart:convert';
 import 'settings_page.dart' as Settings;
 
@@ -39,11 +38,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   @override
-void dispose() {
-  _notificationTimer?.cancel();
-  _nameController.dispose();
-  super.dispose();
-}
+  void dispose() {
+    _notificationTimer?.cancel();
+    _nameController.dispose();
+    super.dispose();
+  }
 
   void _onArrowTap() {
     setState(() => _arrowColor = Colors.grey);
@@ -54,150 +53,151 @@ void dispose() {
   }
 
   // Show a dialog to edit the user's name
-void _showEditNameDialog() {
-  _nameController.text = widget.userName;
+  void _showEditNameDialog() {
+    _nameController.text = widget.userName;
 
-  showDialog(
-    context: context,
-    builder: (dialogContext) { // ← Capture dialog context
-      return AlertDialog(
-        title: const Text(
-          'تعديل الاسم',
-          textAlign: TextAlign.right,
-          style: TextStyle(
-            fontFamily: 'GE-SS-Two-Bold',
-            fontSize: 18,
-            color: Color(0xFF3D3D3D),
-          ),
-        ),
-        content: Directionality(
-          textDirection: TextDirection.rtl,
-          child: TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'الاسم الجديد',
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        // ← Capture dialog context
+        return AlertDialog(
+          title: const Text(
+            'تعديل الاسم',
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontFamily: 'GE-SS-Two-Bold',
+              fontSize: 18,
+              color: Color(0xFF3D3D3D),
             ),
           ),
-        ),
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text(
-                  'إلغاء',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    color: Color(0xFF838383),
-                    fontSize: 16,
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'الاسم الجديد',
+              ),
+            ),
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text(
+                    'إلغاء',
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      color: Color(0xFF838383),
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 20),
-              TextButton(
-                onPressed: () async {
-                  String newName = _nameController.text.trim();
+                const SizedBox(width: 20),
+                TextButton(
+                  onPressed: () async {
+                    String newName = _nameController.text.trim();
 
-                  if (newName.isEmpty) {
-                    Navigator.pop(dialogContext);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('يرجى إدخال اسم صالح'),
-                        backgroundColor: Color(0xFFC62C2C),
-                      ),
-                    );
-                    return;
-                  }
+                    if (newName.isEmpty) {
+                      Navigator.pop(dialogContext);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('يرجى إدخال اسم صالح'),
+                          backgroundColor: Color(0xFFC62C2C),
+                        ),
+                      );
+                      return;
+                    }
 
-                  bool isSuccess = await _updateNameInDatabase(newName);
+                    bool isSuccess = await _updateNameInDatabase(newName);
 
-                  Navigator.pop(dialogContext); // Close dialog
+                    Navigator.pop(dialogContext); // Close dialog
 
-                  if (isSuccess) {
-                    setState(() {
-                      widget.userName = newName;
-                    });
+                    if (isSuccess) {
+                      setState(() {
+                        widget.userName = newName;
+                      });
 
-                    setState(() {
-  errorMessage = 'تم تعديل الاسم بنجاح';
-  notificationColor = const Color(0xFF2C8C68);
-  showErrorNotification = true;
-});
+                      setState(() {
+                        errorMessage = 'تم تعديل الاسم بنجاح';
+                        notificationColor = const Color(0xFF2C8C68);
+                        showErrorNotification = true;
+                      });
 
 // Auto-dismiss after a few seconds
-_notificationTimer?.cancel();
-_notificationTimer = Timer(const Duration(seconds: 5), () {
-  if (mounted) {
-    setState(() {
-      showErrorNotification = false;
-    });
-  }
-});
+                      _notificationTimer?.cancel();
+                      _notificationTimer =
+                          Timer(const Duration(seconds: 5), () {
+                        if (mounted) {
+                          setState(() {
+                            showErrorNotification = false;
+                          });
+                        }
+                      });
 
+                      await Future.delayed(
+                          const Duration(seconds: 5)); // Let the snack bar show
 
-                    await Future.delayed(const Duration(seconds: 5)); // Let the snack bar show
-
-                    if (mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Settings.SettingsPage(
-                            userName: widget.userName,
-                            phoneNumber: widget.phoneNumber,
-                            accounts: widget.accounts,
+                      if (mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Settings.SettingsPage(
+                              userName: widget.userName,
+                              phoneNumber: widget.phoneNumber,
+                              accounts: widget.accounts,
+                            ),
                           ),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('فشل في تحديث الاسم'),
+                          backgroundColor: Color(0xFFC62C2C),
                         ),
                       );
                     }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('فشل في تحديث الاسم'),
-                        backgroundColor: Color(0xFFC62C2C),
-                      ),
-                    );
-                  }
-                },
-                child: const Text(
-                  'تعديل',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    color: Color(0xFF2C8C68),
-                    fontSize: 16,
+                  },
+                  child: const Text(
+                    'تعديل',
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      color: Color(0xFF2C8C68),
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      );
-    },
-  );
-}
-
-
-Future<bool> _updateNameInDatabase(String newName) async {
-  print(widget.phoneNumber);
-  final response = await http.post(
-    Uri.parse('https://login-service.ngrok.io/update-username'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'phoneNumber': widget.phoneNumber,
-      'newUserName': newName,
-    }),
-  );
-
-  if (response.statusCode == 200) {
-    print('Username updated successfully');
-    return true;
-  } else {
-    print('Failed to update username: ${response.body}');
-    // Show error notification if update fails
-    showNotification('فشل في تحديث الاسم');
-    return false;
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
-}
+
+  Future<bool> _updateNameInDatabase(String newName) async {
+    print(widget.phoneNumber);
+    final response = await http.post(
+      Uri.parse('https://login-service.ngrok.io/update-username'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'phoneNumber': widget.phoneNumber,
+        'newUserName': newName,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Username updated successfully');
+      return true;
+    } else {
+      print('Failed to update username: ${response.body}');
+      // Show error notification if update fails
+      showNotification('فشل في تحديث الاسم');
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -340,69 +340,66 @@ Future<bool> _updateNameInDatabase(String newName) async {
             ),
           ),
           if (showErrorNotification)
-  Positioned(
-top: 23,
-left: 19,
-    child: Container(
+            Positioned(
+              top: 23,
+              left: 19,
+              child: Container(
                 width: 353,
                 height: 57,
-      decoration: BoxDecoration(
-        color: notificationColor,
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 15.0),
-              child: Text(
-                errorMessage,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'GE-SS-Two-Light',
-                  fontSize: 14,
+                decoration: BoxDecoration(
+                  color: notificationColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.right,
-                overflow: TextOverflow.ellipsis,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'GE-SS-Two-Light',
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.right,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
-      ),
-    ),
-  ),
-
-
-        ],
-        
       ),
     );
   }
 
-  void showNotification(String message, {Color color = const Color(0xFFC62C2C)}) {
-  setState(() {
-    errorMessage = message;
-    notificationColor = color;
-    showErrorNotification = true;
-  });
+  void showNotification(String message,
+      {Color color = const Color(0xFFC62C2C)}) {
+    setState(() {
+      errorMessage = message;
+      notificationColor = color;
+      showErrorNotification = true;
+    });
 
-  // Cancel any previous timer and start a new one
-  _notificationTimer?.cancel();
-  _notificationTimer = Timer(const Duration(seconds: 5), () {
-    if (mounted) {
-      setState(() {
-        showErrorNotification = false;
-      });
-    }
-  });
-}
-
+    // Cancel any previous timer and start a new one
+    _notificationTimer?.cancel();
+    _notificationTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          showErrorNotification = false;
+        });
+      }
+    });
+  }
 }

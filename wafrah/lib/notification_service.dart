@@ -1,7 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter/material.dart';
-
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
@@ -11,13 +9,15 @@ class NotificationService {
 
   // Initialize the notification service and set onSelectNotification callback
   // Initialize the notification service and pass the onNotificationResponse callback.
-  static Future<void> init(Function(String?) onNotificationResponseCallback) async {
+  static Future<void> init(
+      Function(String?) onNotificationResponseCallback) async {
     onNotificationResponse = onNotificationResponseCallback;
 
-    final AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@drawable/greenlogo'); // Icon for notifications
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings(
+            '@drawable/greenlogo'); // Icon for notifications
 
-    final InitializationSettings initializationSettings =
+    const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
     // Initialize the plugin without onSelectNotification
@@ -30,14 +30,10 @@ class NotificationService {
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
         final String? payload = response.payload;
-        if (onNotificationResponse != null) {
-          onNotificationResponse(payload);
-        }
+        onNotificationResponse(payload);
       },
     );
   }
-
-
 
   // Show notification
   static Future<void> showNotification(
@@ -68,26 +64,25 @@ class NotificationService {
     await _storeNotification(title, body);
   }
 
-
-
   // Store notifications in secure storage
 // Update this method in NotificationService to track new notifications
-static Future<void> _storeNotification(String title, String body) async {
-  try {
-    List<String> notifications = await getNotifications();
-    // Create a timestamp string using ISO8601 format.
-    String timestamp = DateTime.now().toIso8601String(); // e.g. "2025-04-04T01:10:00.000"
-    // Store in the expected format: "timestamp|title:body"
-    notifications.add('$timestamp|$title: $body');
-    await _storage.write(key: 'notifications', value: notifications.join(';'));
+  static Future<void> _storeNotification(String title, String body) async {
+    try {
+      List<String> notifications = await getNotifications();
+      // Create a timestamp string using ISO8601 format.
+      String timestamp =
+          DateTime.now().toIso8601String(); // e.g. "2025-04-04T01:10:00.000"
+      // Store in the expected format: "timestamp|title:body"
+      notifications.add('$timestamp|$title: $body');
+      await _storage.write(
+          key: 'notifications', value: notifications.join(';'));
 
-    // Update new notification flag
-    await _storage.write(key: 'hasNewNotifications', value: 'true');
-  } catch (e) {
-    print("Error storing notification: $e");
+      // Update new notification flag
+      await _storage.write(key: 'hasNewNotifications', value: 'true');
+    } catch (e) {
+      print("Error storing notification: $e");
+    }
   }
-}
-
 
   // Get stored notifications from secure storage
   static Future<List<String>> getNotifications() async {

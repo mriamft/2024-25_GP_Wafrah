@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:wafrah/main.dart';
-import 'package:wafrah/session_manager.dart';
 import 'package:wafrah/storage_service.dart';
 import 'saving_plan_page.dart';
 import 'transactions_page.dart';
@@ -43,8 +42,6 @@ class _SettingsPageState extends State<SettingsPage> {
   Color _supportColor = const Color(0xFFD9D9D9);
   bool hasNewNotifications = false; // Track new notifications
 
-
-
   // Custom page transition
   Route _createNoTransitionRoute(Widget page) {
     return PageRouteBuilder(
@@ -62,7 +59,6 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
     _checkForNewNotifications();
   }
-
 
 // In SettingsPage, add the check for new notifications in initState
   void _checkForNewNotifications() async {
@@ -103,23 +99,23 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-void _onNotificationTap() async {
-  setState(() {
-    hasNewNotifications = false;
-    _notificationColor = Colors.grey[400]!;
-  });
-  // Clear the notification flag in secure storage
-  await _storage.write(key: 'hasNewNotifications', value: 'false');
-
-  Navigator.of(context)
-      .push(_createNoTransitionRoute(NotificationPage(
-          userName: widget.userName, phoneNumber: widget.phoneNumber)))
-      .then((_) {
+  void _onNotificationTap() async {
     setState(() {
-      _notificationColor = const Color(0xFFD9D9D9);
+      hasNewNotifications = false;
+      _notificationColor = Colors.grey[400]!;
     });
-  });
-}
+    // Clear the notification flag in secure storage
+    await _storage.write(key: 'hasNewNotifications', value: 'false');
+
+    Navigator.of(context)
+        .push(_createNoTransitionRoute(NotificationPage(
+            userName: widget.userName, phoneNumber: widget.phoneNumber)))
+        .then((_) {
+      setState(() {
+        _notificationColor = const Color(0xFFD9D9D9);
+      });
+    });
+  }
 
   void navigateToSavingPlan() async {
     // Check if there is a saved plan
@@ -480,115 +476,118 @@ void _onNotificationTap() async {
             top: 235,
             left: 19,
             right: 19,
-  child: GestureDetector(
-    onTap: _onProfileTap,
-    child: Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: _profileColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 10),
-          // Left arrow (kept as originally)
-          const Icon(Icons.arrow_back_ios_new, color: Color(0xFF3D3D3D), size: 15),
-          const SizedBox(width: 10),
-          // Text (right-aligned)
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'الحساب الشخصي',
-                    style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'GE-SS-Two-Bold',
+            child: GestureDetector(
+              onTap: _onProfileTap,
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: _profileColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  children: [
+                    SizedBox(width: 10),
+                    // Left arrow (kept as originally)
+                    Icon(Icons.arrow_back_ios_new,
+                        color: Color(0xFF3D3D3D), size: 15),
+                    SizedBox(width: 10),
+                    // Text (right-aligned)
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'الحساب الشخصي',
+                              style: TextStyle(
+                                color: Color(0xFF3D3D3D),
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'GE-SS-Two-Bold',
+                              ),
+                            ),
+                            Text(
+                              'عرض المعلومات الشخصية',
+                              style: TextStyle(
+                                color: Color(0xFF686868),
+                                fontSize: 9,
+                                fontFamily: 'GE-SS-Two-Light',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    'عرض المعلومات الشخصية',
-                    style: TextStyle(
-                      color: Color(0xFF686868),
-                      fontSize: 9,
-                      fontFamily: 'GE-SS-Two-Light',
-                    ),
-                  ),
-                ],
+                    SizedBox(width: 10),
+                    // Right icon for the profile button
+                    Icon(Icons.person, color: Color(0xFF3D3D3D), size: 20),
+                    SizedBox(width: 10),
+                  ],
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 10),
-          // Right icon for the profile button
-          const Icon(Icons.person, color: Color(0xFF3D3D3D), size: 20),
-          const SizedBox(width: 10),
-        ],
-      ),
-    ),
-  ),
-),
 // Reset Password UI
-Positioned(
-  top: 300,
-  left: 19,
-  right: 19,
-  child: GestureDetector(
-    onTap: _onResetPasswordTap,
-    child: Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: _resetPasswordColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 10),
-          // Left arrow remains
-          const Icon(Icons.arrow_back_ios_new, color: Color(0xFF3D3D3D), size: 15),
-          const SizedBox(width: 10),
-          // Text (right-aligned)
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'إعادة تعيين رمز المرور',
-                    style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'GE-SS-Two-Bold',
+          Positioned(
+            top: 300,
+            left: 19,
+            right: 19,
+            child: GestureDetector(
+              onTap: _onResetPasswordTap,
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: _resetPasswordColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  children: [
+                    SizedBox(width: 10),
+                    // Left arrow remains
+                    Icon(Icons.arrow_back_ios_new,
+                        color: Color(0xFF3D3D3D), size: 15),
+                    SizedBox(width: 10),
+                    // Text (right-aligned)
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'إعادة تعيين رمز المرور',
+                              style: TextStyle(
+                                color: Color(0xFF3D3D3D),
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'GE-SS-Two-Bold',
+                              ),
+                            ),
+                            Text(
+                              'تعديل رمز المرور الخاص بك',
+                              style: TextStyle(
+                                color: Color(0xFF686868),
+                                fontSize: 9,
+                                fontFamily: 'GE-SS-Two-Light',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    'تعديل رمز المرور الخاص بك',
-                    style: TextStyle(
-                      color: Color(0xFF686868),
-                      fontSize: 9,
-                      fontFamily: 'GE-SS-Two-Light',
-                    ),
-                  ),
-                ],
+                    SizedBox(width: 10),
+                    // Right icon for reset password
+                    Icon(Icons.lock_outline,
+                        color: Color(0xFF3D3D3D), size: 20),
+                    SizedBox(width: 10),
+                  ],
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 10),
-          // Right icon for reset password
-          const Icon(Icons.lock_outline, color: Color(0xFF3D3D3D), size: 20),
-          const SizedBox(width: 10),
-        ],
-      ),
-    ),
-  ),
-),
 
 // Manage Notifications UI
           Positioned(
@@ -638,32 +637,31 @@ Positioned(
                       ),
                     ),
                     // Red Dot Indicator
-                   // Notification icon with red dot overlay
-Stack(
-  clipBehavior: Clip.none,
-  children: [
-    const Icon(
-      Icons.notifications,
-      color: Color(0xFF3D3D3D),
-      size: 20,
-    ),
-    if (hasNewNotifications)
-      Positioned(
-        right: -1,
-        top: -1,
-        child: Container(
-          width: 8,
-          height: 8,
-          decoration: const BoxDecoration(
-            color: Colors.red,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-  ],
-),
-const SizedBox(width: 10),
-
+                    // Notification icon with red dot overlay
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(
+                          Icons.notifications,
+                          color: Color(0xFF3D3D3D),
+                          size: 20,
+                        ),
+                        if (hasNewNotifications)
+                          Positioned(
+                            right: -1,
+                            top: -1,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(width: 10),
                   ],
                 ),
               ),
@@ -671,62 +669,64 @@ const SizedBox(width: 10),
           ),
 
 // Contact Support UI
-Positioned(
-  top: 430,
-  left: 19,
-  right: 19,
-  child: GestureDetector(
-    onTap: _onSupportTap,
-    child: Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: _supportColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 10),
-          // Left arrow remains
-          const Icon(Icons.arrow_back_ios_new, color: Color(0xFF3D3D3D), size: 15),
-          const SizedBox(width: 10),
-          // Text (right-aligned)
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'التواصل مع الدعم',
-                    style: TextStyle(
-                      color: Color(0xFF3D3D3D),
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'GE-SS-Two-Bold',
+          Positioned(
+            top: 430,
+            left: 19,
+            right: 19,
+            child: GestureDetector(
+              onTap: _onSupportTap,
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: _supportColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  children: [
+                    SizedBox(width: 10),
+                    // Left arrow remains
+                    Icon(Icons.arrow_back_ios_new,
+                        color: Color(0xFF3D3D3D), size: 15),
+                    SizedBox(width: 10),
+                    // Text (right-aligned)
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'التواصل مع الدعم',
+                              style: TextStyle(
+                                color: Color(0xFF3D3D3D),
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'GE-SS-Two-Bold',
+                              ),
+                            ),
+                            Text(
+                              'وسيلة التواصل مع الدعم',
+                              style: TextStyle(
+                                color: Color(0xFF686868),
+                                fontSize: 9,
+                                fontFamily: 'GE-SS-Two-Light',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    'وسيلة التواصل مع الدعم',
-                    style: TextStyle(
-                      color: Color(0xFF686868),
-                      fontSize: 9,
-                      fontFamily: 'GE-SS-Two-Light',
-                    ),
-                  ),
-                ],
+                    SizedBox(width: 10),
+                    // Right icon for support
+                    Icon(Icons.support_agent,
+                        color: Color(0xFF3D3D3D), size: 20),
+                    SizedBox(width: 10),
+                  ],
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 10),
-          // Right icon for support
-          const Icon(Icons.support_agent, color: Color(0xFF3D3D3D), size: 20),
-          const SizedBox(width: 10),
-        ],
-      ),
-    ),
-  ),
-),
           // Logout button
           Positioned(
             bottom: 205,

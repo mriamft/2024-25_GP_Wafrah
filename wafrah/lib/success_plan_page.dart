@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:wafrah/session_manager.dart';
 import 'saving_plan_page2.dart'; // Import SavingPlanPage2
 
 class SuccessPlanPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final Map<String, dynamic> resultData;
-  final List<Map<String, dynamic>> accounts; // List of accounts with transactions
+  final List<Map<String, dynamic>>
+      accounts; // List of accounts with transactions
 
   const SuccessPlanPage({
     super.key,
@@ -21,16 +21,14 @@ class SuccessPlanPage extends StatefulWidget {
 }
 
 class _SuccessPlanPageState extends State<SuccessPlanPage> {
-
-
-    @override
+  @override
   void initState() {
     super.initState();
-    
-print("Success" );
-print( widget.resultData);
 
+    print("Success");
+    print(widget.resultData);
   }
+
   bool _isPressed = false;
   @override
   Widget build(BuildContext context) {
