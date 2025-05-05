@@ -36,6 +36,7 @@ class SavingPlanPage2 extends StatefulWidget {
 class _SavingPlanPage2State extends State<SavingPlanPage2> {
   /// index 0 = الخطة كاملة، 1..N = كل شهر
   late List<List<Map<String, dynamic>>> _monthlyPlans;
+  late List<List<Map<String, Object>>> _monthlyRecommendedBudgets;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 // Track sent notifications to avoid duplicates
   Map<String, Map<int, int>> sentNotifications = {};
@@ -80,44 +81,119 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   }
 
   /// دالة مساعدة لتهيئة الشهور وبناء الخطة
+  /// دالة مساعدة لتهيئة الشهور وبناء الخطة
   void _setupPlan() {
-    // توليد قائمة الشهور (الخطة كاملة + شهور الخطة)
+    // 1️⃣ regenerate the month labels
     generateMonths(widget.resultData['DurationMonths']);
 
-    // تهيئة categoryTotalSavings من resultData
-    categoryTotalSavings = Map<String, double>.from(
-      (widget.resultData['CategorySavings'] as Map<String, dynamic>)
-          .map((key, value) => MapEntry(key, (value as num).toDouble())),
+    // 2️⃣ pull out whatever came in as 'Schedule'
+    final raw = widget.resultData['Schedule'];
+    late List<Map<String, dynamic>> scheduleList;
+
+    if (raw is List) {
+      // already a List<Map<…>>
+      scheduleList = raw.cast<Map<String, dynamic>>();
+    } else if (raw is String) {
+      // maybe it was JSON-stringified
+      try {
+        final decoded = jsonDecode(raw);
+        scheduleList = decoded is List
+            ? decoded.cast<Map<String, dynamic>>()
+            : <Map<String, dynamic>>[];
+      } catch (_) {
+        scheduleList = <Map<String, dynamic>>[];
+      }
+    } else {
+      // totally missing / wrong type → don’t crash, just empty
+      scheduleList = <Map<String, dynamic>>[];
+    }
+
+    // 3️⃣ group by CycleDate into two buckets: savings and rec-budget
+    final Map<String, Map<String, double>> buckets = {};
+    final Map<String, Map<String, double>> recBudgetBuckets = {};
+
+    for (var entry in scheduleList) {
+      final date = entry['CycleDate'] as String;
+      final cat = entry['Category'] as String;
+      final amt = (entry['SavingAmount'] as num).toDouble();
+      final rec = (entry['RecommendedBudget'] as num).toDouble();
+
+      buckets.putIfAbsent(date, () => {})[cat] = amt;
+      recBudgetBuckets.putIfAbsent(date, () => {})[cat] = rec;
+    }
+
+    // 4️⃣ compute total savings per category (full plan at index 0)
+    categoryTotalSavings = {};
+    for (var monthMap in buckets.values) {
+      monthMap.forEach((cat, amt) {
+        categoryTotalSavings[cat] = (categoryTotalSavings[cat] ?? 0) + amt;
+      });
+    }
+
+    // 5️⃣ build the per-month savings lists
+    _monthlyPlans = [];
+
+    // — full plan
+    _monthlyPlans.add(
+      categoryTotalSavings.entries
+          .where((e) => e.value > 0)
+          .map((e) => {
+                'category': e.key,
+                'monthlySavings': e.value,
+              })
+          .toList(),
     );
 
-    // بناء _monthlyPlans للعرض الكامل والشهري
-    final int totalMonths = widget.resultData['DurationMonths'] as int;
-    _monthlyPlans = List.generate(
-      totalMonths + 1,
-      (i) {
-        if (i == 0) {
-          // الخطة كاملة
-          return categoryTotalSavings.entries
-              .where((e) => e.value > 0)
-              .map((e) => {
-                    'category': e.key,
-                    'monthlySavings': e.value,
-                  })
-              .toList();
-        }
-        // كل شهر مقسوم بالتساوي
-        return categoryTotalSavings.entries
+    // — then each individual month, in date order
+    final sortedDates = buckets.keys.toList()..sort();
+    for (var date in sortedDates) {
+      final m = buckets[date]!;
+      _monthlyPlans.add(
+        m.entries
             .where((e) => e.value > 0)
             .map((e) => {
                   'category': e.key,
-                  'monthlySavings':
-                      double.parse((e.value / totalMonths).toStringAsFixed(2)),
+                  'monthlySavings': e.value,
                 })
-            .toList();
-      },
+            .toList(),
+      );
+    }
+
+    // 5️⃣ also build the per-month recommended-budget lists
+    _monthlyRecommendedBudgets = [];
+
+    // — full plan rec-budgets (sum across all months)
+    final Map<String, double> totalRec = {};
+    for (var monthMap in recBudgetBuckets.values) {
+      monthMap.forEach((cat, recAmt) {
+        totalRec[cat] = (totalRec[cat] ?? 0) + recAmt;
+      });
+    }
+    _monthlyRecommendedBudgets.add(
+      totalRec.entries
+          .where((e) => e.value > 0)
+          .map((e) => {
+                'category': e.key,
+                'recBudget': e.value,
+              })
+          .toList(),
     );
 
-    // أخيراً نولد الخطة الفعلية ونحدّث الواجهة والإشعارات
+    // — then each individual month
+    for (var date in sortedDates) {
+      final mRec = recBudgetBuckets[date]!;
+      _monthlyRecommendedBudgets.add(
+        mRec.entries
+            .where((e) => e.value > 0)
+            .map((e) => {
+                  'category': e.key,
+                  'recBudget': e.value,
+                })
+            .toList(),
+      );
+    }
+
+    // 6️⃣ refresh the UI & notification manager
     setState(() {
       generateSavingsPlan();
     });
@@ -160,16 +236,27 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
 
   Future<void> _savePlanToSecureStorage(Map<String, dynamic> planData) async {
     try {
-      // Ensure startDate is saved properly
-      if (!planData.containsKey('startDate') || planData['startDate'] == null) {
-        print("Warning: startDate is missing in planData. Setting default.");
-        planData['startDate'] =
+      // 1️⃣ read whatever is already saved
+      final existingJson = await secureStorage.read(key: 'savings_plan');
+      final Map<String, dynamic> existing = existingJson != null
+          ? jsonDecode(existingJson) as Map<String, dynamic>
+          : {};
+
+      // 2️⃣ merge in only the new/updated fields
+      existing.addAll(planData);
+
+      // 3️⃣ make sure we never lose startDate
+      if (!existing.containsKey('startDate') || existing['startDate'] == null) {
+        existing['startDate'] =
             widget.resultData['startDate'] ?? DateTime.now().toString();
       }
 
-      print("Saving plan data: $planData"); // Debugging
-      String planJson = jsonEncode(planData);
-      await secureStorage.write(key: 'savings_plan', value: planJson);
+      // 4️⃣ write the merged object back
+      await secureStorage.write(
+        key: 'savings_plan',
+        value: jsonEncode(existing),
+      );
+      print("Merged & saved plan: $existing");
     } catch (e) {
       print("Error saving plan to secure storage: $e");
     }
@@ -232,16 +319,17 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   }
 
   void generateSavingsPlan() {
-    // نأخذ الجزء الجاهز حسب الفهرس
+    // pick the right bucket (0 = full plan, 1..N = month 1..N)
     savingsPlan = _monthlyPlans[_currentMonthIndex];
 
-    // حساب التقدّم
+    // re-compute progress (unchanged)
     final progressData = (_currentMonthIndex == 0)
         ? trackSavingsProgress()
         : MonthlytrackSavingsProgress();
     setState(() => wap = progressData);
 
-    // حفظ الخطة المعدّلة
+    // save the updated plan back to secure storage if you need to
+    // ✅ NEW - also save the Schedule array
     _savePlanToSecureStorage({
       'DurationMonths': widget.resultData['DurationMonths'],
       'CategorySavings': categoryTotalSavings,
@@ -249,6 +337,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       'SavingsGoal': widget.resultData['SavingsGoal'],
       'startDate': widget.resultData['startDate'],
       'discretionaryRatios': widget.resultData['discretionaryRatios'],
+      'Schedule': widget.resultData['Schedule'], // ← add this
     });
   }
 
@@ -367,10 +456,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       if (newIndex >= 0 && newIndex < months.length) {
         _currentMonthIndex = newIndex;
         generateSavingsPlan(); // Refresh data
-        _updatePlan({
-          'DurationMonths': widget.resultData['DurationMonths'],
-          'CategorySavings': categoryTotalSavings,
-        }); // Update secure storage after changes
       } else {
         print(" Error: Selected month index out of range");
       }
@@ -1036,6 +1121,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   }
 
   Widget buildCategorySquare(String category, dynamic monthlySavings) {
+    // 1️⃣ category → icon lookup
     Map<String, IconData> categoryIcons = {
       'المطاعم': Icons.restaurant,
       'التعليم': Icons.school,
@@ -1053,86 +1139,30 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       'التحويلات': Icons.swap_horiz,
       'الخطة كامله': Icons.check_circle,
     };
-
     IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
 
-    // Get the original progress without modification
+    // 2️⃣ progress %
     double originalProgress = wap['progress']?[category] ?? 0.0;
+    double progress = originalProgress.clamp(0, 100);
 
-    // Apply the 100% cap after storing the original value
-    double progress = originalProgress > 100 ? 100 : originalProgress;
-
-    // Determine if the selected month is in the future
+    // 3️⃣ detect future months
     DateTime today = DateTime.now();
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
     DateTime selectedMonthStart =
         startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
-    DateTime selectedMonthEnd =
-        selectedMonthStart.add(const Duration(days: 29));
-    DateTime lastYearStart =
-        selectedMonthStart.subtract(const Duration(days: 365));
-    DateTime lastYearEnd = selectedMonthEnd.subtract(const Duration(days: 365));
     bool isFutureMonth = selectedMonthStart.isAfter(today);
 
-    // **Extract Transactions for the Current and Last Year**
-    double lastYearSpending = 0.0;
-    double currentYearSpending = 0.0;
-
-    for (var account in widget.accounts) {
-      for (var transaction in account['transactions']) {
-        DateTime transactionDate =
-            DateTime.parse(transaction['TransactionDateTime']);
-        String transactionCategory = transaction['Category'] ?? 'Unknown';
-        double amount =
-            double.tryParse(transaction['Amount'].toString()) ?? 0.0;
-
-        if (transactionCategory == category) {
-          // Check if the transaction belongs to last year’s selected month
-          if (transactionDate.isAfter(lastYearStart) &&
-              transactionDate.isBefore(lastYearEnd)) {
-            lastYearSpending += amount;
-          }
-
-          // Check if the transaction belongs to this year’s selected month
-          if (transactionDate.isAfter(selectedMonthStart) &&
-              transactionDate.isBefore(today)) {
-            currentYearSpending += amount;
-          }
-        }
-      }
-    }
-
-    double amountToSave = monthlySavings.toDouble();
-
-    // **Calculate the adjusted last year's spending (after subtracting savings amount)**
-    double adjustedLastYearSpending =
-        (lastYearSpending - amountToSave).clamp(0, double.infinity);
-
-    // **Avoid division by zero**
-    double differencePercentage = adjustedLastYearSpending > 0
-        ? ((adjustedLastYearSpending - currentYearSpending).abs() /
-                adjustedLastYearSpending) *
-            100
-        : (amountToSave > 0
-            ? ((amountToSave - currentYearSpending).abs() / amountToSave) * 100
-            : 0);
-
-    // Alert
-/*    bool showAlert =
-        (_currentMonthIndex > 0) && // Ensure a specific month is selected
-            (!isFutureMonth &&
-                (currentYearSpending != null &&
-                    currentYearSpending > 0) && // Ensure it's a valid value
-                (lastYearSpending != null &&
-                    lastYearSpending > 0) && // Ensure last year had spending
-                (adjustedLastYearSpending >
-                    0) && // Ensure adjusted spending is meaningful
-                (differencePercentage.abs() <= 25 ||
-                    currentYearSpending > adjustedLastYearSpending));*/
+    // 4️⃣ lookup this month’s RecommendedBudget
+    final recList = _monthlyRecommendedBudgets[_currentMonthIndex];
+    final found = recList.firstWhere(
+      (e) => e['category'] == category,
+      orElse: () => <String, Object>{'recBudget': 0.0},
+    );
+    double recBudget = (found['recBudget'] as num).toDouble();
 
     return Container(
       width: 110,
-      height: 135,
+      height: 160,
       decoration: BoxDecoration(
         color: const Color(0xFFD9D9D9),
         borderRadius: BorderRadius.circular(8),
@@ -1146,30 +1176,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       ),
       child: Stack(
         children: [
-          // Alert
-          /* if (showAlert)
-            Positioned(
-              top: 5,
-              right: 5,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color:
-                      const Color.fromARGB(222, 247, 89, 78), // Red background
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text(
-                  "تنبيه",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'GE-SS-Two-Light',
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),*/
-
           if (!isFutureMonth)
             Positioned(
               top: 10,
@@ -1184,7 +1190,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               ),
             ),
 
-          // Circular Progress Bar with Icon
+          // circular progress + icon
           Positioned(
             top: 18,
             left: 10,
@@ -1195,9 +1201,8 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                 alignment: Alignment.center,
                 children: [
                   CircularProgressIndicator(
-                    value: isFutureMonth
-                        ? 0
-                        : (progress > 0 ? progress / 100 : 0.01),
+                    value:
+                        isFutureMonth ? 0 : (progress / 100).clamp(0.01, 1.0),
                     backgroundColor: Colors.grey.shade300,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       isFutureMonth
@@ -1206,18 +1211,13 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                     ),
                     strokeWidth: 6,
                   ),
-                  Icon(
-                    categoryIcon,
-                    color:
-                        const Color(0xFF2C8C68), // Icon always stays this color
-                    size: 22,
-                  ),
+                  Icon(categoryIcon, color: const Color(0xFF2C8C68), size: 22),
                 ],
               ),
             ),
           ),
 
-          // Category Name
+          // category name
           Positioned(
             top: 50,
             right: 10,
@@ -1231,71 +1231,83 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               ),
             ),
           ),
+
+          // three info rows
           Positioned(
-            top: 80,
+            top: 75,
             right: 10,
             child: Directionality(
               textDirection: ui.TextDirection.rtl,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // First line: مطلوب ادخار
+                  // ① مطلوب ادخار
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        "مطلوب ادخار: ",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontFamily: 'GE-SS-Two-Light',
-                          color: Color(0xFF3D3D3D),
-                        ),
-                      ),
-                      Text(
-                        formatNumber(monthlySavings),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontFamily: 'GE-SS-Two-Light',
-                          color: Color(0xFF3D3D3D),
-                        ),
-                      ),
+                      const Text("مطلوب ادخار: ",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'GE-SS-Two-Light',
+                            color: Color(0xFF3D3D3D),
+                          )),
+                      Text(formatNumber(monthlySavings),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'GE-SS-Two-Light',
+                            color: Color(0xFF3D3D3D),
+                          )),
                       const SizedBox(width: 3),
-                      const Icon(
-                        CustomIcons.riyal,
-                        size: 14,
-                        color: Color(0xFF3D3D3D),
-                      ),
+                      const Icon(CustomIcons.riyal,
+                          size: 14, color: Color(0xFF3D3D3D)),
                     ],
                   ),
 
-                  const SizedBox(height: 4), // Space between lines
+                  const SizedBox(height: 4),
 
-                  // Second line: المصروف
+                  // ② المصروف
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        "المصروف: ",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontFamily: 'GE-SS-Two-Light',
-                          color: Color(0xFF3D3D3D),
-                        ),
-                      ),
-                      Text(
-                        formatNumber(calculateSpentAmount(category)),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontFamily: 'GE-SS-Two-Light',
-                          color: Color(0xFF3D3D3D),
-                        ),
-                      ),
+                      const Text("المصروف: ",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'GE-SS-Two-Light',
+                            color: Color(0xFF3D3D3D),
+                          )),
+                      Text(formatNumber(calculateSpentAmount(category)),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'GE-SS-Two-Light',
+                            color: Color(0xFF3D3D3D),
+                          )),
                       const SizedBox(width: 3),
-                      const Icon(
-                        CustomIcons.riyal,
-                        size: 14,
-                        color: Color(0xFF3D3D3D),
-                      ),
+                      const Icon(CustomIcons.riyal,
+                          size: 14, color: Color(0xFF3D3D3D)),
+                    ],
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  // ③ المتاح للصرف (RecommendedBudget)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text("المتاح للصرف: ",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'GE-SS-Two-Light',
+                            color: Color(0xFF3D3D3D),
+                          )),
+                      Text(formatNumber(recBudget),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'GE-SS-Two-Light',
+                            color: Color(0xFF3D3D3D),
+                          )),
+                      const SizedBox(width: 3),
+                      const Icon(CustomIcons.riyal,
+                          size: 14, color: Color(0xFF3D3D3D)),
                     ],
                   ),
                 ],

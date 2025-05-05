@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math' as math; // ← لأجل تدوير السلايدر
+import 'package:flutter/foundation.dart'; // ← for mapEquals
 
 import 'success_plan_page.dart';
 import 'custom_icons.dart';
@@ -156,14 +157,43 @@ class _SavingDisPageState extends State<SavingDisPage> {
 
   // ─────────── إرسال التعديلات إلى السيرفر ───────────
   Future<void> _saveAndRebuildPlan() async {
+    // 1) تحقق إن كان المستخدم غيّر أي نسبة
+    final hasChanged = !mapEquals(
+      _cutPercents.map((k, v) => MapEntry(k, v.toStringAsFixed(4))),
+      _initialPercents.map((k, v) => MapEntry(k, v.toStringAsFixed(4))),
+    );
+
+    // 2) إذا ما فيه تغيير، ننتقل مباشرةً مع الخريطة الأصلية + startDate + Schedule (إن وجدت)
+    if (!hasChanged) {
+      final planWithDate = {
+        ...widget.resultData,
+        'startDate': widget.startDate,
+        'Schedule': widget.resultData['Schedule'],
+      };
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SuccessPlanPage(
+            userName: widget.userName,
+            phoneNumber: widget.phoneNumber,
+            accounts: widget.accounts,
+            resultData: planWithDate,
+          ),
+        ),
+      );
+      return;
+    }
+
+    // 3) خلاف ذلك، نرسل التعديلات للسيرفر
     setState(() {
       _isLoading = true;
       _errorMsg = '';
     });
 
+    // تحويل النسب إلى صيغة 0–1
     final customCuts = {for (var c in _allCats) c: (_cutPercents[c]! / 100.0)};
 
-    // تجميع العمليات
+    // جمع المعاملات
     final List<Map<String, dynamic>> tx = [];
     for (var acc in widget.accounts) {
       if (acc.containsKey('transactions')) {
@@ -194,19 +224,21 @@ class _SavingDisPageState extends State<SavingDisPage> {
         }),
       );
 
-      // بعد ما تستقبل الاستجابة من السيرفر:
-      final decoded = jsonDecode(res.body);
+      final decoded = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode != 200 || !(decoded["success"] ?? false)) {
         throw decoded["error"] ?? decoded["message"] ?? "Server error";
       }
 
-// 1) ابني الخريطة
-      final newPlan = decoded["data"] as Map<String, dynamic>;
+      // استخرج البيانات من الاستجابة
+      final data = decoded["data"] as Map<String, dynamic>;
 
-// 2) احقن startDate اللي اختاره المستخدم
-      newPlan['startDate'] = widget.startDate;
+      // اجمع الخطة الجديدة، حقن startDate و Schedule
+      final newPlan = {
+        ...data,
+        'startDate': widget.startDate,
+        'Schedule': data['Schedule'],
+      };
 
-// 3) انتقل لصفحة النجاح
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
