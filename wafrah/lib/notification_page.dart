@@ -1,17 +1,19 @@
+// notification_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:intl/intl.dart';
 import 'package:wafrah/session_manager.dart';
+import 'notification_service.dart';
 
 class NotificationPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
 
   const NotificationPage({
-    super.key,
+    Key? key,
     required this.userName,
     required this.phoneNumber,
-  });
+  }) : super(key: key);
 
   @override
   _NotificationPageState createState() => _NotificationPageState();
@@ -19,7 +21,6 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  bool hasNewNotifications = false;
   List<String> notifications = [];
 
   @override
@@ -29,29 +30,41 @@ class _NotificationPageState extends State<NotificationPage> {
     SessionManager.startTracking(context);
   }
 
-  // Load notifications from secure storage.
-  // Expected format for each notification: "timestamp|title:body"
-  void _loadNotifications() async {
-    String? storedNotifications = await _storage.read(key: 'notifications');
-    if (storedNotifications != null && storedNotifications.isNotEmpty) {
-      // Split by semicolon and remove any empty entries.
-      notifications = storedNotifications
+  Future<void> _loadNotifications() async {
+    final stored = await _storage.read(key: 'notifications');
+    if (stored != null && stored.isNotEmpty) {
+      notifications = stored
           .split(';')
           .where((s) => s.trim().isNotEmpty)
           .toList();
-      // Debug print to see the stored notifications:
-      print("Stored notifications: $storedNotifications");
+      notifications.sort((a, b) {
+        final ta = _parseTimestamp(a);
+        final tb = _parseTimestamp(b);
+        return tb.compareTo(ta);
+      });
     }
-    setState(() {
-      hasNewNotifications = notifications.isNotEmpty;
-    });
+    setState(() {});
   }
 
-  // Delete a single notification with a confirmation dialog.
+  DateTime _parseTimestamp(String entry) {
+    try {
+      return DateTime.parse(entry.split('|')[0]);
+    } catch (_) {
+      return DateTime.now();
+    }
+  }
+
+  Future<void> _saveNotifications() async {
+    await _storage.write(
+      key: 'notifications',
+      value: notifications.join(';'),
+    );
+  }
+
   void _deleteNotification(int index) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (c) => AlertDialog(
         title: const Text(
           'تأكيد حذف الإشعار',
           textAlign: TextAlign.right,
@@ -66,68 +79,61 @@ class _NotificationPageState extends State<NotificationPage> {
           textAlign: TextAlign.right,
           style: TextStyle(
             fontFamily: 'GE-SS-Two-Light',
+            fontSize: 16,
             color: Color(0xFF3D3D3D),
           ),
         ),
         actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close without deleting.
-                },
-                child: const Text(
-                  'إلغاء',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    color: Color(0xFF838383),
-                    fontSize: 18,
-                  ),
-                ),
+          TextButton(
+            onPressed: () => Navigator.of(c).pop(),
+            child: const Text(
+              'إلغاء',
+              style: TextStyle(
+                fontFamily: 'GE-SS-Two-Light',
+                fontSize: 18,
+                color: Color(0xFF838383),
               ),
-              const SizedBox(width: 20),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    // Since we are displaying reversed list, calculate original index.
-                    int originalIndex = notifications.length - 1 - index;
-                    notifications.removeAt(originalIndex);
-                    hasNewNotifications = notifications.isNotEmpty;
-                  });
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'تم حذف الإشعار بنجاح.',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontFamily: 'GE-SS-Two-Light'),
-                      ),
-                      backgroundColor: Color(0xFF0FBE7C),
+            ),
+          ),
+          const SizedBox(width: 20),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(c).pop();
+              notifications.removeAt(index);
+              await _saveNotifications();
+              setState(() {});
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'تم حذف الإشعار بنجاح.',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 16,
                     ),
-                  );
-                },
-                child: const Text(
-                  'حذف الإشعار',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 18,
-                    color: Colors.red,
                   ),
+                  backgroundColor: Color(0xFF0FBE7C),
                 ),
+              );
+            },
+            child: const Text(
+              'حذف الإشعار',
+              style: TextStyle(
+                fontFamily: 'GE-SS-Two-Light',
+                fontSize: 18,
+                color: Colors.red,
               ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Remove all notifications.
-  void _clearNotifications() async {
+  void _clearNotifications() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (c) => AlertDialog(
         title: const Text(
           'تأكيد حذف جميع الإشعارات',
           textAlign: TextAlign.right,
@@ -142,271 +148,229 @@ class _NotificationPageState extends State<NotificationPage> {
           textAlign: TextAlign.right,
           style: TextStyle(
             fontFamily: 'GE-SS-Two-Light',
+            fontSize: 16,
             color: Color(0xFF3D3D3D),
           ),
         ),
         actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'إلغاء',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    color: Color(0xFF838383),
-                    fontSize: 18,
-                  ),
-                ),
+          TextButton(
+            onPressed: () => Navigator.of(c).pop(),
+            child: const Text(
+              'إلغاء',
+              style: TextStyle(
+                fontFamily: 'GE-SS-Two-Light',
+                fontSize: 18,
+                color: Color(0xFF838383),
               ),
-              const SizedBox(width: 20),
-              TextButton(
-                onPressed: () async {
-                  await _storage.delete(key: 'notifications');
-                  setState(() {
-                    notifications.clear();
-                    hasNewNotifications = false;
-                  });
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'تم حذف جميع الإشعارات بنجاح.',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontFamily: 'GE-SS-Two-Light'),
-                      ),
-                      backgroundColor: Color(0xFF0FBE7C),
+            ),
+          ),
+          const SizedBox(width: 20),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(c).pop();
+              await _storage.delete(key: 'notifications');
+              notifications.clear();
+              setState(() {});
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'تم حذف جميع الإشعارات بنجاح.',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontFamily: 'GE-SS-Two-Light',
+                      fontSize: 16,
                     ),
-                  );
-                },
-                child: const Text(
-                  'حذف الكل',
-                  style: TextStyle(
-                    fontFamily: 'GE-SS-Two-Light',
-                    fontSize: 18,
-                    color: Colors.red,
                   ),
+                  backgroundColor: Color(0xFF0FBE7C),
                 ),
+              );
+            },
+            child: const Text(
+              'حذف الكل',
+              style: TextStyle(
+                fontFamily: 'GE-SS-Two-Light',
+                fontSize: 18,
+                color: Colors.red,
               ),
-            ],
+            ),
           ),
         ],
       ),
     );
-  }
-
-  // Back arrow tap handler.
-  void _onArrowTap() {
-    Navigator.pop(context);
-  }
-
-  // Fallback: get current time if parsing fails.
-  String _getCurrentDateTime() {
-    DateTime now = DateTime.now();
-    return DateFormat('yyyy-MM-dd HH:mm').format(now);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Reverse the list so that the newest notifications appear at the top.
-    final List<String> sortedNotifications = notifications.reversed.toList();
-
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
-      body: Stack(
-        children: [
-          // Back Arrow in header.
-          Positioned(
-            top: 60,
-            right: 15,
-            child: GestureDetector(
-              onTap: _onArrowTap,
-              child: const Icon(
-                Icons.arrow_forward_ios,
-                color: Color(0xFF3D3D3D),
-                size: 28,
-              ),
-            ),
-          ),
-          // Header text.
-          const Positioned(
-            top: 58,
-            left: 170,
-            child: Text(
-              'إدارة الإشعارات',
-              style: TextStyle(
-                color: Color(0xFF3D3D3D),
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'GE-SS-Two-Bold',
-              ),
-            ),
-          ),
-          // "Delete All" button (top left).
-          Positioned(
-            top: 51,
-            left: 15,
-            child: ElevatedButton(
-              onPressed:
-                  sortedNotifications.isEmpty ? null : _clearNotifications,
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                  (Set<WidgetState> states) {
-                    if (states.contains(WidgetState.disabled)) {
-                      return const Color(0xFF707070);
-                    }
-                    return Colors.red;
-                  },
-                ),
-                shape: WidgetStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: notifications.isEmpty ? null : _clearNotifications,
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(MaterialState.disabled)) {
+                          return const Color(0xFF707070);
+                        }
+                        return Colors.red;
+                      }),
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      padding: MaterialStateProperty.all(
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      ),
+                    ),
+                    child: const Text(
+                      'حذف الكل',
+                      style: TextStyle(
+                        fontFamily: 'GE-SS-Two-Light',
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
-                ),
-                padding: WidgetStateProperty.all(
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                ),
-              ),
-              child: const Text(
-                'حذف الكل',
-                style: TextStyle(
-                  fontFamily: 'GE-SS-Two-Light',
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
+                  const Text(
+                    'إدارة الإشعارات',
+                    style: TextStyle(
+                      color: Color(0xFF3D3D3D),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'GE-SS-Two-Bold',
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Color(0xFF3D3D3D),
+                      size: 28,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          // Notifications List.
-          Positioned(
-            top: 100,
-            left: 15,
-            right: 15,
-            bottom: 50,
-            child: SingleChildScrollView(
-              child: Column(
-                children: List.generate(sortedNotifications.length, (index) {
-                  final notif = sortedNotifications[index];
-                  String formattedTime;
-                  String title;
-                  String body;
-                  // Expected format: "timestamp|title:body"
-                  if (notif.contains('|')) {
-                    final parts = notif.split('|');
-                    if (parts.length >= 2) {
-                      final timestampString = parts[0];
-                      final content = parts[1];
-                      final contentParts = content.split(':');
-                      if (contentParts.length >= 2) {
-                        title = contentParts[0];
-                        // In case the body contains additional colons, join the remaining parts.
-                        body = contentParts.sublist(1).join(':');
-                      } else {
-                        title = content;
-                        body = '';
-                      }
-                      // Simply try parsing the timestamp as ISO8601.
-                      DateTime? notifTime = DateTime.tryParse(timestampString);
-                      if (notifTime == null) {
-                        formattedTime = _getCurrentDateTime();
-                      } else {
-                        formattedTime =
-                            DateFormat('yyyy-MM-dd HH:mm').format(notifTime);
-                      }
-                    } else {
-                      formattedTime = _getCurrentDateTime();
-                      title = notif;
-                      body = '';
-                    }
-                  } else {
-                    // Fallback if not in expected format.
-                    formattedTime = _getCurrentDateTime();
-                    final contentParts = notif.split(':');
-                    if (contentParts.length >= 2) {
-                      title = contentParts[0];
-                      body = contentParts.sublist(1).join(':');
-                    } else {
-                      title = notif;
-                      body = '';
-                    }
-                  }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      // Display the stored time.
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15.0),
-                        child: Text(
-                          formattedTime,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF3D3D3D),
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'GE-SS-Two-Bold',
+            const Divider(),
+            // Notifications List
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(15),
+                itemCount: notifications.length,
+                itemBuilder: (context, i) {
+                  final entry = notifications[i];
+                  final dt = _parseTimestamp(entry);
+                  final dateStr = DateFormat('yyyy-MM-dd').format(dt);
+                  final timeStr = DateFormat('hh:mm').format(dt);
+                  final suffix = dt.hour < 12 ? 'صباحًا' : 'مساءً';
+                  final content = entry.contains('|') ? entry.split('|')[1] : '';
+                  final parts = content.split(':');
+                  final title = parts[0];
+                  final body = parts.length > 1 ? parts.sublist(1).join(':') : '';
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Right-aligned timestamp
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                dateStr,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF3D3D3D),
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'GE-SS-Two-Bold',
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                suffix,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF3D3D3D),
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'GE-SS-Two-Bold',
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                timeStr,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF3D3D3D),
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'GE-SS-Two-Bold',
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                      // Notification container with delete button.
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 5.0),
-                        padding: const EdgeInsets.all(10.0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            // Delete button.
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                _deleteNotification(index);
-                              },
-                            ),
-                            const SizedBox(width: 10),
-                            // Notification content.
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  // Notification title.
-                                  Text(
-                                    title,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'GE-SS-Two-Light',
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  // Notification body.
-                                  Text(
-                                    body,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: 'GE-SS-Two-Light',
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ],
+                        const SizedBox(height: 5),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _deleteNotification(i),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      title,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'GE-SS-Two-Light',
+                                      ),
+                                    ),
+                                    if (body.isNotEmpty) ...[
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        body,
+                                        textAlign: TextAlign.right,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: 'GE-SS-Two-Light',
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   );
-                }),
+                },
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
+

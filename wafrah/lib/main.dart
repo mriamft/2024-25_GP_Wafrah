@@ -11,7 +11,6 @@ final GlobalNotificationManager globalNotificationManager =
 
 void main() {
   // Start the global notification manager.
-  globalNotificationManager.start();
 
   runApp(const MyApp());
 }

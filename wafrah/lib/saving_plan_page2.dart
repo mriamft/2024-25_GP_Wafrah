@@ -200,7 +200,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     GlobalNotificationManager().updateData(
       resultData: widget.resultData,
       accounts: widget.accounts,
-    );
+    );         GlobalNotificationManager().start();
   }
 
   String formatNumber(double number) {
