@@ -108,7 +108,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
 
     if (!isValidPassword(password)) {
       showNotification(
-          'حدث خطأ ما\nرمز المرور لا يحقق الشروط: 8 خانات على الأقل، حرف صغير، حرف كبير، رقم ورمز خاص');
+          ':حدث خطأ ما\nرمز المرور لا يحقق الشروط ');
       return;
     }
 
@@ -121,7 +121,7 @@ class _PassConfirmationPage extends State<PassConfirmationPage> {
         Uri.parse('https://login-service.ngrok.io/forget-password');
 
     final response = await http.post(
-      url,
+      url,  
       headers: {"Content-Type": "application/json"},
       body:
           json.encode({'phoneNumber': phoneNumber, 'newPassword': newPassword}),

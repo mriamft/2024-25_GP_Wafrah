@@ -213,7 +213,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   try {
                     final response = await http.delete(
                       Uri.parse(
-                          'https://c2f7-82-167-113-9.ngrok-free.app/delete-user'),
+                          'https://login-service.ngrok.io/delete-user'),
                       headers: {'Content-Type': 'application/json'},
                       body: jsonEncode({'phoneNumber': widget.phoneNumber}),
                     );

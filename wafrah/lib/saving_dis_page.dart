@@ -265,7 +265,7 @@ class _SavingDisPageState extends State<SavingDisPage> {
   Widget build(BuildContext context) {
     final totalPct = _totalPercent();
     // consider it valid if it’s within 0.0001 of 100
-    final valid = (_totalPercent() - 100).abs() < 0.1;
+    final valid = (_totalPercent() - 100).abs() < 1;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
