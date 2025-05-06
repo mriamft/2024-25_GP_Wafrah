@@ -577,6 +577,12 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   }
 
   Map<String, dynamic> trackSavingsProgress() {
+    final recBudgetList = _monthlyRecommendedBudgets[0]; // full plan
+final Map<String, double> recBudgetMap = {
+  for (var item in recBudgetList)
+    item['category'] as String: (item['recBudget'] as num).toDouble()
+};
+
     DateTime today = DateTime.now();
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
     int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
@@ -602,19 +608,10 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
         String category = transaction['Category'] ?? 'Unknown';
         double amount = double.parse(transaction['Amount'].toString());
 
-        if (transactionDate.isAfter(lastYearStart) &&
-            transactionDate.isBefore(lastYearEnd)) {
-          lastYearSpending[category] =
-              (lastYearSpending[category] ?? 0) + amount;
-          print("Previos");
-          print(transaction);
-        }
-
         if (transactionDate.isAfter(startDate) &&
             transactionDate.isBefore(today)) {
           currentSpending[category] = (currentSpending[category] ?? 0) + amount;
-          print("Current");
-          print(transaction);
+          
         }
       }
     }
@@ -631,10 +628,10 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       double progress = daysPassed * dailyProgressGrowth; // Linear progress
 
       // If spending increased compared to last year, reset progress to 0
-      if ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0) <
-          0) {
-        progress = 0;
-      }
+if ((currentSpending[category] ?? 0) > (recBudgetMap[category] ?? double.infinity)) {
+  progress = 0;
+}
+      
 
       progressPercentage[category] =
           progress.clamp(0, 100); // Ensure it remains between 0-100%
@@ -644,6 +641,12 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   }
 
   Map<String, dynamic> MonthlytrackSavingsProgress() {
+    final recBudgetList = _monthlyRecommendedBudgets[_currentMonthIndex]; // selected month
+final Map<String, double> recBudgetMap = {
+  for (var item in recBudgetList)
+    item['category'] as String: (item['recBudget'] as num).toDouble()
+};
+
     DateTime today = DateTime.now();
     //.add(Duration(days: 18))
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
@@ -671,19 +674,10 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
         String category = transaction['Category'] ?? 'Unknown';
         double amount = double.parse(transaction['Amount'].toString());
 
-        if (transactionDate.isAfter(lastYearStart) &&
-            transactionDate.isBefore(lastYearEnd)) {
-          lastYearSpending[category] =
-              (lastYearSpending[category] ?? 0) + amount;
-          /*print("previos");
-        print(transaction);*/
-        }
-
         if (transactionDate.isAfter(selectedMonthStart) &&
             transactionDate.isBefore(today)) {
           currentSpending[category] = (currentSpending[category] ?? 0) + amount;
-          /*print("Current");
-        print(transaction);*/
+         
         }
       }
     }
@@ -699,10 +693,10 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       double progress = daysPassed * dailyProgressGrowth;
 
       // If spending increased compared to last year, reset progress to 0
-      if ((lastYearSpending[category] ?? 0) - (currentSpending[category] ?? 0) <
-          0) {
-        progress = 0;
-      }
+      if ((currentSpending[category] ?? 0) > (recBudgetMap[category] ?? double.infinity)) {
+  progress = 0;
+}
+
 
       progressPercentage[category] =
           progress.clamp(0, 100); // Ensure it doesn't exceed 100%
