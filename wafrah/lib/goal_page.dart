@@ -167,7 +167,9 @@ class _GoalPageState extends State<GoalPage> {
         }
       }
 
-      final String todayOverride = "2025-05-15";
+      final now = DateTime.now();
+      final today =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
       // Call the savings API
       final savingsResponse = await http.post(
@@ -178,7 +180,7 @@ class _GoalPageState extends State<GoalPage> {
           "duration_months": durationInMonths,
           "transactions": transactions,
           "start_date": startDate,
-          "today": todayOverride
+          "today": today
         }),
       );
 

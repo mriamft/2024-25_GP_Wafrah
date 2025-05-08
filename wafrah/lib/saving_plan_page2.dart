@@ -4,6 +4,7 @@ import 'settings_page.dart';
 import 'saving_plan_page.dart';
 import 'transactions_page.dart';
 import 'banks_page.dart';
+import 'package:flutter/foundation.dart';
 import 'home_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // For secure storage
 import 'dart:convert'; // For JSON encoding and decoding
@@ -14,6 +15,7 @@ import 'main.dart';
 import 'notification_service.dart';
 import 'chatbot.dart';
 import 'global_notification_manager.dart';
+import 'package:http/http.dart' as http;
 
 class SavingPlanPage2 extends StatefulWidget {
   final String userName;
@@ -200,7 +202,8 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     GlobalNotificationManager().updateData(
       resultData: widget.resultData,
       accounts: widget.accounts,
-    );         GlobalNotificationManager().start();
+    );
+    GlobalNotificationManager().start();
   }
 
   String formatNumber(double number) {
@@ -578,10 +581,10 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
 
   Map<String, dynamic> trackSavingsProgress() {
     final recBudgetList = _monthlyRecommendedBudgets[0]; // full plan
-final Map<String, double> recBudgetMap = {
-  for (var item in recBudgetList)
-    item['category'] as String: (item['recBudget'] as num).toDouble()
-};
+    final Map<String, double> recBudgetMap = {
+      for (var item in recBudgetList)
+        item['category'] as String: (item['recBudget'] as num).toDouble()
+    };
 
     DateTime today = DateTime.now();
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
@@ -611,7 +614,6 @@ final Map<String, double> recBudgetMap = {
         if (transactionDate.isAfter(startDate) &&
             transactionDate.isBefore(today)) {
           currentSpending[category] = (currentSpending[category] ?? 0) + amount;
-          
         }
       }
     }
@@ -628,10 +630,10 @@ final Map<String, double> recBudgetMap = {
       double progress = daysPassed * dailyProgressGrowth; // Linear progress
 
       // If spending increased compared to last year, reset progress to 0
-if ((currentSpending[category] ?? 0) > (recBudgetMap[category] ?? double.infinity)) {
-  progress = 0;
-}
-      
+      if ((currentSpending[category] ?? 0) >
+          (recBudgetMap[category] ?? double.infinity)) {
+        progress = 0;
+      }
 
       progressPercentage[category] =
           progress.clamp(0, 100); // Ensure it remains between 0-100%
@@ -641,11 +643,12 @@ if ((currentSpending[category] ?? 0) > (recBudgetMap[category] ?? double.infinit
   }
 
   Map<String, dynamic> MonthlytrackSavingsProgress() {
-    final recBudgetList = _monthlyRecommendedBudgets[_currentMonthIndex]; // selected month
-final Map<String, double> recBudgetMap = {
-  for (var item in recBudgetList)
-    item['category'] as String: (item['recBudget'] as num).toDouble()
-};
+    final recBudgetList =
+        _monthlyRecommendedBudgets[_currentMonthIndex]; // selected month
+    final Map<String, double> recBudgetMap = {
+      for (var item in recBudgetList)
+        item['category'] as String: (item['recBudget'] as num).toDouble()
+    };
 
     DateTime today = DateTime.now();
     //.add(Duration(days: 18))
@@ -677,7 +680,6 @@ final Map<String, double> recBudgetMap = {
         if (transactionDate.isAfter(selectedMonthStart) &&
             transactionDate.isBefore(today)) {
           currentSpending[category] = (currentSpending[category] ?? 0) + amount;
-         
         }
       }
     }
@@ -693,10 +695,10 @@ final Map<String, double> recBudgetMap = {
       double progress = daysPassed * dailyProgressGrowth;
 
       // If spending increased compared to last year, reset progress to 0
-      if ((currentSpending[category] ?? 0) > (recBudgetMap[category] ?? double.infinity)) {
-  progress = 0;
-}
-
+      if ((currentSpending[category] ?? 0) >
+          (recBudgetMap[category] ?? double.infinity)) {
+        progress = 0;
+      }
 
       progressPercentage[category] =
           progress.clamp(0, 100); // Ensure it doesn't exceed 100%
@@ -1372,4 +1374,7 @@ final Map<String, double> recBudgetMap = {
 
     return totalSpent;
   }
+
+  /// Called at the end of each 30-day period to see if we under-saved
+  /// and, if so, fetch a refit plan for the remaining months.
 }
