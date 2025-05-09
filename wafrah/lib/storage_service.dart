@@ -6,7 +6,7 @@ class StorageService {
 
   // Save account and transaction data for a specific user by phoneNumber
   Future<void> saveAccountDataLocally(String phoneNumber, List<Map<String, dynamic>> accounts) async {
-    String accountsJson = jsonEncode(accounts); // Convert to JSON string
+    String accountsJson = jsonEncode(accounts); 
     await _secureStorage.write(key: 'user_accounts_$phoneNumber', value: accountsJson);
   }
 
