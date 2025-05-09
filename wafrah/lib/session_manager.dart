@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
-import 'package:wafrah/main.dart'; // your navigatorKey is here
+import 'package:wafrah/main.dart'; 
 
 class SessionManager {
   static Timer? _inactivityTimer;
   static Timer? _confirmationTimer;
-  static int _countdown = 60; // 60 seconds countdown
-  static late StateSetter _dialogStateSetter; // To update dialog UI
+  static int _countdown = 60; 
+  static late StateSetter _dialogStateSetter; 
 
   static void startTracking(BuildContext context) {
     _resetTimer(context);
@@ -25,7 +25,7 @@ class SessionManager {
   }
 
   static void _showConfirmationDialog(BuildContext context) {
-    _countdown = 60; // Reset countdown
+    _countdown = 60; 
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -48,7 +48,7 @@ class SessionManager {
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end, // كل النصوص يمين
+                crossAxisAlignment: CrossAxisAlignment.end, 
                 children: [
                   const Text(
                     'لم يتم استخدام البرنامج لمدة ١٠ دقائق هل ترغب بالاستمرار؟',
@@ -66,26 +66,25 @@ class SessionManager {
                     style: const TextStyle(
                       fontFamily: 'GE-SS-Two-Bold',
                       fontSize: 14,
-                      color: Color(0xFF8D8D8D), // رمادي
+                      color: Color(0xFF8D8D8D),
                     ),
                   ),
                 ],
               ),
-              actionsAlignment: MainAxisAlignment.center, // زر التأكيد بالوسط
+              actionsAlignment: MainAxisAlignment.center,
               actions: [
                 TextButton(
                   onPressed: () {
                     _confirmationTimer?.cancel();
-Navigator.of(context).pop();
-startTracking(navigatorKey.currentState!.overlay!.context);
-
+                  Navigator.of(context).pop();
+                  startTracking(navigatorKey.currentState!.overlay!.context);
                   },
                   child: const Text(
                     'نعم، أرغب بالاستمرار',
                     style: TextStyle(
                       fontFamily: 'GE-SS-Two-Light',
                       fontSize: 16,
-                      color: Color(0xFF2C8C68), // أخضر بدون خلفية
+                      color: Color(0xFF2C8C68), 
                     ),
                   ),
                 ),

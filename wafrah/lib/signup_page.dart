@@ -337,7 +337,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       },
                     ),
                   ),
-                  onChanged: validatePasswordInput, // Validate on change
+                  onChanged: validatePasswordInput, 
                 ),
                 _buildInputField(
                   top: 380,
@@ -392,7 +392,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         style: TextStyle(
                           fontFamily: 'GE-SS-Two-Light',
                           fontSize: 9,
-                          fontWeight: FontWeight.bold, // Make text bold
+                          fontWeight: FontWeight.bold, 
                           color: Colors.white,
                           height: 1.21,
                         ),
@@ -513,7 +513,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      // Wrap the Text widget with Expanded
                       child: Padding(
                         padding: const EdgeInsets.only(right: 15.0),
                         child: Text(
@@ -525,7 +524,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           textAlign: TextAlign.right,
                           overflow: TextOverflow
-                              .ellipsis, // Add this line for overflow handling
+                              .ellipsis, 
                         ),
                       ),
                     ),
@@ -537,7 +536,6 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
-
   Widget _buildInputField({
     required double top,
     required String hintText,

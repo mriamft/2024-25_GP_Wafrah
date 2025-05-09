@@ -29,7 +29,6 @@ class _LoginPageState extends State<LoginPage> {
   Color _signupColor = Colors.white;
   bool _isPasswordVisible = false;
   Timer? _notificationTimer;
-  // State for phone number validation
   bool isPhoneNumberValid = true;
 
   // Show notification method
@@ -40,8 +39,6 @@ class _LoginPageState extends State<LoginPage> {
       notificationColor = color;
       showErrorNotification = true;
     });
-
-    // Cancel any existing timer to prevent multiple timers from stacking
     _notificationTimer?.cancel();
 
     // Start a new timer and store it in _notificationTimer
@@ -94,8 +91,6 @@ class _LoginPageState extends State<LoginPage> {
         if (responseBody['success']) {
           String userName = responseBody['userName'];
           List<Map<String, dynamic>> accounts = responseBody['accounts'] ?? [];
-
-          // Save accounts locally
           print('Saving accounts on login: $accounts');
           await StorageService().loadAccountDataLocally(phoneNumber);
 
@@ -159,108 +154,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
             child: Stack(
               children: [
-Positioned(
-  left: (MediaQuery.of(context).size.width - 200) / 2, // Center horizontally
-  top: 700, // Position near the bottom
-  child: GestureDetector(
-    onTap: () async {
-      // Show a loading indicator or disable the button if desired
-      // You can implement this as per your UI requirements
-
-      // Wait for 2 seconds
-      await Future.delayed(const Duration(seconds: 2));
-
-      List<Map<String, dynamic>> accounts = [];
-      String phoneNumber = '+966530826612'; // Placeholder phone number
-      String fullName = 'Admin User'; // Placeholder full name
-
-      try {
-        // Define the accounts API endpoint
-        final accountsUrl = Uri.parse('https://login-service.ngrok.io/accounts');
-
-        // Make the HTTP GET request to fetch accounts data
-        final accountsResponse = await http.get(
-          accountsUrl,
-          headers: {"Content-Type": "application/json"},
-        );
-
-        if (accountsResponse.statusCode == 200) {
-          // Successfully fetched accounts data from the server
-          accounts = List<Map<String, dynamic>>.from(jsonDecode(accountsResponse.body));
-          print('Accounts loaded from server after adding user: $accounts');
-        } else {
-          // Server responded with an error, attempt to load accounts from local storage
-          print('Failed to fetch accounts from server, loading from local storage.');
-          accounts = await StorageService().loadAccountDataLocally(phoneNumber);
-        }
-      } catch (e) {
-        // Handle any errors that occur during the server request
-        print('Error retrieving accounts from server: $e');
-        // Fall back to local storage in case of errors
-        try {
-          accounts = await StorageService().loadAccountDataLocally(phoneNumber);
-          print('Accounts loaded from local storage after adding user: $accounts');
-        } catch (e) {
-          print('Error loading accounts after adding user: $e');
-          // Optionally, show an error notification to the user
-          showNotification('فشل في تحميل بيانات الحسابات. يرجى المحاولة لاحقًا.');
-          return; // Exit the function if accounts cannot be loaded
-        }
-      }
-
-      // Navigate to HomePage with the retrieved account data
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(
-            userName: fullName,
-            phoneNumber: phoneNumber,
-            accounts: accounts,
-          ),
-        ),
-      );
-    },
-    onTapDown: (_) {
-      setState(() {
-        _buttonColor = const Color(0xFFB0B0B0);
-      });
-    },
-    onTapUp: (_) {
-      setState(() {
-        _buttonColor = Colors.white;
-      });
-    },
-    onTapCancel: () {
-      setState(() {
-        _buttonColor = Colors.white;
-      });
-    },
-    child: Container(
-      width: 200,
-      height: 52,
-      decoration: BoxDecoration(
-        color: Colors.blue, // Set color for the backdoor button
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.5),
-            blurRadius: 10,
-            offset: const Offset(0.4, -5),
-          ),
-        ],
-      ),
-      child: const Center(
-        child: Text(
-          'Backdoor Login',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-          ),
-        ),
-      ),
-    ),
-  ),
-),
                 Positioned(
                   left: -1,
                   top: -99,
@@ -433,8 +326,6 @@ Positioned(
                     ),
                   ),
                 ),
-
-                // Sign Up Text
                 Positioned(
                   bottom: 30,
                   left: 0,
@@ -492,8 +383,6 @@ Positioned(
               ],
             ),
           ),
-
-          // Forgot Password Text
           Positioned(
             left: 25,
             top: 440,
@@ -535,7 +424,6 @@ Positioned(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      // Wrap the Text widget with Expanded
                       child: Padding(
                         padding: const EdgeInsets.only(right: 15.0),
                         child: Text(
@@ -547,7 +435,7 @@ Positioned(
                           ),
                           textAlign: TextAlign.right,
                           overflow: TextOverflow
-                              .ellipsis, // Add this line for overflow handling
+                              .ellipsis, 
                         ),
                       ),
                     ),

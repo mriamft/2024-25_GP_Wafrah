@@ -4,9 +4,8 @@ import 'banks_page.dart';
 import 'dart:async';
 import 'saving_plan_page.dart';
 import 'home_page.dart';
-// Import your goal page for navigation
 import 'saving_plan_page2.dart';
-import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'secure_storage_helper.dart'; 
 import 'custom_icons.dart';
 import 'package:intl/intl.dart';
 import 'chatbot.dart';
@@ -29,20 +28,18 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage> {
   String selectedIBAN = "الكل";
-  String? selectedCategory; // Field to track the selected category
+  String? selectedCategory; 
   bool _showNotification = false;
   String _notificationMessage = '';
   Color _notificationColor = Colors.red;
 
-// Show a top notification for 5 seconds
+// Show a top notification
   void showNotification(String message, {Color color = Colors.red}) {
     setState(() {
       _notificationMessage = message;
       _notificationColor = color;
       _showNotification = true;
     });
-
-    // Auto-dismiss after 5 seconds
     Timer(const Duration(seconds: 5), () {
       if (mounted) {
         setState(() {
@@ -56,7 +53,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
     List<Map<String, dynamic>> allTransactions = [];
 
     for (var account in widget.accounts) {
-      // Filter transactions based on IBAN
       if (selectedIBAN != "الكل" && account['IBAN'] != selectedIBAN) {
         continue;
       }
@@ -66,8 +62,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
         allTransactions.add(transaction);
       }
     }
-
-    // Sort transactions by date
     allTransactions.sort((a, b) {
       String dateA = a['TransactionDateTime'] ?? '';
       String dateB = b['TransactionDateTime'] ?? '';
@@ -76,10 +70,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
       return dateTimeB.compareTo(dateTimeA);
     });
 
-    // Get today's date
     DateTime today = DateTime.now();
 
-    // Group transactions by date
     Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
     for (var transaction in allTransactions) {
       String date =
@@ -166,13 +158,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
               ),
             ),
           ),
-          // Dropdown for filtering by IBAN
           Positioned(
             top: 250,
             left: 10,
             right: 10,
             child: DropdownButton<String>(
-              alignment: AlignmentDirectional.topEnd, // Align to the right
+              alignment: AlignmentDirectional.topEnd, 
               isExpanded: true,
               value: selectedIBAN,
               icon: const Icon(Icons.arrow_drop_down),
@@ -201,10 +192,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         vertical: 8.0, horizontal: 12.0),
                     child: Align(
                       alignment:
-                          Alignment.centerRight, // Align text to the right
+                          Alignment.centerRight, 
                       child: Text(
                         value,
-                        textAlign: TextAlign.right, // Ensure right-alignment
+                        textAlign: TextAlign.right, 
                         style: const TextStyle(
                           fontFamily: 'GE-SS-Two-Light',
                           fontSize: 16,
@@ -218,7 +209,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
               }).toList(),
             ),
           ),
-
           Positioned(
             top: 300,
             left: 10,
@@ -271,7 +261,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     },
                   ),
           ),
-          // BNavigation bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -311,7 +300,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     padding: const EdgeInsets.only(bottom: 10, left: 0),
                     child: buildBottomNavItem(
                         Icons.credit_card, "سجل المعاملات", 1, onTap: () {
-                      // Already on Transactions page
                     }),
                   ),
                   buildBottomNavItem(
@@ -340,7 +328,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
               ),
             ),
           ),
-
           Positioned(
             right: 246,
             top: 785,
@@ -418,7 +405,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            // Wrap the Text widget with Expanded so text doesn't overflow
                             child: Padding(
                               padding: const EdgeInsets.only(right: 15.0),
                               child: Text(
@@ -441,7 +427,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
               ],
             ),
           ),
-          // ✅ زر الذكاء الاصطناعي (chatbot) في مكان محدد
           Positioned(
             top: 650,
             left: 328,
@@ -539,13 +524,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
           content: StatefulBuilder(
             builder: (BuildContext context, setStateDialog) {
               return Container(
-                // Limit the total height of the dialog
                 constraints: const BoxConstraints(maxHeight: 500),
                 width: double.maxFinite,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Scrollable area with categories
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
@@ -606,7 +589,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
                     ElevatedButton(
                       onPressed: () {
-                        // If user did NOT choose a category => error
                         if (dialogSelectedCategory == null) {
                           showNotification(
                             "حدث خطأ ما\nلم يتم اختيار تصنيف العملية",
@@ -614,8 +596,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           );
                           return;
                         }
-
-                        // Show confirmation dialog
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -641,11 +621,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  // "إلغاء" button
                                   TextButton(
                                     onPressed: () {
                                       Navigator.of(context)
-                                          .pop(); // close confirm
+                                          .pop(); 
                                     },
                                     child: const Text(
                                       'إلغاء',
@@ -657,27 +636,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     ),
                                   ),
                                   const SizedBox(width: 20),
-                                  // "تصنيف" button
                                   TextButton(
                                     onPressed: () async {
-                                      // 1) Update the transaction's category
                                       setState(() {
                                         transaction['Category'] =
                                             dialogSelectedCategory!;
                                       });
-
-                                      // 2) Save the entire updated 'widget.accounts'
-                                      //    in local storage so other pages also see the new category
-                                      // (Make sure you have StorageService accessible in this page)
-                                      // e.g.:
-                                      // await _storageService.saveAccountDataLocally(widget.phoneNumber, widget.accounts);
-
-                                      // 3) Close both dialogs
-                                      Navigator.pop(context); // confirmation
+                                      Navigator.pop(context); 
                                       Navigator.pop(
-                                          context); // category selection
-
-                                      // 4) Optionally show success
+                                          context); 
                                       Future.delayed(
                                           const Duration(milliseconds: 200),
                                           () {
@@ -824,7 +791,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       ElevatedButton(
                         onPressed: () {
                           _showCategorySelection(context,
-                              transaction); // Show the category selection dialog
+                              transaction); 
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFADADAD),
@@ -875,7 +842,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      CustomIcons.riyal, // Riyal icon instead of text
+                      CustomIcons.riyal, 
                       size: 14,
                       color: amountColor,
                     ),
@@ -927,7 +894,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
-            resultData: savedPlan, // Pass saved plan data to the next page
+            resultData: savedPlan, 
           ),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
@@ -1048,12 +1015,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
-                    CustomIcons.riyal, // Riyal symbol
+                    CustomIcons.riyal, 
                     size: 13,
                     color: Colors.white,
                   ),
                   const SizedBox(
-                      width: 4), // Space between the symbol and amount
+                      width: 4), 
                   Text(
                     'المبلغ: $amount',
                     style: const TextStyle(

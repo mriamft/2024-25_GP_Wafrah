@@ -20,10 +20,9 @@ Future<Map<String, dynamic>?> loadPlanFromSecureStorage() async {
     String? planJson = await secureStorage.read(key: 'savings_plan');
 
     if (planJson != null) {
-      // Safely decode the JSON to Map<String, dynamic>
       var decodedData = jsonDecode(planJson);
       if (decodedData is Map<String, dynamic>) {
-        return decodedData; // Return the decoded map if valid
+        return decodedData; 
       } else {
         print("Error: The data format is not as expected.");
       }
@@ -31,5 +30,5 @@ Future<Map<String, dynamic>?> loadPlanFromSecureStorage() async {
   } catch (e) {
     print("Error loading plan from secure storage: $e");
   }
-  return null; // Return null if no valid data is found
+  return null; 
 }

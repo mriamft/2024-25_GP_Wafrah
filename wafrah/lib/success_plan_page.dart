@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'saving_plan_page2.dart'; // Import SavingPlanPage2
+import 'saving_plan_page2.dart'; 
 
 class SuccessPlanPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
   final Map<String, dynamic> resultData;
-  final List<Map<String, dynamic>>
-      accounts; // List of accounts with transactions
+  final List<Map<String, dynamic>> accounts; 
 
   const SuccessPlanPage({
     super.key,
@@ -36,7 +35,6 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
-          // Icon "check_circle_outline_rounded"
           const Positioned(
             left: 126,
             top: 123,
@@ -46,8 +44,6 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
               color: Color(0xFF2C8C68),
             ),
           ),
-
-          // Text "تم إنشاء الخطة بنجاح"
           const Positioned(
             left: 76,
             top: 279,
@@ -61,8 +57,6 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
               ),
             ),
           ),
-
-          // Icons "repeat_rounded", "visibility_outlined", and "outlined_flag_rounded"
           const Positioned(
             left: 331,
             top: 372,
@@ -90,8 +84,6 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
               color: Color(0xFF6C6C6C),
             ),
           ),
-
-          // Right-aligned Text "فعل الاستقطاع الشهري للمداومة على التقدم نحو هدفك"
           const Positioned(
             left: 47,
             top: 375,
@@ -105,8 +97,6 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
               ),
             ),
           ),
-
-          // Right-aligned Text "راقب تقدمك في خطة الادخار معنا"
           const Positioned(
             left: 125,
             top: 429,
@@ -120,8 +110,6 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
               ),
             ),
           ),
-
-          // Right-aligned Text "سوف نذكرك بشكل دوري, مما يضمن تقدمك الفعال"
           const Positioned(
             left: 38,
             top: 480,
@@ -135,8 +123,6 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
               ),
             ),
           ),
-
-          // Button for "استمرار"
           Positioned(
             left: 61,
             top: 710,
@@ -157,11 +143,11 @@ class _SuccessPlanPageState extends State<SuccessPlanPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SavingPlanPage2(
-                      userName: widget.userName, // Pass userName
+                      userName: widget.userName, 
                       phoneNumber: widget.phoneNumber,
                       accounts: widget.accounts,
                       resultData: widget.resultData,
-                    ), // Updated route
+                    ), 
                   ),
                 );
               },

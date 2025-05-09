@@ -13,9 +13,8 @@ import 'support_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'banks_page.dart';
 import 'package:another_flushbar/flushbar.dart';
-// Import your goal page for navigation
 import 'saving_plan_page2.dart';
-import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'secure_storage_helper.dart'; 
 import 'chatbot.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -40,27 +39,22 @@ class _SettingsPageState extends State<SettingsPage> {
   Color _resetPasswordColor = const Color(0xFFD9D9D9);
   Color _notificationColor = const Color(0xFFD9D9D9);
   Color _supportColor = const Color(0xFFD9D9D9);
-  bool hasNewNotifications = false; // Track new notifications
-
-  // Custom page transition
+  bool hasNewNotifications = false; 
   Route _createNoTransitionRoute(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionDuration: const Duration(seconds: 0),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return child; // No animation
+        return child; 
       },
     );
   }
 
-// In SettingsPage, check for new notifications in initState
   @override
   void initState() {
     super.initState();
     _checkForNewNotifications();
   }
-
-// In SettingsPage, add the check for new notifications in initState
   void _checkForNewNotifications() async {
     String? hasNewNotifications =
         await _storage.read(key: 'hasNewNotifications');
@@ -69,7 +63,6 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-//Profile Setting
   void _onProfileTap() {
     setState(() {
       _profileColor = Colors.grey[400]!;
@@ -84,7 +77,6 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-//Method to handle password reset
   void _onResetPasswordTap() {
     setState(() {
       _resetPasswordColor = Colors.grey[400]!;
@@ -104,7 +96,6 @@ class _SettingsPageState extends State<SettingsPage> {
       hasNewNotifications = false;
       _notificationColor = Colors.grey[400]!;
     });
-    // Clear the notification flag in secure storage
     await _storage.write(key: 'hasNewNotifications', value: 'false');
 
     Navigator.of(context)
@@ -130,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
-            resultData: savedPlan, // Pass saved plan data to the next page
+            resultData: savedPlan, 
           ),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
@@ -209,7 +200,7 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(width: 20),
               TextButton(
                 onPressed: () async {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop(); 
                   try {
                     final response = await http.delete(
                       Uri.parse(
@@ -219,14 +210,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
 
                     if (response.statusCode == 200) {
-                      // Delete local data for the user from the emulator
                       final storageService = StorageService();
                       await storageService.clearUserData(widget.phoneNumber);
-
-                      // Navigate to main page before showing Flushbar
                       navigatorKey.currentState?.pushNamed('/');
-
-                      // Show success message
                       Flushbar(
                         message: 'تم حذف الحساب بنجاح',
                         messageText: const Text(
@@ -245,7 +231,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         borderRadius: BorderRadius.circular(8.0),
                       ).show(navigatorKey.currentState!.overlay!.context);
                     } else {
-                      // Show failure message
                       Flushbar(
                         message: 'فشل في حذف الحساب. الرجاء المحاولة لاحقًا.',
                         messageText: const Text(
@@ -364,7 +349,6 @@ class _SettingsPageState extends State<SettingsPage> {
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
-          // Green square image
           Positioned(
             top: -100,
             left: 0,
@@ -376,8 +360,6 @@ class _SettingsPageState extends State<SettingsPage> {
               fit: BoxFit.contain,
             ),
           ),
-
-          // Settings Title
           const Positioned(
             top: 200,
             right: 19,
@@ -390,8 +372,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-
-          // Bottom Navigation Bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -457,7 +437,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-
           Positioned(
             right: 350,
             top: 785,
@@ -465,13 +444,11 @@ class _SettingsPageState extends State<SettingsPage> {
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFF2C8C68), // Point color
+                color: Color(0xFF2C8C68), 
                 shape: BoxShape.circle,
               ),
             ),
           ),
-
-          //Profile UI
           Positioned(
             top: 235,
             left: 19,
@@ -487,11 +464,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: const Row(
                   children: [
                     SizedBox(width: 10),
-                    // Left arrow (kept as originally)
                     Icon(Icons.arrow_back_ios_new,
                         color: Color(0xFF3D3D3D), size: 15),
                     SizedBox(width: 10),
-                    // Text (right-aligned)
                     Expanded(
                       child: Align(
                         alignment: Alignment.centerRight,
@@ -521,7 +496,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     SizedBox(width: 10),
-                    // Right icon for the profile button
                     Icon(Icons.person, color: Color(0xFF3D3D3D), size: 20),
                     SizedBox(width: 10),
                   ],
@@ -529,7 +503,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-// Reset Password UI
           Positioned(
             top: 300,
             left: 19,
@@ -545,11 +518,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: const Row(
                   children: [
                     SizedBox(width: 10),
-                    // Left arrow remains
                     Icon(Icons.arrow_back_ios_new,
                         color: Color(0xFF3D3D3D), size: 15),
                     SizedBox(width: 10),
-                    // Text (right-aligned)
                     Expanded(
                       child: Align(
                         alignment: Alignment.centerRight,
@@ -579,7 +550,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     SizedBox(width: 10),
-                    // Right icon for reset password
                     Icon(Icons.lock_outline,
                         color: Color(0xFF3D3D3D), size: 20),
                     SizedBox(width: 10),
@@ -588,8 +558,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-
-// Manage Notifications UI
           Positioned(
             top: 365,
             left: 19,
@@ -636,8 +604,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                     ),
-                    // Red Dot Indicator
-                    // Notification icon with red dot overlay
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
@@ -667,8 +633,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-
-// Contact Support UI
           Positioned(
             top: 430,
             left: 19,
@@ -684,11 +648,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: const Row(
                   children: [
                     SizedBox(width: 10),
-                    // Left arrow remains
                     Icon(Icons.arrow_back_ios_new,
                         color: Color(0xFF3D3D3D), size: 15),
                     SizedBox(width: 10),
-                    // Text (right-aligned)
                     Expanded(
                       child: Align(
                         alignment: Alignment.centerRight,
@@ -718,7 +680,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     SizedBox(width: 10),
-                    // Right icon for support
                     Icon(Icons.support_agent,
                         color: Color(0xFF3D3D3D), size: 20),
                     SizedBox(width: 10),
@@ -727,7 +688,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-          // Logout button
           Positioned(
             bottom: 205,
             left: (MediaQuery.of(context).size.width - 194) / 2,
@@ -755,8 +715,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-
-// Delete Account button
           Positioned(
             bottom: 150,
             left: (MediaQuery.of(context).size.width - 194) / 2,
@@ -772,7 +730,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     side: const BorderSide(color: Color(0xFFDD2C35), width: 1),
                   ),
                 ),
-                onPressed: _onDeleteAccount, // Call the delete account function
+                onPressed: _onDeleteAccount,
                 child: const Text(
                   'حذف الحساب',
                   style: TextStyle(
@@ -783,7 +741,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-
           Positioned(
             bottom: 44,
             left: 0,
@@ -822,7 +779,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         _createNoTransitionRoute(HomePage(
                             userName: widget.userName,
                             phoneNumber: widget.phoneNumber,
-                            accounts: widget.accounts)), // Pass userName
+                            accounts: widget.accounts)), 
                       );
                     },
                   ),
@@ -830,7 +787,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
           ),
-          // ✅ زر الذكاء الاصطناعي (chatbot) في مكان محدد
           Positioned(
             top: 650,
             left: 328,

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'dart:math' as math; // ← لأجل تدوير السلايدر
-import 'package:flutter/foundation.dart'; // ← for mapEquals
+import 'dart:math' as math; 
+import 'package:flutter/foundation.dart'; 
 
 import 'success_plan_page.dart';
 import 'custom_icons.dart';
@@ -13,9 +13,9 @@ import 'custom_icons.dart';
 class SavingDisPage extends StatefulWidget {
   final String userName;
   final String phoneNumber;
-  final Map<String, dynamic> resultData; // الخطة المبدئية
-  final List<Map<String, dynamic>> accounts; // كل الحسابات + العمليات
-  final String startDate; // تاريخ البداية للخطة
+  final Map<String, dynamic> resultData; 
+  final List<Map<String, dynamic>> accounts;
+  final String startDate; 
 
   const SavingDisPage({
     super.key,
@@ -31,14 +31,11 @@ class SavingDisPage extends StatefulWidget {
 }
 
 class _SavingDisPageState extends State<SavingDisPage> {
-  // ─────────── المتغيرات العامة ───────────
   final _arabicFmt = NumberFormat("#,##0.00", "ar");
   Color _arrowColor = const Color(0xFF3D3D3D);
   bool _isPressed = false;
   bool _isLoading = false;
   String _errorMsg = '';
-
-  // كل الفئات الممكنة (حسب backend)
   final List<String> _allCats = const [
     'المطاعم',
     'التعليم',
@@ -56,47 +53,30 @@ class _SavingDisPageState extends State<SavingDisPage> {
     'التحويلات',
   ];
 
-  // القيم الحالية للتوزيع (0–100)
   late Map<String, double> _cutPercents;
-
-  // النسخ الأصلية (لإعادة الضبط)
   late Map<String, double> _initialPercents;
-
-  // مبالغ الادخار لكل فئة عبر كامل الخطة
   late Map<String, double> _catSavings;
-
-  // محرّرات TextField لكل فئة
   late final Map<String, TextEditingController> _controllers = {
     for (var c in _allCats) c: TextEditingController(),
   };
 
-  // ─────────── initState ───────────
   @override
   void initState() {
     super.initState();
 
-    // 1) استيراد مبالغ الادخار الفعلية وهدف الادخار
     final rawSav =
         widget.resultData['CategorySavings'] as Map<String, dynamic>? ?? {};
     final totalGoal = (widget.resultData['SavingsGoal'] as num).toDouble();
-
-// 2) احسب النسبة بناءً على ما ستوفره من إجمالي الهدف
     _cutPercents = {
       for (var c in _allCats)
-        // compute full-precision
         c: ((rawSav[c] ?? 0.0) / totalGoal * 100.0)
     };
 
-// 3) مبالغ الادخار كما هي
     _catSavings = {
       for (var c in _allCats) c: (rawSav[c] ?? 0.0).toDouble(),
     };
 
-    // 4) حفظ نسخة أصلية لإعادة الضبط
     _initialPercents = Map.from(_cutPercents);
-
-    // 5) ضبط محرّرات النص
-    // set controllers to show e.g. 4 decimal places
     _controllers.forEach((cat, ctl) {
       ctl.text = '${_cutPercents[cat]!.toStringAsFixed(4)}%';
     });
@@ -115,21 +95,15 @@ class _SavingDisPageState extends State<SavingDisPage> {
         return key == cat ? newVal : val * scale;
       });
 
-      // correct any tiny floating-point drift so sum == 100
       final diff = 100.0 - _totalPercent();
-// أزل شرط الـ if وأضف diff دائماً:
       final maxKey = _cutPercents.entries
           .where((e) => e.key != cat)
           .reduce((a, b) => a.value > b.value ? a : b)
           .key;
       _cutPercents[maxKey] = _cutPercents[maxKey]! + diff;
-
-      // update text controllers, preserving 4 decimals
       _cutPercents.forEach((key, val) {
         _controllers[key]!.text = '${val.toStringAsFixed(4)}%';
       });
-
-      // recompute savings amounts
       final totalGoal = widget.resultData['SavingsGoal'] as double;
       _catSavings = {
         for (var key in _allCats)
@@ -145,7 +119,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
       _cutPercents.forEach((c, v) {
         _controllers[c]!.text = '${v.toStringAsFixed(4)}%';
       });
-      // إعادة حساب مبالغ الادخار على القيم الأصلية
       final totalGoal = widget.resultData['SavingsGoal'] as double;
       _catSavings = {
         for (var key in _allCats)
@@ -155,15 +128,12 @@ class _SavingDisPageState extends State<SavingDisPage> {
     });
   }
 
-  // ─────────── إرسال التعديلات إلى السيرفر ───────────
   Future<void> _saveAndRebuildPlan() async {
-    // 1) تحقق إن كان المستخدم غيّر أي نسبة
     final hasChanged = !mapEquals(
       _cutPercents.map((k, v) => MapEntry(k, v.toStringAsFixed(4))),
       _initialPercents.map((k, v) => MapEntry(k, v.toStringAsFixed(4))),
     );
 
-    // 2) إذا ما فيه تغيير، ننتقل مباشرةً مع الخريطة الأصلية + startDate + Schedule (إن وجدت)
     if (!hasChanged) {
       final planWithDate = {
         ...widget.resultData,
@@ -183,17 +153,12 @@ class _SavingDisPageState extends State<SavingDisPage> {
       );
       return;
     }
-
-    // 3) خلاف ذلك، نرسل التعديلات للسيرفر
     setState(() {
       _isLoading = true;
       _errorMsg = '';
     });
-
-    // تحويل النسب إلى صيغة 0–1
     final customCuts = {for (var c in _allCats) c: (_cutPercents[c]! / 100.0)};
 
-    // جمع المعاملات
     final List<Map<String, dynamic>> tx = [];
     for (var acc in widget.accounts) {
       if (acc.containsKey('transactions')) {
@@ -229,10 +194,7 @@ class _SavingDisPageState extends State<SavingDisPage> {
         throw decoded["error"] ?? decoded["message"] ?? "Server error";
       }
 
-      // استخرج البيانات من الاستجابة
       final data = decoded["data"] as Map<String, dynamic>;
-
-      // اجمع الخطة الجديدة، حقن startDate و Schedule
       final newPlan = {
         ...data,
         'startDate': widget.startDate,
@@ -260,7 +222,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
     }
   }
 
-  // ─────────── واجهة المستخدم ───────────
   @override
   Widget build(BuildContext context) {
     final totalPct = _totalPercent();
@@ -271,7 +232,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
-          // زر الرجوع
           Positioned(
             top: 60,
             right: 15,
@@ -281,8 +241,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
                   Icon(Icons.arrow_forward_ios, color: _arrowColor, size: 28),
             ),
           ),
-
-          // العنوان والوصف ...
           const Positioned(
             top: 58,
             left: 150,
@@ -322,8 +280,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
               textAlign: TextAlign.right,
             ),
           ),
-
-          // زر إعادة الضبط
           Positioned(
             left: 22,
             top: 236,
@@ -333,8 +289,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
                   color: Color(0xFF3D3D3D), size: 28),
             ),
           ),
-
-          // القائمة
           Positioned(
             top: 265,
             left: 0,
@@ -346,8 +300,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
               ),
             ),
           ),
-
-          // تحذير إذا لم يساو 100%
           if (!valid)
             Positioned(
               left: 90,
@@ -360,8 +312,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
                     fontFamily: 'GE-SS-Two-Light'),
               ),
             ),
-
-          // زر حفظ
           Positioned(
             left: 61,
             top: 710,
@@ -393,8 +343,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
               ),
             ),
           ),
-
-          // رسالة خطأ
           if (_errorMsg.isNotEmpty)
             Positioned(
               bottom: 90,
@@ -416,9 +364,7 @@ class _SavingDisPageState extends State<SavingDisPage> {
     );
   }
 
-  // ─────────── صف الفئة ───────────
   Widget _buildCatRow(String cat) {
-    // 1) determine if this row should be disabled
     final isDisabled = (_catSavings[cat] ?? 0.0) == 0.0;
 
     return Padding(
@@ -427,12 +373,10 @@ class _SavingDisPageState extends State<SavingDisPage> {
         width: 352,
         height: 55,
         decoration: BoxDecoration(
-          // pale background when disabled
           color: isDisabled ? const Color(0xFFE0E0E0) : const Color(0xFFD9D9D9),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Stack(children: [
-          // Category name
           Positioned(
             left: 260,
             top: 19,
@@ -443,7 +387,7 @@ class _SavingDisPageState extends State<SavingDisPage> {
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: isDisabled
-                      ? const Color(0xFF9E9E9E) // greyed out
+                      ? const Color(0xFF9E9E9E)
                       : const Color(0xFF3D3D3D),
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
@@ -452,8 +396,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
               ),
             ),
           ),
-
-          // % label
           Positioned(
             left: 95,
             top: 19,
@@ -469,8 +411,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
               ),
             ),
           ),
-
-          // Slider
           Positioned(
             left: 130,
             top: 26,
@@ -486,7 +426,7 @@ class _SavingDisPageState extends State<SavingDisPage> {
                   max: 100,
                   divisions: 100,
                   onChanged: isDisabled
-                      ? null // disable interaction
+                      ? null 
                       : (v) => _updatePercent(cat, v),
                   activeColor: isDisabled
                       ? const Color(0xFFBDBDBD)
@@ -498,8 +438,6 @@ class _SavingDisPageState extends State<SavingDisPage> {
               ),
             ),
           ),
-
-          // Savings amount
           Positioned(
             left: 5,
             top: 16,

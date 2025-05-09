@@ -400,32 +400,32 @@ class ApiService {
   }
 
   // Step 10: GET Transactions for a Specific Account
-Future<List<Map<String, dynamic>>> getAccountTransactions(String accessToken, String accountId) async {
-  final client = await _createHttpClientWithCert();
-  var url = Uri.parse('https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts/$accountId/transactions');
+  Future<List<Map<String, dynamic>>> getAccountTransactions(String accessToken, String accountId) async {
+    final client = await _createHttpClientWithCert();
+    var url = Uri.parse('https://rs1.lab.openbanking.sa/open-banking/account-information/2022.11.01-final-errata2/accounts/$accountId/transactions');
 
-  try {
-    // Initialize HTTP GET request
-    HttpClientRequest request = await client.getUrl(url);
-    request.headers.set('Authorization', 'Bearer $accessToken');
-    request.headers.set('Content-Type', 'application/json');
+    try {
+      // Initialize HTTP GET request
+      HttpClientRequest request = await client.getUrl(url);
+      request.headers.set('Authorization', 'Bearer $accessToken');
+      request.headers.set('Content-Type', 'application/json');
 
-    // Send request and wait for response
-    HttpClientResponse response = await request.close();
-    // Decode and parse response
-    String responseBody = await response.transform(utf8.decoder).join();
-    if (response.statusCode == 200) {
-      var jsonResponse = jsonDecode(responseBody);
-      return jsonResponse['Data']['Transaction'].cast<Map<String, dynamic>>(); // List of transactions
-    } else {
-      // Handle error
-      throw Exception('Failed to fetch transactions for Account ID $accountId: $responseBody');
+      // Send request and wait for response
+      HttpClientResponse response = await request.close();
+      // Decode and parse response
+      String responseBody = await response.transform(utf8.decoder).join();
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(responseBody);
+        return jsonResponse['Data']['Transaction'].cast<Map<String, dynamic>>(); // List of transactions
+      } else {
+        // Handle error
+        throw Exception('Failed to fetch transactions for Account ID $accountId: $responseBody');
+      }
+    } catch (e) {
+      print('Error fetching transactions for Account ID $accountId: $e');
+      rethrow;
     }
-  } catch (e) {
-    print('Error fetching transactions for Account ID $accountId: $e');
-    rethrow;
   }
-}
 
 
   Future<String> getAccountBalance(String accessToken, String accountId) async {

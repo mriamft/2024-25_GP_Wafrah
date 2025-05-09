@@ -7,14 +7,13 @@ import 'banks_page.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-// Import your goal page for navigation
 import 'saving_plan_page2.dart';
-import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'secure_storage_helper.dart'; 
 import 'custom_icons.dart';
 import 'package:intl/intl.dart';
 import 'chatbot.dart';
 import 'global_notification_manager.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // For secure storage
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; 
 
 class HomePage extends StatefulWidget {
   final String userName;
@@ -66,8 +65,6 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     globalNotificationManager.start();
-
-    // تأجيل بداية SessionManager لما يكتمل بناء الصفحة
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SessionManager.startTracking(context);
     });
@@ -407,7 +404,6 @@ class _HomePageState extends State<HomePage>
       child: Row(
         children: allUsedCategories.map((cat) {
           bool isSelected = selectedCategories.contains(cat);
-          // Determine the color for the category.
           Color chipColor = categoryColors[cat] ?? Colors.grey;
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -418,10 +414,10 @@ class _HomePageState extends State<HomePage>
               ),
               backgroundColor: Colors.white,
               selectedColor:
-                  chipColor.withOpacity(0.3), // light tint when selected
+                  chipColor.withOpacity(0.3), 
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: chipColor), // border in category color
+                side: BorderSide(color: chipColor), 
               ),
               selected: isSelected,
               onSelected: (selected) {
@@ -439,7 +435,6 @@ class _HomePageState extends State<HomePage>
       ),
     );
 
-    // Determine the number of intervals and x-axis labels based on the period.
     int numIntervals;
     List<String> xAxisLabels;
     if (_selectedPeriod == 'اسبوعي') {
@@ -477,17 +472,12 @@ class _HomePageState extends State<HomePage>
       xAxisLabels = [];
     }
 
-    // Map each selected category to its color.
     Map<String, Color> filteredCategoryColors = {};
     for (var cat in selectedCategories) {
       filteredCategoryColors[cat] = categoryColors[cat] ?? Colors.grey;
     }
-
-    // Use the same cutoff logic as before.
     DateTime now = DateTime.now();
     DateTime selectedDate = DateTime(2025, now.month - monthOffset, now.day);
-
-    // Compute the maximum Y value across the selected categories.
     double computedMaxY = 0;
     for (var cat in selectedCategories) {
       List<double> catValues =
@@ -587,7 +577,6 @@ class _HomePageState extends State<HomePage>
                     tooltipPadding: const EdgeInsets.all(8),
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((touchedSpot) {
-                        // Map bar index to category using the order in filteredCategoryColors.
                         List<String> dispCats =
                             filteredCategoryColors.keys.toList();
                         String catName = dispCats[touchedSpot.barIndex];
@@ -643,18 +632,10 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  /// Returns a list of double values representing expense totals for the given [category]
-  /// grouped according to the [period] over the [selectedDate] timeline.
-  ///
-  /// For period:
-  /// - 'سنوي': Groups by month (0 to currentMonth-1)
-  /// - 'شهري': Groups by week within the month (0 to 3)
-  /// - 'اسبوعي': Groups by day within the selected week
   List<double> _calculateCategoryData(
       String period, DateTime selectedDate, String category) {
     // We'll accumulate totals in different buckets.
     if (period == 'سنوي') {
-      // Yearly: Group by month. (Mimic _calculateMonthlyData)
       DateTime now = DateTime.now();
       DateTime cutoffDate = DateTime(now.year, now.month, now.day);
       Map<int, double> monthlyTotals = {};
@@ -664,14 +645,12 @@ class _HomePageState extends State<HomePage>
           String dateStr = tx['TransactionDateTime'] ?? '';
           DateTime? txDate = DateTime.tryParse(dateStr);
           if (txDate == null) continue;
-          // Skip transactions after the cutoff.
           if (txDate.isAfter(cutoffDate)) continue;
           // Only consider transactions in the given year.
           if (txDate.year != selectedDate.year) continue;
           String txCategory = tx['Category'] ??
               tx['SubTransactionType']?.replaceAll('KSAOB.', '') ??
               'غير مصنف';
-          // Only process expense transactions.
           if (![
             'MoneyTransfer',
             'Withdrawal',
@@ -696,7 +675,6 @@ class _HomePageState extends State<HomePage>
       }
       return result;
     } else if (period == 'شهري') {
-      // Monthly: Group by week in the month. (Mimic _calculateWeeklyData)
       DateTime now = DateTime.now();
       // If we're in the current month, cutoff is today; otherwise, use the end of the month.
       DateTime cutoffDate =
@@ -741,7 +719,6 @@ class _HomePageState extends State<HomePage>
       }
       return result;
     } else if (period == 'اسبوعي') {
-      // Weekly: Group by day in the selected week. (Mimic _calculateDailyData)
       DateTime now = DateTime.now();
       // Determine cutoff: if we're in current month, cutoff is now; otherwise, last day of the month.
       DateTime cutoffDate = (selectedDate.month == now.month)
@@ -749,7 +726,6 @@ class _HomePageState extends State<HomePage>
           : DateTime(2025, selectedDate.month + 1, 1, now.hour, now.minute,
                   now.second)
               .subtract(const Duration(days: 1));
-      // The income/expense logic used weekOffset to determine the selected week.
       int selectedWeek = 4 - (weekOffset % 4);
       int startDay = (selectedWeek - 1) * 7 + 1;
       int endDay = selectedWeek * 7;
@@ -762,7 +738,6 @@ class _HomePageState extends State<HomePage>
           String dateStr = tx['TransactionDateTime'] ?? '';
           DateTime? txDate = DateTime.tryParse(dateStr);
           if (txDate == null) continue;
-          // Only consider transactions in 2025 for the current selected month and within the selected week.
           if (!(txDate.year == 2025 &&
               txDate.month == selectedDate.month &&
               txDate.day >= startDay &&
@@ -789,7 +764,6 @@ class _HomePageState extends State<HomePage>
               (double.tryParse(tx['Amount']?.toString() ?? '0') ?? 0.0);
         }
       }
-      // Construct a list for each day (x coordinate 0-based)
       List<double> result = [];
       for (int i = startDay; i <= endDay; i++) {
         result.add(dailyTotals[i] ?? 0.0);
@@ -1151,9 +1125,6 @@ class _HomePageState extends State<HomePage>
     return date.year;
   }
 
-  // ----------------------------
-  // UPDATED: buildIncomeExpenseGraph()
-  // ----------------------------
   Widget buildIncomeExpenseGraph() {
     double maxIncome = incomeData.isNotEmpty
         ? incomeData.map((e) => e.y).reduce((a, b) => a > b ? a : b)
@@ -1367,9 +1338,6 @@ class _HomePageState extends State<HomePage>
       ),
     );
   }
-  // ----------------------------
-  // END UPDATED: buildIncomeExpenseGraph()
-  // ----------------------------
 
   List<FlSpot> _generateIncomeData() {
     List<FlSpot> incomeSpots = [];

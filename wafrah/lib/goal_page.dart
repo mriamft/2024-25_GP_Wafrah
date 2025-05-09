@@ -27,11 +27,10 @@ class _GoalPageState extends State<GoalPage> {
   final TextEditingController goalController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController durationController = TextEditingController();
-  //final TextEditingController endDateController = TextEditingController();
 
   bool isLoading = false;
   String outputMessage = "";
-  String selectedOption = "duration"; // Default selection
+  String selectedOption = "duration";
 
   Color _notificationColor = const Color(0xFFC62C2C);
   Timer? _notificationTimer;
@@ -68,7 +67,6 @@ class _GoalPageState extends State<GoalPage> {
     goalController.dispose();
     startDateController.dispose();
     durationController.dispose();
-    //endDateController.dispose();
     SessionManager.dispose();
     super.dispose();
   }
@@ -78,7 +76,7 @@ class _GoalPageState extends State<GoalPage> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(), // Prevents selecting past dates
+      firstDate: DateTime.now(), 
       lastDate: DateTime(2101),
       builder: (BuildContext context, Widget? child) {
         return Theme(
@@ -105,8 +103,6 @@ class _GoalPageState extends State<GoalPage> {
     final isGoalFilled = goalController.text.isNotEmpty;
     final isStartDateFilled = startDateController.text.isNotEmpty;
     final isDurationFilled = durationController.text.isNotEmpty;
-    //final isEndDateFilled = endDateController.text.isNotEmpty;
-
     return isGoalFilled && (isDurationFilled);
   }
 
@@ -114,19 +110,9 @@ class _GoalPageState extends State<GoalPage> {
     setState(() {
       durationController.text = value;
       if (value.isNotEmpty) {
-        //endDateController.clear(); // Clear end date if duration is filled
       }
     });
   }
-
-  /*void _onEndDateChanged(String value) {
-    setState(() {
-      endDateController.text = value;
-      if (value.isNotEmpty) {
-        durationController.clear(); // Clear duration if end date is filled
-      }
-    });
-  }*/
 
   Future<void> _runFlaskAPI() async {
     setState(() {
@@ -139,12 +125,6 @@ class _GoalPageState extends State<GoalPage> {
       if (durationController.text.isNotEmpty) {
         durationInMonths = double.parse(durationController.text);
       }
-      /*else if (endDateController.text.isNotEmpty) {
-        final startDate = DateTime.parse(startDateController.text);
-        final endDate = DateTime.parse(endDateController.text);
-        durationInMonths =
-            (endDate.difference(startDate).inDays / 30).ceilToDouble();
-      }*/
 
       final goal = double.parse(goalController.text);
       final startDate = startDateController.text;
@@ -184,7 +164,7 @@ class _GoalPageState extends State<GoalPage> {
         }),
       );
 
-      // ✅ Print response for debugging
+      // debugging
       print("🔹 Savings API Response: ${savingsResponse.body}");
 
       if (savingsResponse.statusCode != 200) {
@@ -193,7 +173,6 @@ class _GoalPageState extends State<GoalPage> {
 
       final savingsData = jsonDecode(savingsResponse.body);
 
-      // ✅ Check if API returned success: false
       if (savingsData.containsKey('success') &&
           savingsData['success'] == false) {
         showNotification(
@@ -513,77 +492,13 @@ class _GoalPageState extends State<GoalPage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        /*Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            const Text(
-                              'تاريخ النهاية',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: 'GE-SS-Two-Light',
-                              ),
-                            ),
-                            Radio<String>(
-                              value: "end_date",
-                              groupValue: selectedOption,
-                              activeColor: const Color(
-                                  0xFF2C8C68), // Circular button color
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedOption = value!;
-                                  durationController.clear(); // Clear duration
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          width: 150,
-                          height: 28,
-                          child: TextField(
-                            style: const TextStyle(
-                              fontFamily:
-                                  'GE-SS-Two-Light', // Set input font family
-                            ),
-                            controller: endDateController,
-                            enabled: selectedOption == "end_date",
-                            readOnly: true,
-                            textAlign: TextAlign.right,
-                            onTap: selectedOption == "end_date"
-                                ? () => _selectDate(context, endDateController)
-                                : null,
-                            onChanged: _onEndDateChanged,
-                            decoration: InputDecoration(
-                              hintText: 'تاريخ النهاية',
-                              hintStyle: const TextStyle(
-                                fontFamily:
-                                    'GE-SS-Two-Light', // Set hint font family
-                                height: 0.8, // Adjust height to move hint down
-                                color:
-                                    Color(0xFFAEAEAE), // Optional: hint color
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5),
-                                borderSide: const BorderSide(
-                                    color: Color(0xFF2C8C68),
-                                    width: 1), // Changed to #2C8C68
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5),
-                                borderSide: const BorderSide(
-                                    color: Color(0xFF2C8C68),
-                                    width: 2), // Changed to #2C8C68
-                              ),
-                            ),
-                          ),
-                        ),*/
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.only(
-                        left: 280.0), // Adjust the padding to move left
+                        left: 280.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -618,7 +533,7 @@ class _GoalPageState extends State<GoalPage> {
           ),
           Positioned(
             left: 61,
-            bottom: 40, // Adjust position if needed
+            bottom: 40, 
             child: GestureDetector(
               onTap: _isFormValid() && !isLoading ? _runFlaskAPI : null,
               child: Container(
@@ -642,7 +557,6 @@ class _GoalPageState extends State<GoalPage> {
               ),
             ),
           ),
-          // Loading overlay
           if (isLoading)
             Positioned.fill(
               child: Container(
@@ -653,13 +567,12 @@ class _GoalPageState extends State<GoalPage> {
                   children: [
                     CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(
-                            0xFF69BA9C), // Match the color used in AccLinkPage
+                        Color(0xFF69BA9C), 
                       ),
                     ),
                     SizedBox(height: 20),
                     Text(
-                      "يتم الآن معالجة البيانات", // Loading message
+                      "يتم الآن معالجة البيانات",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,

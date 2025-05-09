@@ -1,4 +1,3 @@
-// notification_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
@@ -279,7 +278,6 @@ class _NotificationPageState extends State<NotificationPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        // Right-aligned timestamp
                         Align(
                           alignment: Alignment.centerRight,
                           child: Row(
@@ -372,5 +370,3 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 }
-
-

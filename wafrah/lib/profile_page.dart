@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'settings_page.dart' as Settings;
 
 class ProfilePage extends StatefulWidget {
-  String userName; // Make userName mutable if you want to update it
+  String userName; 
   final String phoneNumber;
   final List<Map<String, dynamic>> accounts;
 
@@ -52,14 +52,12 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  // Show a dialog to edit the user's name
   void _showEditNameDialog() {
     _nameController.text = widget.userName;
 
     showDialog(
       context: context,
       builder: (dialogContext) {
-        // ← Capture dialog context
         return AlertDialog(
           title: const Text(
             'تعديل الاسم',
@@ -124,8 +122,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         notificationColor = const Color(0xFF2C8C68);
                         showErrorNotification = true;
                       });
-
-// Auto-dismiss after a few seconds
                       _notificationTimer?.cancel();
                       _notificationTimer =
                           Timer(const Duration(seconds: 5), () {
@@ -137,8 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       });
 
                       await Future.delayed(
-                          const Duration(seconds: 5)); // Let the snack bar show
-
+                          const Duration(seconds: 5)); 
                       if (mounted) {
                         Navigator.push(
                           context,
@@ -218,8 +213,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-
-          // Page title at top-left
           const Positioned(
             top: 58,
             left: 145,
@@ -233,8 +226,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-
-          // Gray rectangle (364x148)
           Positioned(
             top: 150,
             left: 14,
@@ -247,7 +238,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: Stack(
                 children: [
-                  // "الاسم" label
                   const Positioned(
                     top: 20,
                     left: 310,
@@ -260,8 +250,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
-
-                  // Row with the edit icon on the left, and the user name on the right
                   Positioned(
                     top: 41,
                     left: 20,
@@ -269,7 +257,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        // The edit icon (on the left)
                         GestureDetector(
                           onTap: _showEditNameDialog,
                           child: const Icon(
@@ -279,7 +266,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // The user's name (on the right)
                         Text(
                           widget.userName,
                           style: const TextStyle(
@@ -292,8 +278,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
-
-                  // "رقم الجوال" label
                   const Positioned(
                     top: 78,
                     left: 277,
@@ -306,8 +290,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
-
-                  // phone number
                   Positioned(
                     top: 99,
                     left: 235,
@@ -325,8 +307,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-
-          // "الحساب الشخصي" label near the top
           const Positioned(
             top: 127,
             left: 268,
@@ -391,8 +371,6 @@ class _ProfilePageState extends State<ProfilePage> {
       notificationColor = color;
       showErrorNotification = true;
     });
-
-    // Cancel any previous timer and start a new one
     _notificationTimer?.cancel();
     _notificationTimer = Timer(const Duration(seconds: 5), () {
       if (mounted) {

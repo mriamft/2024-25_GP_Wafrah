@@ -18,7 +18,6 @@ class SupportPage extends StatefulWidget {
 class _SupportPageState extends State<SupportPage> {
   Color _arrowColor = const Color(0xFF3D3D3D);
 
-  // Force mailto to use %20 for spaces, avoiding "+" in some clients.
   Future<void> _launchEmail() async {
     final subject = 'طلب دعم وفرة'.replaceAll(' ', '%20');
     final body = 'الى فريق وفرة'.replaceAll(' ', '%20');
@@ -58,7 +57,6 @@ class _SupportPageState extends State<SupportPage> {
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
-          // Background image pinned at the top
           Positioned(
             top: -100,
             left: 0,
@@ -70,7 +68,6 @@ class _SupportPageState extends State<SupportPage> {
               fit: BoxFit.cover,
             ),
           ),
-          // Arrow pinned at the top-right
           Positioned(
             top: 60,
             right: 15,
@@ -83,7 +80,6 @@ class _SupportPageState extends State<SupportPage> {
               ),
             ),
           ),
-          // Title text pinned at the top (near center)
           const Positioned(
             top: 58,
             left: 140,
@@ -96,17 +92,13 @@ class _SupportPageState extends State<SupportPage> {
               ),
             ),
           ),
-
-          // Main content in the center of the screen
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              // Use SingleChildScrollView in case the text is large or the screen is small
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Row for "أهلًا" + first name
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       textDirection: TextDirection.rtl,
@@ -136,8 +128,6 @@ class _SupportPageState extends State<SupportPage> {
                       ],
                     ),
                     const SizedBox(height: 20),
-
-                    // كيف نقدر نساعدك؟
                     const Text(
                       'كيف نقدر نساعدك؟',
                       style: TextStyle(
@@ -148,8 +138,6 @@ class _SupportPageState extends State<SupportPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
-
-                    // احنا بخدمتك عبر
                     const Text(
                       'احنا بخدمتك عبر',
                       style: TextStyle(
@@ -160,8 +148,6 @@ class _SupportPageState extends State<SupportPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
-
-                    // The button
                     GestureDetector(
                       onTap: _launchEmail,
                       child: Container(
@@ -184,8 +170,6 @@ class _SupportPageState extends State<SupportPage> {
                         ),
                       ),
                     ),
-
-                    // .نرد عادةً في أقل من 10 دقائق
                     const Text(
                       '.نرد عادةً في أقل من 10 دقائق',
                       style: TextStyle(

@@ -6,9 +6,9 @@ import 'transactions_page.dart';
 import 'banks_page.dart';
 import 'package:flutter/foundation.dart';
 import 'home_page.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // For secure storage
-import 'dart:convert'; // For JSON encoding and decoding
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; 
+import 'dart:convert'; 
+import 'package:intl/intl.dart'; 
 import 'custom_icons.dart';
 import 'dart:ui' as ui;
 import 'main.dart';
@@ -36,20 +36,17 @@ class SavingPlanPage2 extends StatefulWidget {
 }
 
 class _SavingPlanPage2State extends State<SavingPlanPage2> {
-  /// index 0 = الخطة كاملة، 1..N = كل شهر
   late List<List<Map<String, dynamic>>> _monthlyPlans;
   late List<List<Map<String, Object>>> _monthlyRecommendedBudgets;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-// Track sent notifications to avoid duplicates
   Map<String, Map<int, int>> sentNotifications = {};
   int lastNotifiedMonth =
-      0; // tracks last month for which a notification was sent
+      0; 
 
-  int _currentMonthIndex = 0; // Track the selected month
-  List<String> months = []; // Dynamically generated months
-  List<Map<String, dynamic>> savingsPlan = []; // Savings plan for all months
-  Map<String, double> categoryTotalSavings =
-      {}; // Store total savings per category
+  int _currentMonthIndex = 0; 
+  List<String> months = []; 
+  List<Map<String, dynamic>> savingsPlan = []; 
+  Map<String, double> categoryTotalSavings = {}; 
   Map<String, dynamic> wap = {};
   bool isLoading = false;
 
@@ -57,7 +54,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   void initState() {
     super.initState();
 
-    // 1) تهيئة خدمة الإشعارات
     NotificationService.init((String? payload) {
       if (payload != null) {
         navigatorKey.currentState?.push(
@@ -73,30 +69,22 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       }
     });
 
-    // 2) بناء الخطة مبدئيّاً من resultData الواردة
     _setupPlan();
 
-    // 3) حاول تحميل الخطة من Secure Storage ثم أعد بناءها
     _loadPlanFromSecureStorage().then((_) {
       _setupPlan();
     });
   }
 
-  /// دالة مساعدة لتهيئة الشهور وبناء الخطة
-  /// دالة مساعدة لتهيئة الشهور وبناء الخطة
   void _setupPlan() {
-    // 1️⃣ regenerate the month labels
-    generateMonths(widget.resultData['DurationMonths']);
 
-    // 2️⃣ pull out whatever came in as 'Schedule'
+    generateMonths(widget.resultData['DurationMonths']);
     final raw = widget.resultData['Schedule'];
     late List<Map<String, dynamic>> scheduleList;
 
     if (raw is List) {
-      // already a List<Map<…>>
       scheduleList = raw.cast<Map<String, dynamic>>();
     } else if (raw is String) {
-      // maybe it was JSON-stringified
       try {
         final decoded = jsonDecode(raw);
         scheduleList = decoded is List
@@ -106,11 +94,9 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
         scheduleList = <Map<String, dynamic>>[];
       }
     } else {
-      // totally missing / wrong type → don’t crash, just empty
       scheduleList = <Map<String, dynamic>>[];
     }
 
-    // 3️⃣ group by CycleDate into two buckets: savings and rec-budget
     final Map<String, Map<String, double>> buckets = {};
     final Map<String, Map<String, double>> recBudgetBuckets = {};
 
@@ -124,7 +110,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       recBudgetBuckets.putIfAbsent(date, () => {})[cat] = rec;
     }
 
-    // 4️⃣ compute total savings per category (full plan at index 0)
     categoryTotalSavings = {};
     for (var monthMap in buckets.values) {
       monthMap.forEach((cat, amt) {
@@ -132,10 +117,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       });
     }
 
-    // 5️⃣ build the per-month savings lists
     _monthlyPlans = [];
-
-    // — full plan
     _monthlyPlans.add(
       categoryTotalSavings.entries
           .where((e) => e.value > 0)
@@ -146,7 +128,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
           .toList(),
     );
 
-    // — then each individual month, in date order
     final sortedDates = buckets.keys.toList()..sort();
     for (var date in sortedDates) {
       final m = buckets[date]!;
@@ -161,10 +142,8 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       );
     }
 
-    // 5️⃣ also build the per-month recommended-budget lists
     _monthlyRecommendedBudgets = [];
 
-    // — full plan rec-budgets (sum across all months)
     final Map<String, double> totalRec = {};
     for (var monthMap in recBudgetBuckets.values) {
       monthMap.forEach((cat, recAmt) {
@@ -181,7 +160,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
           .toList(),
     );
 
-    // — then each individual month
     for (var date in sortedDates) {
       final mRec = recBudgetBuckets[date]!;
       _monthlyRecommendedBudgets.add(
@@ -195,7 +173,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       );
     }
 
-    // 6️⃣ refresh the UI & notification manager
     setState(() {
       generateSavingsPlan();
     });
@@ -222,39 +199,32 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
         (durationMonths is int) ? durationMonths : durationMonths.toInt();
 
     months.clear();
-    months.add("الخطة كاملة"); // Full Plan at index 0
+    months.add("الخطة كاملة"); 
     months.addAll(List.generate(monthsCount, (index) => "الشهر ${index + 1}"));
   }
 
   void updateAndSavePlan(Map<String, dynamic> updatedPlan) {
-    // Update plan based on your logic
     setState(() {
-      // Example: Calculate new savings (you can insert your logic here)
       categoryTotalSavings = updatedPlan['CategorySavings'];
     });
 
-    // Save the updated plan
     _savePlanToSecureStorage(updatedPlan);
   }
 
   Future<void> _savePlanToSecureStorage(Map<String, dynamic> planData) async {
     try {
-      // 1️⃣ read whatever is already saved
       final existingJson = await secureStorage.read(key: 'savings_plan');
       final Map<String, dynamic> existing = existingJson != null
           ? jsonDecode(existingJson) as Map<String, dynamic>
           : {};
 
-      // 2️⃣ merge in only the new/updated fields
       existing.addAll(planData);
 
-      // 3️⃣ make sure we never lose startDate
       if (!existing.containsKey('startDate') || existing['startDate'] == null) {
         existing['startDate'] =
             widget.resultData['startDate'] ?? DateTime.now().toString();
       }
 
-      // 4️⃣ write the merged object back
       await secureStorage.write(
         key: 'savings_plan',
         value: jsonEncode(existing),
@@ -277,8 +247,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
           // Ensure startDate is not null
           if (!widget.resultData.containsKey('startDate') ||
               widget.resultData['startDate'] == null) {
-            print(
-                "Error: startDate is missing even after loading from storage. Setting default.");
+            print( "Error: startDate is missing even after loading from storage. Setting default.");
             widget.resultData['startDate'] = DateTime.now().toString();
           }
         });
@@ -317,22 +286,18 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       case 12:
         return "الثاني عشر";
       default:
-        return "الشهر $month"; // Default fallback
+        return "الشهر $month"; 
     }
   }
 
   void generateSavingsPlan() {
-    // pick the right bucket (0 = full plan, 1..N = month 1..N)
     savingsPlan = _monthlyPlans[_currentMonthIndex];
 
-    // re-compute progress (unchanged)
     final progressData = (_currentMonthIndex == 0)
         ? trackSavingsProgress()
         : MonthlytrackSavingsProgress();
     setState(() => wap = progressData);
 
-    // save the updated plan back to secure storage if you need to
-    // ✅ NEW - also save the Schedule array
     _savePlanToSecureStorage({
       'DurationMonths': widget.resultData['DurationMonths'],
       'CategorySavings': categoryTotalSavings,
@@ -340,7 +305,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       'SavingsGoal': widget.resultData['SavingsGoal'],
       'startDate': widget.resultData['startDate'],
       'discretionaryRatios': widget.resultData['discretionaryRatios'],
-      'Schedule': widget.resultData['Schedule'], // ← add this
+      'Schedule': widget.resultData['Schedule'], 
     });
   }
 
@@ -365,7 +330,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     });
   }
 
-  // Fix month-end notification: use current month's last day and only if month has started.
   void showMonthProgressNotification() {
     DateTime today = DateTime.now();
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
@@ -404,7 +368,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
         body: notifications[i]['body']!,
       );
 
-      // Wait for 2-3 seconds before showing the next notification
+      // Wait for 2 seconds before showing the next notification
       await Future.delayed(const Duration(seconds: 2));
     }
   }
@@ -434,20 +398,19 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   }
 
   void _updatePlan(Map<String, dynamic> updatedPlan) {
-    // Save the updated plan to secure storage
     _savePlanToSecureStorage(updatedPlan);
   }
 
   List<Widget> buildCategorySquares() {
     return savingsPlan
         .where((saving) =>
-            saving['monthlySavings'] > 0) // Hide zero-value categories
+            saving['monthlySavings'] > 0) 
         .map((saving) {
       return SizedBox(
         width: (MediaQuery.of(context).size.width / 2) - 40,
         child: buildCategorySquare(
           saving['category'],
-          saving['monthlySavings'], // Show savings per selected month
+          saving['monthlySavings'], 
         ),
       );
     }).toList();
@@ -458,7 +421,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       int newIndex = months.indexOf(newMonth!);
       if (newIndex >= 0 && newIndex < months.length) {
         _currentMonthIndex = newIndex;
-        generateSavingsPlan(); // Refresh data
+        generateSavingsPlan(); 
       } else {
         print(" Error: Selected month index out of range");
       }
@@ -509,10 +472,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                 onPressed: () async {
                   Navigator.of(context).pop(); // Close the dialog
                   try {
-                    // Call the function to delete the plan from secure storage
                     await _deletePlanFromStorage();
-
-                    // Show success message
                     Flushbar(
                       message: 'تم حذف الخطة بنجاح.',
                       messageText: const Text(
@@ -530,8 +490,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                       margin: const EdgeInsets.all(8.0),
                       borderRadius: BorderRadius.circular(8.0),
                     ).show(context);
-
-                    // Navigate back to SavingPlanPage
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -543,7 +501,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                       ),
                     );
                   } catch (e) {
-                    // Show failure message if something went wrong
                     Flushbar(
                       message: 'فشل في حذف الخطة. الرجاء المحاولة لاحقًا.',
                       messageText: const Text(
@@ -580,7 +537,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   }
 
   Map<String, dynamic> trackSavingsProgress() {
-    final recBudgetList = _monthlyRecommendedBudgets[0]; // full plan
+    final recBudgetList = _monthlyRecommendedBudgets[0]; 
     final Map<String, double> recBudgetMap = {
       for (var item in recBudgetList)
         item['category'] as String: (item['recBudget'] as num).toDouble()
@@ -590,7 +547,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
     int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
     int totalDays =
-        totalMonths * 30; // Approximate total days for tracking period
+        totalMonths * 30; 
 
     DateTime lastYearStart = startDate.subtract(const Duration(days: 365));
     DateTime lastYearEnd = lastYearStart.add(Duration(days: totalDays));
@@ -599,7 +556,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     Map<String, double> currentSpending = {};
     Map<String, double> progressPercentage = {};
 
-    // Convert category savings values to double
     Map<String, double> categorySavings =
         Map<String, double>.from(widget.resultData['CategorySavings'])
             .map((key, value) => MapEntry(key, (value as num).toDouble()));
@@ -618,25 +574,22 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       }
     }
 
-    // Improved Progress Calculation (Fixed Linear Growth)
     int daysPassed = today
         .difference(startDate)
         .inDays
-        .clamp(0, totalDays); // Ensure valid days range
-    double dailyProgressGrowth =
-        100 / totalDays; // Ensures 100% at the end of the duration
+        .clamp(0, totalDays); 
+    double dailyProgressGrowth = 100 / totalDays; 
 
     for (var category in categorySavings.keys) {
-      double progress = daysPassed * dailyProgressGrowth; // Linear progress
-
-      // If spending increased compared to last year, reset progress to 0
+      double progress = daysPassed * dailyProgressGrowth; 
+      // If spending increased compared to the recommended budjet, reset progress to 0
       if ((currentSpending[category] ?? 0) >
           (recBudgetMap[category] ?? double.infinity)) {
         progress = 0;
       }
 
       progressPercentage[category] =
-          progress.clamp(0, 100); // Ensure it remains between 0-100%
+          progress.clamp(0, 100); 
     }
 
     return {'progress': progressPercentage};
@@ -644,14 +597,13 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
 
   Map<String, dynamic> MonthlytrackSavingsProgress() {
     final recBudgetList =
-        _monthlyRecommendedBudgets[_currentMonthIndex]; // selected month
+        _monthlyRecommendedBudgets[_currentMonthIndex]; 
     final Map<String, double> recBudgetMap = {
       for (var item in recBudgetList)
         item['category'] as String: (item['recBudget'] as num).toDouble()
     };
 
     DateTime today = DateTime.now();
-    //.add(Duration(days: 18))
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
     DateTime selectedMonthStart =
         startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
@@ -665,7 +617,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
     Map<String, double> currentSpending = {};
     Map<String, double> progressPercentage = {};
 
-    // Convert category savings values to double
     Map<String, double> categorySavings =
         Map<String, double>.from(widget.resultData['CategorySavings'])
             .map((key, value) => MapEntry(key, (value as num).toDouble()));
@@ -684,40 +635,38 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       }
     }
 
-    // Improved Progress Calculation (Fixed 3.33% growth per day)
     int daysPassed = today
         .difference(selectedMonthStart)
         .inDays
-        .clamp(0, 30); // Ensuring it stays within the month
+        .clamp(0, 30); 
     double dailyProgressGrowth = 100 / 30; // 3.33% per day
 
     for (var category in categorySavings.keys) {
       double progress = daysPassed * dailyProgressGrowth;
 
-      // If spending increased compared to last year, reset progress to 0
+      // If spending increased compared to the recommended budjet, reset progress to 0
       if ((currentSpending[category] ?? 0) >
           (recBudgetMap[category] ?? double.infinity)) {
         progress = 0;
       }
 
       progressPercentage[category] =
-          progress.clamp(0, 100); // Ensure it doesn't exceed 100%
+          progress.clamp(0, 100); 
     }
-
     return {'progress': progressPercentage};
   }
 
   Color getProgressColor(double progress) {
     if (progress < 50) return Colors.red;
     if (progress < 75) return Colors.orange;
-    return const Color(0xFF2C8C68); // Matches icon color for 75-100%
+    return const Color(0xFF2C8C68); 
   }
 
   Future<void> _deletePlanFromStorage() async {
     try {
       await secureStorage.delete(key: 'savings_plan');
       setState(() {
-        savingsPlan.clear(); // Clear the plan from the UI
+        savingsPlan.clear(); 
       });
     } catch (e) {
       print("Error deleting plan from storage: $e");
@@ -726,7 +675,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
 
   Widget buildDeleteButton() {
     return Positioned(
-      top: 190, // Adjust the position as needed
+      top: 190, 
       right: 310,
       child: GestureDetector(
         onTap: deletePlan,
@@ -734,7 +683,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
           width: 45,
           height: 45,
           decoration: const BoxDecoration(
-            color: Color(0xFFF9F9F9), // Green color
+            color: Color(0xFFF9F9F9),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -751,23 +700,18 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   Widget build(BuildContext context) {
     DateTime today = DateTime.now();
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
-
-    // Calculate remaining months (same logic as trackSavingsProgress)
     int totalMonths = (widget.resultData['DurationMonths'] ?? 0).toInt();
     int elapsedMonths = today.difference(startDate).inDays ~/ 30;
     int remainingMonths = (totalMonths - elapsedMonths).clamp(0, totalMonths);
 
-    // Calculate remaining days for the current month (same logic as MonthlytrackSavingsProgress)
     DateTime selectedMonthStart =
         startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
     DateTime selectedMonthEnd =
         selectedMonthStart.add(const Duration(days: 29));
 
-// Calculate the remaining days correctly
     int daysPassed = today.difference(selectedMonthStart).inDays.clamp(0, 30);
     int remainingDays =
-        (30 - daysPassed).clamp(0, 30); // Ensure it stays in valid range
-
+        (30 - daysPassed).clamp(0, 30); 
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
@@ -783,8 +727,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               fit: BoxFit.contain,
             ),
           ),
-
-          // Show remaining months when "الخطة كاملة" is selected
           if (_currentMonthIndex == 0)
             Positioned(
               top: 130,
@@ -799,8 +741,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                 ),
               ),
             ),
-
-// Show remaining days when a specific month is selected and not in the future
           if (_currentMonthIndex != 0 && !selectedMonthStart.isAfter(today))
             Positioned(
               top: 130,
@@ -815,7 +755,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                 ),
               ),
             ),
-
           const Positioned(
             top: 197,
             left: 280,
@@ -830,8 +769,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
             ),
           ),
           buildDeleteButton(),
-
-          // Dropdown for month selection
           Positioned(
             top: 230,
             left: 4,
@@ -879,28 +816,12 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               ),
             ),
           ),
-//Alert
-          /*if (_currentMonthIndex != 0)
-            const Positioned(
-              left: 10,
-              top: 275,
-              child: Text(
-                'في حال تم الاقتراب للحد الأدنى من الصرف، ستظهر رسالة تحذيرية في مربع هذه الفئة\n',
-                style: TextStyle(
-                  color: Color(0xFF3D3D3D),
-                  fontSize: 10,
-                  fontFamily: 'GE-SS-Two-Light',
-                ),
-                textAlign: TextAlign.right,
-              ),
-            ),*/
-
           Positioned(
             top: 290,
             left: 10,
             right: 10,
             child: SizedBox(
-              height: 410, // Set a larger height for the scrollable area
+              height: 410,
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
@@ -908,14 +829,13 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                     child: Wrap(
                       spacing: 27,
                       runSpacing: 30,
-                      children: buildCategorySquares(), // ≤ هنا
+                      children: buildCategorySquares(),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-
           // Bottom Navigation Bar
           Positioned(
             bottom: 0,
@@ -1070,7 +990,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               ),
             ),
           ),
-          // ✅ زر الذكاء الاصطناعي (chatbot) في مكان محدد
           Positioned(
             top: 650,
             left: 328,
@@ -1117,7 +1036,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
   }
 
   Widget buildCategorySquare(String category, dynamic monthlySavings) {
-    // 1️⃣ category → icon lookup
     Map<String, IconData> categoryIcons = {
       'المطاعم': Icons.restaurant,
       'التعليم': Icons.school,
@@ -1136,19 +1054,14 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       'الخطة كامله': Icons.check_circle,
     };
     IconData categoryIcon = categoryIcons[category] ?? Icons.help_outline;
-
-    // 2️⃣ progress %
     double originalProgress = wap['progress']?[category] ?? 0.0;
     double progress = originalProgress.clamp(0, 100);
-
-    // 3️⃣ detect future months
     DateTime today = DateTime.now();
     DateTime startDate = DateTime.parse(widget.resultData['startDate']);
     DateTime selectedMonthStart =
         startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
     bool isFutureMonth = selectedMonthStart.isAfter(today);
 
-    // 4️⃣ lookup this month’s RecommendedBudget
     final recList = _monthlyRecommendedBudgets[_currentMonthIndex];
     final found = recList.firstWhere(
       (e) => e['category'] == category,
@@ -1185,8 +1098,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                 ),
               ),
             ),
-
-          // circular progress + icon
           Positioned(
             top: 18,
             left: 10,
@@ -1212,8 +1123,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               ),
             ),
           ),
-
-          // category name
           Positioned(
             top: 50,
             right: 10,
@@ -1227,8 +1136,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               ),
             ),
           ),
-
-          // three info rows
           Positioned(
             top: 75,
             right: 10,
@@ -1237,7 +1144,6 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ① مطلوب ادخار
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1258,10 +1164,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                           size: 14, color: Color(0xFF3D3D3D)),
                     ],
                   ),
-
                   const SizedBox(height: 4),
-
-                  // ② المصروف
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1282,10 +1185,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
                           size: 14, color: Color(0xFF3D3D3D)),
                     ],
                   ),
-
                   const SizedBox(height: 4),
-
-                  // ③ المتاح للصرف (RecommendedBudget)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1349,7 +1249,7 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
       // Whole plan selected
       selectedStartDate = startDate;
     } else {
-      // Specific month selected (fixed 30 days)
+      // Specific month selected 
       selectedStartDate =
           startDate.add(Duration(days: (_currentMonthIndex - 1) * 30));
     }
@@ -1374,7 +1274,4 @@ class _SavingPlanPage2State extends State<SavingPlanPage2> {
 
     return totalSpent;
   }
-
-  /// Called at the end of each 30-day period to see if we under-saved
-  /// and, if so, fetch a refit plan for the remaining months.
 }

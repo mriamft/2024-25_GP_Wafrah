@@ -1,10 +1,8 @@
-// global_notification_manager.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'notification_service.dart';
 
 class GlobalNotificationManager {
-  // Singleton pattern
   static final GlobalNotificationManager _instance = GlobalNotificationManager._internal();
   factory GlobalNotificationManager() => _instance;
   GlobalNotificationManager._internal();
@@ -29,7 +27,6 @@ class GlobalNotificationManager {
   DateTime? _planStartDate;
   int? _durationMonths;
 
-  // Enforce a minimum interval between notifications
   DateTime? _lastNotificationTime;
 
   bool _canSend() {
@@ -90,7 +87,6 @@ class GlobalNotificationManager {
     });
   }
 
-  /// Stop the timer if needed.
   void stop() {
     _timer?.cancel();
     _timer = null;
@@ -221,7 +217,7 @@ class GlobalNotificationManager {
     }
   }
 
-  /// Calculate overall progress (%) against goal
+  /// Calculate overall progress against goal
   double _calculateOverallProgress() {
     final Map<String, double> categorySavings = Map<String, double>.from(
       _resultData!['CategorySavings'].map((key, value) =>

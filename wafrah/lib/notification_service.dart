@@ -7,25 +7,20 @@ class NotificationService {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
   static late Function(String?) onNotificationResponse;
 
-  // Initialize the notification service and set onSelectNotification callback
-  // Initialize the notification service and pass the onNotificationResponse callback.
   static Future<void> init(
       Function(String?) onNotificationResponseCallback) async {
     onNotificationResponse = onNotificationResponseCallback;
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings(
-            '@drawable/greenlogo'); // Icon for notifications
+            '@drawable/greenlogo'); 
 
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
-    // Initialize the plugin without onSelectNotification
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
     );
-
-    // Initialize the plugin with the new onDidReceiveNotificationResponse parameter.
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
@@ -40,8 +35,8 @@ class NotificationService {
       {required String title, required String body}) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'saving_plan_channel', // Channel ID
-      'Saving Plan Notifications', // Channel name
+      'saving_plan_channel', 
+      'Saving Plan Notifications',
       channelDescription: 'Notifications to track saving progress',
       importance: Importance.max,
       priority: Priority.high,
@@ -53,26 +48,21 @@ class NotificationService {
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
     await _flutterLocalNotificationsPlugin.show(
-      0, // Notification ID
+      0, 
       title,
       body,
       platformChannelSpecifics,
-      payload: 'item x', // Optional payload
+      payload: 'item x', 
     );
-
-    // Store notification
     await _storeNotification(title, body);
   }
 
-  // Store notifications in secure storage
-// Update this method in NotificationService to track new notifications
+  // Update this method in NotificationService to track new notifications
   static Future<void> _storeNotification(String title, String body) async {
     try {
       List<String> notifications = await getNotifications();
-      // Create a timestamp string using ISO8601 format.
       String timestamp =
-          DateTime.now().toIso8601String(); // e.g. "2025-04-04T01:10:00.000"
-      // Store in the expected format: "timestamp|title:body"
+          DateTime.now().toIso8601String(); 
       notifications.add('$timestamp|$title: $body');
       await _storage.write(
           key: 'notifications', value: notifications.join(';'));
@@ -84,7 +74,6 @@ class NotificationService {
     }
   }
 
-  // Get stored notifications from secure storage
   static Future<List<String>> getNotifications() async {
     try {
       String? storedNotifications = await _storage.read(key: 'notifications');

@@ -145,7 +145,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         builder: (context) => AlertDialog(
           title: const Text(
             'تأكيد إعادة تعيين كلمة المرور',
-            textAlign: TextAlign.right, // Align text to the right
+            textAlign: TextAlign.right,
             style: TextStyle(
               fontFamily: 'GE-SS-Two-Bold',
               fontSize: 20,
@@ -154,7 +154,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           ),
           content: const Text(
             'هل أنت متأكد أنك تريد إعادة تعيين كلمة المرور؟',
-            textAlign: TextAlign.right, // Align text to the right
+            textAlign: TextAlign.right, 
             style: TextStyle(
               fontFamily: 'GE-SS-Two-Light',
               color: Color(0xFF3D3D3D),
@@ -337,7 +337,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 if (confirmPasswordError.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(
-                        top: 8.0, right: 5.0), // Adjust right padding
+                        top: 8.0, right: 5.0), 
                     child: Text(
                       confirmPasswordError,
                       textAlign: TextAlign.right,

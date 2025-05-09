@@ -7,9 +7,9 @@ import 'saving_plan_page.dart';
 import 'settings_page.dart';
 import 'storage_service.dart';
 import 'saving_plan_page2.dart';
-import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'secure_storage_helper.dart'; 
 import 'custom_icons.dart';
-import 'package:intl/intl.dart'; // Import intl package
+import 'package:intl/intl.dart'; 
 import 'chatbot.dart';
 
 class BanksPage extends StatefulWidget {
@@ -31,7 +31,7 @@ class BanksPage extends StatefulWidget {
 class _BanksPageState extends State<BanksPage> {
   final StorageService _storageService = StorageService();
   List<Map<String, dynamic>> _accounts = [];
-  bool _isCirclePressed = false; // Add this line
+  bool _isCirclePressed = false; 
 
   @override
   void initState() {
@@ -59,13 +59,11 @@ void dispose() {
     }
   }
 
+  // Convert the number to Arabic numerals with a comma separator
   String formatNumberWithArabicComma(double number) {
-    // Convert the number to Arabic numerals with a comma separator
+
     String formattedNumber = NumberFormat("#,##0.00", "ar").format(number);
-
-    // Replace the default decimal point (.) with Arabic comma (،)
     formattedNumber = formattedNumber.replaceAll('.', '،');
-
     return formattedNumber;
   }
 
@@ -110,7 +108,7 @@ void dispose() {
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
-            resultData: savedPlan, // Pass saved plan data to the next page
+            resultData: savedPlan, 
           ),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
@@ -155,19 +153,18 @@ void dispose() {
       ),
       child: Row(
         mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, // ✅ Ensures spacing between items
+            MainAxisAlignment.spaceBetween, 
         children: [
-          // Left section for monetary amount
           Padding(
             padding: const EdgeInsets.only(left: 12.0),
             child: Row(
               children: [
                 const Icon(
-                  CustomIcons.riyal, // Use the new Riyal symbol
-                  size: 14, // Adjust size as needed
+                  CustomIcons.riyal, 
+                  size: 14, 
                   color: Color(0xFF5F5F5F),
                 ),
-                const SizedBox(width: 5), // Spacing between icon and amount
+                const SizedBox(width: 5), 
                 Text(
                   formatNumberWithArabicComma(
                       double.tryParse(account['Balance']?.toString() ?? '0') ??
@@ -184,12 +181,11 @@ void dispose() {
             ),
           ),
 
-          // Middle section for account details
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment:
-                  CrossAxisAlignment.end, // ✅ Ensures right alignment
+                  CrossAxisAlignment.end,
               children: [
                 Text(
                   translatedAccountSubType,
@@ -203,42 +199,38 @@ void dispose() {
                 ),
 
                 const SizedBox(
-                    height: 8), // ✅ Adds space above the IBAN to prevent overlap
+                    height: 8),
 
                 Row(
-  mainAxisAlignment: MainAxisAlignment.end, // ✅ Ensures text alignment
-  children: [
-    Expanded(
-      // ✅ Allows the IBAN to take available space
-      child: Text(
-        account['IBAN'] ?? 'رقم الايبان',
-        style: const TextStyle(
-          color: Color(0xFF5F5F5F),
-          fontSize: 13,
-          fontFamily: 'GE-SS-Two-Light',
-        ),
-        textAlign: TextAlign.right,
-        softWrap: false, // Prevents automatic wrapping
-        overflow: TextOverflow.visible, // ✅ Ensures full IBAN is shown
-      ),
-    ),
-    const SizedBox(width: 16), // Increased space
-    const Text(
-      'رقم الآيبان',
-      style: TextStyle(
-        color: Color(0xFF3D3D3D),
-        fontSize: 13,
-        fontFamily: 'GE-SS-Two-Bold',
-      ),
-    ),
-  ],
-),
-
+                  mainAxisAlignment: MainAxisAlignment.end, 
+                  children: [
+                    Expanded(
+                      child: Text(
+                        account['IBAN'] ?? 'رقم الايبان',
+                        style: const TextStyle(
+                          color: Color(0xFF5F5F5F),
+                          fontSize: 13,
+                          fontFamily: 'GE-SS-Two-Light',
+                        ),
+                        textAlign: TextAlign.right,
+                        softWrap: false, 
+                        overflow: TextOverflow.visible, 
+                      ),
+                    ),
+                    const SizedBox(width: 16), 
+                    const Text(
+                      'رقم الآيبان',
+                      style: TextStyle(
+                        color: Color(0xFF3D3D3D),
+                        fontSize: 13,
+                        fontFamily: 'GE-SS-Two-Bold',
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-
-          // Right section for SAMA logo
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Image.asset(
@@ -501,12 +493,11 @@ void dispose() {
               ),
             ),
           ),
-          // Chatbot button with the image in the specified position
           Positioned(
-            top: 650, // Position the image at x=333 and y=702
+            top: 650,
             left: 328,
             child: GestureDetector(
-              onTap: navigateToChatbot, // Navigate to Chatbot when clicked
+              onTap: navigateToChatbot,
               child: Container(
                 width: 55,
                 height: 55,
@@ -522,7 +513,7 @@ void dispose() {
                 ),
                 child: ClipOval(
                   child: Image.asset(
-                    'assets/images/chatbotIcon.png', // Image path
+                    'assets/images/chatbotIcon.png',
                     fit: BoxFit.cover,
                   ),
                 ),

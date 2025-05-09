@@ -53,7 +53,6 @@ class GPTService {
       }
     ];
 
-    // HTTP POST request to OpenAI's API
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -65,7 +64,7 @@ class GPTService {
           'model': 'gpt-4o',
           'messages': messages,
           'max_tokens': 10,
-          'temperature': 0.3, // Specify the temperature to ensures more restrict responses
+          'temperature': 0.3, 
         }),
       );
 
@@ -74,8 +73,6 @@ class GPTService {
             jsonDecode(utf8.decode(response.bodyBytes));
         final String rawCategory =
             data['choices'][0]['message']['content'].trim();
-
-        // Normalize the category to handle slight variations
         return _findClosestCategory(rawCategory);
       } else {
         throw Exception('Failed to fetch category: ${response.body}');

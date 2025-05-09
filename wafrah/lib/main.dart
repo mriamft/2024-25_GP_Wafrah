@@ -5,13 +5,10 @@ import 'info_page.dart';
 import 'global_notification_manager.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-// Declare a global instance so you can update it from anywhere.
 final GlobalNotificationManager globalNotificationManager =
     GlobalNotificationManager();
 
 void main() {
-  // Start the global notification manager.
-
   runApp(const MyApp());
 }
 
@@ -22,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      navigatorKey: navigatorKey, // Add the navigator key
+      navigatorKey: navigatorKey, 
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
@@ -161,7 +158,6 @@ class _SplashScreenState extends State<SplashScreen> {
                             builder: (context) => const InfoPage(),
                           ),
                         );
-                        // Drag "ابدأ" for smooth transition
                         Future.delayed(const Duration(milliseconds: 300), () {
                           setState(() {
                             _dragValue = 0.0;

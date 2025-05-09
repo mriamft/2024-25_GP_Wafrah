@@ -25,7 +25,6 @@ class _InfoPageState extends State<InfoPage> {
     });
   }
 
-  // to navigate back
   void _goBack() {
     Navigator.pop(context);
   }

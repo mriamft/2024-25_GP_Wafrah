@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'goal_page.dart'; // Import your goal page for navigation
+import 'goal_page.dart'; 
 import 'settings_page.dart';
 import 'transactions_page.dart';
 import 'home_page.dart';
 import 'banks_page.dart';
-import 'secure_storage_helper.dart'; // Import the secure storage helper
+import 'secure_storage_helper.dart'; 
 import 'saving_plan_page2.dart';
 import 'chatbot.dart';
 
@@ -32,7 +32,6 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
   void navigateToSavingPlan() async {
     // Check if there is a saved plan
     var savedPlan = await loadPlanFromSecureStorage();
-
     // If saved plan exists, navigate to SavingPlanPage2
     if (savedPlan != null) {
       Navigator.pushReplacement(
@@ -42,12 +41,12 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
             userName: widget.userName,
             phoneNumber: widget.phoneNumber,
             accounts: widget.accounts,
-            resultData: savedPlan, // Pass saved plan data to the next page
+            resultData: savedPlan, 
           ),
         ),
       );
     } else {
-      // If no saved plan exists, navigate to GoalPage or any other page to create a plan
+      // If no saved plan exists, navigate to GoalPage 
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -65,9 +64,8 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
   Future<void> _savePlan(Map<String, dynamic> planData) async {
     await savePlanToSecureStorage(planData); // Save the plan securely
     setState(() {
-      _isPlanSaved = true; // Mark the plan as saved
+      _isPlanSaved = true; 
     });
-
     // Navigate to SavingPlanPage2 after saving
     Navigator.pushReplacement(
       context,
@@ -76,7 +74,7 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
           userName: widget.userName,
           phoneNumber: widget.phoneNumber,
           accounts: widget.accounts,
-          resultData: planData, // Pass the saved plan data
+          resultData: planData,
         ),
       ),
     );
@@ -100,13 +98,13 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
             ),
           ),
           Positioned(
-            left: 80, // Adjust as needed
-            top: 140, // Adjust as needed
+            left: 80, 
+            top: 140,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Image.asset(
-                  'assets/images/Saving_image.png', // Use the appropriate image path
+                  'assets/images/Saving_image.png',
                   width: 240,
                   height: 400,
                 ),
@@ -141,8 +139,6 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
               ),
             ),
           ),
-
-          // Updated onTap for the continue button in SavingPlanPage
           Positioned(
             left: 61,
             top: 610,
@@ -158,7 +154,7 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
                 });
               },
               onTap: () {
-                navigateToSavingPlan(); // Call the function to check and navigate
+                navigateToSavingPlan(); 
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -281,7 +277,6 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
               ),
             ),
           ),
-          // Bottom Circle Indicator
           Positioned(
             left: 339,
             top: 785,
@@ -294,7 +289,6 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
               ),
             ),
           ),
-          // Home Button with gradient circle
           Positioned(
             bottom: 44,
             left: 0,
@@ -347,7 +341,6 @@ class _SavingPlanPageState extends State<SavingPlanPage> {
               ],
             ),
           ),
-// ✅ زر الذكاء الاصطناعي (chatbot) في مكان محدد
           Positioned(
             top: 650,
             left: 328,

@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-// Adjust this import based on where your SavingDisPage file is located:
 import 'package:wafrah/saving_dis_page.dart';
 import 'custom_icons.dart';
 
@@ -33,7 +32,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
   @override
   void initState() {
     super.initState();
-    print("resultData: ${widget.resultData}"); // ✅ Print resultData in console
+    print("resultData: ${widget.resultData}"); 
   }
 
   final NumberFormat arabicNumberFormat = NumberFormat("#,##0.00", "ar");
@@ -41,10 +40,8 @@ class _UserPatternPageState extends State<UserPatternPage> {
     return number
         .replaceAll(',', '') // Remove thousands separator
         .replaceAll('،', '.') // Convert Arabic decimal separator to '.'
-        .replaceAll(RegExp(r'[^0-9.]'),
-            '') // Remove any non-numeric characters except '.'
-        .replaceAllMapped(RegExp(r'\.(?=.*\.)'),
-            (match) => ''); // Keep only the last decimal point
+        .replaceAll(RegExp(r'[^0-9.]'), '') 
+        .replaceAllMapped(RegExp(r'\.(?=.*\.)'), (match) => '');
   }
 
   Color _arrowColor = const Color(0xFF3D3D3D);
@@ -78,7 +75,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
       case 'التحويلات':
         return Icons.swap_horiz;
       default:
-        return Icons.help_outline; // Default icon if category is missing
+        return Icons.help_outline;
     }
   }
 
@@ -92,7 +89,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
       backgroundColor: const Color(0xFFF9F9F9),
       body: Stack(
         children: [
-          // Back arrow
           Positioned(
             top: 60,
             right: 15,
@@ -115,8 +111,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
               ),
             ),
           ),
-
-          // Page Title
           const Positioned(
             top: 58,
             left: 65,
@@ -130,8 +124,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
               ),
             ),
           ),
-
-          // Spending Summary Rectangle
           Positioned(
             left: 83,
             top: 200,
@@ -167,8 +159,8 @@ class _UserPatternPageState extends State<UserPatternPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
-                          CustomIcons.riyal, // Riyal symbol
-                          size: 14, // Adjust size as needed
+                          CustomIcons.riyal, 
+                          size: 14, 
                           color: Color(0xFF3D3D3D),
                         ),
                         const SizedBox(width: 5),
@@ -187,10 +179,9 @@ class _UserPatternPageState extends State<UserPatternPage> {
               ),
             ),
           ),
-// Total Income Rectangle
           Positioned(
             left: 83,
-            top: 280, // ✅ Adjust position below the spending rectangle
+            top: 280, 
             child: Container(
               width: 228,
               height: 68,
@@ -223,8 +214,8 @@ class _UserPatternPageState extends State<UserPatternPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
-                          CustomIcons.riyal, // Riyal symbol
-                          size: 14, // Adjust size as needed
+                          CustomIcons.riyal, 
+                          size: 14,
                           color: Color(0xFF3D3D3D),
                         ),
                         const SizedBox(width: 5),
@@ -243,8 +234,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
               ),
             ),
           ),
-
-          // Explanation text at the top
           const Positioned(
             left: 30,
             top: 114,
@@ -259,8 +248,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
               textAlign: TextAlign.right,
             ),
           ),
-
-          // Scrollable Category Circles
           Positioned(
             top: 360,
             left: 20,
@@ -282,8 +269,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
               ),
             ),
           ),
-
-          // Next Page Button
           Positioned(
             top: 710,
             left: 61,
@@ -348,10 +333,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
   }
 
   List<Widget> _buildCategoryCircles() {
-    // Compute total spending excluding "الراتب"
     double totalSpending = widget.spendingData['TotalSpending'] ?? 0.0;
-
-    // Fetch precomputed category percentages from Python API
     List<Map<String, dynamic>> categories =
         widget.spendingData['CategorySpending'] != null
             ? (widget.spendingData['CategorySpending'] as Map<String, dynamic>)
@@ -365,12 +347,11 @@ class _UserPatternPageState extends State<UserPatternPage> {
                           ? double.parse(widget
                               .spendingData['CategoryPercentages']![entry.key]!
                               .toStringAsFixed(1))
-                          : 0.0 // ✅ Use precomputed percentage from Python
+                          : 0.0 
                     })
                 .toList()
             : [];
 
-    // ✅ Ensure spending amounts match total spending
     double totalCalculatedSpending = 0.0;
     double largestAmount = 0.0;
     String? largestCategory;
@@ -388,7 +369,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
       }
     }
 
-    // ✅ Adjust the largest category to absorb rounding error
     double roundingDifference = totalSpending - totalCalculatedSpending;
     if (largestCategory != null) {
       for (var cat in categories) {
@@ -400,11 +380,9 @@ class _UserPatternPageState extends State<UserPatternPage> {
       }
     }
 
-    // ✅ Sort by percentage descending order
+    // Sort by percentage descending order
     categories.sort((a, b) =>
         (b['percentage'] as double).compareTo(a['percentage'] as double));
-
-    // ✅ Convert percentage to string with '%' after sorting
     for (var cat in categories) {
       cat['percentage'] =
           '${(cat['percentage'] as double).toStringAsFixed(1)}%';
@@ -420,15 +398,12 @@ class _UserPatternPageState extends State<UserPatternPage> {
     }).toList();
   }
 
-  /// Builds a single circular widget (with the arc, icon, spending, etc.)
-  /// The percentage text is placed at the end of the circular arc, **outside** the circle.
   Widget _buildCategoryCircleItem({
     required IconData icon,
     required String label,
     required String amount,
     required String percentage,
   }) {
-    // 1) Convert "10%" => 0.10, "8%" => 0.08, etc.
     double progressValue = 0.1;
     if (percentage.endsWith('%')) {
       final numeric = percentage.substring(0, percentage.length - 1);
@@ -436,28 +411,16 @@ class _UserPatternPageState extends State<UserPatternPage> {
       if (parsed != null) {
         progressValue = parsed / 100.0;
       }
-
-      // Move percentage sign to the left
       percentage =
-          '%$numeric'; // Now the percentage symbol is placed before the number
+          '%$numeric'; 
     }
 
-    // 2) For a 130×130 circle, the center is at (65, 65).
-    //    CircularProgressIndicator starts at -90° (top), so angle offset is -pi/2
-    //    The endpoint moves clockwise by (progressValue * 2*pi).
     double angle = -math.pi / 2 + 2 * math.pi * progressValue;
 
-    // Center point in the 130x130 container
     double center = 65;
-    // Increase this radius > 65 to ensure the percentage text sits outside the circle
-    // The stroke is 5px, so let's push the label out a bit further, e.g. 75.
     double radius = 83;
-
-    // 3) Convert from polar to Cartesian for label position
     double offsetX = center + radius * math.cos(angle);
     double offsetY = center + radius * math.sin(angle);
-
-    // 4) Build the widget with a Stack so we can absolutely position the label
     return SizedBox(
       width: 130,
       height: 130,
@@ -465,7 +428,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
-          // Gray circle background
           Container(
             width: 120,
             height: 120,
@@ -481,8 +443,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
               ],
             ),
           ),
-
-          // The green progress indicator
           SizedBox(
             width: 120,
             height: 120,
@@ -494,8 +454,6 @@ class _UserPatternPageState extends State<UserPatternPage> {
               strokeWidth: 5,
             ),
           ),
-
-          // Icon + label + spending in the center
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -514,11 +472,11 @@ class _UserPatternPageState extends State<UserPatternPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    CustomIcons.riyal, // Riyal symbol
-                    size: 14, // Adjust size if needed
+                    CustomIcons.riyal, 
+                    size: 14, 
                     color: Color(0xFF3D3D3D),
                   ),
-                  const SizedBox(width: 5), // Space between icon and amount
+                  const SizedBox(width: 5),
                   Text(
                     arabicNumberFormat.format(double.tryParse(
                             amount.replaceAll(',', '').replaceAll('،', '.')) ??
@@ -533,10 +491,7 @@ class _UserPatternPageState extends State<UserPatternPage> {
               ),
             ],
           ),
-
-          // 5) The percentage text placed at the arc endpoint, outside the circle
           Positioned(
-            // Adjust these offsets so the text is visually centered around the arc end
             left: offsetX - 16,
             top: offsetY - 8,
             child: Text(
